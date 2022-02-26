@@ -203,3 +203,13 @@ class RETURN : public Composite
 {
 
 };
+
+class ShaderBuilder
+{
+	const char skipSymbols[3] =
+	{
+		32,
+		9,
+		0
+	};
+};
