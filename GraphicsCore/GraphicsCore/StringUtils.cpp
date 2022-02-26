@@ -53,5 +53,9 @@ std::string readWord(
 	size_t to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);
 	
 	currentIndex = to;
-	return str.substr(from, to - from);
+	std::string word = str.substr(from, to - from);
+	if (word == "" && str[currentIndex])
+		word = str[currentIndex++];
+
+	return word;
 }
