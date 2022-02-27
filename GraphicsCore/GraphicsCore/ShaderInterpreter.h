@@ -1,6 +1,7 @@
 #pragma once
 #include <string>
 #include <list>
+#include <queue>
 
 class Component
 {
@@ -230,4 +231,11 @@ class ShaderBuilder
 			':',
 			0
 	};
+
+	std::string shaderText = "";
+	int currentIndex = 0;
+	
+	std::queue<std::string> words;
+
+	void unknown();
 };
