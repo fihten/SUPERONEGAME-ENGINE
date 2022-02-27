@@ -206,10 +206,28 @@ class RETURN : public Composite
 
 class ShaderBuilder
 {
-	const char skipSymbols[3] =
+	const char skipSymbols[5] =
 	{
-		32,
-		9,
-		0
+		32, // space
+		9,  // tab
+		10, // line feed
+		13, // carriage return
+		0   
+	};
+
+	const char stopSymbols[12] = 
+	{
+			32, // space
+			9,  // tab
+			10, // line feed
+			13, // carriage return
+			'(',
+			')',
+			'{',
+			'}',
+			',',
+			';',
+			':',
+			0
 	};
 };
