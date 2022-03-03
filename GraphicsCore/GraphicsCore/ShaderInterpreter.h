@@ -2,6 +2,7 @@
 #include <string>
 #include <list>
 #include <queue>
+#include <stack>
 
 class Component
 {
@@ -237,5 +238,19 @@ class ShaderBuilder
 	
 	std::queue<std::string> words;
 
+	enum State
+	{
+		UNKNOWN,
+		BRACKETS_UNARY_OPERATOR_OPEN,
+		BRACKETS_UNARY_OPERATOR_CLOSE
+	};
+	State currentState = State::UNKNOWN;
+	std::stack<State> statesStack;
+
+	Component* leftOperand = nullptr;
+
 	void unknown();
+
+public:
+	void build();
 };
