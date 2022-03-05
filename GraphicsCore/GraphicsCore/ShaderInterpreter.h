@@ -247,9 +247,10 @@ class ShaderBuilder
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
 
-	Component* leftOperand = nullptr;
+	std::stack<Component*> componentStack;
 
 	void unknown();
+	void bracketsUnaryOperatorOpen();
 
 public:
 	void build();

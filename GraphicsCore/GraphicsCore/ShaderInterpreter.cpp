@@ -5,8 +5,8 @@ void ShaderBuilder::build()
 {
 	words = std::queue<std::string>();
 	statesStack = std::stack<State>();
+	componentStack = std::stack<Component*>();
 	currentState = State::UNKNOWN;
-	leftOperand = nullptr;
 	currentIndex = 0;
 
 	do
@@ -39,5 +39,24 @@ void ShaderBuilder::build()
 void ShaderBuilder::unknown()
 {
 	std::string word = words.front();
-	words.pop();
+
+	// open round brackets
+	if (word == "(")
+	{
+		words.pop();
+		statesStack.push(State::UNKNOWN);
+		currentState = State::BRACKETS_UNARY_OPERATOR_OPEN;
+		componentStack.push(new ROUND_BRACKETS());
+	}
+	if (word == ")" && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
+	{
+		words.pop();
+		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
+	}
+}
+
+void ShaderBuilder::bracketsUnaryOperatorOpen()
+{
+	statesStack.push(State::BRACKETS_UNARY_OPERATOR_OPEN);
+	currentState = State::UNKNOWN;
 }
