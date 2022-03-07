@@ -47,11 +47,15 @@ void ShaderBuilder::unknown()
 		statesStack.push(State::UNKNOWN);
 		currentState = State::BRACKETS_UNARY_OPERATOR_OPEN;
 		componentStack.push(new ROUND_BRACKETS());
+
+		return;
 	}
 	if (word == ")" && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
+
+		return;
 	}
 }
 
@@ -59,4 +63,25 @@ void ShaderBuilder::bracketsUnaryOperatorOpen()
 {
 	statesStack.push(State::BRACKETS_UNARY_OPERATOR_OPEN);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::bracketsUnaryOperatorClose()
+{
+	std::string word = words.front();
+
+	if (word == ";" || word == "," || word == ")" || word == ":")
+	{
+		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
+		currentState = State::FINISH_EXPRESSION;
+
+		return;
+	}
+	if (word == "+")
+	{
+		words.pop();
+		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
+		currentState = State::BINARY_PLUS;
+
+		return;
+	}
 }

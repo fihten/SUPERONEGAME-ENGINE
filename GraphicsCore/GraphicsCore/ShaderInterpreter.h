@@ -256,6 +256,7 @@ class ShaderBuilder
 
 	void unknown();
 	void bracketsUnaryOperatorOpen();
+	void bracketsUnaryOperatorClose();
 
 public:
 	void build();
