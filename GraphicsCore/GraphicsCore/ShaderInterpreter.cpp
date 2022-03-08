@@ -44,7 +44,6 @@ void ShaderBuilder::unknown()
 	if (word == "(")
 	{
 		words.pop();
-		statesStack.push(State::UNKNOWN);
 		currentState = State::BRACKETS_UNARY_OPERATOR_OPEN;
 		componentStack.push(new ROUND_BRACKETS());
 
