@@ -83,4 +83,28 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 
 		return;
 	}
+	if (word == "-")
+	{
+		words.pop();
+		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
+		currentState = State::BINARY_MINUS;
+
+		return;
+	}
+	if (word == "*")
+	{
+		words.pop();
+		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
+		currentState = State::BINARY_MULTIPLY;
+
+		return;
+	}
+	if (word == "/")
+	{
+		words.pop();
+		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
+		currentState = State::BINARY_DIVIDE;
+
+		return;
+	}
 }
