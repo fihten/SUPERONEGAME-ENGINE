@@ -22,14 +22,34 @@ void ShaderBuilder::build()
 		switch (currentState)
 		{
 		case State::UNKNOWN:
-
+			unknown();
 			break;
 		
 		case State::BRACKETS_UNARY_OPERATOR_OPEN:
-
+			bracketsUnaryOperatorOpen();
 			break;
 
 		case State::BRACKETS_UNARY_OPERATOR_CLOSE:
+			bracketsUnaryOperatorClose();
+			break;
+
+		case State::FINISH_EXPRESSION:
+			finishExpression();
+			break;
+
+		case State::BINARY_MINUS:
+
+			break;
+
+		case State::BINARY_PLUS:
+
+			break;
+
+		case State::BINARY_DIVIDE:
+
+			break;
+
+		case State::BINARY_MULTIPLY:
 
 			break;
 		}
@@ -45,7 +65,6 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_OPEN;
-		componentStack.push(new ROUND_BRACKETS());
 
 		return;
 	}
@@ -107,4 +126,25 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 
 		return;
 	}
+}
+
+void ShaderBuilder::finishExpression()
+{
+	if (statesStack.top() == State::BRACKETS_UNARY_OPERATOR_CLOSE)
+	{
+		statesStack.pop();
+		statesStack.pop();
+	}
+}
+
+bool ShaderBuilder::isOperationState(State state) const
+{
+	if (state == State::BINARY_DIVIDE ||
+		state == State::BINARY_MINUS ||
+		state == State::BINARY_MULTIPLY ||
+		state == State::BINARY_PLUS
+		)
+		return true;
+
+	return false;
 }

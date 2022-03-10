@@ -257,6 +257,10 @@ class ShaderBuilder
 	void unknown();
 	void bracketsUnaryOperatorOpen();
 	void bracketsUnaryOperatorClose();
+	void finishExpression();
+
+private:
+	bool isOperationState(State state) const;
 
 public:
 	void build();
