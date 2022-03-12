@@ -135,6 +135,33 @@ void ShaderBuilder::finishExpression()
 		statesStack.pop();
 		statesStack.pop();
 	}
+	if (isOperationState(statesStack.top()))
+	{
+		Component* operand = componentStack.top();
+		componentStack.pop();
+
+		Component* operation = componentStack.top();
+		componentStack.pop();
+
+		operation->add(operand);
+		componentStack.top()->add(operation);
+
+		statesStack.pop();
+	}
+	else
+	{
+		Component* component = componentStack.top();
+		componentStack.pop();
+
+		componentStack.top()->add(component);
+	}
+
+	currentState = State::UNKNOWN;
+	if (!statesStack.empty())
+	{
+		currentState = statesStack.top();
+		statesStack.pop();
+	}
 }
 
 bool ShaderBuilder::isOperationState(State state) const
