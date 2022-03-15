@@ -38,7 +38,7 @@ void ShaderBuilder::build()
 			break;
 
 		case State::BINARY_MINUS:
-
+			binaryMinus();
 			break;
 
 		case State::BINARY_PLUS:
@@ -87,54 +87,21 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 {
 	std::string word = words.front();
 
+	statesStack.pop();
 	if (word == ";" || word == "," || word == ")" || word == ":")
-	{
-		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
 		currentState = State::FINISH_EXPRESSION;
-
-		return;
-	}
 	if (word == "+")
-	{
-		words.pop();
-		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
 		currentState = State::BINARY_PLUS;
-
-		return;
-	}
 	if (word == "-")
-	{
-		words.pop();
-		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
 		currentState = State::BINARY_MINUS;
-
-		return;
-	}
 	if (word == "*")
-	{
-		words.pop();
-		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
 		currentState = State::BINARY_MULTIPLY;
-
-		return;
-	}
 	if (word == "/")
-	{
-		words.pop();
-		statesStack.push(State::BRACKETS_UNARY_OPERATOR_CLOSE);
 		currentState = State::BINARY_DIVIDE;
-
-		return;
-	}
 }
 
 void ShaderBuilder::finishExpression()
 {
-	if (statesStack.top() == State::BRACKETS_UNARY_OPERATOR_CLOSE)
-	{
-		statesStack.pop();
-		statesStack.pop();
-	}
 	if (isOperationState(statesStack.top()))
 	{
 		Component* operand = componentStack.top();
@@ -174,4 +141,13 @@ bool ShaderBuilder::isOperationState(State state) const
 		return true;
 
 	return false;
+}
+
+void ShaderBuilder::binaryMinus()
+{
+	State lastState = statesStack.top();
+	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_BINARY_MINUS;
 }

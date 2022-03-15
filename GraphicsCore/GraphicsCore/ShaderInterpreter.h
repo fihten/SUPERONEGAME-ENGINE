@@ -217,7 +217,7 @@ class ShaderBuilder
 		0   
 	};
 
-	const char stopSymbols[12] = 
+	const char stopSymbols[17] = 
 	{
 			32, // space
 			9,  // tab
@@ -230,6 +230,11 @@ class ShaderBuilder
 			',',
 			';',
 			':',
+			'+',
+			'-',
+			'*',
+			'/',
+			'=',
 			0
 	};
 
@@ -247,7 +252,8 @@ class ShaderBuilder
 		BINARY_MINUS,
 		BINARY_PLUS,
 		BINARY_MULTIPLY,
-		BINARY_DIVIDE
+		BINARY_DIVIDE,
+		CREATING_BINARY_MINUS
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -258,6 +264,7 @@ class ShaderBuilder
 	void bracketsUnaryOperatorOpen();
 	void bracketsUnaryOperatorClose();
 	void finishExpression();
+	void binaryMinus();
 
 private:
 	bool isOperationState(State state) const;
