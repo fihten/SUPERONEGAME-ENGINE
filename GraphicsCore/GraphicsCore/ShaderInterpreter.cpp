@@ -102,26 +102,54 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 
 void ShaderBuilder::finishExpression()
 {
+	std::string word = words.front();
+
 	if (isOperationState(statesStack.top()))
 	{
 		Component* operand = componentStack.top();
 		componentStack.pop();
 
 		Component* operation = componentStack.top();
-		componentStack.pop();
-
 		operation->add(operand);
-		componentStack.top()->add(operation);
-
-		statesStack.pop();
 	}
-	else
+
+	if (isOperationState(statesStack.top()) && (word == ";" || word == "," || word == ")" || word == ";"))
 	{
-		Component* component = componentStack.top();
-		componentStack.pop();
-
-		componentStack.top()->add(component);
+		statesStack.pop();
+		return;
 	}
+
+	if (isOperationState(statesStack.top()) && word == "+")
+	{
+		statesStack.pop();
+		currentState = State::BINARY_PLUS;
+		return;
+	}
+	if (isOperationState(statesStack.top()) && word == "-")
+	{
+		statesStack.pop();
+		currentState = State::BINARY_MINUS;
+		return;
+	}
+	if (isOperationState(statesStack.top()) && word == "*")
+	{
+		statesStack.pop();
+		currentState = State::BINARY_MULTIPLY;
+		return;
+	}
+	if (isOperationState(statesStack.top()) && word == "/")
+	{
+		statesStack.pop();
+		currentState = State::BINARY_DIVIDE;
+		return;
+	}
+
+	words.pop();
+
+	Component* component = componentStack.top();
+	componentStack.pop();
+
+	componentStack.top()->add(component);
 
 	currentState = State::UNKNOWN;
 	if (!statesStack.empty())
