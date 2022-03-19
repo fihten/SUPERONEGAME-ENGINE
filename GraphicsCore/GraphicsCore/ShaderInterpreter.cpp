@@ -117,7 +117,7 @@ void ShaderBuilder::finishExpression()
 		operation->add(operand);
 	}
 
-	if (isOperationState(statesStack.top()) && (word == ";" || word == "," || word == ")" || word == ";"))
+	if (isOperationState(statesStack.top()) && (word == ";" || word == "," || word == ")"))
 	{
 		statesStack.pop();
 		return;
