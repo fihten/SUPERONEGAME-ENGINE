@@ -41,6 +41,10 @@ void ShaderBuilder::build()
 			binaryMinus();
 			break;
 
+		case State::CREATING_BINARY_MINUS:
+			creatingBinaryMinus();
+			break;
+
 		case State::BINARY_PLUS:
 
 			break;
@@ -144,8 +148,6 @@ void ShaderBuilder::finishExpression()
 		return;
 	}
 
-	words.pop();
-
 	Component* component = componentStack.top();
 	componentStack.pop();
 
@@ -178,4 +180,18 @@ void ShaderBuilder::binaryMinus()
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MINUS;
+}
+
+void ShaderBuilder::creatingBinaryMinus()
+{
+	Component* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	Component* binaryMinusOp = new ::BINARY_MINUS();
+	binaryMinusOp->add(leftOperand);
+
+	componentStack.push(binaryMinusOp);
+
+	statesStack.push(State::BINARY_MINUS);
+	currentState = State::UNKNOWN;
 }

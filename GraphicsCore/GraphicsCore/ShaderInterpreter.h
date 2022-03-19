@@ -11,6 +11,7 @@ public:
 	virtual ~Component() {};
 public:
 	virtual void add(Component* component) {};
+	void setName(const std::string& name) { this->name = name; };
 };
 
 class Composite : public Component
@@ -166,7 +167,7 @@ class VARIABLE_DECL : public Composite
 
 };
 
-class OPERATOR : public Composite
+class BINARY_MINUS : public Composite
 {
 
 };
@@ -265,6 +266,7 @@ class ShaderBuilder
 	void bracketsUnaryOperatorClose();
 	void finishExpression();
 	void binaryMinus();
+	void creatingBinaryMinus();
 
 private:
 	bool isOperationState(State state) const;
