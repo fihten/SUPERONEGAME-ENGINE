@@ -49,8 +49,16 @@ void ShaderBuilder::build()
 			binaryPlus();
 			break;
 
-		case State::BINARY_DIVIDE:
+		case State::CREATING_BINARY_PLUS:
+			creatingBinaryPlus();
+			break;
 
+		case State::BINARY_DIVIDE:
+			binaryDivide();
+			break;
+
+		case State::CREATING_BINARY_DIVIDE:
+			creatingBinaryDivide();
 			break;
 
 		case State::BINARY_MULTIPLY:
@@ -220,5 +228,26 @@ void ShaderBuilder::creatingBinaryPlus()
 	componentStack.push(binaryPlusOp);
 
 	statesStack.push(State::BINARY_PLUS);
+	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::binaryDivide()
+{
+	currentState = CREATING_BINARY_DIVIDE;
+}
+
+void ShaderBuilder::creatingBinaryDivide()
+{
+	words.pop();
+
+	Component* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	Component* binaryDivideOp = new ::BINARY_DIVIDE();
+	binaryDivideOp->add(leftOperand);
+
+	componentStack.push(binaryDivideOp);
+
+	statesStack.push(State::BINARY_DIVIDE);
 	currentState = State::UNKNOWN;
 }
