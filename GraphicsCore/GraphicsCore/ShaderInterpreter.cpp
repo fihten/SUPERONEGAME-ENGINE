@@ -46,7 +46,7 @@ void ShaderBuilder::build()
 			break;
 
 		case State::BINARY_PLUS:
-
+			binaryPlus();
 			break;
 
 		case State::BINARY_DIVIDE:
@@ -184,6 +184,8 @@ void ShaderBuilder::binaryMinus()
 
 void ShaderBuilder::creatingBinaryMinus()
 {
+	words.pop();
+
 	Component* leftOperand = componentStack.top();
 	componentStack.pop();
 
@@ -193,5 +195,30 @@ void ShaderBuilder::creatingBinaryMinus()
 	componentStack.push(binaryMinusOp);
 
 	statesStack.push(State::BINARY_MINUS);
+	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::binaryPlus()
+{
+	State lastState = statesStack.top();
+	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_BINARY_PLUS;
+}
+
+void ShaderBuilder::creatingBinaryPlus()
+{
+	words.pop();
+
+	Component* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	Component* binaryPlusOp = new ::BINARY_PLUS();
+	binaryPlusOp->add(leftOperand);
+
+	componentStack.push(binaryPlusOp);
+
+	statesStack.push(State::BINARY_PLUS);
 	currentState = State::UNKNOWN;
 }

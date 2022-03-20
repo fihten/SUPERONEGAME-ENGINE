@@ -172,6 +172,11 @@ class BINARY_MINUS : public Composite
 
 };
 
+class BINARY_PLUS : public Composite
+{
+
+};
+
 class ASSIGNMENT : public Composite
 {
 
@@ -254,7 +259,8 @@ class ShaderBuilder
 		BINARY_PLUS,
 		BINARY_MULTIPLY,
 		BINARY_DIVIDE,
-		CREATING_BINARY_MINUS
+		CREATING_BINARY_MINUS,
+		CREATING_BINARY_PLUS
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -262,11 +268,17 @@ class ShaderBuilder
 	std::stack<Component*> componentStack;
 
 	void unknown();
+
 	void bracketsUnaryOperatorOpen();
 	void bracketsUnaryOperatorClose();
+
 	void finishExpression();
+
 	void binaryMinus();
 	void creatingBinaryMinus();
+
+	void binaryPlus();
+	void creatingBinaryPlus();
 
 private:
 	bool isOperationState(State state) const;
