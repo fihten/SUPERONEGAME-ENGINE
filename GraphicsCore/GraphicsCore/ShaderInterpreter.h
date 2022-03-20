@@ -182,6 +182,11 @@ class BINARY_DIVIDE : public Composite
 
 };
 
+class BINARY_MULTIPLY : public Composite
+{
+
+};
+
 class ASSIGNMENT : public Composite
 {
 
@@ -266,7 +271,8 @@ class ShaderBuilder
 		BINARY_DIVIDE,
 		CREATING_BINARY_MINUS,
 		CREATING_BINARY_PLUS,
-		CREATING_BINARY_DIVIDE
+		CREATING_BINARY_DIVIDE,
+		CREATING_BINARY_MULTIPLY
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -288,6 +294,9 @@ class ShaderBuilder
 
 	void binaryDivide();
 	void creatingBinaryDivide();
+
+	void binaryMultiply();
+	void creatingBinaryMultiply();
 
 private:
 	bool isOperationState(State state) const;

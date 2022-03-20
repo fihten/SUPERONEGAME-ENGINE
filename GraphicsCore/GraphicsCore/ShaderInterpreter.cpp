@@ -62,8 +62,13 @@ void ShaderBuilder::build()
 			break;
 
 		case State::BINARY_MULTIPLY:
-
+			binaryMultiply();
 			break;
+
+		case State::CREATING_BINARY_MULTIPLY:
+			creatingBinaryMultiply();
+			break;
+
 		}
 	} while (!words.empty());
 }
@@ -249,5 +254,30 @@ void ShaderBuilder::creatingBinaryDivide()
 	componentStack.push(binaryDivideOp);
 
 	statesStack.push(State::BINARY_DIVIDE);
+	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::binaryMultiply()
+{
+	State lastState = statesStack.top();
+	if (lastState == State::BINARY_DIVIDE)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_BINARY_MULTIPLY;
+}
+
+void ShaderBuilder::creatingBinaryMultiply()
+{
+	words.pop();
+
+	Component* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	Component* binaryMultiplyOp = new ::BINARY_MULTIPLY();
+	binaryMultiplyOp->add(leftOperand);
+
+	componentStack.push(binaryMultiplyOp);
+
+	statesStack.push(State::BINARY_MULTIPLY);
 	currentState = State::UNKNOWN;
 }
