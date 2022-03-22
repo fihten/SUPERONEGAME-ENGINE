@@ -85,7 +85,7 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
-	if (word == ")" && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
+	if (word == ")" && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
@@ -120,8 +120,11 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 void ShaderBuilder::finishExpression()
 {
 	std::string word = words.front();
+	bool op = false;
+	if (!statesStack.empty())
+		op = isOperationState(statesStack.top());
 
-	if (isOperationState(statesStack.top()))
+	if (op)
 	{
 		Component* operand = componentStack.top();
 		componentStack.pop();
@@ -130,48 +133,38 @@ void ShaderBuilder::finishExpression()
 		operation->add(operand);
 	}
 
-	if (isOperationState(statesStack.top()) && (word == ";" || word == "," || word == ")"))
+	if (op && (word == ";" || word == "," || word == ")"))
 	{
 		statesStack.pop();
 		return;
 	}
 
-	if (isOperationState(statesStack.top()) && word == "+")
+	if (op && word == "+")
 	{
 		statesStack.pop();
 		currentState = State::BINARY_PLUS;
 		return;
 	}
-	if (isOperationState(statesStack.top()) && word == "-")
+	if (op && word == "-")
 	{
 		statesStack.pop();
 		currentState = State::BINARY_MINUS;
 		return;
 	}
-	if (isOperationState(statesStack.top()) && word == "*")
+	if (op && word == "*")
 	{
 		statesStack.pop();
 		currentState = State::BINARY_MULTIPLY;
 		return;
 	}
-	if (isOperationState(statesStack.top()) && word == "/")
+	if (op && word == "/")
 	{
 		statesStack.pop();
 		currentState = State::BINARY_DIVIDE;
 		return;
 	}
 
-	Component* component = componentStack.top();
-	componentStack.pop();
-
-	componentStack.top()->add(component);
-
 	currentState = State::UNKNOWN;
-	if (!statesStack.empty())
-	{
-		currentState = statesStack.top();
-		statesStack.pop();
-	}
 }
 
 bool ShaderBuilder::isOperationState(State state) const
@@ -188,7 +181,10 @@ bool ShaderBuilder::isOperationState(State state) const
 
 void ShaderBuilder::binaryMinus()
 {
-	State lastState = statesStack.top();
+	State lastState = State::UNKNOWN;
+	if(!statesStack.empty())
+		lastState = statesStack.top();
+
 	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
 		currentState = State::FINISH_EXPRESSION;
 	else
@@ -213,7 +209,10 @@ void ShaderBuilder::creatingBinaryMinus()
 
 void ShaderBuilder::binaryPlus()
 {
-	State lastState = statesStack.top();
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
+
 	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
 		currentState = State::FINISH_EXPRESSION;
 	else
@@ -259,7 +258,10 @@ void ShaderBuilder::creatingBinaryDivide()
 
 void ShaderBuilder::binaryMultiply()
 {
-	State lastState = statesStack.top();
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
+
 	if (lastState == State::BINARY_DIVIDE)
 		currentState = State::FINISH_EXPRESSION;
 	else
