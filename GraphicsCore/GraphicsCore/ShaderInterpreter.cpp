@@ -11,13 +11,17 @@ void ShaderBuilder::build()
 
 	do
 	{
-		std::string word = readWord(
-			shaderText,
-			std::string(skipSymbols),
-			std::string(stopSymbols),
-			currentIndex
-		);
-		words.push(word);
+		for (int i = 0; i < 2; ++i)
+		{
+			std::string word = readWord(
+				shaderText,
+				std::string(skipSymbols),
+				std::string(stopSymbols),
+				currentIndex
+			);
+			if (word != "")
+				words.push(word);
+		}
 
 		switch (currentState)
 		{
@@ -69,6 +73,10 @@ void ShaderBuilder::build()
 			creatingBinaryMultiply();
 			break;
 
+		case State::VARIABLE:
+			variable();
+			break;
+
 		}
 	} while (!words.empty());
 }
@@ -90,6 +98,14 @@ void ShaderBuilder::unknown()
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
 
+		return;
+	}
+
+	userName = word;
+	words.pop();
+	if (words.front() != "(");
+	{
+		currentState = State::VARIABLE;
 		return;
 	}
 }
@@ -282,4 +298,25 @@ void ShaderBuilder::creatingBinaryMultiply()
 
 	statesStack.push(State::BINARY_MULTIPLY);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::variable()
+{
+	Component* var = new ::VARIABLE();
+	var->setName(userName);
+	userName = "";
+
+	componentStack.push(var);
+
+	std::string word = words.front();
+	if (word == "," || word == ";" || word == ")" || word == ":" || word == "}")
+		currentState = State::FINISH_EXPRESSION;
+	if (word == "-")
+		currentState = State::BINARY_MINUS;
+	if (word == "+")
+		currentState = State::BINARY_PLUS;
+	if (word == "*")
+		currentState = State::BINARY_MULTIPLY;
+	if (word == "/")
+		currentState = State::BINARY_DIVIDE;
 }

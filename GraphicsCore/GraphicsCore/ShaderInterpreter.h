@@ -272,7 +272,8 @@ class ShaderBuilder
 		CREATING_BINARY_MINUS,
 		CREATING_BINARY_PLUS,
 		CREATING_BINARY_DIVIDE,
-		CREATING_BINARY_MULTIPLY
+		CREATING_BINARY_MULTIPLY,
+		VARIABLE
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -297,6 +298,9 @@ class ShaderBuilder
 
 	void binaryMultiply();
 	void creatingBinaryMultiply();
+
+	std::string userName = "";
+	void variable();
 
 private:
 	bool isOperationState(State state) const;
