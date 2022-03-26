@@ -212,7 +212,9 @@ void ShaderBuilder::binaryMinus()
 	if(!statesStack.empty())
 		lastState = statesStack.top();
 
-	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
+	if (lastState == State::BINARY_DIVIDE || 
+		lastState == State::BINARY_MULTIPLY || 
+		lastState == State::UNARY_MINUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MINUS;
@@ -240,7 +242,9 @@ void ShaderBuilder::binaryPlus()
 	if (!statesStack.empty())
 		lastState = statesStack.top();
 
-	if (lastState == State::BINARY_DIVIDE || lastState == State::BINARY_MULTIPLY)
+	if (lastState == State::BINARY_DIVIDE || 
+		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::UNARY_MINUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_PLUS;
@@ -264,7 +268,14 @@ void ShaderBuilder::creatingBinaryPlus()
 
 void ShaderBuilder::binaryDivide()
 {
-	currentState = CREATING_BINARY_DIVIDE;
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
+
+	if (lastState == State::UNARY_MINUS)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = CREATING_BINARY_DIVIDE;
 }
 
 void ShaderBuilder::creatingBinaryDivide()
@@ -289,7 +300,8 @@ void ShaderBuilder::binaryMultiply()
 	if (!statesStack.empty())
 		lastState = statesStack.top();
 
-	if (lastState == State::BINARY_DIVIDE)
+	if (lastState == State::BINARY_DIVIDE ||
+		lastState == State::UNARY_MINUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MULTIPLY;
