@@ -187,6 +187,16 @@ class BINARY_MULTIPLY : public Composite
 
 };
 
+class UNARY_MINUS : public Composite
+{
+
+};
+
+class UNARY_PLUS : public Composite
+{
+
+};
+
 class ASSIGNMENT : public Composite
 {
 
@@ -274,7 +284,8 @@ class ShaderBuilder
 		CREATING_BINARY_DIVIDE,
 		CREATING_BINARY_MULTIPLY,
 		VARIABLE,
-		UNARY_MINUS
+		UNARY_MINUS,
+		UNARY_PLUS
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -304,6 +315,7 @@ class ShaderBuilder
 	void variable();
 
 	void unaryMinus();
+	void unaryPlus();
 
 private:
 	bool isOperationState(State state) const;

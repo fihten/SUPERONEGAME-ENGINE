@@ -80,6 +80,10 @@ void ShaderBuilder::build()
 		case State::UNARY_MINUS:
 			unaryMinus();
 			break;
+
+		case State::UNARY_PLUS:
+			unaryPlus();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -107,6 +111,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::UNARY_MINUS;
+
+		return;
+	}
+	if (word == "+")
+	{
+		words.pop();
+		currentState = State::UNARY_PLUS;
 
 		return;
 	}
@@ -199,7 +210,8 @@ bool ShaderBuilder::isOperationState(State state) const
 		state == State::BINARY_MINUS ||
 		state == State::BINARY_MULTIPLY ||
 		state == State::BINARY_PLUS ||
-		state == State::UNARY_MINUS
+		state == State::UNARY_MINUS ||
+		state == State::UNARY_PLUS
 		)
 		return true;
 
@@ -214,7 +226,8 @@ void ShaderBuilder::binaryMinus()
 
 	if (lastState == State::BINARY_DIVIDE || 
 		lastState == State::BINARY_MULTIPLY || 
-		lastState == State::UNARY_MINUS)
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MINUS;
@@ -244,7 +257,8 @@ void ShaderBuilder::binaryPlus()
 
 	if (lastState == State::BINARY_DIVIDE || 
 		lastState == State::BINARY_MULTIPLY ||
-		lastState == State::UNARY_MINUS)
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_PLUS;
@@ -272,7 +286,8 @@ void ShaderBuilder::binaryDivide()
 	if (!statesStack.empty())
 		lastState = statesStack.top();
 
-	if (lastState == State::UNARY_MINUS)
+	if (lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = CREATING_BINARY_DIVIDE;
@@ -301,7 +316,8 @@ void ShaderBuilder::binaryMultiply()
 		lastState = statesStack.top();
 
 	if (lastState == State::BINARY_DIVIDE ||
-		lastState == State::UNARY_MINUS)
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MULTIPLY;
@@ -348,4 +364,16 @@ void ShaderBuilder::unaryMinus()
 {
 	statesStack.push(State::UNARY_MINUS);
 	currentState = State::UNKNOWN;
+
+	Component* unaryMinusOp = new ::UNARY_MINUS();
+	componentStack.push(unaryMinusOp);
+}
+
+void ShaderBuilder::unaryPlus()
+{
+	statesStack.push(State::UNARY_PLUS);
+	currentState = State::UNKNOWN;
+
+	Component* unaryPlusOp = new ::UNARY_PLUS();
+	componentStack.push(unaryPlusOp);
 }
