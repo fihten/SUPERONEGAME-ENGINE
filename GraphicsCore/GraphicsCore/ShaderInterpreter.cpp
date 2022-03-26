@@ -77,6 +77,9 @@ void ShaderBuilder::build()
 			variable();
 			break;
 
+		case State::UNARY_MINUS:
+			unaryMinus();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -97,6 +100,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
+
+		return;
+	}
+	if (word == "-")
+	{
+		words.pop();
+		currentState = State::UNARY_MINUS;
 
 		return;
 	}
@@ -319,4 +329,10 @@ void ShaderBuilder::variable()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == "/")
 		currentState = State::BINARY_DIVIDE;
+}
+
+void ShaderBuilder::unaryMinus()
+{
+	statesStack.push(State::UNARY_MINUS);
+	currentState = State::UNKNOWN;
 }
