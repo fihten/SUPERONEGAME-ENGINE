@@ -198,7 +198,8 @@ bool ShaderBuilder::isOperationState(State state) const
 	if (state == State::BINARY_DIVIDE ||
 		state == State::BINARY_MINUS ||
 		state == State::BINARY_MULTIPLY ||
-		state == State::BINARY_PLUS
+		state == State::BINARY_PLUS ||
+		state == State::UNARY_MINUS
 		)
 		return true;
 
