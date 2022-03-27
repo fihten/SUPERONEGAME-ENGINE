@@ -84,6 +84,10 @@ void ShaderBuilder::build()
 		case State::UNARY_PLUS:
 			unaryPlus();
 			break;
+
+		case State::FUNCTION_CALL:
+			functionCall();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -127,6 +131,11 @@ void ShaderBuilder::unknown()
 	if (words.front() != "(");
 	{
 		currentState = State::VARIABLE;
+		return;
+	}
+	if (words.front() == "(");
+	{
+		currentState = State::FUNCTION_CALL;
 		return;
 	}
 }
@@ -376,4 +385,16 @@ void ShaderBuilder::unaryPlus()
 
 	Component* unaryPlusOp = new ::UNARY_PLUS();
 	componentStack.push(unaryPlusOp);
+}
+
+void ShaderBuilder::functionCall()
+{
+	Component* functionCallOp = new ::FUNCTION_CALL();
+	functionCallOp->setName(userName);
+	userName = "";
+
+	componentStack.push(functionCallOp);
+
+	statesStack.push(State::FUNCTION_CALL);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 }

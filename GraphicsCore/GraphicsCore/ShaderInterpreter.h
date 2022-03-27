@@ -285,7 +285,9 @@ class ShaderBuilder
 		CREATING_BINARY_MULTIPLY,
 		VARIABLE,
 		UNARY_MINUS,
-		UNARY_PLUS
+		UNARY_PLUS,
+		FUNCTION_CALL,
+		ARGUMENTS_LIST_OPEN_BRACKET
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -316,6 +318,8 @@ class ShaderBuilder
 
 	void unaryMinus();
 	void unaryPlus();
+
+	void functionCall();
 
 private:
 	bool isOperationState(State state) const;
