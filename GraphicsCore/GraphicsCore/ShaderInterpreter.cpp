@@ -119,6 +119,13 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == ")" && !statesStack.empty() && statesStack.top() == State::ARGUMENTS_LIST_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
+
+		return;
+	}
 	if (word == "-")
 	{
 		words.pop();
