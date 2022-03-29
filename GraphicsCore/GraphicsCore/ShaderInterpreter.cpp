@@ -150,6 +150,7 @@ void ShaderBuilder::unknown()
 	}
 	if (words.front() == "(");
 	{
+		words.pop();
 		currentState = State::FUNCTION_CALL;
 		return;
 	}
