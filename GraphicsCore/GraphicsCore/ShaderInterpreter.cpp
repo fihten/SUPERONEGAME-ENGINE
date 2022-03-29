@@ -225,6 +225,14 @@ void ShaderBuilder::finishExpression()
 		return;
 	}
 
+	Component* componentToAdd = componentStack.top();
+	componentStack.pop();
+
+	Component* composite = componentStack.top();
+	composite->add(componentToAdd);
+	if (word != ")")
+		words.pop();
+
 	currentState = State::UNKNOWN;
 }
 
