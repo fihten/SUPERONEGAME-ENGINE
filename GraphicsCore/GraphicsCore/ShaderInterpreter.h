@@ -287,7 +287,8 @@ class ShaderBuilder
 		UNARY_MINUS,
 		UNARY_PLUS,
 		FUNCTION_CALL,
-		ARGUMENTS_LIST_OPEN_BRACKET
+		ARGUMENTS_LIST_OPEN_BRACKET,
+		ARGUMENTS_LIST_CLOSE_BRACKET
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -321,6 +322,7 @@ class ShaderBuilder
 
 	void functionCall();
 	void argumentsListOpenBracket();
+	void argumentsListCloseBracket();
 
 private:
 	bool isOperationState(State state) const;

@@ -92,6 +92,10 @@ void ShaderBuilder::build()
 		case State::ARGUMENTS_LIST_OPEN_BRACKET:
 			argumentsListOpenBracket();
 			break;
+
+		case State::ARGUMENTS_LIST_CLOSE_BRACKET:
+			argumentsListCloseBracket();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -410,4 +414,28 @@ void ShaderBuilder::argumentsListOpenBracket()
 
 	statesStack.push(State::ARGUMENTS_LIST_OPEN_BRACKET);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::argumentsListCloseBracket()
+{
+	statesStack.pop();
+	statesStack.pop();
+
+	Component* arguments = componentStack.top();
+	componentStack.pop();
+
+	Component* func = componentStack.top();
+	func->add(arguments);
+
+	std::string word = words.front();
+	if (word == "," || word == ";" || word == ")")
+		currentState = State::FINISH_EXPRESSION;
+	if (word == "+")
+		currentState = State::BINARY_PLUS;
+	if (word == "-")
+		currentState = State::BINARY_MINUS;
+	if (word == "*")
+		currentState = State::BINARY_MULTIPLY;
+	if (word == "/")
+		currentState = State::BINARY_DIVIDE;
 }
