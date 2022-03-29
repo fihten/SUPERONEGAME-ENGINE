@@ -320,6 +320,7 @@ class ShaderBuilder
 	void unaryPlus();
 
 	void functionCall();
+	void argumentsListOpenBracket();
 
 private:
 	bool isOperationState(State state) const;

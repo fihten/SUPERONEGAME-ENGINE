@@ -88,6 +88,10 @@ void ShaderBuilder::build()
 		case State::FUNCTION_CALL:
 			functionCall();
 			break;
+
+		case State::ARGUMENTS_LIST_OPEN_BRACKET:
+			argumentsListOpenBracket();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -397,4 +401,13 @@ void ShaderBuilder::functionCall()
 
 	statesStack.push(State::FUNCTION_CALL);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+}
+
+void ShaderBuilder::argumentsListOpenBracket()
+{
+	Component* arguments = new ::ROUND_BRACKETS();
+	componentStack.push(arguments);
+
+	statesStack.push(State::ARGUMENTS_LIST_OPEN_BRACKET);
+	currentState = State::UNKNOWN;
 }
