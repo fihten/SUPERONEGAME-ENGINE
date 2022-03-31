@@ -1,0 +1,13 @@
+1. What elements are necessary?
+
+There is "open 3d model"/"save 3d model" buttons must be present.
+3d primitives such as sphere, cube, piramide, cone ...
+2d primitives such as a square, circle, triangle ...
+1d primitives such as line
+0d primitives such as point
+
+Editor must automatically load all shaders from particular folder, for example, "shaders".
+Then editor must parse these shaders, i.e. build hierarchy tree of lexemes.
+
+
+2. How to implement these elements?
