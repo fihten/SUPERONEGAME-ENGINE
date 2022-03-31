@@ -96,6 +96,10 @@ void ShaderBuilder::build()
 		case State::ARGUMENTS_LIST_CLOSE_BRACKET:
 			argumentsListCloseBracket();
 			break;
+
+		case State::ASSIGNMENT:
+			assignment();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -244,7 +248,8 @@ bool ShaderBuilder::isOperationState(State state) const
 		state == State::BINARY_MULTIPLY ||
 		state == State::BINARY_PLUS ||
 		state == State::UNARY_MINUS ||
-		state == State::UNARY_PLUS
+		state == State::UNARY_PLUS ||
+		state == State::ASSIGNMENT
 		)
 		return true;
 
@@ -391,6 +396,8 @@ void ShaderBuilder::variable()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == "/")
 		currentState = State::BINARY_DIVIDE;
+	if (word == "=")
+		currentState = State::ASSIGNMENT;
 }
 
 void ShaderBuilder::unaryMinus()
@@ -454,4 +461,19 @@ void ShaderBuilder::argumentsListCloseBracket()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == "/")
 		currentState = State::BINARY_DIVIDE;
+}
+
+void ShaderBuilder::assignment()
+{
+	words.pop();
+
+	Component* leftValue = componentStack.top();
+	componentStack.pop();
+
+	Component* assignmentOp = new ::ASSIGNMENT();
+	assignmentOp->add(leftValue);
+	componentStack.push(assignmentOp);
+
+	statesStack.push(State::ASSIGNMENT);
+	currentState = State::UNKNOWN;
 }
