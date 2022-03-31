@@ -1,13 +1,18 @@
 1. What elements are necessary?
 
-There is "open 3d model"/"save 3d model" buttons must be present.
+There must be presented "open 3d model"/"save 3d model" buttons.
 3d primitives such as sphere, cube, piramide, cone ...
 2d primitives such as a square, circle, triangle ...
-1d primitives such as line
-0d primitives such as point
+1d primitives such as a line
+0d primitives such as a point
 
-Editor must automatically load all shaders from particular folder, for example, "shaders".
+Editor must automatically load all shaders from a particular folder, for example, "shaders".
 Then editor must parse these shaders, i.e. build hierarchy tree of lexemes.
 
+From tree of lexemes editor can fetch all necessary objects.
+In particularly it can fetch techniques and their passes.
+Technique and its pass represent a graphic method applied to 3d object.
+
+Therefore, there must be presented something like a palette of graphic methods.
 
 2. How to implement these elements?
