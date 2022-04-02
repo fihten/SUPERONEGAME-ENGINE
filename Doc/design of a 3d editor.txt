@@ -15,4 +15,19 @@ Technique and its pass represent a graphic method applied to 3d object.
 
 Therefore, there must be presented something like a palette of graphic methods.
 
+Some constants and uniforms must be defined by engine user.
+Among constants and uniforms there are textures, cameras, lights, structures that define light properties of material, etc.
+
+Let's see at textures.
+Textures can be fetched from files such as files with extensions png, jpg, bmp, etc.
+Textures can be fetched from output of preeceding graphic method(s).
+
+Let's see at cameras.
+Cameras can be cameras controlled by gamer.
+Cameras can represent light sources.
+Cameras are represented by matricies.
+
+Let's see at lights.
+Lights structures are created by users.
+
 2. How to implement these elements?
