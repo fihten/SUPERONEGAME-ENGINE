@@ -100,6 +100,22 @@ void ShaderBuilder::build()
 		case State::ASSIGNMENT:
 			assignment();
 			break;
+
+		case State::FLOAT:
+			floatState();
+			break;
+
+		case State::CUSTOM_NAME:
+			customName();
+			break;
+
+		case State::FUNCTION_DECLARATION:
+			functionDeclaration();
+			break;
+
+		case State::VARIABLE_DECLARATION:
+			variableDeclaration();
+			break;
 		}
 	} while (!words.empty());
 }
@@ -141,6 +157,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::UNARY_PLUS;
+
+		return;
+	}
+	if (word == "float")
+	{
+		words.pop();
+		currentState = State::FLOAT;
 
 		return;
 	}
@@ -476,4 +499,42 @@ void ShaderBuilder::assignment()
 
 	statesStack.push(State::ASSIGNMENT);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::floatState()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		decl.type = new ::FLOAT();
+		decl.name = word;
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void ShaderBuilder::customName()
+{
+	std::string word = words.front();
+	if (word == "(")
+	{
+		currentState = State::FUNCTION_DECLARATION;
+		return;
+	}
+
+	currentState = State::VARIABLE_DECLARATION;
+	return;
+}
+
+void ShaderBuilder::functionDeclaration()
+{
+
+}
+
+void ShaderBuilder::variableDeclaration()
+{
+
 }

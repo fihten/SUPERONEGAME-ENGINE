@@ -52,6 +52,16 @@ class VOID : public TYPE
 
 };
 
+class FLOAT : public TYPE
+{
+
+};
+
+class FLOAT2 : public TYPE
+{
+
+};
+
 class FLOAT3 : public TYPE
 {
 
@@ -289,7 +299,11 @@ class ShaderBuilder
 		FUNCTION_CALL,
 		ARGUMENTS_LIST_OPEN_BRACKET,
 		ARGUMENTS_LIST_CLOSE_BRACKET,
-		ASSIGNMENT
+		ASSIGNMENT,
+		FLOAT,
+		CUSTOM_NAME,
+		FUNCTION_DECLARATION,
+		VARIABLE_DECLARATION
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -326,6 +340,20 @@ class ShaderBuilder
 	void argumentsListCloseBracket();
 
 	void assignment();
+
+	void floatState();
+	void customName();
+	void functionDeclaration();
+	void variableDeclaration();
+
+	struct DeclarationFunctionOrVariable
+	{
+		Component* type = nullptr;
+		Component* signature = nullptr;
+		Component* body = nullptr;
+		std::string name = "";
+	};
+	DeclarationFunctionOrVariable decl;
 
 private:
 	bool isOperationState(State state) const;
