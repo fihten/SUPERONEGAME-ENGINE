@@ -1,28 +1,29 @@
 Thoughts
 
 What interested?
-Moon, war, science, dictatorship, army, hell, mystic, souls of dead people, horror, superheroic, music
+Moon(80%), war(30%), science(80%), dictatorship(50%), army(80%), hell(50%), mystic(50%), souls of dead people(50%), horror(50%), superheroic(10%), music(80%)
 
 What genre?
 First person shoter
 
 What inspire me?
-half life, doom 3, x-files, breaking bad, wolverine, terminator, bioshock infinite, myths of ancient egypt, byble
+half life(100%), doom 3(80%), return to castle wolfenstein(70%), x-files(100%), breaking bad(100%), wolverine(10%), terminator(50%), bioshock infinite(10%), myths of ancient egypt(100%), byble(100%)
 
 How long it must be?
 I think it must last for about two-three hours
 
 Who is the main character?
-teacher, doctor, scientist, marine, police, builder, driver, programer, math, priest, jesus, god, dead, woman, gay, trans, animal, spirit, killer
+teacher(0%), doctor(0%), scientist(0%), marine(0%), police(10%), builder(0%), driver(0%), programer(-100%), math(-100%), priest(20%), jesus(20%), god(0%), dead(0%), woman(0%), gay(0%), trans(0%), animal(50%), spirit(10%), killer(1%)
 
 Weapon?
-Bottle, shotgun, ak47, fg42, m16, futuristic weapon like bluster, plasma gun, lazer gun
+Bottle(0%), shotgun(100%), ak47(0%), fg42(100%), m16(0%), futuristic weapon like bluster(100%), plasma gun(100%), lazer gun(100%)
 
 Villain?
-Human, woman, man, gay, trans, animal, nature, another, aliens, demons, hell, god, jesus, sinister jesus, sinister god, satan, army, president, russians, USSR, north korean, chinese, crime, maniac(s), killer(s)
+Human(100%), woman(50%), man(50%), gay(50%), trans(0%), animal(0%), nature(100%), another(100%), aliens(20%), demons(20%), hell(20%), god(100%), jesus(50%), sinister jesus(100%), sinister god(100%), satan(0%), army(50%), president(0%), russians(0%), USSR(60%), north korean(0%), chinese(0%), crime(0%), maniac(s)(0%), killer(s)(0%)
 
 
 Plot
+We are a monkey which is held in lab on the moon base. One day we have an opportunity to escape from this lab. In this moment somewhat invase moon base. These beings are the soviet people which somehow jump into the future. The sinister god lead them. They are very angry and dark people. They try to kill all moon base stuff. They want to take a space ship to reach the earth and slave all civilised world. And they reach their aim. We can not stop them. But luck leads us to the experemental portal labs. This portal is not tested yet. But we can't read and pass through it. We are in strange world. There are hitler and stalin, people kill each other. In five minute this dream finished and we arive to the earth. We look at the sky and see space ship with evil soviet people. Sinister god make all people do evil. We try to fight. But we are killed. The end.
 
 
 Mechanics
