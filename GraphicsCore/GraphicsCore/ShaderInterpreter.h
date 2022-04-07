@@ -303,7 +303,15 @@ class ShaderBuilder
 		FLOAT,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
-		VARIABLE_DECLARATION
+		VARIABLE_DECLARATION,
+		SIGNATURE_OPEN_BRACKET,
+		SIGNATURE_CLOSE_BRACKET,
+		SEMANTIC,
+		SV_POSITION_,
+		SV_TARGET_,
+		CUSTOM_SEMANTIC,
+		FUNCTION_BODY_OPEN_BRACKET,
+		FUNCTION_BODY_CLOSE_BRACKET
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -343,7 +351,17 @@ class ShaderBuilder
 
 	void floatState();
 	void customName();
+	
 	void functionDeclaration();
+	void signatureOpenBracket();
+	void signatureCloseBracket();
+	void semantic();
+	void svPosition();
+	void svTarget();
+	void customSemantic();
+	void functionBodyOpenBracket();
+	void functionBodyCloseBracket();
+
 	void variableDeclaration();
 
 	struct DeclarationFunctionOrVariable

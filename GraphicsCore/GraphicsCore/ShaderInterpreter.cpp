@@ -113,6 +113,38 @@ void ShaderBuilder::build()
 			functionDeclaration();
 			break;
 
+		case State::SIGNATURE_OPEN_BRACKET:
+			signatureOpenBracket();
+			break;
+
+		case State::SIGNATURE_CLOSE_BRACKET:
+			signatureCloseBracket();
+			break;
+
+		case State::SEMANTIC:
+			semantic();
+			break;
+
+		case State::SV_POSITION_:
+			svPosition();
+			break;
+
+		case State::SV_TARGET_:
+			svTarget();
+			break;
+
+		case State::CUSTOM_SEMANTIC:
+			customSemantic();
+			break;
+
+		case State::FUNCTION_BODY_OPEN_BRACKET:
+			functionBodyOpenBracket();
+			break;
+
+		case State::FUNCTION_BODY_CLOSE_BRACKET:
+			functionBodyCloseBracket();
+			break;
+
 		case State::VARIABLE_DECLARATION:
 			variableDeclaration();
 			break;
@@ -530,6 +562,46 @@ void ShaderBuilder::customName()
 }
 
 void ShaderBuilder::functionDeclaration()
+{
+
+}
+
+void ShaderBuilder::signatureOpenBracket()
+{
+
+}
+
+void ShaderBuilder::signatureCloseBracket()
+{
+
+}
+
+void ShaderBuilder::semantic()
+{
+
+}
+
+void ShaderBuilder::svPosition()
+{
+
+}
+
+void ShaderBuilder::svTarget()
+{
+
+}
+
+void ShaderBuilder::customSemantic()
+{
+
+}
+
+void ShaderBuilder::functionBodyOpenBracket()
+{
+
+}
+
+void ShaderBuilder::functionBodyCloseBracket()
 {
 
 }
