@@ -23,7 +23,7 @@ void ShaderBuilder::build()
 			break;
 	}
 
-	do
+	while (!words.empty())
 	{
 		switch (currentState)
 		{
@@ -147,11 +147,15 @@ void ShaderBuilder::build()
 			functionBodyCloseBracket();
 			break;
 
+		case State::INSERT_FUNCTION_DECLARATION:
+			insertFunctionDeclaration();
+			break;
+
 		case State::VARIABLE_DECLARATION:
 			variableDeclaration();
 			break;
 		}
-	} while (!words.empty());
+	}
 }
 
 void ShaderBuilder::unknown()
@@ -609,6 +613,11 @@ void ShaderBuilder::functionBodyCloseBracket()
 }
 
 void ShaderBuilder::variableDeclaration()
+{
+
+}
+
+void ShaderBuilder::insertFunctionDeclaration()
 {
 
 }

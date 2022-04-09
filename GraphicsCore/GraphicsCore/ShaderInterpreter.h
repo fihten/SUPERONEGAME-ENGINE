@@ -311,7 +311,8 @@ class ShaderBuilder
 		SV_TARGET_,
 		CUSTOM_SEMANTIC,
 		FUNCTION_BODY_OPEN_BRACKET,
-		FUNCTION_BODY_CLOSE_BRACKET
+		FUNCTION_BODY_CLOSE_BRACKET,
+		INSERT_FUNCTION_DECLARATION
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -361,6 +362,7 @@ class ShaderBuilder
 	void customSemantic();
 	void functionBodyOpenBracket();
 	void functionBodyCloseBracket();
+	void insertFunctionDeclaration();
 
 	void variableDeclaration();
 
