@@ -9,20 +9,22 @@ void ShaderBuilder::build()
 	currentState = State::UNKNOWN;
 	currentIndex = 0;
 
+	for (;;)
+	{
+		std::string word = readWord(
+			shaderText,
+			std::string(skipSymbols),
+			std::string(stopSymbols),
+			currentIndex
+		);
+		if (word != "")
+			words.push(word);
+		else
+			break;
+	}
+
 	do
 	{
-		for (int i = 0; i < 2; ++i)
-		{
-			std::string word = readWord(
-				shaderText,
-				std::string(skipSymbols),
-				std::string(stopSymbols),
-				currentIndex
-			);
-			if (word != "")
-				words.push(word);
-		}
-
 		switch (currentState)
 		{
 		case State::UNKNOWN:
