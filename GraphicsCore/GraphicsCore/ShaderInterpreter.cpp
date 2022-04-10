@@ -553,7 +553,7 @@ void ShaderBuilder::floatState()
 	{
 		words.pop();
 
-		DeclarationFunctionOrVariable decl;
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT();
 		decl.name = word;
@@ -580,12 +580,28 @@ void ShaderBuilder::customName()
 
 void ShaderBuilder::functionDeclaration()
 {
+	std::string word = words.front();
+	if (word == "(")
+	{
+		words.pop();
 
+		statesStack.push(State::FUNCTION_DECLARATION);
+		currentState = State::SIGNATURE_OPEN_BRACKET;
+
+		return;
+	}
 }
 
 void ShaderBuilder::signatureOpenBracket()
 {
+	Component* signature = new ::ROUND_BRACKETS();
+	decls.top().signature = signature;
+	componentStack.push(signature);
 
+	statesStack.push(State::SIGNATURE_OPEN_BRACKET);
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void ShaderBuilder::signatureCloseBracket()
