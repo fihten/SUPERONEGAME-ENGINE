@@ -553,8 +553,12 @@ void ShaderBuilder::floatState()
 	{
 		words.pop();
 
+		DeclarationFunctionOrVariable decl;
+
 		decl.type = new ::FLOAT();
 		decl.name = word;
+
+		decls.push(decl);
 
 		currentState = State::CUSTOM_NAME;
 		return;

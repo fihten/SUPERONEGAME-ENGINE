@@ -373,7 +373,7 @@ class ShaderBuilder
 		Component* body = nullptr;
 		std::string name = "";
 	};
-	DeclarationFunctionOrVariable decl;
+	std::stack<DeclarationFunctionOrVariable> decls;
 
 private:
 	bool isOperationState(State state) const;
