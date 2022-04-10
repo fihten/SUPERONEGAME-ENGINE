@@ -291,11 +291,18 @@ void ShaderBuilder::finishExpression()
 		return;
 	}
 
-	Component* componentToAdd = componentStack.top();
-	componentStack.pop();
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
 
-	Component* composite = componentStack.top();
-	composite->add(componentToAdd);
+	if (word != ")" || (lastState != State::BRACKETS_UNARY_OPERATOR_OPEN))
+	{
+		Component* componentToAdd = componentStack.top();
+		componentStack.pop();
+
+		Component* composite = componentStack.top();
+		composite->add(componentToAdd);
+	}
 	if (word != ")")
 		words.pop();
 
