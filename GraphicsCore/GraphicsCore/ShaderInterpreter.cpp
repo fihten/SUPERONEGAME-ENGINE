@@ -184,6 +184,20 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == ")" && !statesStack.empty() && statesStack.top() == State::SIGNATURE_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::SIGNATURE_CLOSE_BRACKET;
+
+		return;
+	}
+	if (word == "}" && !statesStack.empty() && statesStack.top() == State::FUNCTION_BODY_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_CLOSE_BRACKET;
+
+		return;
+	}
 	if (word == "-")
 	{
 		words.pop();
@@ -636,7 +650,26 @@ void ShaderBuilder::functionBodyOpenBracket()
 
 void ShaderBuilder::functionBodyCloseBracket()
 {
+	statesStack.pop();
+	statesStack.pop();
 
+	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
+	
+	FUNCTION_DECL* funcDecl = new ::FUNCTION_DECL();
+	funcDecl->add(funcDeclStruct.type);
+	funcDecl->setName(funcDeclStruct.name);
+	funcDecl->add(funcDeclStruct.signature);
+	if (funcDeclStruct.body)
+		funcDecl->add(funcDeclStruct.body);
+
+	decls.pop();
+
+	componentStack.pop();
+	componentStack.top()->add(funcDecl);
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void ShaderBuilder::variableDeclaration()
