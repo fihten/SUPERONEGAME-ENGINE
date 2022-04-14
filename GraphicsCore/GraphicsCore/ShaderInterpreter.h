@@ -370,6 +370,7 @@ class ShaderBuilder
 	{
 		Component* type = nullptr;
 		Component* signature = nullptr;
+		Component* semantic = nullptr;
 		Component* body = nullptr;
 		std::string name = "";
 	};

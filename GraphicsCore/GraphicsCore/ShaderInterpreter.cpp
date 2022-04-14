@@ -620,32 +620,126 @@ void ShaderBuilder::signatureOpenBracket()
 
 void ShaderBuilder::signatureCloseBracket()
 {
+	std::string word = words.front();
+	componentStack.pop();
 
+	if (word == ":")
+	{
+		words.pop();
+		currentState = State::SEMANTIC;
+		return;
+	}
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_FUNCTION_DECLARATION;
+		return;
+	}
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
 }
 
 void ShaderBuilder::semantic()
 {
-
+	std::string word = words.front();
+	if (word == "SV_POSITION")
+	{
+		words.pop();
+		currentState = State::SV_POSITION_;
+		return;
+	}
+	if (word == "SV_TARGET")
+	{
+		words.pop();
+		currentState = State::SV_TARGET_;
+		return;
+	}
+	// CUSTOM_SEMANTIC
+	{
+		words.pop();
+		userName = word;
+		currentState = State::CUSTOM_SEMANTIC;
+		return;
+	}
 }
 
 void ShaderBuilder::svPosition()
 {
+	std::string word = words.front();
 
+	Component* semanticElement = new ::SV_POSITION();
+	decls.top().semantic = semanticElement;
+
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_FUNCTION_DECLARATION;
+		return;
+	}
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
 }
 
 void ShaderBuilder::svTarget()
 {
+	std::string word = words.front();
 
+	Component* semanticElement = new ::SV_TARGET();
+	decls.top().semantic = semanticElement;
+
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_FUNCTION_DECLARATION;
+		return;
+	}
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
 }
 
 void ShaderBuilder::customSemantic()
 {
+	std::string word = words.front();
 
+	Component* semanticElement = new ::SEMANTIC();
+	semanticElement->setName(userName);
+	userName = "";
+	decls.top().semantic = semanticElement;
+
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_FUNCTION_DECLARATION;
+		return;
+	}
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
 }
 
 void ShaderBuilder::functionBodyOpenBracket()
 {
+	Component* body = new ::CURLY_BRACKETS();
+	decls.top().body = body;
+	componentStack.push(body);
 
+	currentState = State::UNKNOWN;
+	statesStack.push(State::FUNCTION_BODY_OPEN_BRACKET);
 }
 
 void ShaderBuilder::functionBodyCloseBracket()
@@ -663,10 +757,7 @@ void ShaderBuilder::functionBodyCloseBracket()
 		funcDecl->add(funcDeclStruct.body);
 
 	decls.pop();
-
-	componentStack.pop();
 	componentStack.top()->add(funcDecl);
-
 	currentState = State::UNKNOWN;
 
 	return;
