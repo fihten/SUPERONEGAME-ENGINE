@@ -36,4 +36,6 @@ I thought about my own widgits today. The idea was to implement poping menus lik
 But it is not origin. Perhaps, design of menu doesn't must be origin.
 Maybe it must be a console?
 It must be like pop uping cloud with function in it. Functions can be switched by moving mouse wheel. Functions depend on object pointed by mouse. More frequent used functions appears rather than functions that is almost not used. Pop uping ocured, for example, when user press down CTRL.
- 
+What design can be else?
+Maybe i don't must concern about design now... What about to write application for reconstruction 3d model from set of photos. But at first i must to write bmp-loader.
+When it will be done i think I will be already aware with WinApi enough to create more professional design.
