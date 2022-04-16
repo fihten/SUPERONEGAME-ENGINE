@@ -744,6 +744,8 @@ void ShaderBuilder::functionBodyOpenBracket()
 
 void ShaderBuilder::functionBodyCloseBracket()
 {
+	componentStack.pop();
+
 	statesStack.pop();
 	statesStack.pop();
 
@@ -753,6 +755,30 @@ void ShaderBuilder::functionBodyCloseBracket()
 	funcDecl->add(funcDeclStruct.type);
 	funcDecl->setName(funcDeclStruct.name);
 	funcDecl->add(funcDeclStruct.signature);
+	if (funcDeclStruct.semantic)
+		funcDecl->add(funcDeclStruct.semantic);
+	if (funcDeclStruct.body)
+		funcDecl->add(funcDeclStruct.body);
+
+	decls.pop();
+	componentStack.top()->add(funcDecl);
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::insertFunctionDeclaration()
+{
+	statesStack.pop();
+
+	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
+
+	FUNCTION_DECL* funcDecl = new ::FUNCTION_DECL();
+	funcDecl->add(funcDeclStruct.type);
+	funcDecl->setName(funcDeclStruct.name);
+	funcDecl->add(funcDeclStruct.signature);
+	if (funcDeclStruct.semantic)
+		funcDecl->add(funcDeclStruct.semantic);
 	if (funcDeclStruct.body)
 		funcDecl->add(funcDeclStruct.body);
 
@@ -764,11 +790,6 @@ void ShaderBuilder::functionBodyCloseBracket()
 }
 
 void ShaderBuilder::variableDeclaration()
-{
-
-}
-
-void ShaderBuilder::insertFunctionDeclaration()
 {
 
 }
