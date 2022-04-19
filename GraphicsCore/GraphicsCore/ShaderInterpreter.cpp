@@ -154,6 +154,10 @@ void ShaderBuilder::build()
 		case State::VARIABLE_DECLARATION:
 			variableDeclaration();
 			break;
+
+		case State::INSERT_VARIABLE_DECLARATION:
+			insertVariableDeclaration();
+			break;
 		}
 	}
 }
@@ -196,6 +200,14 @@ void ShaderBuilder::unknown()
 		words.pop();
 		currentState = State::FUNCTION_BODY_CLOSE_BRACKET;
 
+		return;
+	}
+	if ((word == ";" || word == "," || word == ")") 
+		&& !statesStack.empty() && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		if (word != ")")
+			words.pop();
+		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
 	if (word == "-")
@@ -309,18 +321,25 @@ void ShaderBuilder::finishExpression()
 	if (!statesStack.empty())
 		lastState = statesStack.top();
 
-	if (word != ")" || (lastState != State::BRACKETS_UNARY_OPERATOR_OPEN))
+	currentState = State::UNKNOWN;
+	if ((word != ")" || lastState != State::BRACKETS_UNARY_OPERATOR_OPEN) &&
+		((word != ")" && word != ";" && word != ",") || lastState != State::VARIABLE_DECLARATION))
 	{
 		Component* componentToAdd = componentStack.top();
 		componentStack.pop();
 
 		Component* composite = componentStack.top();
 		composite->add(componentToAdd);
-	}
-	if (word != ")")
-		words.pop();
 
-	currentState = State::UNKNOWN;
+		if (word != ")")
+			words.pop();
+	}
+	if ((word == ")" || word == ";" || word == ",") && lastState == State::VARIABLE_DECLARATION)
+	{
+		decls.top().value = componentStack.top();
+		componentStack.pop();
+	}
+	
 }
 
 bool ShaderBuilder::isOperationState(State state) const
@@ -674,16 +693,23 @@ void ShaderBuilder::svPosition()
 	Component* semanticElement = new ::SV_POSITION();
 	decls.top().semantic = semanticElement;
 
-	if (word == ";")
+	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{")
+	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
+	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		if (word != ")")
+			words.pop();
+		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
 }
@@ -695,16 +721,23 @@ void ShaderBuilder::svTarget()
 	Component* semanticElement = new ::SV_TARGET();
 	decls.top().semantic = semanticElement;
 
-	if (word == ";")
+	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{")
+	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
+	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		if (word != ")")
+			words.pop();
+		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
 }
@@ -718,16 +751,23 @@ void ShaderBuilder::customSemantic()
 	userName = "";
 	decls.top().semantic = semanticElement;
 
-	if (word == ";")
+	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{")
+	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
+	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		if (word != ")")
+			words.pop();
+		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
 }
@@ -790,6 +830,30 @@ void ShaderBuilder::insertFunctionDeclaration()
 }
 
 void ShaderBuilder::variableDeclaration()
+{
+	std::string word = words.front();
+	statesStack.push(State::VARIABLE_DECLARATION);
+	if (word == "=")
+	{
+		words.pop();
+		currentState = State::UNKNOWN;
+		return;
+	}
+	if (word == ":")
+	{
+		words.pop();
+		currentState = State::SEMANTIC;
+		return;
+	}
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_VARIABLE_DECLARATION;
+		return;
+	}
+}
+
+void ShaderBuilder::insertVariableDeclaration()
 {
 
 }

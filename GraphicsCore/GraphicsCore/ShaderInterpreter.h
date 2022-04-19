@@ -303,7 +303,6 @@ class ShaderBuilder
 		FLOAT,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
-		VARIABLE_DECLARATION,
 		SIGNATURE_OPEN_BRACKET,
 		SIGNATURE_CLOSE_BRACKET,
 		SEMANTIC,
@@ -312,7 +311,9 @@ class ShaderBuilder
 		CUSTOM_SEMANTIC,
 		FUNCTION_BODY_OPEN_BRACKET,
 		FUNCTION_BODY_CLOSE_BRACKET,
-		INSERT_FUNCTION_DECLARATION
+		INSERT_FUNCTION_DECLARATION,
+		VARIABLE_DECLARATION,
+		INSERT_VARIABLE_DECLARATION
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -365,14 +366,16 @@ class ShaderBuilder
 	void insertFunctionDeclaration();
 
 	void variableDeclaration();
+	void insertVariableDeclaration();
 
 	struct DeclarationFunctionOrVariable
 	{
 		Component* type = nullptr;
+		std::string name = "";
 		Component* signature = nullptr;
 		Component* semantic = nullptr;
 		Component* body = nullptr;
-		std::string name = "";
+		Component* value = nullptr;
 	};
 	std::stack<ShaderBuilder::DeclarationFunctionOrVariable> decls;
 
