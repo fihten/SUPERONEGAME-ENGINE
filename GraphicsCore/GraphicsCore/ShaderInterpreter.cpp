@@ -107,6 +107,18 @@ void ShaderBuilder::build()
 			floatState();
 			break;
 
+		case State::FLOAT2:
+			float2State();
+			break;
+
+		case State::FLOAT3:
+			float3State();
+			break;
+
+		case State::FLOAT4:
+			float4State();
+			break;
+
 		case State::CUSTOM_NAME:
 			customName();
 			break;
@@ -228,6 +240,27 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT;
+
+		return;
+	}
+	if (word == "float2")
+	{
+		words.pop();
+		currentState = State::FLOAT2;
+
+		return;
+	}
+	if (word == "float3")
+	{
+		words.pop();
+		currentState = State::FLOAT3;
+
+		return;
+	}
+	if (word == "float4")
+	{
+		words.pop();
+		currentState = State::FLOAT4;
 
 		return;
 	}
@@ -589,6 +622,63 @@ void ShaderBuilder::floatState()
 		ShaderBuilder::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void ShaderBuilder::float2State()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ::FLOAT2();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void ShaderBuilder::float3State()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ::FLOAT3();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void ShaderBuilder::float4State()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ::FLOAT4();
 		decl.name = word;
 
 		decls.push(decl);

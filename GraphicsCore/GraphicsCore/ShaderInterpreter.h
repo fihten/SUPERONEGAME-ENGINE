@@ -301,6 +301,9 @@ class ShaderBuilder
 		ARGUMENTS_LIST_CLOSE_BRACKET,
 		ASSIGNMENT,
 		FLOAT,
+		FLOAT2,
+		FLOAT3,
+		FLOAT4,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
 		SIGNATURE_OPEN_BRACKET,
@@ -352,6 +355,9 @@ class ShaderBuilder
 	void assignment();
 
 	void floatState();
+	void float2State();
+	void float3State();
+	void float4State();
 	void customName();
 	
 	void functionDeclaration();
