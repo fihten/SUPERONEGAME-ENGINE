@@ -855,5 +855,22 @@ void ShaderBuilder::variableDeclaration()
 
 void ShaderBuilder::insertVariableDeclaration()
 {
+	statesStack.pop();
 
+	Component* pVariableDeclaration = new ::VARIABLE_DECL();
+	
+	pVariableDeclaration->add(decls.top().type);
+	pVariableDeclaration->setName(decls.top().name);
+	if (decls.top().semantic)
+		pVariableDeclaration->add(decls.top().semantic);
+	if (decls.top().value)
+		pVariableDeclaration->add(decls.top().value);
+
+	decls.pop();
+
+	componentStack.top()->add(pVariableDeclaration);
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
