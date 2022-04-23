@@ -300,6 +300,7 @@ class ShaderBuilder
 		ARGUMENTS_LIST_OPEN_BRACKET,
 		ARGUMENTS_LIST_CLOSE_BRACKET,
 		ASSIGNMENT,
+		VOID,
 		FLOAT,
 		FLOAT2,
 		FLOAT3,
@@ -354,6 +355,7 @@ class ShaderBuilder
 
 	void assignment();
 
+	void voidState();
 	void floatState();
 	void float2State();
 	void float3State();

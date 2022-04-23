@@ -103,6 +103,10 @@ void ShaderBuilder::build()
 			assignment();
 			break;
 
+		case State::VOID:
+			voidState();
+			break;
+
 		case State::FLOAT:
 			floatState();
 			break;
@@ -233,6 +237,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::UNARY_PLUS;
+
+		return;
+	}
+	if (word == "void")
+	{
+		words.pop();
+		currentState = State::VOID;
 
 		return;
 	}
@@ -610,6 +621,25 @@ void ShaderBuilder::assignment()
 
 	statesStack.push(State::ASSIGNMENT);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderBuilder::voidState()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ::VOID();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
 }
 
 void ShaderBuilder::floatState()
