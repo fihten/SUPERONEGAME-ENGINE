@@ -174,6 +174,22 @@ void ShaderBuilder::build()
 		case State::INSERT_VARIABLE_DECLARATION:
 			insertVariableDeclaration();
 			break;
+
+		case State::IN:
+			inState();
+			break;
+
+		case State::OUT:
+			outState();
+			break;
+
+		case State::INOUT:
+			inoutState();
+			break;
+
+		case State::UNIFORM:
+			uniformState();
+			break;
 		}
 	}
 }
@@ -272,6 +288,34 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT4;
+
+		return;
+	}
+	if (word == "in")
+	{
+		words.pop();
+		currentState = State::IN;
+
+		return;
+	}
+	if (word == "out")
+	{
+		words.pop();
+		currentState = State::OUT;
+
+		return;
+	}
+	if (word == "inout")
+	{
+		words.pop();
+		currentState = State::INOUT;
+
+		return;
+	}
+	if (word == "uniform")
+	{
+		words.pop();
+		currentState = State::UNIFORM;
 
 		return;
 	}
@@ -951,6 +995,12 @@ void ShaderBuilder::insertFunctionDeclaration()
 
 void ShaderBuilder::variableDeclaration()
 {
+	if (modifier)
+	{
+		decls.top().modifier = modifier;
+		modifier = nullptr;
+	}
+
 	std::string word = words.front();
 	statesStack.push(State::VARIABLE_DECLARATION);
 	if (word == "=")
@@ -990,6 +1040,38 @@ void ShaderBuilder::insertVariableDeclaration()
 
 	componentStack.top()->add(pVariableDeclaration);
 
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::inState()
+{
+	modifier = new ::IN();
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::outState()
+{
+	modifier = new ::OUT();
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::inoutState()
+{
+	modifier = new ::INOUT();
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::uniformState()
+{
+	modifier = new ::UNIFORM();
 	currentState = State::UNKNOWN;
 
 	return;

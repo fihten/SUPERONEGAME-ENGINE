@@ -317,7 +317,11 @@ class ShaderBuilder
 		FUNCTION_BODY_CLOSE_BRACKET,
 		INSERT_FUNCTION_DECLARATION,
 		VARIABLE_DECLARATION,
-		INSERT_VARIABLE_DECLARATION
+		INSERT_VARIABLE_DECLARATION,
+		IN,
+		OUT,
+		INOUT,
+		UNIFORM
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -376,8 +380,15 @@ class ShaderBuilder
 	void variableDeclaration();
 	void insertVariableDeclaration();
 
+	void inState();
+	void outState();
+	void inoutState();
+	void uniformState();
+	Component* modifier = nullptr;
+
 	struct DeclarationFunctionOrVariable
 	{
+		Component* modifier = nullptr;
 		Component* type = nullptr;
 		std::string name = "";
 		Component* signature = nullptr;
