@@ -321,7 +321,8 @@ class ShaderBuilder
 		IN,
 		OUT,
 		INOUT,
-		UNIFORM
+		UNIFORM,
+		MUL
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -385,6 +386,8 @@ class ShaderBuilder
 	void inoutState();
 	void uniformState();
 	Component* modifier = nullptr;
+
+	void mulState();
 
 	struct DeclarationFunctionOrVariable
 	{

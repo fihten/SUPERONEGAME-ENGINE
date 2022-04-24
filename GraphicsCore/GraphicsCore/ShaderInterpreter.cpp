@@ -190,6 +190,10 @@ void ShaderBuilder::build()
 		case State::UNIFORM:
 			uniformState();
 			break;
+
+		case State::MUL:
+			mulState();
+			break;
 		}
 	}
 }
@@ -316,6 +320,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::UNIFORM;
+
+		return;
+	}
+	if (word == "mul")
+	{
+		words.pop();
+		currentState = State::MUL;
 
 		return;
 	}
@@ -1075,4 +1086,21 @@ void ShaderBuilder::uniformState()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void ShaderBuilder::mulState()
+{
+	statesStack.push(State::MUL);
+
+	Component* pMul = new ::MUL();
+	componentStack.push(pMul);
+
+	std::string word = words.front();
+	if (word == "(")
+	{
+		words.pop();
+		currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+		return;
+	}
 }
