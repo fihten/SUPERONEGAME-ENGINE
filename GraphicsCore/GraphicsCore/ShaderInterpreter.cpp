@@ -194,6 +194,10 @@ void ShaderBuilder::build()
 		case State::MUL:
 			mulState();
 			break;
+
+		case State::FLOAT4_CONSTRUCTOR:
+			float4constructor();
+			break;
 		}
 	}
 }
@@ -769,6 +773,14 @@ void ShaderBuilder::float4State()
 		decls.push(decl);
 
 		currentState = State::CUSTOM_NAME;
+		
+		return;
+	}
+	if (word == "(")
+	{
+		words.pop();
+		currentState = State::FLOAT4_CONSTRUCTOR;
+
 		return;
 	}
 }
@@ -1103,4 +1115,15 @@ void ShaderBuilder::mulState()
 
 		return;
 	}
+}
+
+void ShaderBuilder::float4constructor()
+{
+	Component* pFloat4Constructor = new ::FLOAT4_CONSTRUCTOR();
+	componentStack.push(pFloat4Constructor);
+
+	statesStack.push(State::FLOAT4_CONSTRUCTOR);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	return;
 }
