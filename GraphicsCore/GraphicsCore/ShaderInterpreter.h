@@ -397,6 +397,15 @@ class ShaderBuilder
 	void mulState();
 	void float4constructor();
 
+	struct CbufferDefinition
+	{
+		std::string name = "";
+		Component* body = nullptr;
+
+		void clear() { name = ""; body = nullptr; }
+	};
+	CbufferDefinition cbufferDecl;
+
 	void cbufferState();
 	void cbufferName();
 	void insertCbuffer();

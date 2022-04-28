@@ -361,6 +361,20 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "cbuffer")
+	{
+		words.pop();
+		currentState = State::CBUFFER;
+
+		return;
+	}
+	if (word == "}" && !statesStack.empty() && statesStack.top() == State::CBUFFER_BODY_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::INSERT_CBUFFER;
+
+		return;
+	}
 
 	userName = word;
 	words.pop();
@@ -1177,7 +1191,19 @@ void ShaderBuilder::float4constructor()
 
 void ShaderBuilder::cbufferState()
 {
-
+	statesStack.push(State::CBUFFER);
+	std::string word = words.front();
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::CBUFFER_BODY_OPEN_BRACKET;
+		return;
+	}
+	// non-predefined word
+	{
+		currentState = State::CBUFFER_NAME;
+		return;
+	}
 }
 
 void ShaderBuilder::cbufferName()
