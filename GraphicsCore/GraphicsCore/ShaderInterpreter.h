@@ -324,7 +324,11 @@ class ShaderBuilder
 		INOUT,
 		UNIFORM,
 		MUL,
-		FLOAT4_CONSTRUCTOR
+		FLOAT4_CONSTRUCTOR,
+		CBUFFER,
+		CBUFFER_NAME,
+		INSERT_CBUFFER,
+		CBUFFER_BODY_OPEN_BRACKET
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -392,6 +396,11 @@ class ShaderBuilder
 
 	void mulState();
 	void float4constructor();
+
+	void cbufferState();
+	void cbufferName();
+	void insertCbuffer();
+	void cbufferBodyOpenBracket();
 
 	struct DeclarationFunctionOrVariable
 	{

@@ -202,6 +202,22 @@ void ShaderBuilder::build()
 		case State::FLOAT4_CONSTRUCTOR:
 			float4constructor();
 			break;
+
+		case State::CBUFFER:
+			cbufferState();
+			break;
+
+		case State::CBUFFER_NAME:
+			cbufferName();
+			break;
+
+		case State::INSERT_CBUFFER:
+			insertCbuffer();
+			break;
+
+		case State::CBUFFER_BODY_OPEN_BRACKET:
+			cbufferBodyOpenBracket();
+			break;
 		}
 	}
 }
@@ -1157,4 +1173,24 @@ void ShaderBuilder::float4constructor()
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
 	return;
+}
+
+void ShaderBuilder::cbufferState()
+{
+
+}
+
+void ShaderBuilder::cbufferName()
+{
+
+}
+
+void ShaderBuilder::insertCbuffer()
+{
+
+}
+
+void ShaderBuilder::cbufferBodyOpenBracket()
+{
+
 }
