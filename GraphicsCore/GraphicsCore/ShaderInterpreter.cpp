@@ -123,6 +123,10 @@ void ShaderBuilder::build()
 			float4State();
 			break;
 
+		case State::FLOAT4X4:
+			float4x4State();
+			break;
+
 		case State::CUSTOM_NAME:
 			customName();
 			break;
@@ -296,6 +300,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT4;
+
+		return;
+	}
+	if (word == "float4x4")
+	{
+		words.pop();
+		currentState = State::FLOAT4X4;
 
 		return;
 	}
@@ -780,6 +791,26 @@ void ShaderBuilder::float4State()
 	{
 		words.pop();
 		currentState = State::FLOAT4_CONSTRUCTOR;
+
+		return;
+	}
+}
+
+void ShaderBuilder::float4x4State()
+{
+	std::string word = words.front();
+	if (word != "(")
+	{
+		words.pop();
+
+		ShaderBuilder::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ::FLOAT4X4();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
 
 		return;
 	}

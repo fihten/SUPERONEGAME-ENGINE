@@ -305,6 +305,7 @@ class ShaderBuilder
 		FLOAT2,
 		FLOAT3,
 		FLOAT4,
+		FLOAT4X4,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
 		SIGNATURE_OPEN_BRACKET,
@@ -366,6 +367,7 @@ class ShaderBuilder
 	void float2State();
 	void float3State();
 	void float4State();
+	void float4x4State();
 	void customName();
 	
 	void functionDeclaration();
