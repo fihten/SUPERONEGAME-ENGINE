@@ -1208,15 +1208,60 @@ void ShaderBuilder::cbufferState()
 
 void ShaderBuilder::cbufferName()
 {
+	std::string cbufferName = words.front();
+	words.pop();
 
+	cbufferDecl.name = cbufferName;
+
+	std::string word = words.front();
+	if (word == "{")
+	{
+		words.pop();
+		currentState = State::CBUFFER_BODY_OPEN_BRACKET;
+
+		return;
+	}
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_CBUFFER;
+
+		return;
+	}
 }
 
 void ShaderBuilder::insertCbuffer()
 {
+	if (statesStack.top() == State::CBUFFER_BODY_OPEN_BRACKET)
+		statesStack.pop();
+	if (statesStack.top() == State::CBUFFER)
+		statesStack.pop();
 
+	Component* pCbuffer = new ::CBUFFER();
+	if (cbufferDecl.name != "")
+		pCbuffer->setName(cbufferDecl.name);
+	if (cbufferDecl.body)
+		pCbuffer->add(cbufferDecl.body);
+	cbufferDecl.clear();
+
+	componentStack.pop();
+
+	Component* parent = componentStack.top();
+	parent->add(pCbuffer);
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void ShaderBuilder::cbufferBodyOpenBracket()
 {
+	Component* body = new ::CURLY_BRACKETS();
+	cbufferDecl.body = body;
+	componentStack.push(body);
 
+	statesStack.push(State::CBUFFER_BODY_OPEN_BRACKET);
+	currentState = State::UNKNOWN;
+
+	return;
 }
