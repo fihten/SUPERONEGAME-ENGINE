@@ -218,6 +218,14 @@ void ShaderBuilder::build()
 		case State::CBUFFER_BODY_OPEN_BRACKET:
 			cbufferBodyOpenBracket();
 			break;
+
+		case State::TECHNIQUE11:
+			technique11state();
+			break;
+
+		case State::INSERT_TECHNIQUE11:
+			insertTechnique11();
+			break;
 		}
 	}
 }
@@ -1264,4 +1272,14 @@ void ShaderBuilder::cbufferBodyOpenBracket()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void ShaderBuilder::technique11state()
+{
+
+}
+
+void ShaderBuilder::insertTechnique11()
+{
+
 }

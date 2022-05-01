@@ -328,7 +328,9 @@ class ShaderBuilder
 		CBUFFER,
 		CBUFFER_NAME,
 		INSERT_CBUFFER,
-		CBUFFER_BODY_OPEN_BRACKET
+		CBUFFER_BODY_OPEN_BRACKET,
+		TECHNIQUE11,
+		INSERT_TECHNIQUE11
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -410,6 +412,9 @@ class ShaderBuilder
 	void cbufferName();
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
+
+	void technique11state();
+	void insertTechnique11();
 
 	struct DeclarationFunctionOrVariable
 	{
