@@ -383,6 +383,21 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "technique11")
+	{
+		words.pop();
+		currentState = State::TECHNIQUE11;
+
+		return;
+	}
+	if (word == "}" && !statesStack.empty() && statesStack.top() == State::TECHNIQUE11)
+	{
+		words.pop();
+		currentState = State::INSERT_TECHNIQUE11;
+
+		return;
+	}
+
 
 	userName = word;
 	words.pop();
@@ -1276,10 +1291,34 @@ void ShaderBuilder::cbufferBodyOpenBracket()
 
 void ShaderBuilder::technique11state()
 {
+	std::string techName = words.front();
+	words.pop();
+	words.pop();
 
+	tech = new ::TECHNIQUE11();
+	tech->setName(techName);
+
+	Component* body = new ::CURLY_BRACKETS();
+	tech->add(body);
+
+	componentStack.push(body);
+	statesStack.push(State::TECHNIQUE11);
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void ShaderBuilder::insertTechnique11()
 {
+	componentStack.pop();
 
+	Component* parent = componentStack.top();
+	parent->add(tech);
+	tech = nullptr;
+
+	statesStack.pop();
+	currentState = State::UNKNOWN;
+
+	return;
 }

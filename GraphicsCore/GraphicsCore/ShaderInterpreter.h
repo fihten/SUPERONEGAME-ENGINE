@@ -413,6 +413,7 @@ class ShaderBuilder
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
 
+	Component* tech = nullptr;
 	void technique11state();
 	void insertTechnique11();
 
