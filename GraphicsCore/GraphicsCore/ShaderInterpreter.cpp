@@ -226,6 +226,14 @@ void ShaderBuilder::build()
 		case State::INSERT_TECHNIQUE11:
 			insertTechnique11();
 			break;
+
+		case State::PASS:
+			passState();
+			break;
+
+		case State::INSERT_PASS:
+			insertPass();
+			break;
 		}
 	}
 }
@@ -397,7 +405,20 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "pass")
+	{
+		words.pop();
+		currentState = State::PASS;
 
+		return;
+	}
+	if (word == "}" && !statesStack.empty() && statesStack.top() == State::PASS)
+	{
+		words.pop();
+		currentState = State::INSERT_PASS;
+
+		return;
+	}
 
 	userName = word;
 	words.pop();
@@ -1316,6 +1337,40 @@ void ShaderBuilder::insertTechnique11()
 	Component* parent = componentStack.top();
 	parent->add(tech);
 	tech = nullptr;
+
+	statesStack.pop();
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::passState()
+{
+	std::string passName = words.front();
+	words.pop();
+	words.pop();
+
+	pass = new ::PASS();
+	pass->setName(passName);
+
+	Component* body = new ::CURLY_BRACKETS();
+	pass->add(body);
+
+	componentStack.push(body);
+	statesStack.push(State::PASS);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::insertPass()
+{
+	componentStack.pop();
+
+	Component* parent = componentStack.top();
+	parent->add(pass);
+	pass = nullptr;
 
 	statesStack.pop();
 	currentState = State::UNKNOWN;

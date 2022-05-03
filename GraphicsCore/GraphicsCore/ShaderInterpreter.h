@@ -330,7 +330,9 @@ class ShaderBuilder
 		INSERT_CBUFFER,
 		CBUFFER_BODY_OPEN_BRACKET,
 		TECHNIQUE11,
-		INSERT_TECHNIQUE11
+		INSERT_TECHNIQUE11,
+		PASS,
+		INSERT_PASS
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -416,6 +418,10 @@ class ShaderBuilder
 	Component* tech = nullptr;
 	void technique11state();
 	void insertTechnique11();
+
+	Component* pass = nullptr;
+	void passState();
+	void insertPass();
 
 	struct DeclarationFunctionOrVariable
 	{
