@@ -234,6 +234,10 @@ void ShaderBuilder::build()
 		case State::INSERT_PASS:
 			insertPass();
 			break;
+
+		case State::SET_VERTEX_SHADER:
+			setVertexShaderState();
+			break;
 		}
 	}
 }
@@ -419,6 +423,14 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "SetVertexShader")
+	{
+		words.pop();
+		currentState = State::SET_VERTEX_SHADER;
+
+		return;
+	}
+
 
 	userName = word;
 	words.pop();
@@ -1374,6 +1386,17 @@ void ShaderBuilder::insertPass()
 
 	statesStack.pop();
 	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::setVertexShaderState()
+{
+	Component* pSetVertexShader = new ::SET_VERTEX_SHADER();
+	componentStack.push(pSetVertexShader);
+
+	statesStack.push(State::SET_VERTEX_SHADER);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
 	return;
 }

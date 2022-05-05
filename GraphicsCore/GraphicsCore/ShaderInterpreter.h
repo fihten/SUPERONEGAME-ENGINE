@@ -332,7 +332,8 @@ class ShaderBuilder
 		TECHNIQUE11,
 		INSERT_TECHNIQUE11,
 		PASS,
-		INSERT_PASS
+		INSERT_PASS,
+		SET_VERTEX_SHADER
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -422,6 +423,8 @@ class ShaderBuilder
 	Component* pass = nullptr;
 	void passState();
 	void insertPass();
+
+	void setVertexShaderState();
 
 	struct DeclarationFunctionOrVariable
 	{
