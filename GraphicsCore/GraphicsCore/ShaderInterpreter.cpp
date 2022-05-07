@@ -238,6 +238,10 @@ void ShaderBuilder::build()
 		case State::SET_VERTEX_SHADER:
 			setVertexShaderState();
 			break;
+
+		case State::COMPILE_SHADER:
+			compileShader();
+			break;
 		}
 	}
 }
@@ -427,6 +431,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::SET_VERTEX_SHADER;
+
+		return;
+	}
+	if (word == "CompileShader")
+	{
+		words.pop();
+		currentState = State::COMPILE_SHADER;
 
 		return;
 	}
@@ -1396,6 +1407,17 @@ void ShaderBuilder::setVertexShaderState()
 	componentStack.push(pSetVertexShader);
 
 	statesStack.push(State::SET_VERTEX_SHADER);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	return;
+}
+
+void ShaderBuilder::compileShader()
+{
+	Component* pCompileShader = new ::COMPILE_SHADER();
+	componentStack.push(pCompileShader);
+
+	statesStack.push(State::COMPILE_SHADER);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
 	return;
