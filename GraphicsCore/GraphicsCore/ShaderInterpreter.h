@@ -334,6 +334,7 @@ class ShaderBuilder
 		PASS,
 		INSERT_PASS,
 		SET_VERTEX_SHADER,
+		SET_PIXEL_SHADER,
 		COMPILE_SHADER
 	};
 	State currentState = State::UNKNOWN;
@@ -426,6 +427,7 @@ class ShaderBuilder
 	void insertPass();
 
 	void setVertexShaderState();
+	void setPixelShaderState();
 	void compileShader();
 
 	struct DeclarationFunctionOrVariable

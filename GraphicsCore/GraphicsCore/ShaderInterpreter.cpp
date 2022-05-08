@@ -239,6 +239,10 @@ void ShaderBuilder::build()
 			setVertexShaderState();
 			break;
 
+		case State::SET_PIXEL_SHADER:
+			setPixelShaderState();
+			break;
+
 		case State::COMPILE_SHADER:
 			compileShader();
 			break;
@@ -431,6 +435,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::SET_VERTEX_SHADER;
+
+		return;
+	}
+	if (word == "SetPixelShader")
+	{
+		words.pop();
+		currentState = State::SET_PIXEL_SHADER;
 
 		return;
 	}
@@ -1409,6 +1420,21 @@ void ShaderBuilder::setVertexShaderState()
 	statesStack.push(State::SET_VERTEX_SHADER);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
+	words.pop();
+
+	return;
+}
+
+void ShaderBuilder::setPixelShaderState()
+{
+	Component* pSetPixelShader = new ::SET_PIXEL_SHADER();
+	componentStack.push(pSetPixelShader);
+
+	statesStack.push(State::SET_PIXEL_SHADER);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	words.pop();
+
 	return;
 }
 
@@ -1420,5 +1446,8 @@ void ShaderBuilder::compileShader()
 	statesStack.push(State::COMPILE_SHADER);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
+	words.pop();
+
 	return;
 }
+
