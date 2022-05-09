@@ -246,6 +246,10 @@ void ShaderBuilder::build()
 		case State::COMPILE_SHADER:
 			compileShader();
 			break;
+
+		case State::VS_5_0:
+			vs_5_0_state();
+			break;
 		}
 	}
 }
@@ -452,7 +456,13 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "vs_5_0")
+	{
+		words.pop();
+		currentState = State::VS_5_0;
 
+		return;
+	}
 
 	userName = word;
 	words.pop();
@@ -1451,3 +1461,15 @@ void ShaderBuilder::compileShader()
 	return;
 }
 
+void ShaderBuilder::vs_5_0_state()
+{
+	Component* pVS_5_0 = new ::VERTEX_SHADER_VERSION();
+	pVS_5_0->setName("vs_5_0");
+
+	Component* parent = componentStack.top();
+	parent->add(pVS_5_0);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
