@@ -336,7 +336,8 @@ class ShaderBuilder
 		SET_VERTEX_SHADER,
 		SET_PIXEL_SHADER,
 		COMPILE_SHADER,
-		VS_5_0
+		VS_5_0,
+		PS_5_0
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -432,6 +433,7 @@ class ShaderBuilder
 	void compileShader();
 
 	void vs_5_0_state();
+	void ps_5_0_state();
 
 	struct DeclarationFunctionOrVariable
 	{

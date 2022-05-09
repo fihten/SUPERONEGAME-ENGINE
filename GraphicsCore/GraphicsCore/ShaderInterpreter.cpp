@@ -250,6 +250,10 @@ void ShaderBuilder::build()
 		case State::VS_5_0:
 			vs_5_0_state();
 			break;
+
+		case State::PS_5_0:
+			ps_5_0_state();
+			break;
 		}
 	}
 }
@@ -460,6 +464,13 @@ void ShaderBuilder::unknown()
 	{
 		words.pop();
 		currentState = State::VS_5_0;
+
+		return;
+	}
+	if (word == "ps_5_0")
+	{
+		words.pop();
+		currentState = State::PS_5_0;
 
 		return;
 	}
@@ -1468,6 +1479,19 @@ void ShaderBuilder::vs_5_0_state()
 
 	Component* parent = componentStack.top();
 	parent->add(pVS_5_0);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::ps_5_0_state()
+{
+	Component* pPS_5_0 = new ::PIXEL_SHADER_VERSION();
+	pPS_5_0->setName("ps_5_0");
+
+	Component* parent = componentStack.top();
+	parent->add(pPS_5_0);
 
 	currentState = State::UNKNOWN;
 
