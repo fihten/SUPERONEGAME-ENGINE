@@ -337,7 +337,9 @@ class ShaderBuilder
 		SET_PIXEL_SHADER,
 		COMPILE_SHADER,
 		VS_5_0,
-		PS_5_0
+		PS_5_0,
+		RETURN,
+		INSERT_RETURN
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -434,6 +436,9 @@ class ShaderBuilder
 
 	void vs_5_0_state();
 	void ps_5_0_state();
+
+	void returnState();
+	void insertReturn();
 
 	struct DeclarationFunctionOrVariable
 	{

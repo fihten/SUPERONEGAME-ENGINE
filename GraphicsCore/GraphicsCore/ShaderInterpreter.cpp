@@ -254,6 +254,14 @@ void ShaderBuilder::build()
 		case State::PS_5_0:
 			ps_5_0_state();
 			break;
+
+		case State::RETURN:
+			returnState();
+			break;
+
+		case State::INSERT_RETURN:
+			insertReturn();
+			break;
 		}
 	}
 }
@@ -474,6 +482,20 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == "return")
+	{
+		words.pop();
+		currentState = State::RETURN;
+
+		return;
+	}
+	if (word == ";" && !statesStack.empty() && statesStack.top() == State::RETURN)
+	{
+		words.pop();
+		currentState = State::INSERT_RETURN;
+
+		return;
+	}
 
 	userName = word;
 	words.pop();
@@ -574,7 +596,7 @@ void ShaderBuilder::finishExpression()
 		Component* composite = componentStack.top();
 		composite->add(componentToAdd);
 
-		if (word != ")")
+		if (word != ")" && word != ";")
 			words.pop();
 	}
 	if ((word == ")" || word == ";" || word == ",") && lastState == State::VARIABLE_DECLARATION)
@@ -1492,6 +1514,43 @@ void ShaderBuilder::ps_5_0_state()
 
 	Component* parent = componentStack.top();
 	parent->add(pPS_5_0);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::returnState()
+{
+	std::string word = words.front();
+	
+	Component* pReturn = new ::RETURN();
+	componentStack.push(pReturn);
+	
+	statesStack.push(State::RETURN);
+
+	if (word == ";")
+	{
+		words.pop();
+		currentState = State::INSERT_RETURN;
+
+		return;
+	}
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderBuilder::insertReturn()
+{
+	statesStack.pop();
+
+	Component* pReturn = componentStack.top();
+	componentStack.pop();
+
+	Component* parent = componentStack.top();
+	parent->add(pReturn);
 
 	currentState = State::UNKNOWN;
 
