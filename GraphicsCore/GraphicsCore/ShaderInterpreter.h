@@ -1,248 +1,11 @@
 #pragma once
 #include <string>
-#include <list>
 #include <queue>
 #include <stack>
 
-class Component
-{
-	std::string name = "";
-public:
-	virtual ~Component() {};
-public:
-	virtual void add(Component* component) {};
-	void setName(const std::string& name) { this->name = name; };
-};
+#include "ShaderComponent.h"
 
-class Composite : public Component
-{
-	std::list<Component*> childs;
-public:
-	~Composite()
-	{
-		for (auto* child : childs)
-			delete child;
-	};
-public:
-	void add(Component* component) { childs.push_back(component); };
-};
-
-class Leaf : public Component
-{
-
-};
-
-class CBUFFER : public Composite
-{
-
-};
-
-class TYPE : public Composite
-{
-
-};
-
-class FLOAT4X4 : public TYPE
-{
-
-};
-
-class VOID : public TYPE
-{
-
-};
-
-class FLOAT : public TYPE
-{
-
-};
-
-class FLOAT2 : public TYPE
-{
-
-};
-
-class FLOAT3 : public TYPE
-{
-
-};
-
-class FLOAT4 : public TYPE
-{
-
-};
-
-class STRUCT : public TYPE
-{
-
-};
-
-class SEMANTIC : public Leaf
-{
-
-};
-
-class SV_POSITION : public SEMANTIC
-{
-
-};
-
-class SV_TARGET : public SEMANTIC
-{
-
-};
-
-class FUNCTION_DECL : public Composite
-{
-
-};
-
-class FUNCTION_CALL : public Composite
-{
-
-};
-
-class MUL : public FUNCTION_CALL
-{
-
-};
-
-class FLOAT4_CONSTRUCTOR : public FUNCTION_CALL
-{
-
-};
-
-class FUNCTION : public Composite
-{
-
-};
-
-class SET_VERTEX_SHADER : public Composite
-{
-
-};
-
-class SET_PIXEL_SHADER : public Composite
-{
-
-};
-
-class COMPILE_SHADER : public Composite
-{
-
-};
-
-class VERTEX_SHADER_VERSION : public Leaf
-{
-
-};
-
-class PIXEL_SHADER_VERSION : public Leaf
-{
-
-};
-
-class MODIFIER : public Leaf
-{
-
-};
-
-class IN : public MODIFIER
-{
-
-};
-
-class OUT : public MODIFIER
-{
-
-};
-
-class INOUT : public MODIFIER
-{
-
-};
-
-class UNIFORM : public MODIFIER
-{
-
-};
-
-class VARIABLE : public Leaf
-{
-
-};
-
-class VARIABLE_DECL : public Composite
-{
-
-};
-
-class BINARY_MINUS : public Composite
-{
-
-};
-
-class BINARY_PLUS : public Composite
-{
-
-};
-
-class BINARY_DIVIDE : public Composite
-{
-
-};
-
-class BINARY_MULTIPLY : public Composite
-{
-
-};
-
-class UNARY_MINUS : public Composite
-{
-
-};
-
-class UNARY_PLUS : public Composite
-{
-
-};
-
-class ASSIGNMENT : public Composite
-{
-
-};
-
-class TECHNIQUE11 : public Composite
-{
-
-};
-
-class PASS : public Composite
-{
-
-};
-
-class ROUND_BRACKETS : public Composite
-{
-
-};
-
-class SQUARE_BRACKETS : public Composite
-{
-
-};
-
-class CURLY_BRACKETS : public Composite
-{
-
-};
-
-class RETURN : public Composite
-{
-
-};
-
-class ShaderBuilder
+class ShaderInterpreter
 {
 	const char skipSymbols[5] =
 	{
@@ -344,7 +107,7 @@ class ShaderBuilder
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
 
-	std::stack<Component*> componentStack;
+	std::stack<ShaderComponent*> componentStack;
 
 	void unknown();
 
@@ -403,7 +166,7 @@ class ShaderBuilder
 	void outState();
 	void inoutState();
 	void uniformState();
-	Component* modifier = nullptr;
+	ShaderComponent* modifier = nullptr;
 
 	void mulState();
 	void float4constructor();
@@ -411,7 +174,7 @@ class ShaderBuilder
 	struct CbufferDefinition
 	{
 		std::string name = "";
-		Component* body = nullptr;
+		ShaderComponent* body = nullptr;
 
 		void clear() { name = ""; body = nullptr; }
 	};
@@ -422,11 +185,11 @@ class ShaderBuilder
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
 
-	Component* tech = nullptr;
+	ShaderComponent* tech = nullptr;
 	void technique11state();
 	void insertTechnique11();
 
-	Component* pass = nullptr;
+	ShaderComponent* pass = nullptr;
 	void passState();
 	void insertPass();
 
@@ -442,15 +205,15 @@ class ShaderBuilder
 
 	struct DeclarationFunctionOrVariable
 	{
-		Component* modifier = nullptr;
-		Component* type = nullptr;
+		ShaderComponent* modifier = nullptr;
+		ShaderComponent* type = nullptr;
 		std::string name = "";
-		Component* signature = nullptr;
-		Component* semantic = nullptr;
-		Component* body = nullptr;
-		Component* value = nullptr;
+		ShaderComponent* signature = nullptr;
+		ShaderComponent* semantic = nullptr;
+		ShaderComponent* body = nullptr;
+		ShaderComponent* value = nullptr;
 	};
-	std::stack<ShaderBuilder::DeclarationFunctionOrVariable> decls;
+	std::stack<ShaderInterpreter::DeclarationFunctionOrVariable> decls;
 
 private:
 	bool isOperationState(State state) const;

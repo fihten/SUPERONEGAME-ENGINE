@@ -1,11 +1,11 @@
 #include "ShaderInterpreter.h"
 #include "StringUtils.h"
 
-void ShaderBuilder::build()
+void ShaderInterpreter::build()
 {
 	words = std::queue<std::string>();
 	statesStack = std::stack<State>();
-	componentStack = std::stack<Component*>();
+	componentStack = std::stack<ShaderComponent*>();
 	currentState = State::UNKNOWN;
 	currentIndex = 0;
 
@@ -266,7 +266,7 @@ void ShaderBuilder::build()
 	}
 }
 
-void ShaderBuilder::unknown()
+void ShaderInterpreter::unknown()
 {
 	std::string word = words.front();
 
@@ -519,13 +519,13 @@ void ShaderBuilder::unknown()
 	}
 }
 
-void ShaderBuilder::bracketsUnaryOperatorOpen()
+void ShaderInterpreter::bracketsUnaryOperatorOpen()
 {
 	statesStack.push(State::BRACKETS_UNARY_OPERATOR_OPEN);
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::bracketsUnaryOperatorClose()
+void ShaderInterpreter::bracketsUnaryOperatorClose()
 {
 	std::string word = words.front();
 
@@ -542,7 +542,7 @@ void ShaderBuilder::bracketsUnaryOperatorClose()
 		currentState = State::BINARY_DIVIDE;
 }
 
-void ShaderBuilder::finishExpression()
+void ShaderInterpreter::finishExpression()
 {
 	std::string word = words.front();
 	bool op = false;
@@ -551,10 +551,10 @@ void ShaderBuilder::finishExpression()
 
 	if (op)
 	{
-		Component* operand = componentStack.top();
+		ShaderComponent* operand = componentStack.top();
 		componentStack.pop();
 
-		Component* operation = componentStack.top();
+		ShaderComponent* operation = componentStack.top();
 		operation->add(operand);
 	}
 
@@ -597,10 +597,10 @@ void ShaderBuilder::finishExpression()
 	if ((word != ")" || lastState != State::BRACKETS_UNARY_OPERATOR_OPEN) &&
 		((word != ")" && word != ";" && word != ",") || lastState != State::VARIABLE_DECLARATION))
 	{
-		Component* componentToAdd = componentStack.top();
+		ShaderComponent* componentToAdd = componentStack.top();
 		componentStack.pop();
 
-		Component* composite = componentStack.top();
+		ShaderComponent* composite = componentStack.top();
 		composite->add(componentToAdd);
 
 		if (word != ")" && word != ";")
@@ -614,7 +614,7 @@ void ShaderBuilder::finishExpression()
 	
 }
 
-bool ShaderBuilder::isOperationState(State state) const
+bool ShaderInterpreter::isOperationState(State state) const
 {
 	if (state == State::BINARY_DIVIDE ||
 		state == State::BINARY_MINUS ||
@@ -629,7 +629,7 @@ bool ShaderBuilder::isOperationState(State state) const
 	return false;
 }
 
-void ShaderBuilder::binaryMinus()
+void ShaderInterpreter::binaryMinus()
 {
 	State lastState = State::UNKNOWN;
 	if(!statesStack.empty())
@@ -644,14 +644,14 @@ void ShaderBuilder::binaryMinus()
 		currentState = State::CREATING_BINARY_MINUS;
 }
 
-void ShaderBuilder::creatingBinaryMinus()
+void ShaderInterpreter::creatingBinaryMinus()
 {
 	words.pop();
 
-	Component* leftOperand = componentStack.top();
+	ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	Component* binaryMinusOp = new ::BINARY_MINUS();
+	ShaderComponent* binaryMinusOp = new ::BINARY_MINUS();
 	binaryMinusOp->add(leftOperand);
 
 	componentStack.push(binaryMinusOp);
@@ -660,7 +660,7 @@ void ShaderBuilder::creatingBinaryMinus()
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::binaryPlus()
+void ShaderInterpreter::binaryPlus()
 {
 	State lastState = State::UNKNOWN;
 	if (!statesStack.empty())
@@ -675,14 +675,14 @@ void ShaderBuilder::binaryPlus()
 		currentState = State::CREATING_BINARY_PLUS;
 }
 
-void ShaderBuilder::creatingBinaryPlus()
+void ShaderInterpreter::creatingBinaryPlus()
 {
 	words.pop();
 
-	Component* leftOperand = componentStack.top();
+	ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	Component* binaryPlusOp = new ::BINARY_PLUS();
+	ShaderComponent* binaryPlusOp = new ::BINARY_PLUS();
 	binaryPlusOp->add(leftOperand);
 
 	componentStack.push(binaryPlusOp);
@@ -691,7 +691,7 @@ void ShaderBuilder::creatingBinaryPlus()
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::binaryDivide()
+void ShaderInterpreter::binaryDivide()
 {
 	State lastState = State::UNKNOWN;
 	if (!statesStack.empty())
@@ -704,14 +704,14 @@ void ShaderBuilder::binaryDivide()
 		currentState = CREATING_BINARY_DIVIDE;
 }
 
-void ShaderBuilder::creatingBinaryDivide()
+void ShaderInterpreter::creatingBinaryDivide()
 {
 	words.pop();
 
-	Component* leftOperand = componentStack.top();
+	ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	Component* binaryDivideOp = new ::BINARY_DIVIDE();
+	ShaderComponent* binaryDivideOp = new ::BINARY_DIVIDE();
 	binaryDivideOp->add(leftOperand);
 
 	componentStack.push(binaryDivideOp);
@@ -720,7 +720,7 @@ void ShaderBuilder::creatingBinaryDivide()
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::binaryMultiply()
+void ShaderInterpreter::binaryMultiply()
 {
 	State lastState = State::UNKNOWN;
 	if (!statesStack.empty())
@@ -734,14 +734,14 @@ void ShaderBuilder::binaryMultiply()
 		currentState = State::CREATING_BINARY_MULTIPLY;
 }
 
-void ShaderBuilder::creatingBinaryMultiply()
+void ShaderInterpreter::creatingBinaryMultiply()
 {
 	words.pop();
 
-	Component* leftOperand = componentStack.top();
+	ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	Component* binaryMultiplyOp = new ::BINARY_MULTIPLY();
+	ShaderComponent* binaryMultiplyOp = new ::BINARY_MULTIPLY();
 	binaryMultiplyOp->add(leftOperand);
 
 	componentStack.push(binaryMultiplyOp);
@@ -750,9 +750,9 @@ void ShaderBuilder::creatingBinaryMultiply()
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::variable()
+void ShaderInterpreter::variable()
 {
-	Component* var = new ::VARIABLE();
+	ShaderComponent* var = new ::VARIABLE();
 	var->setName(userName);
 	userName = "";
 
@@ -773,27 +773,27 @@ void ShaderBuilder::variable()
 		currentState = State::ASSIGNMENT;
 }
 
-void ShaderBuilder::unaryMinus()
+void ShaderInterpreter::unaryMinus()
 {
 	statesStack.push(State::UNARY_MINUS);
 	currentState = State::UNKNOWN;
 
-	Component* unaryMinusOp = new ::UNARY_MINUS();
+	ShaderComponent* unaryMinusOp = new ::UNARY_MINUS();
 	componentStack.push(unaryMinusOp);
 }
 
-void ShaderBuilder::unaryPlus()
+void ShaderInterpreter::unaryPlus()
 {
 	statesStack.push(State::UNARY_PLUS);
 	currentState = State::UNKNOWN;
 
-	Component* unaryPlusOp = new ::UNARY_PLUS();
+	ShaderComponent* unaryPlusOp = new ::UNARY_PLUS();
 	componentStack.push(unaryPlusOp);
 }
 
-void ShaderBuilder::functionCall()
+void ShaderInterpreter::functionCall()
 {
-	Component* functionCallOp = new ::FUNCTION_CALL();
+	ShaderComponent* functionCallOp = new ::FUNCTION_CALL();
 	functionCallOp->setName(userName);
 	userName = "";
 
@@ -803,24 +803,24 @@ void ShaderBuilder::functionCall()
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 }
 
-void ShaderBuilder::argumentsListOpenBracket()
+void ShaderInterpreter::argumentsListOpenBracket()
 {
-	Component* arguments = new ::ROUND_BRACKETS();
+	ShaderComponent* arguments = new ::ROUND_BRACKETS();
 	componentStack.push(arguments);
 
 	statesStack.push(State::ARGUMENTS_LIST_OPEN_BRACKET);
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::argumentsListCloseBracket()
+void ShaderInterpreter::argumentsListCloseBracket()
 {
 	statesStack.pop();
 	statesStack.pop();
 
-	Component* arguments = componentStack.top();
+	ShaderComponent* arguments = componentStack.top();
 	componentStack.pop();
 
-	Component* func = componentStack.top();
+	ShaderComponent* func = componentStack.top();
 	func->add(arguments);
 
 	std::string word = words.front();
@@ -836,14 +836,14 @@ void ShaderBuilder::argumentsListCloseBracket()
 		currentState = State::BINARY_DIVIDE;
 }
 
-void ShaderBuilder::assignment()
+void ShaderInterpreter::assignment()
 {
 	words.pop();
 
-	Component* leftValue = componentStack.top();
+	ShaderComponent* leftValue = componentStack.top();
 	componentStack.pop();
 
-	Component* assignmentOp = new ::ASSIGNMENT();
+	ShaderComponent* assignmentOp = new ::ASSIGNMENT();
 	assignmentOp->add(leftValue);
 	componentStack.push(assignmentOp);
 
@@ -851,14 +851,14 @@ void ShaderBuilder::assignment()
 	currentState = State::UNKNOWN;
 }
 
-void ShaderBuilder::voidState()
+void ShaderInterpreter::voidState()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::VOID();
 		decl.name = word;
@@ -870,14 +870,14 @@ void ShaderBuilder::voidState()
 	}
 }
 
-void ShaderBuilder::floatState()
+void ShaderInterpreter::floatState()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT();
 		decl.name = word;
@@ -889,14 +889,14 @@ void ShaderBuilder::floatState()
 	}
 }
 
-void ShaderBuilder::float2State()
+void ShaderInterpreter::float2State()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT2();
 		decl.name = word;
@@ -908,14 +908,14 @@ void ShaderBuilder::float2State()
 	}
 }
 
-void ShaderBuilder::float3State()
+void ShaderInterpreter::float3State()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT3();
 		decl.name = word;
@@ -927,14 +927,14 @@ void ShaderBuilder::float3State()
 	}
 }
 
-void ShaderBuilder::float4State()
+void ShaderInterpreter::float4State()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT4();
 		decl.name = word;
@@ -954,14 +954,14 @@ void ShaderBuilder::float4State()
 	}
 }
 
-void ShaderBuilder::float4x4State()
+void ShaderInterpreter::float4x4State()
 {
 	std::string word = words.front();
 	if (word != "(")
 	{
 		words.pop();
 
-		ShaderBuilder::DeclarationFunctionOrVariable decl;
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ::FLOAT4X4();
 		decl.name = word;
@@ -974,7 +974,7 @@ void ShaderBuilder::float4x4State()
 	}
 }
 
-void ShaderBuilder::customName()
+void ShaderInterpreter::customName()
 {
 	std::string word = words.front();
 	if (word == "(")
@@ -987,7 +987,7 @@ void ShaderBuilder::customName()
 	return;
 }
 
-void ShaderBuilder::functionDeclaration()
+void ShaderInterpreter::functionDeclaration()
 {
 	std::string word = words.front();
 	if (word == "(")
@@ -1001,9 +1001,9 @@ void ShaderBuilder::functionDeclaration()
 	}
 }
 
-void ShaderBuilder::signatureOpenBracket()
+void ShaderInterpreter::signatureOpenBracket()
 {
-	Component* signature = new ::ROUND_BRACKETS();
+	ShaderComponent* signature = new ::ROUND_BRACKETS();
 	decls.top().signature = signature;
 	componentStack.push(signature);
 
@@ -1013,7 +1013,7 @@ void ShaderBuilder::signatureOpenBracket()
 	return;
 }
 
-void ShaderBuilder::signatureCloseBracket()
+void ShaderInterpreter::signatureCloseBracket()
 {
 	std::string word = words.front();
 	componentStack.pop();
@@ -1038,7 +1038,7 @@ void ShaderBuilder::signatureCloseBracket()
 	}
 }
 
-void ShaderBuilder::semantic()
+void ShaderInterpreter::semantic()
 {
 	std::string word = words.front();
 	if (word == "SV_POSITION")
@@ -1062,11 +1062,11 @@ void ShaderBuilder::semantic()
 	}
 }
 
-void ShaderBuilder::svPosition()
+void ShaderInterpreter::svPosition()
 {
 	std::string word = words.front();
 
-	Component* semanticElement = new ::SV_POSITION();
+	ShaderComponent* semanticElement = new ::SV_POSITION();
 	decls.top().semantic = semanticElement;
 
 	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
@@ -1090,11 +1090,11 @@ void ShaderBuilder::svPosition()
 	}
 }
 
-void ShaderBuilder::svTarget()
+void ShaderInterpreter::svTarget()
 {
 	std::string word = words.front();
 
-	Component* semanticElement = new ::SV_TARGET();
+	ShaderComponent* semanticElement = new ::SV_TARGET();
 	decls.top().semantic = semanticElement;
 
 	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
@@ -1118,11 +1118,11 @@ void ShaderBuilder::svTarget()
 	}
 }
 
-void ShaderBuilder::customSemantic()
+void ShaderInterpreter::customSemantic()
 {
 	std::string word = words.front();
 
-	Component* semanticElement = new ::SEMANTIC();
+	ShaderComponent* semanticElement = new ::SEMANTIC();
 	semanticElement->setName(userName);
 	userName = "";
 	decls.top().semantic = semanticElement;
@@ -1148,9 +1148,9 @@ void ShaderBuilder::customSemantic()
 	}
 }
 
-void ShaderBuilder::functionBodyOpenBracket()
+void ShaderInterpreter::functionBodyOpenBracket()
 {
-	Component* body = new ::CURLY_BRACKETS();
+	ShaderComponent* body = new ::CURLY_BRACKETS();
 	decls.top().body = body;
 	componentStack.push(body);
 
@@ -1158,7 +1158,7 @@ void ShaderBuilder::functionBodyOpenBracket()
 	statesStack.push(State::FUNCTION_BODY_OPEN_BRACKET);
 }
 
-void ShaderBuilder::functionBodyCloseBracket()
+void ShaderInterpreter::functionBodyCloseBracket()
 {
 	componentStack.pop();
 
@@ -1183,7 +1183,7 @@ void ShaderBuilder::functionBodyCloseBracket()
 	return;
 }
 
-void ShaderBuilder::insertFunctionDeclaration()
+void ShaderInterpreter::insertFunctionDeclaration()
 {
 	statesStack.pop();
 
@@ -1205,7 +1205,7 @@ void ShaderBuilder::insertFunctionDeclaration()
 	return;
 }
 
-void ShaderBuilder::variableDeclaration()
+void ShaderInterpreter::variableDeclaration()
 {
 	if (modifier)
 	{
@@ -1235,11 +1235,11 @@ void ShaderBuilder::variableDeclaration()
 	}
 }
 
-void ShaderBuilder::insertVariableDeclaration()
+void ShaderInterpreter::insertVariableDeclaration()
 {
 	statesStack.pop();
 
-	Component* pVariableDeclaration = new ::VARIABLE_DECL();
+	ShaderComponent* pVariableDeclaration = new ::VARIABLE_DECL();
 	
 	pVariableDeclaration->add(decls.top().type);
 	pVariableDeclaration->setName(decls.top().name);
@@ -1257,7 +1257,7 @@ void ShaderBuilder::insertVariableDeclaration()
 	return;
 }
 
-void ShaderBuilder::inState()
+void ShaderInterpreter::inState()
 {
 	modifier = new ::IN();
 	currentState = State::UNKNOWN;
@@ -1265,7 +1265,7 @@ void ShaderBuilder::inState()
 	return;
 }
 
-void ShaderBuilder::outState()
+void ShaderInterpreter::outState()
 {
 	modifier = new ::OUT();
 	currentState = State::UNKNOWN;
@@ -1273,7 +1273,7 @@ void ShaderBuilder::outState()
 	return;
 }
 
-void ShaderBuilder::inoutState()
+void ShaderInterpreter::inoutState()
 {
 	modifier = new ::INOUT();
 	currentState = State::UNKNOWN;
@@ -1281,7 +1281,7 @@ void ShaderBuilder::inoutState()
 	return;
 }
 
-void ShaderBuilder::uniformState()
+void ShaderInterpreter::uniformState()
 {
 	modifier = new ::UNIFORM();
 	currentState = State::UNKNOWN;
@@ -1289,11 +1289,11 @@ void ShaderBuilder::uniformState()
 	return;
 }
 
-void ShaderBuilder::mulState()
+void ShaderInterpreter::mulState()
 {
 	statesStack.push(State::MUL);
 
-	Component* pMul = new ::MUL();
+	ShaderComponent* pMul = new ::MUL();
 	componentStack.push(pMul);
 
 	std::string word = words.front();
@@ -1306,9 +1306,9 @@ void ShaderBuilder::mulState()
 	}
 }
 
-void ShaderBuilder::float4constructor()
+void ShaderInterpreter::float4constructor()
 {
-	Component* pFloat4Constructor = new ::FLOAT4_CONSTRUCTOR();
+	ShaderComponent* pFloat4Constructor = new ::FLOAT4_CONSTRUCTOR();
 	componentStack.push(pFloat4Constructor);
 
 	statesStack.push(State::FLOAT4_CONSTRUCTOR);
@@ -1317,7 +1317,7 @@ void ShaderBuilder::float4constructor()
 	return;
 }
 
-void ShaderBuilder::cbufferState()
+void ShaderInterpreter::cbufferState()
 {
 	statesStack.push(State::CBUFFER);
 	std::string word = words.front();
@@ -1334,7 +1334,7 @@ void ShaderBuilder::cbufferState()
 	}
 }
 
-void ShaderBuilder::cbufferName()
+void ShaderInterpreter::cbufferName()
 {
 	std::string cbufferName = words.front();
 	words.pop();
@@ -1358,14 +1358,14 @@ void ShaderBuilder::cbufferName()
 	}
 }
 
-void ShaderBuilder::insertCbuffer()
+void ShaderInterpreter::insertCbuffer()
 {
 	if (statesStack.top() == State::CBUFFER_BODY_OPEN_BRACKET)
 		statesStack.pop();
 	if (statesStack.top() == State::CBUFFER)
 		statesStack.pop();
 
-	Component* pCbuffer = new ::CBUFFER();
+	ShaderComponent* pCbuffer = new ::CBUFFER();
 	if (cbufferDecl.name != "")
 		pCbuffer->setName(cbufferDecl.name);
 	if (cbufferDecl.body)
@@ -1374,7 +1374,7 @@ void ShaderBuilder::insertCbuffer()
 
 	componentStack.pop();
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(pCbuffer);
 
 	currentState = State::UNKNOWN;
@@ -1382,9 +1382,9 @@ void ShaderBuilder::insertCbuffer()
 	return;
 }
 
-void ShaderBuilder::cbufferBodyOpenBracket()
+void ShaderInterpreter::cbufferBodyOpenBracket()
 {
-	Component* body = new ::CURLY_BRACKETS();
+	ShaderComponent* body = new ::CURLY_BRACKETS();
 	cbufferDecl.body = body;
 	componentStack.push(body);
 
@@ -1394,7 +1394,7 @@ void ShaderBuilder::cbufferBodyOpenBracket()
 	return;
 }
 
-void ShaderBuilder::technique11state()
+void ShaderInterpreter::technique11state()
 {
 	std::string techName = words.front();
 	words.pop();
@@ -1403,7 +1403,7 @@ void ShaderBuilder::technique11state()
 	tech = new ::TECHNIQUE11();
 	tech->setName(techName);
 
-	Component* body = new ::CURLY_BRACKETS();
+	ShaderComponent* body = new ::CURLY_BRACKETS();
 	tech->add(body);
 
 	componentStack.push(body);
@@ -1414,11 +1414,11 @@ void ShaderBuilder::technique11state()
 	return;
 }
 
-void ShaderBuilder::insertTechnique11()
+void ShaderInterpreter::insertTechnique11()
 {
 	componentStack.pop();
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(tech);
 	tech = nullptr;
 
@@ -1428,7 +1428,7 @@ void ShaderBuilder::insertTechnique11()
 	return;
 }
 
-void ShaderBuilder::passState()
+void ShaderInterpreter::passState()
 {
 	std::string passName = words.front();
 	words.pop();
@@ -1437,7 +1437,7 @@ void ShaderBuilder::passState()
 	pass = new ::PASS();
 	pass->setName(passName);
 
-	Component* body = new ::CURLY_BRACKETS();
+	ShaderComponent* body = new ::CURLY_BRACKETS();
 	pass->add(body);
 
 	componentStack.push(body);
@@ -1448,11 +1448,11 @@ void ShaderBuilder::passState()
 	return;
 }
 
-void ShaderBuilder::insertPass()
+void ShaderInterpreter::insertPass()
 {
 	componentStack.pop();
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(pass);
 	pass = nullptr;
 
@@ -1462,9 +1462,9 @@ void ShaderBuilder::insertPass()
 	return;
 }
 
-void ShaderBuilder::setVertexShaderState()
+void ShaderInterpreter::setVertexShaderState()
 {
-	Component* pSetVertexShader = new ::SET_VERTEX_SHADER();
+	ShaderComponent* pSetVertexShader = new ::SET_VERTEX_SHADER();
 	componentStack.push(pSetVertexShader);
 
 	statesStack.push(State::SET_VERTEX_SHADER);
@@ -1475,9 +1475,9 @@ void ShaderBuilder::setVertexShaderState()
 	return;
 }
 
-void ShaderBuilder::setPixelShaderState()
+void ShaderInterpreter::setPixelShaderState()
 {
-	Component* pSetPixelShader = new ::SET_PIXEL_SHADER();
+	ShaderComponent* pSetPixelShader = new ::SET_PIXEL_SHADER();
 	componentStack.push(pSetPixelShader);
 
 	statesStack.push(State::SET_PIXEL_SHADER);
@@ -1488,9 +1488,9 @@ void ShaderBuilder::setPixelShaderState()
 	return;
 }
 
-void ShaderBuilder::compileShader()
+void ShaderInterpreter::compileShader()
 {
-	Component* pCompileShader = new ::COMPILE_SHADER();
+	ShaderComponent* pCompileShader = new ::COMPILE_SHADER();
 	componentStack.push(pCompileShader);
 
 	statesStack.push(State::COMPILE_SHADER);
@@ -1501,12 +1501,12 @@ void ShaderBuilder::compileShader()
 	return;
 }
 
-void ShaderBuilder::vs_5_0_state()
+void ShaderInterpreter::vs_5_0_state()
 {
-	Component* pVS_5_0 = new ::VERTEX_SHADER_VERSION();
+	ShaderComponent* pVS_5_0 = new ::VERTEX_SHADER_VERSION();
 	pVS_5_0->setName("vs_5_0");
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(pVS_5_0);
 
 	currentState = State::UNKNOWN;
@@ -1514,12 +1514,12 @@ void ShaderBuilder::vs_5_0_state()
 	return;
 }
 
-void ShaderBuilder::ps_5_0_state()
+void ShaderInterpreter::ps_5_0_state()
 {
-	Component* pPS_5_0 = new ::PIXEL_SHADER_VERSION();
+	ShaderComponent* pPS_5_0 = new ::PIXEL_SHADER_VERSION();
 	pPS_5_0->setName("ps_5_0");
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(pPS_5_0);
 
 	currentState = State::UNKNOWN;
@@ -1527,11 +1527,11 @@ void ShaderBuilder::ps_5_0_state()
 	return;
 }
 
-void ShaderBuilder::returnState()
+void ShaderInterpreter::returnState()
 {
 	std::string word = words.front();
 	
-	Component* pReturn = new ::RETURN();
+	ShaderComponent* pReturn = new ::RETURN();
 	componentStack.push(pReturn);
 	
 	statesStack.push(State::RETURN);
@@ -1549,14 +1549,14 @@ void ShaderBuilder::returnState()
 	return;
 }
 
-void ShaderBuilder::insertReturn()
+void ShaderInterpreter::insertReturn()
 {
 	statesStack.pop();
 
-	Component* pReturn = componentStack.top();
+	ShaderComponent* pReturn = componentStack.top();
 	componentStack.pop();
 
-	Component* parent = componentStack.top();
+	ShaderComponent* parent = componentStack.top();
 	parent->add(pReturn);
 
 	currentState = State::UNKNOWN;
