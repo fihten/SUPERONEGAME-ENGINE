@@ -496,6 +496,13 @@ void ShaderBuilder::unknown()
 
 		return;
 	}
+	if (word == ";" || word == "," || word == ")" || word == "}")
+	{
+		words.pop();
+		currentState = State::UNKNOWN;
+
+		return;
+	}
 
 	userName = word;
 	words.pop();
