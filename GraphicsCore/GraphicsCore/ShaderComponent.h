@@ -5,6 +5,24 @@
 class ShaderComponent
 {
 	std::string name = "";
+	ShaderComponent* parent = nullptr;
+private:
+	void setParent(ShaderComponent* parent) { this->parent = parent; };
+	ShaderComponent* getParent() { return parent; };
+
+private:
+	class iterator
+	{
+		ShaderComponent* current = nullptr;
+		std::list<ShaderComponent>::iterator it;
+		std::stack<std::list<ShaderComponent*>::iterator> ancestors;
+	public:
+		iterator() {};
+		~iterator() {};
+	};
+
+	friend class ShaderComposite;
+
 public:
 	virtual ~ShaderComponent() {};
 public:
@@ -22,7 +40,11 @@ public:
 			delete child;
 	};
 public:
-	void add(ShaderComponent* component) { childs.push_back(component); };
+	void add(ShaderComponent* component) 
+	{
+		component->setParent(this);
+		childs.push_back(component); 
+	};
 };
 
 class Leaf : public ShaderComponent
