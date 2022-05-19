@@ -2,23 +2,82 @@
 #include <string>
 #include <list>
 
+class ShaderComposite;
+
 class ShaderComponent
 {
 	std::string name = "";
 	ShaderComponent* parent = nullptr;
+
 private:
 	void setParent(ShaderComponent* parent) { this->parent = parent; };
 	ShaderComponent* getParent() { return parent; };
 
 private:
+
+	virtual std::list<ShaderComponent*>* getChilds() { return nullptr; };
+
+	class iterator;
+
+	friend class iterator;
+
 	class iterator
 	{
 		ShaderComponent* current = nullptr;
-		std::list<ShaderComponent>::iterator it;
-		std::stack<std::list<ShaderComponent*>::iterator> ancestors;
+		std::list<ShaderComponent*>::iterator it;
+		std::stack<std::list<ShaderComponent*>::iterator> ancestorsIterators;
 	public:
 		iterator() {};
 		~iterator() {};
+
+		virtual iterator& operator++()
+		{
+			auto childs = current->getChilds();
+			if (childs)
+			{
+				if (current->parent)
+					ancestorsIterators.push(it);
+				it = childs->begin();
+				current = *it;
+
+				return *this;
+			}
+			if (current && current->parent == nullptr)
+			{
+				current = nullptr;
+				while (!ancestorsIterators.empty())
+					ancestorsIterators.pop();
+				return *this;
+			}
+			if (current && current->parent)
+			{
+				++it;
+				auto childs = current->parent->getChilds();
+				if (it == childs->end() && ancestorsIterators.empty())
+				{
+					current = nullptr;
+					while (!ancestorsIterators.empty())
+						ancestorsIterators.pop();
+					return *this;
+				}
+				if (it == childs->end())
+				{
+					it = ancestorsIterators.top();
+					ancestorsIterators.pop();
+					
+					++it;
+
+					current = *it;
+
+					return *this;
+				}
+
+				current = *it;
+
+				return *this;
+			}
+			return *this;
+		};
 	};
 
 	friend class ShaderComposite;
@@ -33,6 +92,7 @@ public:
 class ShaderComposite : public ShaderComponent
 {
 	std::list<ShaderComponent*> childs;
+	std::list<ShaderComponent*>* getChilds() override { return &childs; };
 public:
 	~ShaderComposite()
 	{
