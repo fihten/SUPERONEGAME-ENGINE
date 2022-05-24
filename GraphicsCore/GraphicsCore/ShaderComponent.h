@@ -3,6 +3,7 @@
 #include <list>
 
 class ShaderComposite;
+class ShaderVisitor;
 
 class ShaderComponent
 {
@@ -20,6 +21,7 @@ public:
 	virtual ~ShaderComponent() {};
 public:
 	virtual void add(ShaderComponent* component) {};
+	virtual void query(ShaderVisitor* visitor);
 	void setName(const std::string& name) { this->name = name; };
 };
 
@@ -33,11 +35,17 @@ public:
 			delete child;
 	};
 public:
-	void add(ShaderComponent* component) 
+	void add(ShaderComponent* component) override 
 	{
 		component->setParent(this);
 		childs.push_back(component); 
 	};
+	void query(ShaderVisitor* visitor) override;
+};
+
+class SHADER : public ShaderComposite
+{
+
 };
 
 class Leaf : public ShaderComponent

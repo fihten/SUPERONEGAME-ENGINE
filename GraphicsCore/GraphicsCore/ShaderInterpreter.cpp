@@ -1,11 +1,14 @@
 #include "ShaderInterpreter.h"
 #include "StringUtils.h"
 
-void ShaderInterpreter::build()
+::SHADER* ShaderInterpreter::build()
 {
 	words = std::queue<std::string>();
 	statesStack = std::stack<State>();
+	
 	componentStack = std::stack<ShaderComponent*>();
+	componentStack.push(new ::SHADER());
+	
 	currentState = State::UNKNOWN;
 	currentIndex = 0;
 
@@ -264,6 +267,8 @@ void ShaderInterpreter::build()
 			break;
 		}
 	}
+
+	return dynamic_cast<::SHADER*>(componentStack.top());
 }
 
 void ShaderInterpreter::unknown()

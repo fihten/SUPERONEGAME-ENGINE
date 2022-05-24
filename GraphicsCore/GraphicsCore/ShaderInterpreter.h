@@ -219,5 +219,5 @@ private:
 	bool isOperationState(State state) const;
 
 public:
-	void build();
+	::SHADER* build();
 };

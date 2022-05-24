@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ShaderComponent.h"
 
 class ShaderVisitor
@@ -42,6 +44,8 @@ public:
 	virtual void startVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	virtual void startVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
 	virtual void startVisit(const RETURN* pRETURN) {};
+	virtual void startVisit(const SHADER* pSHADER) {};
+	virtual void startVisit(const ShaderComponent* pShaderComponent) {};
 
 	virtual void finishVisit(const CBUFFER* pCBUFFER) {};
 	virtual void finishVisit(const FLOAT4X4* pFLOAT4X4) {};
@@ -82,4 +86,6 @@ public:
 	virtual void finishVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	virtual void finishVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
 	virtual void finishVisit(const RETURN* pRETURN) {};
+	virtual void finishVisit(const SHADER* pSHADER) {};
+	virtual void finishVisit(const ShaderComponent* pShaderComponent) {};
 };
