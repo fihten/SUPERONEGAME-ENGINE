@@ -219,5 +219,10 @@ private:
 	bool isOperationState(State state) const;
 
 public:
+	void setShaderText(const std::string& shaderText)
+	{
+		this->shaderText = shaderText;
+		this->currentIndex = 0;
+	}
 	::SHADER* build();
 };
