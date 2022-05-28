@@ -6,14 +6,49 @@
 
 class PrintVisitor : public ShaderVisitor
 {
+	int numberOfSpaces = 0;
+	void printSpaces()
+	{
+		for (int i = 0; i < numberOfSpaces; ++i)
+			std::cout << ' ';
+	};
 public:
-	void startVisit(const CBUFFER* pCBUFFER) {};
-	void startVisit(const FLOAT4X4* pFLOAT4X4) {};
-	void startVisit(const VOID* pVOID) {};
-	void startVisit(const FLOAT* pFLOAT) {};
-	void startVisit(const FLOAT2* pFLOAT2) {};
-	void startVisit(const FLOAT3* pFLOAT3) {};
-	void startVisit(const FLOAT4* pFLOAT4) {};
+	void startVisit(const CBUFFER* pCBUFFER) 
+	{
+		printSpaces();
+		std::cout << "CBUFFER " << pCBUFFER->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const FLOAT4X4* pFLOAT4X4) 
+	{
+		printSpaces();
+		std::cout << "float4x4" << std::endl;
+	};
+	void startVisit(const VOID* pVOID) 
+	{
+		printSpaces();
+		std::cout << "void" << std::endl;
+	};
+	void startVisit(const FLOAT* pFLOAT)
+	{
+		printSpaces();
+		std::cout << "float" << std::endl;
+	};
+	void startVisit(const FLOAT2* pFLOAT2) 
+	{
+		printSpaces();
+		std::cout << "float2" << std::endl;
+	};
+	void startVisit(const FLOAT3* pFLOAT3) 
+	{
+		printSpaces();
+		std::cout << "float3" << std::endl;
+	};
+	void startVisit(const FLOAT4* pFLOAT4)
+	{
+		printSpaces();
+		std::cout << "float4" << std::endl;
+	};
 	void startVisit(const STRUCT* pSTRUCT) {};
 	void startVisit(const SEMANTIC* pSEMANTIC) {};
 	void startVisit(const SV_POSITION* pSV_POSITION) {};
@@ -49,7 +84,10 @@ public:
 	void startVisit(const SHADER* pSHADER) {};
 	void startVisit(const ShaderComponent* pShaderComponent) {};
 
-	void finishVisit(const CBUFFER* pCBUFFER) {};
+	void finishVisit(const CBUFFER* pCBUFFER)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const FLOAT4X4* pFLOAT4X4) {};
 	void finishVisit(const VOID* pVOID) {};
 	void finishVisit(const FLOAT* pFLOAT) {};

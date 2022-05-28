@@ -23,6 +23,7 @@ public:
 	virtual void add(ShaderComponent* component) {};
 	virtual void query(ShaderVisitor* visitor);
 	void setName(const std::string& name) { this->name = name; };
+	std::string getName() const { return name; };
 };
 
 class ShaderComposite : public ShaderComponent
