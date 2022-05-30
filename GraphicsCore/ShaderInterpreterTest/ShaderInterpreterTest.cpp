@@ -49,12 +49,39 @@ public:
 		printSpaces();
 		std::cout << "float4" << std::endl;
 	};
-	void startVisit(const STRUCT* pSTRUCT) {};
-	void startVisit(const SEMANTIC* pSEMANTIC) {};
-	void startVisit(const SV_POSITION* pSV_POSITION) {};
-	void startVisit(const SV_TARGET* pSV_TARGET) {};
-	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL) {};
-	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL) {};
+	void startVisit(const STRUCT* pSTRUCT) 
+	{
+		printSpaces();
+		std::cout << "struct " << pSTRUCT->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const SEMANTIC* pSEMANTIC) 
+	{
+		printSpaces();
+		std::cout << "user semantic " << pSEMANTIC->getName() << std::endl;
+	};
+	void startVisit(const SV_POSITION* pSV_POSITION) 
+	{
+		printSpaces();
+		std::cout << "SV_POSITION" << std::endl;
+	};
+	void startVisit(const SV_TARGET* pSV_TARGET) 
+	{
+		printSpaces();
+		std::cout << "SV_TARGET" << std::endl;
+	};
+	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL) 
+	{
+		printSpaces();
+		std::cout << "function declaration " << pFUNCTION_DECL->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL) 
+	{
+		printSpaces();
+		std::cout << "function call " << pFUNCTION_CALL->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const MUL* pMUL) {};
 	void startVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	void startVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
@@ -94,12 +121,21 @@ public:
 	void finishVisit(const FLOAT2* pFLOAT2) {};
 	void finishVisit(const FLOAT3* pFLOAT3) {};
 	void finishVisit(const FLOAT4* pFLOAT4) {};
-	void finishVisit(const STRUCT* pSTRUCT) {};
+	void finishVisit(const STRUCT* pSTRUCT)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const SEMANTIC* pSEMANTIC) {};
 	void finishVisit(const SV_POSITION* pSV_POSITION) {};
 	void finishVisit(const SV_TARGET* pSV_TARGET) {};
-	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL) {};
-	void finishVisit(const FUNCTION_CALL* pFUNCTION_CALL) {};
+	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const FUNCTION_CALL* pFUNCTION_CALL) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const MUL* pMUL) {};
 	void finishVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	void finishVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
