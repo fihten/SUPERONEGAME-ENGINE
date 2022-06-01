@@ -82,10 +82,30 @@ public:
 		std::cout << "function call " << pFUNCTION_CALL->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
-	void startVisit(const MUL* pMUL) {};
-	void startVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
-	void startVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
-	void startVisit(const SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
+	void startVisit(const MUL* pMUL) 
+	{
+		printSpaces();
+		std::cout << "mul" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) 
+	{
+		printSpaces();
+		std::cout << "constructor of float4" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) 
+	{
+		printSpaces();
+		std::cout << "set_vertex_shader" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const SET_PIXEL_SHADER* pSET_PIXEL_SHADER) 
+	{
+		printSpaces();
+		std::cout << "set_pixel_shader" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
 	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	void startVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
@@ -136,10 +156,22 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
-	void finishVisit(const MUL* pMUL) {};
-	void finishVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
-	void finishVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
-	void finishVisit(const SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
+	void finishVisit(const MUL* pMUL)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const SET_VERTEX_SHADER* pSET_VERTEX_SHADER) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const SET_PIXEL_SHADER* pSET_PIXEL_SHADER)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
 	void finishVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	void finishVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
