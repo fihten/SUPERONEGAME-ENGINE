@@ -106,13 +106,42 @@ public:
 		std::cout << "set_pixel_shader" << std::endl;
 		numberOfSpaces += 4;
 	};
-	void startVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
-	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
-	void startVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
-	void startVisit(const IN* pIN) {};
-	void startVisit(const OUT* pOUT) {};
-	void startVisit(const INOUT* pINOUT) {};
-	void startVisit(const UNIFORM* pUNIFORM) {};
+	void startVisit(const COMPILE_SHADER* pCOMPILE_SHADER) 
+	{
+		printSpaces();
+		std::cout << "CompileShader" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) 
+	{
+		printSpaces();
+		std::cout << pVERTEX_SHADER_VERSION->getName() << std::endl;
+	};
+	void startVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) 
+	{
+		printSpaces();
+		std::cout << pPIXEL_SHADER_VERSION->getName();
+	};
+	void startVisit(const IN* pIN) 
+	{
+		printSpaces();
+		std::cout << "in" << std::endl;
+	};
+	void startVisit(const OUT* pOUT) 
+	{
+		printSpaces();
+		std::cout << "out" << std::endl;
+	};
+	void startVisit(const INOUT* pINOUT) 
+	{
+		printSpaces();
+		std::cout << "inout" << std::endl;
+	};
+	void startVisit(const UNIFORM* pUNIFORM) 
+	{
+		printSpaces();
+		std::cout << "uniform" << std::endl;
+	};
 	void startVisit(const VARIABLE* pVARIABLE) {};
 	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL) {};
 	void startVisit(const BINARY_MINUS* pBINARY_MINUS) {};
@@ -172,7 +201,10 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
-	void finishVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
+	void finishVisit(const COMPILE_SHADER* pCOMPILE_SHADER) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	void finishVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
 	void finishVisit(const IN* pIN) {};
