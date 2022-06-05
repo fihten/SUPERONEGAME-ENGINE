@@ -142,12 +142,41 @@ public:
 		printSpaces();
 		std::cout << "uniform" << std::endl;
 	};
-	void startVisit(const VARIABLE* pVARIABLE) {};
-	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL) {};
-	void startVisit(const BINARY_MINUS* pBINARY_MINUS) {};
-	void startVisit(const BINARY_PLUS* pBINARY_PLUS) {};
-	void startVisit(const BINARY_DIVIDE* pBINARY_DIVIDE) {};
-	void startVisit(const BINARY_MULTIPLY* pBINARY_MULTIPLY) {};
+	void startVisit(const VARIABLE* pVARIABLE) 
+	{
+		printSpaces();
+		std::cout << pVARIABLE->getName() << std::endl;
+	};
+	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL) 
+	{
+		printSpaces();
+		std::cout << "Decl of variable " << pVARIABLE_DECL->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const BINARY_MINUS* pBINARY_MINUS)
+	{
+		printSpaces();
+		std::cout << "-" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const BINARY_PLUS* pBINARY_PLUS) 
+	{
+		printSpaces();
+		std::cout << "+" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const BINARY_DIVIDE* pBINARY_DIVIDE) 
+	{
+		printSpaces();
+		std::cout << "/" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const BINARY_MULTIPLY* pBINARY_MULTIPLY) 
+	{
+		printSpaces();
+		std::cout << "*" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const UNARY_MINUS* pUNARY_MINUS) {};
 	void startVisit(const UNARY_PLUS* pUNARY_PLUS) {};
 	void startVisit(const ASSIGNMENT* pASSIGNMENT) {};
@@ -212,11 +241,26 @@ public:
 	void finishVisit(const INOUT* pINOUT) {};
 	void finishVisit(const UNIFORM* pUNIFORM) {};
 	void finishVisit(const VARIABLE* pVARIABLE) {};
-	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL) {};
-	void finishVisit(const BINARY_MINUS* pBINARY_MINUS) {};
-	void finishVisit(const BINARY_PLUS* pBINARY_PLUS) {};
-	void finishVisit(const BINARY_DIVIDE* pBINARY_DIVIDE) {};
-	void finishVisit(const BINARY_MULTIPLY* pBINARY_MULTIPLY) {};
+	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const BINARY_MINUS* pBINARY_MINUS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const BINARY_PLUS* pBINARY_PLUS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const BINARY_DIVIDE* pBINARY_DIVIDE) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const BINARY_MULTIPLY* pBINARY_MULTIPLY) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const UNARY_MINUS* pUNARY_MINUS) {};
 	void finishVisit(const UNARY_PLUS* pUNARY_PLUS) {};
 	void finishVisit(const ASSIGNMENT* pASSIGNMENT) {};
