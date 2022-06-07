@@ -177,11 +177,36 @@ public:
 		std::cout << "*" << std::endl;
 		numberOfSpaces += 4;
 	};
-	void startVisit(const UNARY_MINUS* pUNARY_MINUS) {};
-	void startVisit(const UNARY_PLUS* pUNARY_PLUS) {};
-	void startVisit(const ASSIGNMENT* pASSIGNMENT) {};
-	void startVisit(const TECHNIQUE11* pTECHNIQUE11) {};
-	void startVisit(const PASS* pPASS) {};
+	void startVisit(const UNARY_MINUS* pUNARY_MINUS) 
+	{
+		printSpaces();
+		std::cout << "-" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const UNARY_PLUS* pUNARY_PLUS) 
+	{
+		printSpaces();
+		std::cout << "+" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const ASSIGNMENT* pASSIGNMENT) 
+	{
+		printSpaces();
+		std::cout << "=" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const TECHNIQUE11* pTECHNIQUE11) 
+	{
+		printSpaces();
+		std::cout << "technique11 " << pTECHNIQUE11->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const PASS* pPASS) 
+	{
+		printSpaces();
+		std::cout << "pass " << pPASS->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ROUND_BRACKETS* pROUND_BRACKETS) {};
 	void startVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	void startVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
@@ -261,11 +286,26 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
-	void finishVisit(const UNARY_MINUS* pUNARY_MINUS) {};
-	void finishVisit(const UNARY_PLUS* pUNARY_PLUS) {};
-	void finishVisit(const ASSIGNMENT* pASSIGNMENT) {};
-	void finishVisit(const TECHNIQUE11* pTECHNIQUE11) {};
-	void finishVisit(const PASS* pPASS) {};
+	void finishVisit(const UNARY_MINUS* pUNARY_MINUS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const UNARY_PLUS* pUNARY_PLUS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ASSIGNMENT* pASSIGNMENT) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const TECHNIQUE11* pTECHNIQUE11) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const PASS* pPASS) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ROUND_BRACKETS* pROUND_BRACKETS) {};
 	void finishVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	void finishVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
