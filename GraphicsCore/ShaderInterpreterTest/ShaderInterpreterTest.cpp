@@ -2,7 +2,9 @@
 //
 
 #include <iostream>
+#include <fstream>
 #include "ShaderVisitor.h"
+#include "ShaderInterpreter.h"
 
 class PrintVisitor : public ShaderVisitor
 {
@@ -120,7 +122,7 @@ public:
 	void startVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) 
 	{
 		printSpaces();
-		std::cout << pPIXEL_SHADER_VERSION->getName();
+		std::cout << pPIXEL_SHADER_VERSION->getName() << std::endl;
 	};
 	void startVisit(const IN* pIN) 
 	{
@@ -207,11 +209,36 @@ public:
 		std::cout << "pass " << pPASS->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
-	void startVisit(const ROUND_BRACKETS* pROUND_BRACKETS) {};
-	void startVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
-	void startVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
-	void startVisit(const RETURN* pRETURN) {};
-	void startVisit(const SHADER* pSHADER) {};
+	void startVisit(const ROUND_BRACKETS* pROUND_BRACKETS) 
+	{
+		printSpaces();
+		std::cout << "()" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) 
+	{
+		printSpaces();
+		std::cout << "[]" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) 
+	{
+		printSpaces();
+		std::cout << "{}" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const RETURN* pRETURN) 
+	{
+		printSpaces();
+		std::cout << "return" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const SHADER* pSHADER) 
+	{
+		printSpaces();
+		std::cout << "SHADER:" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderComponent* pShaderComponent) {};
 
 	void finishVisit(const CBUFFER* pCBUFFER)
@@ -306,17 +333,56 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
-	void finishVisit(const ROUND_BRACKETS* pROUND_BRACKETS) {};
-	void finishVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
-	void finishVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) {};
-	void finishVisit(const RETURN* pRETURN) {};
-	void finishVisit(const SHADER* pSHADER) {};
+	void finishVisit(const ROUND_BRACKETS* pROUND_BRACKETS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const SQUARE_BRACKETS* pSQUARE_BRACKETS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const CURLY_BRACKETS* pCURLY_BRACKETS) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const RETURN* pRETURN)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const SHADER* pSHADER) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderComponent* pShaderComponent) {};
 };
 
 int main()
 {
-    std::cout << "Hello World!\n";
+	std::ifstream file("C:\\3dEngine\\Shaders\\Demo.fx");
+	if (file)
+	{
+		file.seekg(0, file.end);
+		int length = file.tellg();
+		file.seekg(0, file.beg);
+
+		char* buff = new char[length + 1];
+		file.read(buff, length);
+		buff[length] = 0;
+
+		std::string shaderText(buff);
+
+		ShaderInterpreter interpreter;
+		interpreter.setShaderText(shaderText);
+		SHADER* shader = interpreter.build();
+
+		PrintVisitor visitor;
+		shader->query(&visitor);
+
+		delete shader;
+		file.close();
+		delete []buff;
+	}
+
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu

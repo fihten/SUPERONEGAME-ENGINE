@@ -20,7 +20,7 @@
 			std::string(stopSymbols),
 			currentIndex
 		);
-		if (word != "")
+		if (word != std::string(""))
 			words.push(word);
 		else
 			break;
@@ -276,232 +276,232 @@ void ShaderInterpreter::unknown()
 	std::string word = words.front();
 
 	// open round brackets
-	if (word == "(")
+	if (word == std::string("("))
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_OPEN;
 
 		return;
 	}
-	if (word == ")" && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
+	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
 		currentState = State::BRACKETS_UNARY_OPERATOR_CLOSE;
 
 		return;
 	}
-	if (word == ")" && !statesStack.empty() && statesStack.top() == State::ARGUMENTS_LIST_OPEN_BRACKET)
+	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::ARGUMENTS_LIST_OPEN_BRACKET)
 	{
 		words.pop();
 		currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
 
 		return;
 	}
-	if (word == ")" && !statesStack.empty() && statesStack.top() == State::SIGNATURE_OPEN_BRACKET)
+	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::SIGNATURE_OPEN_BRACKET)
 	{
 		words.pop();
 		currentState = State::SIGNATURE_CLOSE_BRACKET;
 
 		return;
 	}
-	if (word == "}" && !statesStack.empty() && statesStack.top() == State::FUNCTION_BODY_OPEN_BRACKET)
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::FUNCTION_BODY_OPEN_BRACKET)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_CLOSE_BRACKET;
 
 		return;
 	}
-	if ((word == ";" || word == "," || word == ")") 
+	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) 
 		&& !statesStack.empty() && statesStack.top() == State::VARIABLE_DECLARATION)
 	{
-		if (word != ")")
+		if (word != std::string(")"))
 			words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
-	if (word == "-")
+	if (word == std::string("-"))
 	{
 		words.pop();
 		currentState = State::UNARY_MINUS;
 
 		return;
 	}
-	if (word == "+")
+	if (word == std::string("+"))
 	{
 		words.pop();
 		currentState = State::UNARY_PLUS;
 
 		return;
 	}
-	if (word == "void")
+	if (word == std::string("void"))
 	{
 		words.pop();
 		currentState = State::VOID;
 
 		return;
 	}
-	if (word == "float")
+	if (word == std::string("float"))
 	{
 		words.pop();
 		currentState = State::FLOAT;
 
 		return;
 	}
-	if (word == "float2")
+	if (word == std::string("float2"))
 	{
 		words.pop();
 		currentState = State::FLOAT2;
 
 		return;
 	}
-	if (word == "float3")
+	if (word == std::string("float3"))
 	{
 		words.pop();
 		currentState = State::FLOAT3;
 
 		return;
 	}
-	if (word == "float4")
+	if (word == std::string("float4"))
 	{
 		words.pop();
 		currentState = State::FLOAT4;
 
 		return;
 	}
-	if (word == "float4x4")
+	if (word == std::string("float4x4"))
 	{
 		words.pop();
 		currentState = State::FLOAT4X4;
 
 		return;
 	}
-	if (word == "in")
+	if (word == std::string("in"))
 	{
 		words.pop();
 		currentState = State::IN;
 
 		return;
 	}
-	if (word == "out")
+	if (word == std::string("out"))
 	{
 		words.pop();
 		currentState = State::OUT;
 
 		return;
 	}
-	if (word == "inout")
+	if (word == std::string("inout"))
 	{
 		words.pop();
 		currentState = State::INOUT;
 
 		return;
 	}
-	if (word == "uniform")
+	if (word == std::string("uniform"))
 	{
 		words.pop();
 		currentState = State::UNIFORM;
 
 		return;
 	}
-	if (word == "mul")
+	if (word == std::string("mul"))
 	{
 		words.pop();
 		currentState = State::MUL;
 
 		return;
 	}
-	if (word == "cbuffer")
+	if (word == std::string("cbuffer"))
 	{
 		words.pop();
 		currentState = State::CBUFFER;
 
 		return;
 	}
-	if (word == "}" && !statesStack.empty() && statesStack.top() == State::CBUFFER_BODY_OPEN_BRACKET)
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::CBUFFER_BODY_OPEN_BRACKET)
 	{
 		words.pop();
 		currentState = State::INSERT_CBUFFER;
 
 		return;
 	}
-	if (word == "technique11")
+	if (word == std::string("technique11"))
 	{
 		words.pop();
 		currentState = State::TECHNIQUE11;
 
 		return;
 	}
-	if (word == "}" && !statesStack.empty() && statesStack.top() == State::TECHNIQUE11)
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::TECHNIQUE11)
 	{
 		words.pop();
 		currentState = State::INSERT_TECHNIQUE11;
 
 		return;
 	}
-	if (word == "pass")
+	if (word == std::string("pass"))
 	{
 		words.pop();
 		currentState = State::PASS;
 
 		return;
 	}
-	if (word == "}" && !statesStack.empty() && statesStack.top() == State::PASS)
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::PASS)
 	{
 		words.pop();
 		currentState = State::INSERT_PASS;
 
 		return;
 	}
-	if (word == "SetVertexShader")
+	if (word == std::string("SetVertexShader"))
 	{
 		words.pop();
 		currentState = State::SET_VERTEX_SHADER;
 
 		return;
 	}
-	if (word == "SetPixelShader")
+	if (word == std::string("SetPixelShader"))
 	{
 		words.pop();
 		currentState = State::SET_PIXEL_SHADER;
 
 		return;
 	}
-	if (word == "CompileShader")
+	if (word == std::string("CompileShader"))
 	{
 		words.pop();
 		currentState = State::COMPILE_SHADER;
 
 		return;
 	}
-	if (word == "vs_5_0")
+	if (word == std::string("vs_5_0"))
 	{
 		words.pop();
 		currentState = State::VS_5_0;
 
 		return;
 	}
-	if (word == "ps_5_0")
+	if (word == std::string("ps_5_0"))
 	{
 		words.pop();
 		currentState = State::PS_5_0;
 
 		return;
 	}
-	if (word == "return")
+	if (word == std::string("return"))
 	{
 		words.pop();
 		currentState = State::RETURN;
 
 		return;
 	}
-	if (word == ";" && !statesStack.empty() && statesStack.top() == State::RETURN)
+	if (word == std::string(";") && !statesStack.empty() && statesStack.top() == State::RETURN)
 	{
 		words.pop();
 		currentState = State::INSERT_RETURN;
 
 		return;
 	}
-	if (word == ";" || word == "," || word == ")" || word == "}")
+	if (word == std::string(";") || word == std::string(",") || word == std::string(")") || word == std::string("}"))
 	{
 		words.pop();
 		currentState = State::UNKNOWN;
@@ -511,12 +511,15 @@ void ShaderInterpreter::unknown()
 
 	userName = word;
 	words.pop();
-	if (words.front() != "(");
+	word = std::string("");
+	if (!words.empty())
+		word = words.front();
+	if (word != std::string("("))
 	{
 		currentState = State::VARIABLE;
 		return;
 	}
-	if (words.front() == "(");
+	if (word == std::string("("))
 	{
 		words.pop();
 		currentState = State::FUNCTION_CALL;
@@ -535,15 +538,15 @@ void ShaderInterpreter::bracketsUnaryOperatorClose()
 	std::string word = words.front();
 
 	statesStack.pop();
-	if (word == ";" || word == "," || word == ")" || word == ":")
+	if (word == std::string(";") || word == std::string(",") || word == std::string(")") || word == std::string(":"))
 		currentState = State::FINISH_EXPRESSION;
-	if (word == "+")
+	if (word == std::string("+"))
 		currentState = State::BINARY_PLUS;
-	if (word == "-")
+	if (word == std::string("-"))
 		currentState = State::BINARY_MINUS;
-	if (word == "*")
+	if (word == std::string("*"))
 		currentState = State::BINARY_MULTIPLY;
-	if (word == "/")
+	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
 }
 
@@ -563,31 +566,31 @@ void ShaderInterpreter::finishExpression()
 		operation->add(operand);
 	}
 
-	if (op && (word == ";" || word == "," || word == ")"))
+	if (op && (word == std::string(";") || word == std::string(",") || word == std::string(")")))
 	{
 		statesStack.pop();
 		return;
 	}
 
-	if (op && word == "+")
+	if (op && word == std::string("+"))
 	{
 		statesStack.pop();
 		currentState = State::BINARY_PLUS;
 		return;
 	}
-	if (op && word == "-")
+	if (op && word == std::string("-"))
 	{
 		statesStack.pop();
 		currentState = State::BINARY_MINUS;
 		return;
 	}
-	if (op && word == "*")
+	if (op && word == std::string("*"))
 	{
 		statesStack.pop();
 		currentState = State::BINARY_MULTIPLY;
 		return;
 	}
-	if (op && word == "/")
+	if (op && word == std::string("/"))
 	{
 		statesStack.pop();
 		currentState = State::BINARY_DIVIDE;
@@ -599,8 +602,8 @@ void ShaderInterpreter::finishExpression()
 		lastState = statesStack.top();
 
 	currentState = State::UNKNOWN;
-	if ((word != ")" || lastState != State::BRACKETS_UNARY_OPERATOR_OPEN) &&
-		((word != ")" && word != ";" && word != ",") || lastState != State::VARIABLE_DECLARATION))
+	if ((word != std::string(")") || lastState != State::BRACKETS_UNARY_OPERATOR_OPEN) &&
+		((word != std::string(")") && word != std::string(";") && word != std::string(",")) || lastState != State::VARIABLE_DECLARATION))
 	{
 		ShaderComponent* componentToAdd = componentStack.top();
 		componentStack.pop();
@@ -608,10 +611,10 @@ void ShaderInterpreter::finishExpression()
 		ShaderComponent* composite = componentStack.top();
 		composite->add(componentToAdd);
 
-		if (word != ")" && word != ";")
+		if (word != std::string(")") && word != std::string(";"))
 			words.pop();
 	}
-	if ((word == ")" || word == ";" || word == ",") && lastState == State::VARIABLE_DECLARATION)
+	if ((word == std::string(")") || word == std::string(";") || word == std::string(",")) && lastState == State::VARIABLE_DECLARATION)
 	{
 		decls.top().value = componentStack.top();
 		componentStack.pop();
@@ -759,22 +762,22 @@ void ShaderInterpreter::variable()
 {
 	ShaderComponent* var = new ::VARIABLE();
 	var->setName(userName);
-	userName = "";
+	userName = std::string("");
 
 	componentStack.push(var);
 
 	std::string word = words.front();
-	if (word == "," || word == ";" || word == ")" || word == ":" || word == "}")
+	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))
 		currentState = State::FINISH_EXPRESSION;
-	if (word == "-")
+	if (word == std::string("-"))
 		currentState = State::BINARY_MINUS;
-	if (word == "+")
+	if (word == std::string("+"))
 		currentState = State::BINARY_PLUS;
-	if (word == "*")
+	if (word == std::string("*"))
 		currentState = State::BINARY_MULTIPLY;
-	if (word == "/")
+	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
-	if (word == "=")
+	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
 }
 
@@ -800,7 +803,7 @@ void ShaderInterpreter::functionCall()
 {
 	ShaderComponent* functionCallOp = new ::FUNCTION_CALL();
 	functionCallOp->setName(userName);
-	userName = "";
+	userName = std::string("");
 
 	componentStack.push(functionCallOp);
 
@@ -829,15 +832,15 @@ void ShaderInterpreter::argumentsListCloseBracket()
 	func->add(arguments);
 
 	std::string word = words.front();
-	if (word == "," || word == ";" || word == ")")
+	if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
 		currentState = State::FINISH_EXPRESSION;
-	if (word == "+")
+	if (word == std::string("+"))
 		currentState = State::BINARY_PLUS;
-	if (word == "-")
+	if (word == std::string("-"))
 		currentState = State::BINARY_MINUS;
-	if (word == "*")
+	if (word == std::string("*"))
 		currentState = State::BINARY_MULTIPLY;
-	if (word == "/")
+	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
 }
 
@@ -859,7 +862,7 @@ void ShaderInterpreter::assignment()
 void ShaderInterpreter::voidState()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -878,7 +881,7 @@ void ShaderInterpreter::voidState()
 void ShaderInterpreter::floatState()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -897,7 +900,7 @@ void ShaderInterpreter::floatState()
 void ShaderInterpreter::float2State()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -916,7 +919,7 @@ void ShaderInterpreter::float2State()
 void ShaderInterpreter::float3State()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -935,7 +938,7 @@ void ShaderInterpreter::float3State()
 void ShaderInterpreter::float4State()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -950,7 +953,7 @@ void ShaderInterpreter::float4State()
 		
 		return;
 	}
-	if (word == "(")
+	if (word == std::string("("))
 	{
 		words.pop();
 		currentState = State::FLOAT4_CONSTRUCTOR;
@@ -962,7 +965,7 @@ void ShaderInterpreter::float4State()
 void ShaderInterpreter::float4x4State()
 {
 	std::string word = words.front();
-	if (word != "(")
+	if (word != std::string("("))
 	{
 		words.pop();
 
@@ -982,7 +985,7 @@ void ShaderInterpreter::float4x4State()
 void ShaderInterpreter::customName()
 {
 	std::string word = words.front();
-	if (word == "(")
+	if (word == std::string("("))
 	{
 		currentState = State::FUNCTION_DECLARATION;
 		return;
@@ -995,7 +998,7 @@ void ShaderInterpreter::customName()
 void ShaderInterpreter::functionDeclaration()
 {
 	std::string word = words.front();
-	if (word == "(")
+	if (word == std::string("("))
 	{
 		words.pop();
 
@@ -1020,22 +1023,24 @@ void ShaderInterpreter::signatureOpenBracket()
 
 void ShaderInterpreter::signatureCloseBracket()
 {
+	statesStack.pop();
+
 	std::string word = words.front();
 	componentStack.pop();
 
-	if (word == ":")
+	if (word == std::string(":"))
 	{
 		words.pop();
 		currentState = State::SEMANTIC;
 		return;
 	}
-	if (word == ";")
+	if (word == std::string(";"))
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{")
+	if (word == std::string("{"))
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
@@ -1046,13 +1051,13 @@ void ShaderInterpreter::signatureCloseBracket()
 void ShaderInterpreter::semantic()
 {
 	std::string word = words.front();
-	if (word == "SV_POSITION")
+	if (word == std::string("SV_POSITION"))
 	{
 		words.pop();
 		currentState = State::SV_POSITION_;
 		return;
 	}
-	if (word == "SV_TARGET")
+	if (word == std::string("SV_TARGET"))
 	{
 		words.pop();
 		currentState = State::SV_TARGET_;
@@ -1074,21 +1079,21 @@ void ShaderInterpreter::svPosition()
 	ShaderComponent* semanticElement = new ::SV_POSITION();
 	decls.top().semantic = semanticElement;
 
-	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string("{") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
 		return;
 	}
-	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) && statesStack.top() == State::VARIABLE_DECLARATION)
 	{
-		if (word != ")")
+		if (word != std::string(")"))
 			words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
@@ -1102,21 +1107,21 @@ void ShaderInterpreter::svTarget()
 	ShaderComponent* semanticElement = new ::SV_TARGET();
 	decls.top().semantic = semanticElement;
 
-	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string("{") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
 		return;
 	}
-	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) && statesStack.top() == State::VARIABLE_DECLARATION)
 	{
-		if (word != ")")
+		if (word != std::string(")"))
 			words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
@@ -1129,24 +1134,24 @@ void ShaderInterpreter::customSemantic()
 
 	ShaderComponent* semanticElement = new ::SEMANTIC();
 	semanticElement->setName(userName);
-	userName = "";
+	userName = std::string("");
 	decls.top().semantic = semanticElement;
 
-	if (word == ";" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
-	if (word == "{" && statesStack.top() == State::FUNCTION_DECLARATION)
+	if (word == std::string("{") && statesStack.top() == State::FUNCTION_DECLARATION)
 	{
 		words.pop();
 		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
 		return;
 	}
-	if ((word == ";" || word == "," || word == ")") && statesStack.top() == State::VARIABLE_DECLARATION)
+	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) && statesStack.top() == State::VARIABLE_DECLARATION)
 	{
-		if (word != ")")
+		if (word != std::string(")"))
 			words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
@@ -1220,19 +1225,19 @@ void ShaderInterpreter::variableDeclaration()
 
 	std::string word = words.front();
 	statesStack.push(State::VARIABLE_DECLARATION);
-	if (word == "=")
+	if (word == std::string("="))
 	{
 		words.pop();
 		currentState = State::UNKNOWN;
 		return;
 	}
-	if (word == ":")
+	if (word == std::string(":"))
 	{
 		words.pop();
 		currentState = State::SEMANTIC;
 		return;
 	}
-	if (word == ";")
+	if (word == std::string(";"))
 	{
 		words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
@@ -1246,6 +1251,8 @@ void ShaderInterpreter::insertVariableDeclaration()
 
 	ShaderComponent* pVariableDeclaration = new ::VARIABLE_DECL();
 	
+	if (decls.top().modifier)
+		pVariableDeclaration->add(decls.top().modifier);
 	pVariableDeclaration->add(decls.top().type);
 	pVariableDeclaration->setName(decls.top().name);
 	if (decls.top().semantic)
@@ -1302,7 +1309,7 @@ void ShaderInterpreter::mulState()
 	componentStack.push(pMul);
 
 	std::string word = words.front();
-	if (word == "(")
+	if (word == std::string("("))
 	{
 		words.pop();
 		currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
@@ -1326,7 +1333,7 @@ void ShaderInterpreter::cbufferState()
 {
 	statesStack.push(State::CBUFFER);
 	std::string word = words.front();
-	if (word == "{")
+	if (word == std::string("{"))
 	{
 		words.pop();
 		currentState = State::CBUFFER_BODY_OPEN_BRACKET;
@@ -1347,14 +1354,14 @@ void ShaderInterpreter::cbufferName()
 	cbufferDecl.name = cbufferName;
 
 	std::string word = words.front();
-	if (word == "{")
+	if (word == std::string("{"))
 	{
 		words.pop();
 		currentState = State::CBUFFER_BODY_OPEN_BRACKET;
 
 		return;
 	}
-	if (word == ";")
+	if (word == std::string(";"))
 	{
 		words.pop();
 		currentState = State::INSERT_CBUFFER;
@@ -1371,7 +1378,7 @@ void ShaderInterpreter::insertCbuffer()
 		statesStack.pop();
 
 	ShaderComponent* pCbuffer = new ::CBUFFER();
-	if (cbufferDecl.name != "")
+	if (cbufferDecl.name != std::string(""))
 		pCbuffer->setName(cbufferDecl.name);
 	if (cbufferDecl.body)
 		pCbuffer->add(cbufferDecl.body);
@@ -1509,7 +1516,7 @@ void ShaderInterpreter::compileShader()
 void ShaderInterpreter::vs_5_0_state()
 {
 	ShaderComponent* pVS_5_0 = new ::VERTEX_SHADER_VERSION();
-	pVS_5_0->setName("vs_5_0");
+	pVS_5_0->setName(std::string("vs_5_0"));
 
 	ShaderComponent* parent = componentStack.top();
 	parent->add(pVS_5_0);
@@ -1522,7 +1529,7 @@ void ShaderInterpreter::vs_5_0_state()
 void ShaderInterpreter::ps_5_0_state()
 {
 	ShaderComponent* pPS_5_0 = new ::PIXEL_SHADER_VERSION();
-	pPS_5_0->setName("ps_5_0");
+	pPS_5_0->setName(std::string("ps_5_0"));
 
 	ShaderComponent* parent = componentStack.top();
 	parent->add(pPS_5_0);
@@ -1541,7 +1548,7 @@ void ShaderInterpreter::returnState()
 	
 	statesStack.push(State::RETURN);
 
-	if (word == ";")
+	if (word == std::string(";"))
 	{
 		words.pop();
 		currentState = State::INSERT_RETURN;
