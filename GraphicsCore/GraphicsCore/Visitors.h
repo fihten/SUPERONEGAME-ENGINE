@@ -3,19 +3,21 @@
 #include "ShaderVisitor.h"
 #include <vector>
 
-struct VertexShader
+struct ShadersNames
 {
 	std::string technique = "";
-	std::string pass = "";
-	std::string vertexShader = "";
-
-	bool isValid() { return technique != std::string("") && pass != std::string("") && vertexShader != std::string(""); };
+	std::vector<std::string> passes;
+	std::vector<std::string> shaders;
 };
 
-class VertexShaderVisitor :public ShaderVisitor
+class ShadersNamesVisitor :public ShaderVisitor
 {
-	std::vector<VertexShader> vss;
+	std::vector<ShadersNames> shadersNames;
+	bool SHADER_VERSION = false;
 public:
 	void startVisit(const TECHNIQUE11* pTECHNIQUE11);
-	void finishVisit(const TECHNIQUE11* pTECHNIQUE11);
+	void startVisit(const PASS* pPASS);
+	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION);
+	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL);
+
 };
