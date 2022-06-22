@@ -2,6 +2,7 @@
 
 #include "ShaderVisitor.h"
 #include <vector>
+#include <D3D11.h>
 
 struct ShadersNames
 {
@@ -20,4 +21,11 @@ public:
 	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION);
 	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL);
 
+};
+
+#define INPUT_ELEMENT_MAX_COUNT 32
+class InputLayoutVisitor : public ShaderVisitor
+{
+	D3D11_INPUT_ELEMENT_DESC inputElements[INPUT_ELEMENT_MAX_COUNT];
+	int inputElementsCount = 0;
 };
