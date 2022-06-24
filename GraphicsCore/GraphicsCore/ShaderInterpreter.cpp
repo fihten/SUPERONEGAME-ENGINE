@@ -110,7 +110,7 @@
 			voidState();
 			break;
 
-		case State::FLOAT:
+		case State::FLOAT1:
 			floatState();
 			break;
 
@@ -343,7 +343,7 @@ void ShaderInterpreter::unknown()
 	if (word == std::string("float"))
 	{
 		words.pop();
-		currentState = State::FLOAT;
+		currentState = State::FLOAT1;
 
 		return;
 	}
@@ -887,7 +887,7 @@ void ShaderInterpreter::floatState()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT();
+		decl.type = new ::FLOAT1();
 		decl.name = word;
 
 		decls.push(decl);

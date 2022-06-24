@@ -28,4 +28,13 @@ class InputLayoutVisitor : public ShaderVisitor
 {
 	D3D11_INPUT_ELEMENT_DESC inputElements[INPUT_ELEMENT_MAX_COUNT];
 	int inputElementsCount = 0;
+	
+	std::string shaderName = "";
+
+	bool withinDeclaration = false;
+
+public:
+	void setShaderName(const std::string& shaderName) { this->shaderName = shaderName; };
+	
+	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL);
 };

@@ -64,7 +64,7 @@ class ShaderInterpreter
 		ARGUMENTS_LIST_CLOSE_BRACKET,
 		ASSIGNMENT,
 		VOID,
-		FLOAT,
+		FLOAT1,
 		FLOAT2,
 		FLOAT3,
 		FLOAT4,

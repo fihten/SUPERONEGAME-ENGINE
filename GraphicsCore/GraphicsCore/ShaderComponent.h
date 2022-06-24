@@ -79,7 +79,7 @@ public:
 	void query(ShaderVisitor* visitor);
 };
 
-class FLOAT : public TYPE
+class FLOAT1 : public TYPE
 {
 public:
 	void query(ShaderVisitor* visitor);

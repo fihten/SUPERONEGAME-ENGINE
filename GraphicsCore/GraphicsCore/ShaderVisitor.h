@@ -8,7 +8,7 @@ public:
 	virtual void startVisit(const CBUFFER* pCBUFFER) {};
 	virtual void startVisit(const FLOAT4X4* pFLOAT4X4) {};
 	virtual void startVisit(const VOID* pVOID) {};
-	virtual void startVisit(const FLOAT* pFLOAT) {};
+	virtual void startVisit(const FLOAT1* pFLOAT) {};
 	virtual void startVisit(const FLOAT2* pFLOAT2) {};
 	virtual void startVisit(const FLOAT3* pFLOAT3) {};
 	virtual void startVisit(const FLOAT4* pFLOAT4) {};
@@ -50,7 +50,7 @@ public:
 	virtual void finishVisit(const CBUFFER* pCBUFFER) {};
 	virtual void finishVisit(const FLOAT4X4* pFLOAT4X4) {};
 	virtual void finishVisit(const VOID* pVOID) {};
-	virtual void finishVisit(const FLOAT* pFLOAT) {};
+	virtual void finishVisit(const FLOAT1* pFLOAT) {};
 	virtual void finishVisit(const FLOAT2* pFLOAT2) {};
 	virtual void finishVisit(const FLOAT3* pFLOAT3) {};
 	virtual void finishVisit(const FLOAT4* pFLOAT4) {};

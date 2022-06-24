@@ -43,7 +43,7 @@ void VOID::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void FLOAT::query(ShaderVisitor* visitor)
+void FLOAT1::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);

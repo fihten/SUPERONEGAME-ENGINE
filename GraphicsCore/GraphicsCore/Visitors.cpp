@@ -1,5 +1,7 @@
 #include "Visitors.h"
 
+/*________________________________ShadersNamesVisitor________________________________*/
+
 void ShadersNamesVisitor::startVisit(const TECHNIQUE11* pTECHNIQUE11)
 {
 	shadersNames.push_back(ShadersNames());
@@ -24,4 +26,12 @@ void ShadersNamesVisitor::startVisit(const FUNCTION_CALL* pFUNCTION_CALL)
 		shadersNames.back().shaders.push_back(pFUNCTION_CALL->getName());
 		SHADER_VERSION = false;
 	}
+}
+
+/*________________________________InputLayoutVisitor________________________________*/
+
+void InputLayoutVisitor::startVisit(const FUNCTION_DECL* pFUNCTION_DECL)
+{
+	if (shaderName == pFUNCTION_DECL->getName())
+		withinDeclaration = true;
 }

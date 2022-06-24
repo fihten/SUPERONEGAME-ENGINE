@@ -31,7 +31,7 @@ public:
 		printSpaces();
 		std::cout << "void" << std::endl;
 	};
-	void startVisit(const FLOAT* pFLOAT)
+	void startVisit(const FLOAT1* pFLOAT)
 	{
 		printSpaces();
 		std::cout << "float" << std::endl;
@@ -247,7 +247,7 @@ public:
 	};
 	void finishVisit(const FLOAT4X4* pFLOAT4X4) {};
 	void finishVisit(const VOID* pVOID) {};
-	void finishVisit(const FLOAT* pFLOAT) {};
+	void finishVisit(const FLOAT1* pFLOAT) {};
 	void finishVisit(const FLOAT2* pFLOAT2) {};
 	void finishVisit(const FLOAT3* pFLOAT3) {};
 	void finishVisit(const FLOAT4* pFLOAT4) {};
