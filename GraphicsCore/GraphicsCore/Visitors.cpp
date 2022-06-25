@@ -35,3 +35,8 @@ void InputLayoutVisitor::startVisit(const FUNCTION_DECL* pFUNCTION_DECL)
 	if (shaderName == pFUNCTION_DECL->getName())
 		withinDeclaration = true;
 }
+
+void InputLayoutVisitor::finishVisit(const FUNCTION_DECL* pFUNCTION_DECL)
+{
+	withinDeclaration = false;
+}

@@ -37,4 +37,5 @@ public:
 	void setShaderName(const std::string& shaderName) { this->shaderName = shaderName; };
 	
 	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL);
+	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL);
 };
