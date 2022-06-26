@@ -33,10 +33,10 @@ void ShadersNamesVisitor::startVisit(const FUNCTION_CALL* pFUNCTION_CALL)
 void InputLayoutVisitor::startVisit(const FUNCTION_DECL* pFUNCTION_DECL)
 {
 	if (shaderName == pFUNCTION_DECL->getName())
-		withinDeclaration = true;
+		withinShaderDeclaration = true;
 }
 
 void InputLayoutVisitor::finishVisit(const FUNCTION_DECL* pFUNCTION_DECL)
 {
-	withinDeclaration = false;
+	withinShaderDeclaration = false;
 }

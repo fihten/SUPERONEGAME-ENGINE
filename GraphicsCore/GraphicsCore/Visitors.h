@@ -31,7 +31,12 @@ class InputLayoutVisitor : public ShaderVisitor
 	
 	std::string shaderName = "";
 
-	bool withinDeclaration = false;
+	bool withinShaderDeclaration = false;
+	bool inVariable = true;
+
+	std::string semanticName = "";
+	std::string format = "";
+	UINT alignedByteOffset = 0;
 
 public:
 	void setShaderName(const std::string& shaderName) { this->shaderName = shaderName; };
