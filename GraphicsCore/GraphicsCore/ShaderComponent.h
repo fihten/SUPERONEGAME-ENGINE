@@ -192,19 +192,19 @@ public:
 	void query(ShaderVisitor* visitor);
 };
 
-class IN : public MODIFIER
+class IN_MODIFIER : public MODIFIER
 {
 public:
 	void query(ShaderVisitor* visitor);
 };
 
-class OUT : public MODIFIER
+class OUT_MODIFIER : public MODIFIER
 {
 public:
 	void query(ShaderVisitor* visitor);
 };
 
-class INOUT : public MODIFIER
+class INOUT_MODIFIER : public MODIFIER
 {
 public:
 	void query(ShaderVisitor* visitor);

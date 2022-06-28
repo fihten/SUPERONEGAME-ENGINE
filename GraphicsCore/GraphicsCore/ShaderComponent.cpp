@@ -167,19 +167,19 @@ void MODIFIER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void IN::query(ShaderVisitor* visitor)
+void IN_MODIFIER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void OUT::query(ShaderVisitor* visitor)
+void OUT_MODIFIER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void INOUT::query(ShaderVisitor* visitor)
+void INOUT_MODIFIER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);

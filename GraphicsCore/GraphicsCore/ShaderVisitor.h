@@ -25,9 +25,9 @@ public:
 	virtual void startVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	virtual void startVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
-	virtual void startVisit(const IN* pIN) {};
-	virtual void startVisit(const OUT* pOUT) {};
-	virtual void startVisit(const INOUT* pINOUT) {};
+	virtual void startVisit(const IN_MODIFIER* pIN) {};
+	virtual void startVisit(const OUT_MODIFIER* pOUT) {};
+	virtual void startVisit(const INOUT_MODIFIER* pINOUT) {};
 	virtual void startVisit(const UNIFORM* pUNIFORM) {};
 	virtual void startVisit(const VARIABLE* pVARIABLE) {};
 	virtual void startVisit(const VARIABLE_DECL* pVARIABLE_DECL) {};
@@ -67,9 +67,9 @@ public:
 	virtual void finishVisit(const COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void finishVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	virtual void finishVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
-	virtual void finishVisit(const IN* pIN) {};
-	virtual void finishVisit(const OUT* pOUT) {};
-	virtual void finishVisit(const INOUT* pINOUT) {};
+	virtual void finishVisit(const IN_MODIFIER* pIN) {};
+	virtual void finishVisit(const OUT_MODIFIER* pOUT) {};
+	virtual void finishVisit(const INOUT_MODIFIER* pINOUT) {};
 	virtual void finishVisit(const UNIFORM* pUNIFORM) {};
 	virtual void finishVisit(const VARIABLE* pVARIABLE) {};
 	virtual void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL) {};

@@ -43,4 +43,6 @@ public:
 	
 	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL);
 	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL);
+
+	void startVisit(const OUT_MODIFIER* pOUT);
 };

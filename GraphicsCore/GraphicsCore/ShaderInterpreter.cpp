@@ -1271,7 +1271,7 @@ void ShaderInterpreter::insertVariableDeclaration()
 
 void ShaderInterpreter::inState()
 {
-	modifier = new ::IN();
+	modifier = new ::IN_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1279,7 +1279,7 @@ void ShaderInterpreter::inState()
 
 void ShaderInterpreter::outState()
 {
-	modifier = new ::OUT();
+	modifier = new ::OUT_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1287,7 +1287,7 @@ void ShaderInterpreter::outState()
 
 void ShaderInterpreter::inoutState()
 {
-	modifier = new ::INOUT();
+	modifier = new ::INOUT_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;

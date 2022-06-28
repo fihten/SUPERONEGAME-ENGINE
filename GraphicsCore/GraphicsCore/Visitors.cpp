@@ -40,3 +40,9 @@ void InputLayoutVisitor::finishVisit(const FUNCTION_DECL* pFUNCTION_DECL)
 {
 	withinShaderDeclaration = false;
 }
+
+void InputLayoutVisitor::startVisit(const OUT_MODIFIER* pOUT)
+{
+	if (withinShaderDeclaration)
+		inVariable = false;
+}

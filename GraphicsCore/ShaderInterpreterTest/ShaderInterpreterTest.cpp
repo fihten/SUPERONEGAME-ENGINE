@@ -124,17 +124,17 @@ public:
 		printSpaces();
 		std::cout << pPIXEL_SHADER_VERSION->getName() << std::endl;
 	};
-	void startVisit(const IN* pIN) 
+	void startVisit(const IN_MODIFIER* pIN)
 	{
 		printSpaces();
 		std::cout << "in" << std::endl;
 	};
-	void startVisit(const OUT* pOUT) 
+	void startVisit(const OUT_MODIFIER* pOUT)
 	{
 		printSpaces();
 		std::cout << "out" << std::endl;
 	};
-	void startVisit(const INOUT* pINOUT) 
+	void startVisit(const INOUT_MODIFIER* pINOUT)
 	{
 		printSpaces();
 		std::cout << "inout" << std::endl;
@@ -288,9 +288,9 @@ public:
 	};
 	void finishVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
 	void finishVisit(const PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
-	void finishVisit(const IN* pIN) {};
-	void finishVisit(const OUT* pOUT) {};
-	void finishVisit(const INOUT* pINOUT) {};
+	void finishVisit(const IN_MODIFIER* pIN) {};
+	void finishVisit(const OUT_MODIFIER* pOUT) {};
+	void finishVisit(const INOUT_MODIFIER* pINOUT) {};
 	void finishVisit(const UNIFORM* pUNIFORM) {};
 	void finishVisit(const VARIABLE* pVARIABLE) {};
 	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL) 
