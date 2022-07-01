@@ -46,3 +46,27 @@ void InputLayoutVisitor::startVisit(const OUT_MODIFIER* pOUT)
 	if (withinShaderDeclaration)
 		inVariable = false;
 }
+
+void InputLayoutVisitor::startVisit(const FLOAT1* pFLOAT1)
+{
+	if (withinShaderDeclaration)
+		format = "float";
+}
+
+void InputLayoutVisitor::startVisit(const FLOAT2* pFLOAT2)
+{
+	if (withinShaderDeclaration)
+		format = "float2";
+}
+
+void InputLayoutVisitor::startVisit(const FLOAT3* pFLOAT3)
+{
+	if (withinShaderDeclaration)
+		format = "float3";
+}
+
+void InputLayoutVisitor::startVisit(const FLOAT4* pFLOAT4)
+{
+	if (withinShaderDeclaration)
+		format = "float4";
+}

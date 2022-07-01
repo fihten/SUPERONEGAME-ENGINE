@@ -45,4 +45,9 @@ public:
 	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL);
 
 	void startVisit(const OUT_MODIFIER* pOUT);
+
+	void startVisit(const FLOAT1* pFLOAT1);
+	void startVisit(const FLOAT2* pFLOAT2);
+	void startVisit(const FLOAT3* pFLOAT3);
+	void startVisit(const FLOAT4* pFLOAT4);
 };
