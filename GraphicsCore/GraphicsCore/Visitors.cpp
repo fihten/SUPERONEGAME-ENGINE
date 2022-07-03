@@ -70,3 +70,9 @@ void InputLayoutVisitor::startVisit(const FLOAT4* pFLOAT4)
 	if (withinShaderDeclaration)
 		format = "float4";
 }
+
+void InputLayoutVisitor::startVisit(const SEMANTIC* pSEMANTIC)
+{
+	if (withinShaderDeclaration)
+		semanticName = pSEMANTIC->getName();
+}

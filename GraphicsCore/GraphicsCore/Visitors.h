@@ -50,4 +50,6 @@ public:
 	void startVisit(const FLOAT2* pFLOAT2);
 	void startVisit(const FLOAT3* pFLOAT3);
 	void startVisit(const FLOAT4* pFLOAT4);
+
+	void startVisit(const SEMANTIC* pSEMANTIC);
 };
