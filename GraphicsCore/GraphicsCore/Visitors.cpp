@@ -76,3 +76,26 @@ void InputLayoutVisitor::startVisit(const SEMANTIC* pSEMANTIC)
 	if (withinShaderDeclaration)
 		semanticName = pSEMANTIC->getName();
 }
+
+void InputLayoutVisitor::startVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+{
+	inVariable = true;
+	semanticName = "";
+	format = "";
+}
+
+void InputLayoutVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+{
+	if (!withinShaderDeclaration)
+		return;
+	if (!inVariable)
+		return;
+	if (semanticName == std::string(""))
+		return;
+
+	D3D11_INPUT_ELEMENT_DESC desc;
+
+	size_t pos = semanticName.find_last_not_of("0123456789");
+	desc.SemanticName = semanticName.substr(0, pos).c_str();
+	desc.SemanticIndex = std::atoi(semanticName.substr(pos).c_str());
+}

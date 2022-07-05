@@ -52,4 +52,7 @@ public:
 	void startVisit(const FLOAT4* pFLOAT4);
 
 	void startVisit(const SEMANTIC* pSEMANTIC);
+
+	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 };
