@@ -55,4 +55,6 @@ public:
 
 	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+
+	void startVisit(const SHADER* pSHADER);
 };

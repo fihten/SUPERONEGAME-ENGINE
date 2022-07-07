@@ -92,10 +92,46 @@ void InputLayoutVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
 		return;
 	if (semanticName == std::string(""))
 		return;
+	if (inputElementsCount == INPUT_ELEMENT_MAX_COUNT)
+		return;
 
-	D3D11_INPUT_ELEMENT_DESC desc;
+	auto& desc = inputElements[inputElementsCount];
 
 	size_t pos = semanticName.find_last_not_of("0123456789");
 	desc.SemanticName = semanticName.substr(0, pos).c_str();
 	desc.SemanticIndex = std::atoi(semanticName.substr(pos).c_str());
+	
+	desc.AlignedByteOffset = alignedByteOffset;
+
+	if (format == std::string("float"))
+	{
+		desc.Format = DXGI_FORMAT_R32_FLOAT;
+		alignedByteOffset += 4;
+	}
+	else if (format == std::string("float2"))
+	{
+		desc.Format = DXGI_FORMAT_R32G32_FLOAT;
+		alignedByteOffset += 8;
+	}
+	else if (format == std::string("float3"))
+	{
+		desc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+		alignedByteOffset += 12;
+	}
+	else if (format == std::string("float4"))
+	{
+		desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+		alignedByteOffset += 16;
+	}
+
+	desc.InputSlot = 0;
+	desc.InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
+	desc.InstanceDataStepRate = 0;
+
+	++inputElementsCount;
+}
+
+void InputLayoutVisitor::startVisit(const SHADER* pSHADER)
+{
+	inputElementsCount = 0;
 }
