@@ -21,6 +21,8 @@ public:
 	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION);
 	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL);
 
+public:
+	std::vector<ShadersNames>&& getShadersNames() { return std::move(shadersNames); };
 };
 
 #define INPUT_ELEMENT_MAX_COUNT 32
