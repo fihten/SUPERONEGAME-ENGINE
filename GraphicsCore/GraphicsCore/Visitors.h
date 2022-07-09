@@ -57,4 +57,7 @@ public:
 	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 
 	void startVisit(const SHADER* pSHADER);
+
+public:
+	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
 };

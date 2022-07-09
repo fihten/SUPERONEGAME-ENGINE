@@ -135,3 +135,11 @@ void InputLayoutVisitor::startVisit(const SHADER* pSHADER)
 {
 	inputElementsCount = 0;
 }
+
+ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength)
+{
+	ID3D11InputLayout** inputLayout = nullptr;
+	device->CreateInputLayout(inputElements, inputElementsCount, shaderByteCode, byteCodeLength, inputLayout);
+
+	return *inputLayout;
+}
