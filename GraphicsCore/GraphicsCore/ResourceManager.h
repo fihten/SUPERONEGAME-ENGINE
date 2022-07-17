@@ -25,9 +25,11 @@ public:
 		OK,
 		TECHNIQUE_ALREADY_EXISTS,
 		TECHNIQUE_DOESNT_EXIST,
-		PASS_ALREADY_EXISTS
+		PASS_ALREADY_EXISTS,
+		PASS_DOESNT_EXIST
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
 	RegisterMessage registerPass(const std::string& techniqueName, const std::string& passName, const ID3DX11EffectPass* pass);
+	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout);
 };
