@@ -63,3 +63,15 @@ public:
 public:
 	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
 };
+
+#define ELEMENTS_OF_CBUFFER_MAX_COUNT 32
+class ElementsOfCbufferVisitor : public ShaderVisitor
+{
+	struct ElementOfCbuffer
+	{
+		std::string type = "";
+		std::string name = "";
+	};
+	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
+	int elementsCount = 0;
+};
