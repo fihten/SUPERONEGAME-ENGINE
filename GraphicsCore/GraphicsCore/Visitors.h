@@ -67,6 +67,8 @@ public:
 #define ELEMENTS_OF_CBUFFER_MAX_COUNT 32
 class ElementsOfCbufferVisitor : public ShaderVisitor
 {
+	bool withinCbuffer = false;
+public:
 	struct ElementOfCbuffer
 	{
 		std::string type = "";
@@ -74,4 +76,7 @@ class ElementsOfCbufferVisitor : public ShaderVisitor
 	};
 	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
 	int elementsCount = 0;
+
+	void startVisit(const CBUFFER* pCBUFFER);
+	void finishVisit(const CBUFFER* pCBUFFER);
 };

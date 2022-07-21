@@ -143,3 +143,15 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 
 	return *inputLayout;
 }
+
+/*________________________________ElementsOfCbufferVisitor________________________________*/
+
+void ElementsOfCbufferVisitor::startVisit(const CBUFFER* pCBUFFER)
+{
+	withinCbuffer = true;
+}
+
+void ElementsOfCbufferVisitor::finishVisit(const CBUFFER* pCBUFFER)
+{
+	withinCbuffer = false;
+}
