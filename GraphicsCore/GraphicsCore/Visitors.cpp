@@ -155,3 +155,18 @@ void ElementsOfCbufferVisitor::finishVisit(const CBUFFER* pCBUFFER)
 {
 	withinCbuffer = false;
 }
+
+void ElementsOfCbufferVisitor::startVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+{
+	if (withinCbuffer)
+	{
+		++elementsCount;
+		withinVariableDeclaration = true;
+	}
+}
+
+void ElementsOfCbufferVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+{
+	if (withinCbuffer)
+		withinVariableDeclaration = false;
+}

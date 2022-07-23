@@ -68,15 +68,21 @@ public:
 class ElementsOfCbufferVisitor : public ShaderVisitor
 {
 	bool withinCbuffer = false;
+	bool withinVariableDeclaration = false;
 public:
 	struct ElementOfCbuffer
 	{
 		std::string type = "";
 		std::string name = "";
 	};
-	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
-	int elementsCount = 0;
 
 	void startVisit(const CBUFFER* pCBUFFER);
 	void finishVisit(const CBUFFER* pCBUFFER);
+
+	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+
+private:
+	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
+	int elementsCount = 0;
 };
