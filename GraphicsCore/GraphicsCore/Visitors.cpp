@@ -170,3 +170,9 @@ void ElementsOfCbufferVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
 	if (withinCbuffer)
 		withinVariableDeclaration = false;
 }
+
+void ElementsOfCbufferVisitor::startVisit(const FLOAT4X4* pFLOAT4X4)
+{
+	if (withinCbuffer && withinVariableDeclaration)
+		elements[elementsCount - 1].type = "float4x4";
+}

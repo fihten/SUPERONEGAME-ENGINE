@@ -82,6 +82,8 @@ public:
 	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 
+	void startVisit(const FLOAT4X4* pFLOAT4X4);
+
 private:
 	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
 	int elementsCount = 0;
