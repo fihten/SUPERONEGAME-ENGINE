@@ -76,6 +76,8 @@ public:
 		std::string name = "";
 	};
 
+	void startVisit(const SHADER* pSHADER);
+
 	void startVisit(const CBUFFER* pCBUFFER);
 	void finishVisit(const CBUFFER* pCBUFFER);
 
@@ -83,6 +85,9 @@ public:
 	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
 
 	void startVisit(const FLOAT4X4* pFLOAT4X4);
+	void startVisit(const VARIABLE* pVARIABLE);
+
+	void getElements(ElementOfCbuffer*& pElements, int& count);
 
 private:
 	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];

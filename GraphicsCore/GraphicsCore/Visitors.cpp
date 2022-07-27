@@ -146,6 +146,11 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 
 /*________________________________ElementsOfCbufferVisitor________________________________*/
 
+void ElementsOfCbufferVisitor::startVisit(const SHADER* pSHADER)
+{
+	elementsCount = 0;
+}
+
 void ElementsOfCbufferVisitor::startVisit(const CBUFFER* pCBUFFER)
 {
 	withinCbuffer = true;
@@ -175,4 +180,16 @@ void ElementsOfCbufferVisitor::startVisit(const FLOAT4X4* pFLOAT4X4)
 {
 	if (withinCbuffer && withinVariableDeclaration)
 		elements[elementsCount - 1].type = "float4x4";
+}
+
+void ElementsOfCbufferVisitor::startVisit(const VARIABLE* pVARIABLE)
+{
+	if (withinCbuffer && withinVariableDeclaration)
+		elements[elementsCount - 1].name = pVARIABLE->getName();
+}
+
+void ElementsOfCbufferVisitor::getElements(ElementOfCbuffer*& pElements, int& count)
+{
+	pElements = elements;
+	count = elementsCount;
 }
