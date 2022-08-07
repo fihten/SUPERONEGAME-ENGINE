@@ -63,7 +63,7 @@ class ShaderInterpreter
 		ARGUMENTS_LIST_OPEN_BRACKET,
 		ARGUMENTS_LIST_CLOSE_BRACKET,
 		ASSIGNMENT,
-		VOID,
+		VOID_,
 		FLOAT1,
 		FLOAT2,
 		FLOAT3,
@@ -82,10 +82,10 @@ class ShaderInterpreter
 		INSERT_FUNCTION_DECLARATION,
 		VARIABLE_DECLARATION,
 		INSERT_VARIABLE_DECLARATION,
-		IN,
-		OUT,
-		INOUT,
-		UNIFORM,
+		IN_,
+		OUT_,
+		INOUT_,
+		UNIFORM_,
 		MUL,
 		FLOAT4_CONSTRUCTOR,
 		CBUFFER,
@@ -107,7 +107,7 @@ class ShaderInterpreter
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
 
-	std::stack<ShaderComponent*> componentStack;
+	std::stack<ShaderUnits::ShaderComponent*> componentStack;
 
 	void unknown();
 
@@ -166,7 +166,7 @@ class ShaderInterpreter
 	void outState();
 	void inoutState();
 	void uniformState();
-	ShaderComponent* modifier = nullptr;
+	ShaderUnits::ShaderComponent* modifier = nullptr;
 
 	void mulState();
 	void float4constructor();
@@ -174,7 +174,7 @@ class ShaderInterpreter
 	struct CbufferDefinition
 	{
 		std::string name = "";
-		ShaderComponent* body = nullptr;
+		ShaderUnits::ShaderComponent* body = nullptr;
 
 		void clear() { name = ""; body = nullptr; }
 	};
@@ -185,11 +185,11 @@ class ShaderInterpreter
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
 
-	ShaderComponent* tech = nullptr;
+	ShaderUnits::ShaderComponent* tech = nullptr;
 	void technique11state();
 	void insertTechnique11();
 
-	ShaderComponent* pass = nullptr;
+	ShaderUnits::ShaderComponent* pass = nullptr;
 	void passState();
 	void insertPass();
 
@@ -205,13 +205,13 @@ class ShaderInterpreter
 
 	struct DeclarationFunctionOrVariable
 	{
-		ShaderComponent* modifier = nullptr;
-		ShaderComponent* type = nullptr;
+		ShaderUnits::ShaderComponent* modifier = nullptr;
+		ShaderUnits::ShaderComponent* type = nullptr;
 		std::string name = "";
-		ShaderComponent* signature = nullptr;
-		ShaderComponent* semantic = nullptr;
-		ShaderComponent* body = nullptr;
-		ShaderComponent* value = nullptr;
+		ShaderUnits::ShaderComponent* signature = nullptr;
+		ShaderUnits::ShaderComponent* semantic = nullptr;
+		ShaderUnits::ShaderComponent* body = nullptr;
+		ShaderUnits::ShaderComponent* value = nullptr;
 	};
 	std::stack<ShaderInterpreter::DeclarationFunctionOrVariable> decls;
 
@@ -224,5 +224,5 @@ public:
 		this->shaderText = shaderText;
 		this->currentIndex = 0;
 	}
-	::SHADER* build();
+	ShaderUnits::SHADER* build();
 };

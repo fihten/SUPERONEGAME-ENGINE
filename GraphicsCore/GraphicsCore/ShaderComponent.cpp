@@ -1,21 +1,13 @@
 #include "ShaderComponent.h"
 #include "ShaderVisitor.h"
 
-void ShaderComponent::query(ShaderVisitor* visitor)
+void ShaderUnits::ShaderComponent::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void ShaderComposite::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	for (auto ch : childs)
-		ch->query(visitor);
-	visitor->finishVisit(this);
-}
-
-void SHADER::query(ShaderVisitor* visitor)
+void ShaderUnits::ShaderComposite::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -23,7 +15,7 @@ void SHADER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void CBUFFER::query(ShaderVisitor* visitor)
+void ShaderUnits::SHADER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -31,43 +23,7 @@ void CBUFFER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void FLOAT4X4::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void VOID::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void FLOAT1::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void FLOAT2::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void FLOAT3::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void FLOAT4::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void STRUCT::query(ShaderVisitor* visitor)
+void ShaderUnits::CBUFFER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -75,49 +31,43 @@ void STRUCT::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void SEMANTIC::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT4X4::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void SV_POSITION::query(ShaderVisitor* visitor)
+void ShaderUnits::VOID_::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void SV_TARGET::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT1::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
 
-void FUNCTION_DECL::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT2::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
-	for (auto ch : childs)
-		ch->query(visitor);
 	visitor->finishVisit(this);
 }
 
-void FUNCTION_CALL::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT3::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
-	for (auto ch : childs)
-		ch->query(visitor);
 	visitor->finishVisit(this);
 }
 
-void MUL::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT4::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
-	for (auto ch : childs)
-		ch->query(visitor);
 	visitor->finishVisit(this);
 }
 
-void FLOAT4_CONSTRUCTOR::query(ShaderVisitor* visitor)
+void ShaderUnits::STRUCT::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -125,7 +75,25 @@ void FLOAT4_CONSTRUCTOR::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void SET_VERTEX_SHADER::query(ShaderVisitor* visitor)
+void ShaderUnits::SEMANTIC::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::SV_POSITION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::SV_TARGET::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::FUNCTION_DECL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -133,7 +101,7 @@ void SET_VERTEX_SHADER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void SET_PIXEL_SHADER::query(ShaderVisitor* visitor)
+void ShaderUnits::FUNCTION_CALL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -141,7 +109,7 @@ void SET_PIXEL_SHADER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void COMPILE_SHADER::query(ShaderVisitor* visitor)
+void ShaderUnits::MUL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -149,55 +117,7 @@ void COMPILE_SHADER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void VERTEX_SHADER_VERSION::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void PIXEL_SHADER_VERSION::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void MODIFIER::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void IN_MODIFIER::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void OUT_MODIFIER::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void INOUT_MODIFIER::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void UNIFORM::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void VARIABLE::query(ShaderVisitor* visitor)
-{
-	visitor->startVisit(this);
-	visitor->finishVisit(this);
-}
-
-void VARIABLE_DECL::query(ShaderVisitor* visitor)
+void ShaderUnits::FLOAT4_CONSTRUCTOR::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -205,7 +125,7 @@ void VARIABLE_DECL::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void BINARY_MINUS::query(ShaderVisitor* visitor)
+void ShaderUnits::SET_VERTEX_SHADER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -213,7 +133,7 @@ void BINARY_MINUS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void BINARY_PLUS::query(ShaderVisitor* visitor)
+void ShaderUnits::SET_PIXEL_SHADER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -221,7 +141,7 @@ void BINARY_PLUS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void BINARY_DIVIDE::query(ShaderVisitor* visitor)
+void ShaderUnits::COMPILE_SHADER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -229,7 +149,55 @@ void BINARY_DIVIDE::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void BINARY_MULTIPLY::query(ShaderVisitor* visitor)
+void ShaderUnits::VERTEX_SHADER_VERSION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::PIXEL_SHADER_VERSION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::MODIFIER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::IN_MODIFIER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::OUT_MODIFIER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::INOUT_MODIFIER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::UNIFORM::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::VARIABLE::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::VARIABLE_DECL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -237,7 +205,7 @@ void BINARY_MULTIPLY::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void UNARY_MINUS::query(ShaderVisitor* visitor)
+void ShaderUnits::BINARY_MINUS::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -245,7 +213,7 @@ void UNARY_MINUS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void UNARY_PLUS::query(ShaderVisitor* visitor)
+void ShaderUnits::BINARY_PLUS::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -253,7 +221,7 @@ void UNARY_PLUS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void ASSIGNMENT::query(ShaderVisitor* visitor)
+void ShaderUnits::BINARY_DIVIDE::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -261,7 +229,7 @@ void ASSIGNMENT::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void TECHNIQUE11::query(ShaderVisitor* visitor)
+void ShaderUnits::BINARY_MULTIPLY::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -269,7 +237,7 @@ void TECHNIQUE11::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void PASS::query(ShaderVisitor* visitor)
+void ShaderUnits::UNARY_MINUS::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -277,7 +245,7 @@ void PASS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void ROUND_BRACKETS::query(ShaderVisitor* visitor)
+void ShaderUnits::UNARY_PLUS::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -285,7 +253,7 @@ void ROUND_BRACKETS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void SQUARE_BRACKETS::query(ShaderVisitor* visitor)
+void ShaderUnits::ASSIGNMENT::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -293,7 +261,7 @@ void SQUARE_BRACKETS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void CURLY_BRACKETS::query(ShaderVisitor* visitor)
+void ShaderUnits::TECHNIQUE11::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)
@@ -301,7 +269,39 @@ void CURLY_BRACKETS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
-void RETURN::query(ShaderVisitor* visitor)
+void ShaderUnits::PASS::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::ROUND_BRACKETS::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::SQUARE_BRACKETS::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::CURLY_BRACKETS::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::RETURN::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
 	for (auto ch : childs)

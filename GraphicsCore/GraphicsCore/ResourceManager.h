@@ -39,3 +39,5 @@ public:
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3D10EffectMatrixVariable* matrix);
 };
+
+extern ResourceManager resourceManager;

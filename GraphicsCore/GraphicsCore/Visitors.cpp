@@ -2,24 +2,24 @@
 
 /*________________________________ShadersNamesVisitor________________________________*/
 
-void ShadersNamesVisitor::startVisit(const TECHNIQUE11* pTECHNIQUE11)
+void ShadersNamesVisitor::startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11)
 {
 	shadersNames.push_back(ShadersNames());
 	shadersNames.back().technique = pTECHNIQUE11->getName();
 }
 
 
-void ShadersNamesVisitor::startVisit(const PASS* pPASS)
+void ShadersNamesVisitor::startVisit(const ShaderUnits::PASS* pPASS)
 {
 	shadersNames.back().passes.push_back(pPASS->getName());
 }
 
-void ShadersNamesVisitor::startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION)
+void ShadersNamesVisitor::startVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION)
 {
 	SHADER_VERSION = true;
 }
 
-void ShadersNamesVisitor::startVisit(const FUNCTION_CALL* pFUNCTION_CALL)
+void ShadersNamesVisitor::startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL)
 {
 	if (SHADER_VERSION)
 	{
@@ -30,61 +30,61 @@ void ShadersNamesVisitor::startVisit(const FUNCTION_CALL* pFUNCTION_CALL)
 
 /*________________________________InputLayoutVisitor________________________________*/
 
-void InputLayoutVisitor::startVisit(const FUNCTION_DECL* pFUNCTION_DECL)
+void InputLayoutVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 {
 	if (shaderName == pFUNCTION_DECL->getName())
 		withinShaderDeclaration = true;
 }
 
-void InputLayoutVisitor::finishVisit(const FUNCTION_DECL* pFUNCTION_DECL)
+void InputLayoutVisitor::finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 {
 	withinShaderDeclaration = false;
 }
 
-void InputLayoutVisitor::startVisit(const OUT_MODIFIER* pOUT)
+void InputLayoutVisitor::startVisit(const ShaderUnits::OUT_MODIFIER* pOUT)
 {
 	if (withinShaderDeclaration)
 		inVariable = false;
 }
 
-void InputLayoutVisitor::startVisit(const FLOAT1* pFLOAT1)
+void InputLayoutVisitor::startVisit(const ShaderUnits::FLOAT1* pFLOAT1)
 {
 	if (withinShaderDeclaration)
 		format = "float";
 }
 
-void InputLayoutVisitor::startVisit(const FLOAT2* pFLOAT2)
+void InputLayoutVisitor::startVisit(const ShaderUnits::FLOAT2* pFLOAT2)
 {
 	if (withinShaderDeclaration)
 		format = "float2";
 }
 
-void InputLayoutVisitor::startVisit(const FLOAT3* pFLOAT3)
+void InputLayoutVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
 {
 	if (withinShaderDeclaration)
 		format = "float3";
 }
 
-void InputLayoutVisitor::startVisit(const FLOAT4* pFLOAT4)
+void InputLayoutVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
 {
 	if (withinShaderDeclaration)
 		format = "float4";
 }
 
-void InputLayoutVisitor::startVisit(const SEMANTIC* pSEMANTIC)
+void InputLayoutVisitor::startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC)
 {
 	if (withinShaderDeclaration)
 		semanticName = pSEMANTIC->getName();
 }
 
-void InputLayoutVisitor::startVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+void InputLayoutVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
 	inVariable = true;
 	semanticName = "";
 	format = "";
 }
 
-void InputLayoutVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+void InputLayoutVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
 	if (!withinShaderDeclaration)
 		return;
@@ -131,7 +131,7 @@ void InputLayoutVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
 	++inputElementsCount;
 }
 
-void InputLayoutVisitor::startVisit(const SHADER* pSHADER)
+void InputLayoutVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
 {
 	inputElementsCount = 0;
 }
@@ -146,22 +146,22 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 
 /*________________________________ElementsOfCbufferVisitor________________________________*/
 
-void ElementsOfCbufferVisitor::startVisit(const SHADER* pSHADER)
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
 {
 	elementsCount = 0;
 }
 
-void ElementsOfCbufferVisitor::startVisit(const CBUFFER* pCBUFFER)
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 {
 	withinCbuffer = true;
 }
 
-void ElementsOfCbufferVisitor::finishVisit(const CBUFFER* pCBUFFER)
+void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 {
 	withinCbuffer = false;
 }
 
-void ElementsOfCbufferVisitor::startVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
 	if (withinCbuffer)
 	{
@@ -170,19 +170,19 @@ void ElementsOfCbufferVisitor::startVisit(const VARIABLE_DECL* pVARIABLE_DECL)
 	}
 }
 
-void ElementsOfCbufferVisitor::finishVisit(const VARIABLE_DECL* pVARIABLE_DECL)
+void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
 	if (withinCbuffer)
 		withinVariableDeclaration = false;
 }
 
-void ElementsOfCbufferVisitor::startVisit(const FLOAT4X4* pFLOAT4X4)
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4)
 {
 	if (withinCbuffer && withinVariableDeclaration)
 		elements[elementsCount - 1].type = "float4x4";
 }
 
-void ElementsOfCbufferVisitor::startVisit(const VARIABLE* pVARIABLE)
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE* pVARIABLE)
 {
 	if (withinCbuffer && withinVariableDeclaration)
 		elements[elementsCount - 1].name = pVARIABLE->getName();

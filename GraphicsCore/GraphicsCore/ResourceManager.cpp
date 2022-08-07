@@ -1,5 +1,7 @@
 #include "ResourceManager.h"
 
+ResourceManager resourceManager;
+
 ResourceManager::RegisterMessage ResourceManager::registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique)
 {
 	if (techniques.count(techniqueName) != 0)

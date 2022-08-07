@@ -1,13 +1,13 @@
 #include "ShaderInterpreter.h"
 #include "StringUtils.h"
 
-::SHADER* ShaderInterpreter::build()
+ShaderUnits::SHADER* ShaderInterpreter::build()
 {
 	words = std::queue<std::string>();
 	statesStack = std::stack<State>();
 	
-	componentStack = std::stack<ShaderComponent*>();
-	componentStack.push(new ::SHADER());
+	componentStack = std::stack<ShaderUnits::ShaderComponent*>();
+	componentStack.push(new ShaderUnits::SHADER());
 	
 	currentState = State::UNKNOWN;
 	currentIndex = 0;
@@ -106,7 +106,7 @@
 			assignment();
 			break;
 
-		case State::VOID:
+		case State::VOID_:
 			voidState();
 			break;
 
@@ -182,19 +182,19 @@
 			insertVariableDeclaration();
 			break;
 
-		case State::IN:
+		case State::IN_:
 			inState();
 			break;
 
-		case State::OUT:
+		case State::OUT_:
 			outState();
 			break;
 
-		case State::INOUT:
+		case State::INOUT_:
 			inoutState();
 			break;
 
-		case State::UNIFORM:
+		case State::UNIFORM_:
 			uniformState();
 			break;
 
@@ -268,7 +268,7 @@
 		}
 	}
 
-	return dynamic_cast<::SHADER*>(componentStack.top());
+	return dynamic_cast<ShaderUnits::SHADER*>(componentStack.top());
 }
 
 void ShaderInterpreter::unknown()
@@ -336,7 +336,7 @@ void ShaderInterpreter::unknown()
 	if (word == std::string("void"))
 	{
 		words.pop();
-		currentState = State::VOID;
+		currentState = State::VOID_;
 
 		return;
 	}
@@ -378,28 +378,28 @@ void ShaderInterpreter::unknown()
 	if (word == std::string("in"))
 	{
 		words.pop();
-		currentState = State::IN;
+		currentState = State::IN_;
 
 		return;
 	}
 	if (word == std::string("out"))
 	{
 		words.pop();
-		currentState = State::OUT;
+		currentState = State::OUT_;
 
 		return;
 	}
 	if (word == std::string("inout"))
 	{
 		words.pop();
-		currentState = State::INOUT;
+		currentState = State::INOUT_;
 
 		return;
 	}
 	if (word == std::string("uniform"))
 	{
 		words.pop();
-		currentState = State::UNIFORM;
+		currentState = State::UNIFORM_;
 
 		return;
 	}
@@ -559,10 +559,10 @@ void ShaderInterpreter::finishExpression()
 
 	if (op)
 	{
-		ShaderComponent* operand = componentStack.top();
+		ShaderUnits::ShaderComponent* operand = componentStack.top();
 		componentStack.pop();
 
-		ShaderComponent* operation = componentStack.top();
+		ShaderUnits::ShaderComponent* operation = componentStack.top();
 		operation->add(operand);
 	}
 
@@ -605,10 +605,10 @@ void ShaderInterpreter::finishExpression()
 	if ((word != std::string(")") || lastState != State::BRACKETS_UNARY_OPERATOR_OPEN) &&
 		((word != std::string(")") && word != std::string(";") && word != std::string(",")) || lastState != State::VARIABLE_DECLARATION))
 	{
-		ShaderComponent* componentToAdd = componentStack.top();
+		ShaderUnits::ShaderComponent* componentToAdd = componentStack.top();
 		componentStack.pop();
 
-		ShaderComponent* composite = componentStack.top();
+		ShaderUnits::ShaderComponent* composite = componentStack.top();
 		composite->add(componentToAdd);
 
 		if (word != std::string(")") && word != std::string(";"))
@@ -656,10 +656,10 @@ void ShaderInterpreter::creatingBinaryMinus()
 {
 	words.pop();
 
-	ShaderComponent* leftOperand = componentStack.top();
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* binaryMinusOp = new ::BINARY_MINUS();
+	ShaderUnits::ShaderComponent* binaryMinusOp = new ShaderUnits::BINARY_MINUS();
 	binaryMinusOp->add(leftOperand);
 
 	componentStack.push(binaryMinusOp);
@@ -687,10 +687,10 @@ void ShaderInterpreter::creatingBinaryPlus()
 {
 	words.pop();
 
-	ShaderComponent* leftOperand = componentStack.top();
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* binaryPlusOp = new ::BINARY_PLUS();
+	ShaderUnits::ShaderComponent* binaryPlusOp = new ShaderUnits::BINARY_PLUS();
 	binaryPlusOp->add(leftOperand);
 
 	componentStack.push(binaryPlusOp);
@@ -716,10 +716,10 @@ void ShaderInterpreter::creatingBinaryDivide()
 {
 	words.pop();
 
-	ShaderComponent* leftOperand = componentStack.top();
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* binaryDivideOp = new ::BINARY_DIVIDE();
+	ShaderUnits::ShaderComponent* binaryDivideOp = new ShaderUnits::BINARY_DIVIDE();
 	binaryDivideOp->add(leftOperand);
 
 	componentStack.push(binaryDivideOp);
@@ -746,10 +746,10 @@ void ShaderInterpreter::creatingBinaryMultiply()
 {
 	words.pop();
 
-	ShaderComponent* leftOperand = componentStack.top();
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* binaryMultiplyOp = new ::BINARY_MULTIPLY();
+	ShaderUnits::ShaderComponent* binaryMultiplyOp = new ShaderUnits::BINARY_MULTIPLY();
 	binaryMultiplyOp->add(leftOperand);
 
 	componentStack.push(binaryMultiplyOp);
@@ -760,7 +760,7 @@ void ShaderInterpreter::creatingBinaryMultiply()
 
 void ShaderInterpreter::variable()
 {
-	ShaderComponent* var = new ::VARIABLE();
+	ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
 	var->setName(userName);
 	userName = std::string("");
 
@@ -786,7 +786,7 @@ void ShaderInterpreter::unaryMinus()
 	statesStack.push(State::UNARY_MINUS);
 	currentState = State::UNKNOWN;
 
-	ShaderComponent* unaryMinusOp = new ::UNARY_MINUS();
+	ShaderUnits::ShaderComponent* unaryMinusOp = new ShaderUnits::UNARY_MINUS();
 	componentStack.push(unaryMinusOp);
 }
 
@@ -795,13 +795,13 @@ void ShaderInterpreter::unaryPlus()
 	statesStack.push(State::UNARY_PLUS);
 	currentState = State::UNKNOWN;
 
-	ShaderComponent* unaryPlusOp = new ::UNARY_PLUS();
+	ShaderUnits::ShaderComponent* unaryPlusOp = new ShaderUnits::UNARY_PLUS();
 	componentStack.push(unaryPlusOp);
 }
 
 void ShaderInterpreter::functionCall()
 {
-	ShaderComponent* functionCallOp = new ::FUNCTION_CALL();
+	ShaderUnits::ShaderComponent* functionCallOp = new ShaderUnits::FUNCTION_CALL();
 	functionCallOp->setName(userName);
 	userName = std::string("");
 
@@ -813,7 +813,7 @@ void ShaderInterpreter::functionCall()
 
 void ShaderInterpreter::argumentsListOpenBracket()
 {
-	ShaderComponent* arguments = new ::ROUND_BRACKETS();
+	ShaderUnits::ShaderComponent* arguments = new ShaderUnits::ROUND_BRACKETS();
 	componentStack.push(arguments);
 
 	statesStack.push(State::ARGUMENTS_LIST_OPEN_BRACKET);
@@ -825,10 +825,10 @@ void ShaderInterpreter::argumentsListCloseBracket()
 	statesStack.pop();
 	statesStack.pop();
 
-	ShaderComponent* arguments = componentStack.top();
+	ShaderUnits::ShaderComponent* arguments = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* func = componentStack.top();
+	ShaderUnits::ShaderComponent* func = componentStack.top();
 	func->add(arguments);
 
 	std::string word = words.front();
@@ -848,10 +848,10 @@ void ShaderInterpreter::assignment()
 {
 	words.pop();
 
-	ShaderComponent* leftValue = componentStack.top();
+	ShaderUnits::ShaderComponent* leftValue = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* assignmentOp = new ::ASSIGNMENT();
+	ShaderUnits::ShaderComponent* assignmentOp = new ShaderUnits::ASSIGNMENT();
 	assignmentOp->add(leftValue);
 	componentStack.push(assignmentOp);
 
@@ -868,7 +868,7 @@ void ShaderInterpreter::voidState()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::VOID();
+		decl.type = new ShaderUnits::VOID_();
 		decl.name = word;
 
 		decls.push(decl);
@@ -887,7 +887,7 @@ void ShaderInterpreter::floatState()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT1();
+		decl.type = new ShaderUnits::FLOAT1();
 		decl.name = word;
 
 		decls.push(decl);
@@ -906,7 +906,7 @@ void ShaderInterpreter::float2State()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT2();
+		decl.type = new ShaderUnits::FLOAT2();
 		decl.name = word;
 
 		decls.push(decl);
@@ -925,7 +925,7 @@ void ShaderInterpreter::float3State()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT3();
+		decl.type = new ShaderUnits::FLOAT3();
 		decl.name = word;
 
 		decls.push(decl);
@@ -944,7 +944,7 @@ void ShaderInterpreter::float4State()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT4();
+		decl.type = new ShaderUnits::FLOAT4();
 		decl.name = word;
 
 		decls.push(decl);
@@ -971,7 +971,7 @@ void ShaderInterpreter::float4x4State()
 
 		ShaderInterpreter::DeclarationFunctionOrVariable decl;
 
-		decl.type = new ::FLOAT4X4();
+		decl.type = new ShaderUnits::FLOAT4X4();
 		decl.name = word;
 
 		decls.push(decl);
@@ -1011,7 +1011,7 @@ void ShaderInterpreter::functionDeclaration()
 
 void ShaderInterpreter::signatureOpenBracket()
 {
-	ShaderComponent* signature = new ::ROUND_BRACKETS();
+	ShaderUnits::ShaderComponent* signature = new ShaderUnits::ROUND_BRACKETS();
 	decls.top().signature = signature;
 	componentStack.push(signature);
 
@@ -1076,7 +1076,7 @@ void ShaderInterpreter::svPosition()
 {
 	std::string word = words.front();
 
-	ShaderComponent* semanticElement = new ::SV_POSITION();
+	ShaderUnits::ShaderComponent* semanticElement = new ShaderUnits::SV_POSITION();
 	decls.top().semantic = semanticElement;
 
 	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
@@ -1104,7 +1104,7 @@ void ShaderInterpreter::svTarget()
 {
 	std::string word = words.front();
 
-	ShaderComponent* semanticElement = new ::SV_TARGET();
+	ShaderUnits::ShaderComponent* semanticElement = new ShaderUnits::SV_TARGET();
 	decls.top().semantic = semanticElement;
 
 	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
@@ -1132,7 +1132,7 @@ void ShaderInterpreter::customSemantic()
 {
 	std::string word = words.front();
 
-	ShaderComponent* semanticElement = new ::SEMANTIC();
+	ShaderUnits::ShaderComponent* semanticElement = new ShaderUnits::SEMANTIC();
 	semanticElement->setName(userName);
 	userName = std::string("");
 	decls.top().semantic = semanticElement;
@@ -1160,7 +1160,7 @@ void ShaderInterpreter::customSemantic()
 
 void ShaderInterpreter::functionBodyOpenBracket()
 {
-	ShaderComponent* body = new ::CURLY_BRACKETS();
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
 	decls.top().body = body;
 	componentStack.push(body);
 
@@ -1177,7 +1177,7 @@ void ShaderInterpreter::functionBodyCloseBracket()
 
 	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
 	
-	FUNCTION_DECL* funcDecl = new ::FUNCTION_DECL();
+	ShaderUnits::FUNCTION_DECL* funcDecl = new ShaderUnits::FUNCTION_DECL();
 	funcDecl->add(funcDeclStruct.type);
 	funcDecl->setName(funcDeclStruct.name);
 	funcDecl->add(funcDeclStruct.signature);
@@ -1199,7 +1199,7 @@ void ShaderInterpreter::insertFunctionDeclaration()
 
 	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
 
-	FUNCTION_DECL* funcDecl = new ::FUNCTION_DECL();
+	ShaderUnits::FUNCTION_DECL* funcDecl = new ShaderUnits::FUNCTION_DECL();
 	funcDecl->add(funcDeclStruct.type);
 	funcDecl->setName(funcDeclStruct.name);
 	funcDecl->add(funcDeclStruct.signature);
@@ -1249,7 +1249,7 @@ void ShaderInterpreter::insertVariableDeclaration()
 {
 	statesStack.pop();
 
-	ShaderComponent* pVariableDeclaration = new ::VARIABLE_DECL();
+	ShaderUnits::ShaderComponent* pVariableDeclaration = new ShaderUnits::VARIABLE_DECL();
 	
 	if (decls.top().modifier)
 		pVariableDeclaration->add(decls.top().modifier);
@@ -1271,7 +1271,7 @@ void ShaderInterpreter::insertVariableDeclaration()
 
 void ShaderInterpreter::inState()
 {
-	modifier = new ::IN_MODIFIER();
+	modifier = new ShaderUnits::IN_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1279,7 +1279,7 @@ void ShaderInterpreter::inState()
 
 void ShaderInterpreter::outState()
 {
-	modifier = new ::OUT_MODIFIER();
+	modifier = new ShaderUnits::OUT_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1287,7 +1287,7 @@ void ShaderInterpreter::outState()
 
 void ShaderInterpreter::inoutState()
 {
-	modifier = new ::INOUT_MODIFIER();
+	modifier = new ShaderUnits::INOUT_MODIFIER();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1295,7 +1295,7 @@ void ShaderInterpreter::inoutState()
 
 void ShaderInterpreter::uniformState()
 {
-	modifier = new ::UNIFORM();
+	modifier = new ShaderUnits::UNIFORM();
 	currentState = State::UNKNOWN;
 
 	return;
@@ -1305,7 +1305,7 @@ void ShaderInterpreter::mulState()
 {
 	statesStack.push(State::MUL);
 
-	ShaderComponent* pMul = new ::MUL();
+	ShaderUnits::ShaderComponent* pMul = new ShaderUnits::MUL();
 	componentStack.push(pMul);
 
 	std::string word = words.front();
@@ -1320,7 +1320,7 @@ void ShaderInterpreter::mulState()
 
 void ShaderInterpreter::float4constructor()
 {
-	ShaderComponent* pFloat4Constructor = new ::FLOAT4_CONSTRUCTOR();
+	ShaderUnits::ShaderComponent* pFloat4Constructor = new ShaderUnits::FLOAT4_CONSTRUCTOR();
 	componentStack.push(pFloat4Constructor);
 
 	statesStack.push(State::FLOAT4_CONSTRUCTOR);
@@ -1377,7 +1377,7 @@ void ShaderInterpreter::insertCbuffer()
 	if (statesStack.top() == State::CBUFFER)
 		statesStack.pop();
 
-	ShaderComponent* pCbuffer = new ::CBUFFER();
+	ShaderUnits::ShaderComponent* pCbuffer = new ShaderUnits::CBUFFER();
 	if (cbufferDecl.name != std::string(""))
 		pCbuffer->setName(cbufferDecl.name);
 	if (cbufferDecl.body)
@@ -1386,7 +1386,7 @@ void ShaderInterpreter::insertCbuffer()
 
 	componentStack.pop();
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pCbuffer);
 
 	currentState = State::UNKNOWN;
@@ -1396,7 +1396,7 @@ void ShaderInterpreter::insertCbuffer()
 
 void ShaderInterpreter::cbufferBodyOpenBracket()
 {
-	ShaderComponent* body = new ::CURLY_BRACKETS();
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
 	cbufferDecl.body = body;
 	componentStack.push(body);
 
@@ -1412,10 +1412,10 @@ void ShaderInterpreter::technique11state()
 	words.pop();
 	words.pop();
 
-	tech = new ::TECHNIQUE11();
+	tech = new ShaderUnits::TECHNIQUE11();
 	tech->setName(techName);
 
-	ShaderComponent* body = new ::CURLY_BRACKETS();
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
 	tech->add(body);
 
 	componentStack.push(body);
@@ -1430,7 +1430,7 @@ void ShaderInterpreter::insertTechnique11()
 {
 	componentStack.pop();
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(tech);
 	tech = nullptr;
 
@@ -1446,10 +1446,10 @@ void ShaderInterpreter::passState()
 	words.pop();
 	words.pop();
 
-	pass = new ::PASS();
+	pass = new ShaderUnits::PASS();
 	pass->setName(passName);
 
-	ShaderComponent* body = new ::CURLY_BRACKETS();
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
 	pass->add(body);
 
 	componentStack.push(body);
@@ -1464,7 +1464,7 @@ void ShaderInterpreter::insertPass()
 {
 	componentStack.pop();
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pass);
 	pass = nullptr;
 
@@ -1476,7 +1476,7 @@ void ShaderInterpreter::insertPass()
 
 void ShaderInterpreter::setVertexShaderState()
 {
-	ShaderComponent* pSetVertexShader = new ::SET_VERTEX_SHADER();
+	ShaderUnits::ShaderComponent* pSetVertexShader = new ShaderUnits::SET_VERTEX_SHADER();
 	componentStack.push(pSetVertexShader);
 
 	statesStack.push(State::SET_VERTEX_SHADER);
@@ -1489,7 +1489,7 @@ void ShaderInterpreter::setVertexShaderState()
 
 void ShaderInterpreter::setPixelShaderState()
 {
-	ShaderComponent* pSetPixelShader = new ::SET_PIXEL_SHADER();
+	ShaderUnits::ShaderComponent* pSetPixelShader = new ShaderUnits::SET_PIXEL_SHADER();
 	componentStack.push(pSetPixelShader);
 
 	statesStack.push(State::SET_PIXEL_SHADER);
@@ -1502,7 +1502,7 @@ void ShaderInterpreter::setPixelShaderState()
 
 void ShaderInterpreter::compileShader()
 {
-	ShaderComponent* pCompileShader = new ::COMPILE_SHADER();
+	ShaderUnits::ShaderComponent* pCompileShader = new ShaderUnits::COMPILE_SHADER();
 	componentStack.push(pCompileShader);
 
 	statesStack.push(State::COMPILE_SHADER);
@@ -1515,10 +1515,10 @@ void ShaderInterpreter::compileShader()
 
 void ShaderInterpreter::vs_5_0_state()
 {
-	ShaderComponent* pVS_5_0 = new ::VERTEX_SHADER_VERSION();
+	ShaderUnits::ShaderComponent* pVS_5_0 = new ShaderUnits::VERTEX_SHADER_VERSION();
 	pVS_5_0->setName(std::string("vs_5_0"));
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pVS_5_0);
 
 	currentState = State::UNKNOWN;
@@ -1528,10 +1528,10 @@ void ShaderInterpreter::vs_5_0_state()
 
 void ShaderInterpreter::ps_5_0_state()
 {
-	ShaderComponent* pPS_5_0 = new ::PIXEL_SHADER_VERSION();
+	ShaderUnits::ShaderComponent* pPS_5_0 = new ShaderUnits::PIXEL_SHADER_VERSION();
 	pPS_5_0->setName(std::string("ps_5_0"));
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pPS_5_0);
 
 	currentState = State::UNKNOWN;
@@ -1543,7 +1543,7 @@ void ShaderInterpreter::returnState()
 {
 	std::string word = words.front();
 	
-	ShaderComponent* pReturn = new ::RETURN();
+	ShaderUnits::ShaderComponent* pReturn = new ShaderUnits::RETURN();
 	componentStack.push(pReturn);
 	
 	statesStack.push(State::RETURN);
@@ -1565,10 +1565,10 @@ void ShaderInterpreter::insertReturn()
 {
 	statesStack.pop();
 
-	ShaderComponent* pReturn = componentStack.top();
+	ShaderUnits::ShaderComponent* pReturn = componentStack.top();
 	componentStack.pop();
 
-	ShaderComponent* parent = componentStack.top();
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pReturn);
 
 	currentState = State::UNKNOWN;

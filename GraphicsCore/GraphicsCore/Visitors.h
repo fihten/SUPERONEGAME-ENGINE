@@ -4,22 +4,27 @@
 #include <vector>
 #include <D3D11.h>
 
-struct ShadersNames
-{
-	std::string technique = "";
-	std::vector<std::string> passes;
-	std::vector<std::string> shaders;
-};
+
 
 class ShadersNamesVisitor :public ShaderVisitor
 {
+public:
+	struct ShadersNames
+	{
+		std::string technique = "";
+		std::vector<std::string> passes;
+		std::vector<std::string> shaders;
+	};
+
+private:
 	std::vector<ShadersNames> shadersNames;
 	bool SHADER_VERSION = false;
+
 public:
-	void startVisit(const TECHNIQUE11* pTECHNIQUE11);
-	void startVisit(const PASS* pPASS);
-	void startVisit(const VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION);
-	void startVisit(const FUNCTION_CALL* pFUNCTION_CALL);
+	void startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11);
+	void startVisit(const ShaderUnits::PASS* pPASS);
+	void startVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION);
+	void startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL);
 
 public:
 	std::vector<ShadersNames>&& getShadersNames() { return std::move(shadersNames); };
@@ -43,22 +48,22 @@ class InputLayoutVisitor : public ShaderVisitor
 public:
 	void setShaderName(const std::string& shaderName) { this->shaderName = shaderName; };
 	
-	void startVisit(const FUNCTION_DECL* pFUNCTION_DECL);
-	void finishVisit(const FUNCTION_DECL* pFUNCTION_DECL);
+	void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
+	void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
 
-	void startVisit(const OUT_MODIFIER* pOUT);
+	void startVisit(const ShaderUnits::OUT_MODIFIER* pOUT);
 
-	void startVisit(const FLOAT1* pFLOAT1);
-	void startVisit(const FLOAT2* pFLOAT2);
-	void startVisit(const FLOAT3* pFLOAT3);
-	void startVisit(const FLOAT4* pFLOAT4);
+	void startVisit(const ShaderUnits::FLOAT1* pFLOAT1);
+	void startVisit(const ShaderUnits::FLOAT2* pFLOAT2);
+	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
+	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
 
-	void startVisit(const SEMANTIC* pSEMANTIC);
+	void startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC);
 
-	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
-	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
 
-	void startVisit(const SHADER* pSHADER);
+	void startVisit(const ShaderUnits::SHADER* pSHADER);
 
 public:
 	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
@@ -76,16 +81,16 @@ public:
 		std::string name = "";
 	};
 
-	void startVisit(const SHADER* pSHADER);
+	void startVisit(const ShaderUnits::SHADER* pSHADER);
 
-	void startVisit(const CBUFFER* pCBUFFER);
-	void finishVisit(const CBUFFER* pCBUFFER);
+	void startVisit(const ShaderUnits::CBUFFER* pCBUFFER);
+	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER);
 
-	void startVisit(const VARIABLE_DECL* pVARIABLE_DECL);
-	void finishVisit(const VARIABLE_DECL* pVARIABLE_DECL);
+	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
 
-	void startVisit(const FLOAT4X4* pFLOAT4X4);
-	void startVisit(const VARIABLE* pVARIABLE);
+	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
+	void startVisit(const ShaderUnits::VARIABLE* pVARIABLE);
 
 	void getElements(ElementOfCbuffer*& pElements, int& count);
 
