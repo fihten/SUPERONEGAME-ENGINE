@@ -39,6 +39,16 @@ void processShader(ID3D11Device* device, LPCTSTR path)
 	ShadersNamesVisitor shadersNamesVisitor;
 	shader->query(&shadersNamesVisitor);
 
+	ElementsOfCbufferVisitor elementsOfCbufferVisitor;
+	shader->query(&elementsOfCbufferVisitor);
+
+	ElementOfCbuffer* elementsOfCbuffers = nullptr;
+	int countOfCbufferElements = 0;
+	elementsOfCbufferVisitor.getElements(elementsOfCbuffers, countOfCbufferElements);
+
+	for (int i = 0; i < countOfCbufferElements; ++i)
+		elementsOfCbuffers[i].v = mShader->GetVariableByName(elementsOfCbuffers[i].name.c_str());
+
 	std::vector<ShadersNamesVisitor::ShadersNames> shadersNames = shadersNamesVisitor.getShadersNames();
 	for (auto& sn : shadersNames)
 	{
@@ -60,6 +70,12 @@ void processShader(ID3D11Device* device, LPCTSTR path)
 
 			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
 			resourceManager.registerInputLayout(sn.technique, sn.passes[i], inputLayout);
+		}
+
+		for (int i = 0; i < countOfCbufferElements; ++i)
+		{
+			if (elementsOfCbuffers[i].type == std::string("float4x4"))
+				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
 		}
 	}
 }

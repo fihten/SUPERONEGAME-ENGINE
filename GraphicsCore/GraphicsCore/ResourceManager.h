@@ -19,7 +19,7 @@ class ResourceManager
 		std::map<std::string, PassResource> passes;
 
 		// matrices
-		std::map<std::string, const ID3D10EffectMatrixVariable*> matrices;
+		std::map<std::string, const ID3DX11EffectMatrixVariable*> matrices;
 	};
 	std::map<std::string, TechniqueResource> techniques;
 
@@ -37,7 +37,7 @@ public:
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
 	RegisterMessage registerPass(const std::string& techniqueName, const std::string& passName, const ID3DX11EffectPass* pass);
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout);
-	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3D10EffectMatrixVariable* matrix);
+	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix);
 };
 
 extern ResourceManager resourceManager;

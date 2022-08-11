@@ -4,8 +4,6 @@
 #include <vector>
 #include <D3D11.h>
 
-
-
 class ShadersNamesVisitor :public ShaderVisitor
 {
 public:
@@ -70,17 +68,21 @@ public:
 };
 
 #define ELEMENTS_OF_CBUFFER_MAX_COUNT 32
+
+struct ID3DX11EffectVariable;
+
+struct ElementOfCbuffer
+{
+	std::string type = "";
+	std::string name = "";
+	ID3DX11EffectVariable* v = nullptr;
+};
+
 class ElementsOfCbufferVisitor : public ShaderVisitor
 {
 	bool withinCbuffer = false;
 	bool withinVariableDeclaration = false;
 public:
-	struct ElementOfCbuffer
-	{
-		std::string type = "";
-		std::string name = "";
-	};
-
 	void startVisit(const ShaderUnits::SHADER* pSHADER);
 
 	void startVisit(const ShaderUnits::CBUFFER* pCBUFFER);

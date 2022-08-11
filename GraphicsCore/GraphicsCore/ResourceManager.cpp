@@ -43,7 +43,7 @@ ResourceManager::RegisterMessage ResourceManager::registerInputLayout(const std:
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3D10EffectMatrixVariable* matrix)
+ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
