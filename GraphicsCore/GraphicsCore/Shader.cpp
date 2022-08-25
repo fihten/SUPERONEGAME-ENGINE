@@ -3,9 +3,15 @@
 #include <d3dx11async.h>
 #include <fstream>
 #include <cstddef>
+#include <cstdlib>
+
+#include <boost/filesystem.hpp>
+#include <boost/range/iterator_range.hpp>
 
 #include "Visitors.h"
 #include "ResourceManager.h"
+
+using namespace boost::filesystem;
 
 void processShader(ID3D11Device* device, LPCTSTR path)
 {
@@ -78,4 +84,10 @@ void processShader(ID3D11Device* device, LPCTSTR path)
 				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
 		}
 	}
+}
+
+void processShaders(ID3D11Device* device)
+{
+	const char* shadersFolder = getenv("SHADERS");
+	
 }

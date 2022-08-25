@@ -3,3 +3,4 @@
 #include <d3d11.h>
 
 void processShader(ID3D11Device* device, LPCTSTR path);
+void processShaders(ID3D11Device* device);
