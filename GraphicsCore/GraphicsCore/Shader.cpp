@@ -3,10 +3,10 @@
 #include <d3dx11async.h>
 #include <fstream>
 #include <cstddef>
-#include <cstdlib>
+#include <winbase.h>
+#include <tchar.h>
 
 #include <boost/filesystem.hpp>
-#include <boost/range/iterator_range.hpp>
 
 #include "Visitors.h"
 #include "ResourceManager.h"
@@ -86,8 +86,28 @@ void processShader(ID3D11Device* device, LPCTSTR path)
 	}
 }
 
+void getPathsToShaders(std::vector<std::basic_string<TCHAR>>& pathsToShaders)
+{
+	pathsToShaders.clear();
+
+	TCHAR shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariable(_T("SHADERS"), shadersFolder, sz);
+	
+	path p(shadersFolder);
+	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
+	{
+		if (!is_directory(i->path()))
+			pathsToShaders.push_back(std::basic_string<TCHAR>(shadersFolder) + _T("//") + i->path().filename().c_str());
+		else
+			continue;
+	}
+}
+
 void processShaders(ID3D11Device* device)
 {
-	const char* shadersFolder = getenv("SHADERS");
-	
+	std::vector<std::basic_string<TCHAR>> pathsToShaders;
+	getPathsToShaders(pathsToShaders);
+	for (const auto& pathToShader : pathsToShaders)
+		processShader(device, pathToShader.c_str());
 }
