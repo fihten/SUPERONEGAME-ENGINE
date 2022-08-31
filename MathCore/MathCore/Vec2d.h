@@ -11,6 +11,9 @@ public:
 
 	Vec2d<value_type> operator+(const Vec2d<value_type>& v) const;
 	Vec2d<value_type> operator-(const Vec2d<value_type>& v) const;
+
+	friend value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+	friend value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
 };
 
 template<class value_type>
@@ -29,4 +32,16 @@ Vec2d<value_type> Vec2d<value_type>::operator-(const Vec2d<value_type>& v) const
 	for (int i = 0; i < 2; ++i)
 		r.v[i] = this->v[i] - v.v[i];
 	return r;
+}
+
+template<class value_type>
+value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2)
+{
+	return v1.v[0] * v2.v[0] + v1.v[1] * v2.v[1];
+}
+
+template<class value_type>
+value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2)
+{
+	return v1.v[0] * v2.v[1] - v1.v[1] * v2.v[0];
 }
