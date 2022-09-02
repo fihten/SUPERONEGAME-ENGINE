@@ -13,6 +13,7 @@ public:
 	Vec3d<value_type> operator-(const Vec3d<value_type>& v) const;
 
 	friend value_type dot(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
+	friend Vec3d<value_type> cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
 };
 
 template<class value_type>
@@ -31,4 +32,10 @@ template<class value_type>
 value_type dot(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2)
 {
 	return v1.v[0] * v2.v[0] + v1.v[1] * v2.v[1] + v1.v[2] * v2.v[2];
+}
+
+template<class value_type>
+Vec3d<value_type> cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2)
+{
+	return Vec3d<value_type>(v1.v[1] * v2.v[2] - v1.v[2] * v2.v[1], v1.v[2] * v2.v[0] - v1.v[0] * v2.v[2], v1.v[0] * v2.v[1] - v1.v[1] * v2.v[0]);
 }
