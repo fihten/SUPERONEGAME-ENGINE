@@ -11,6 +11,16 @@ public:
 
 	Vec4d<value_type> operator+(const Vec4d<value_type>& v) const;
 	Vec4d<value_type> operator-(const Vec4d<value_type>& v) const;
+	
+	value_type& x() { return v[0]; };
+	value_type& y() { return v[1]; };
+	value_type& z() { return v[2]; };
+	value_type& w() { return v[3]; };
+
+	const value_type& x() { return v[0]; };
+	const value_type& y() { return v[1]; };
+	const value_type& z() { return v[2]; };
+	const value_type& w() { return v[3]; };
 
 	friend value_type dot(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2);
 };
