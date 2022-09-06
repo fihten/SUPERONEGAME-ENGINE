@@ -44,3 +44,6 @@ value_type cross(const Vec1d<value_type>& v1, const Vec1d<value_type>& v2)
 {
 	return value_type(0);
 }
+
+typedef Vec1d<float> flt1;
+typedef Vec1d<double> dbl1;

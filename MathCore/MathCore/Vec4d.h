@@ -42,3 +42,6 @@ value_type dot(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2)
 {
 	return v1.v[0] * v2.v[0] + v1.v[1] * v2.v[1] + v1.v[2] * v2.v[2] + v1.v[3] * v2.v[3];
 }
+
+typedef Vec4d<float> flt4;
+typedef Vec4d<double> dbl4;

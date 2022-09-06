@@ -45,3 +45,6 @@ value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2)
 {
 	return v1.v[0] * v2.v[1] - v1.v[1] * v2.v[0];
 }
+
+typedef Vec2d<float> flt2;
+typedef Vec2d<double> dbl2;

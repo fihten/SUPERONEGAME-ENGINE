@@ -30,6 +30,47 @@ public:
 		r.z() = v.x() * m.m[2] + v.y() * m.m[6] + v.z() * m.m[10] + v.w() * m.m[14];
 		r.w() = v.x() * m.m[3] + v.y() * m.m[7] + v.z() * m.m[11] + v.w() * m.m[15];
 
-		return Vec4d<value_type>();
-	}
+		return r;
+	};
+
+	friend Vec4d<value_type> operator*(const Matrix4x4<value_type>& m, const Vec4d<value_type>& v)
+	{
+		Vec4d<value_type> r;
+
+		r.x() = m.m[0] * v.x() + m.m[1] * v.y() + m.m[2] * v.z() + m.m[3] * v.w();
+		r.y() = m.m[4] * v.x() + m.m[5] * v.y() + m.m[6] * v.z() + m.m[7] * v.w();
+		r.z() = m.m[8] * v.x() + m.m[9] * v.y() + m.m[10] * v.z() + m.m[11] * v.w();
+		r.w() = m.m[12] * v.x() + m.m[13] * v.y() + m.m[14] * v.z() + m.m[15] * v.w();
+
+		return r;
+	};
 };
+
+template<class value_type>
+Matrix4x4<value_type> makePerspectiveProjection(const value_type& aspectRatio, const value_type& fovy, const value_type& near, const value_type& far)
+{
+	value_type fovy_ = fovy * M_PI / 180;
+	value_type tinv = 1 / tan(0.5 * fovy_);
+	value_type m22 = far / (far - near);
+
+	return Matrix4x4<value_type>(
+		tinv / aspectRatio, value_type(0), value_type(0), value_type(0),
+		value_type(0), tinv, value_type(0), value_type(0),
+		value_type(0), value_type(0), m22, value_type(0),
+		value_type(0), value_type(0), -near * m22, value_type(0)
+		);
+}
+
+template<class value_type>
+Matrix4x4<value_type> makeOrthographicProjection(const value_type& left, const value_type& right, const value_type& bottom, const value_type& top, const value_type& near, const value_type& far)
+{
+	return Matrix4x4<value_type>(
+		2.0 / (right - left), 0, 0, 0,
+		0, 2.0 / (top - bottom), 0, 0,
+		0, 0, 1.0 / (far - near), 0,
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -near / (far - near), 1
+		);
+}
+
+typedef Matrix4x4<float> flt4x4;
+typedef Matrix4x4<double> dbl4x4;

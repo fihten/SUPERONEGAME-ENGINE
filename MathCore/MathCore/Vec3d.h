@@ -39,3 +39,6 @@ Vec3d<value_type> cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2
 {
 	return Vec3d<value_type>(v1.v[1] * v2.v[2] - v1.v[2] * v2.v[1], v1.v[2] * v2.v[0] - v1.v[0] * v2.v[2], v1.v[0] * v2.v[1] - v1.v[1] * v2.v[0]);
 }
+
+typedef Vec3d<float> flt3;
+typedef Vec3d<double> dbl3;
