@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <vector>
 #include <string>
 
@@ -16,6 +17,22 @@ class Mesh
 	std::vector<std::pair<std::string, std::vector<flt4>>> flt4_streams;
 
 	std::vector<uint32_t> indicies;
+
+	std::map<std::string, std::string> params;
+
+public:
+	std::string getTechnique() const;
+	std::string getPass() const;
+
+	enum StreamType
+	{
+		FLT1,
+		FLT2,
+		FLT3,
+		FLT4
+	};
+	const void* getStream(const std::string& name, StreamType type) const;
+	const std::vector<uint32_t>* getIndicies() const;
 
 	friend Mesh&& createCube();
 };

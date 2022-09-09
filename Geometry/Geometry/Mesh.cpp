@@ -1,4 +1,6 @@
 #include "pch.h"
+
+#include <algorithm>
 #include "Mesh.h"
 
 Mesh&& createCube()
@@ -93,5 +95,91 @@ Mesh&& createCube()
 	inds.push_back(0);
 	inds.push_back(3);
 
+	m.params["technique"] = "Demo";
+	m.params["pass"] = "P0";
+
 	return std::move(m);
+}
+
+std::string Mesh::getTechnique() const
+{
+	std::string technique = "";
+	
+	if (params.count("technique"))
+		technique = params.at("technique");
+	
+	return technique;
+}
+
+std::string Mesh::getPass() const
+{
+	std::string pass = "";
+	
+	if (params.count("pass"))
+		pass = params.at("pass");
+
+	return pass;
+}
+
+const void* Mesh::getStream(const std::string& name, StreamType type) const
+{
+	const void* rPtr = nullptr;
+	switch (type)
+	{
+	case FLT1:
+	{
+		const auto& it = std::find_if(flt1_streams.begin(), flt1_streams.end(), [&](const std::pair<std::string, std::vector<flt1>>& el) -> bool
+		{
+			return el.first == name;
+		});
+
+		if (it != flt1_streams.end())
+			rPtr = &it->second;
+
+		break;
+	}
+	case FLT2:
+	{
+		const auto& it = std::find_if(flt2_streams.begin(), flt2_streams.end(), [&](const std::pair<std::string, std::vector<flt2>>& el) -> bool
+		{
+			return el.first == name;
+		});
+
+		if (it != flt2_streams.end())
+			rPtr = &it->second;
+
+		break;
+	}
+	case FLT3:
+	{
+		const auto& it = std::find_if(flt3_streams.begin(), flt3_streams.end(), [&](const std::pair<std::string, std::vector<flt3>>& el) -> bool
+		{
+			return el.first == name;
+		});
+
+		if (it != flt3_streams.end())
+			rPtr = &it->second;
+
+		break;
+	}
+	case FLT4:
+	{
+		const auto& it = std::find_if(flt4_streams.begin(), flt4_streams.end(), [&](const std::pair<std::string, std::vector<flt4>>& el) -> bool
+		{
+			return el.first == name;
+		});
+
+		if (it != flt4_streams.end())
+			rPtr = &it->second;
+
+		break;
+	}
+	}
+
+	return rPtr;
+}
+
+const std::vector<uint32_t>* Mesh::getIndicies() const
+{
+	return &indicies;
 }
