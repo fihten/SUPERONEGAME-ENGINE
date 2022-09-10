@@ -1,4 +1,5 @@
 #include "Visitors.h"
+#include <sstream>
 
 /*________________________________ShadersNamesVisitor________________________________*/
 
@@ -142,6 +143,21 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 	device->CreateInputLayout(inputElements, inputElementsCount, shaderByteCode, byteCodeLength, inputLayout);
 
 	return *inputLayout;
+}
+
+std::vector<InputLayoutVisitor::InputLayoutStreamInfo>&& InputLayoutVisitor::getInputLayoutStreamsInfo()
+{
+	std::vector<InputLayoutVisitor::InputLayoutStreamInfo> streamsInfo(inputElementsCount);
+	for (int i = 0; i < inputElementsCount; ++i)
+	{
+		auto& info = streamsInfo[i];
+
+		std::ostringstream ss;
+		ss << inputElements[i].SemanticName << inputElements[i].SemanticIndex;
+		info.name = ss.str();
+	}
+
+	return std::move(streamsInfo);
 }
 
 /*________________________________ElementsOfCbufferVisitor________________________________*/

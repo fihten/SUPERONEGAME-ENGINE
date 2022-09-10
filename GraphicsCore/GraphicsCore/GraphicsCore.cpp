@@ -1,4 +1,5 @@
 #include "GraphicsCore.h"
+#include "Shader.h"
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -135,6 +136,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UIN
 	vp.MaxDepth = 1.0f;
 
 	context->RSSetViewports(1, &vp);
+
+	// 9. Process shaders
+
+	processShaders(device);
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)

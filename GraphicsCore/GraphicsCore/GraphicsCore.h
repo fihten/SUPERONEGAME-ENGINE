@@ -1,5 +1,5 @@
 #pragma once
-#include <d3d11.h>
+#include "All.h"
 #include <WinDef.h>
 #include <dxgiformat.h>
 #include <dxgi.h>
