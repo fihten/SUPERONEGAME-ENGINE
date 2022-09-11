@@ -2,6 +2,7 @@
 
 #include "Mesh.h"
 #include "ShaderVisitor.h"
+#include "ResourceManager.h"
 #include <vector>
 #include <D3D11.h>
 
@@ -66,13 +67,7 @@ public:
 
 public:
 	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
-
-	struct InputLayoutStreamInfo
-	{
-		std::string name;
-		Mesh::StreamType type;
-	};
-	std::vector<InputLayoutStreamInfo>&& getInputLayoutStreamsInfo();
+	std::vector<ResourceManager::InputLayoutStreamInfo>&& getStreamsInfo();
 };
 
 #define ELEMENTS_OF_CBUFFER_MAX_COUNT 32

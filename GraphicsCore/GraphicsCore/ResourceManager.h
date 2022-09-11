@@ -3,9 +3,11 @@
 #include <map>
 #include <string>
 #include <d3dx11effect.h>
+#include "Mesh.h"
 
 class ResourceManager
 {
+	struct InputLayoutStreamInfo;
 	struct TechniqueResource
 	{
 		const ID3DX11EffectTechnique* technique = nullptr;
@@ -15,6 +17,8 @@ class ResourceManager
 		{
 			const ID3DX11EffectPass* pass = nullptr;
 			const ID3D11InputLayout* inputLayout = nullptr;
+
+			std::vector<InputLayoutStreamInfo> streamsInfo;
 		};
 		std::map<std::string, PassResource> passes;
 
@@ -34,10 +38,19 @@ public:
 		MATRIX_ALREADY_EXISTS
 	};
 
+	struct InputLayoutStreamInfo
+	{
+		std::string name;
+		Mesh::StreamType type;
+		uint32_t size;
+	};
+
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
 	RegisterMessage registerPass(const std::string& techniqueName, const std::string& passName, const ID3DX11EffectPass* pass);
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout);
+	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>&& streamsInfo);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix);
+
 };
 
 extern ResourceManager resourceManager;

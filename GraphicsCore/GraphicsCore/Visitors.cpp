@@ -145,9 +145,9 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 	return *inputLayout;
 }
 
-std::vector<InputLayoutVisitor::InputLayoutStreamInfo>&& InputLayoutVisitor::getInputLayoutStreamsInfo()
+std::vector<ResourceManager::InputLayoutStreamInfo>&& InputLayoutVisitor::getStreamsInfo()
 {
-	std::vector<InputLayoutVisitor::InputLayoutStreamInfo> streamsInfo(inputElementsCount);
+	std::vector<ResourceManager::InputLayoutStreamInfo> streamsInfo(inputElementsCount);
 	for (int i = 0; i < inputElementsCount; ++i)
 	{
 		auto& info = streamsInfo[i];
@@ -155,6 +155,28 @@ std::vector<InputLayoutVisitor::InputLayoutStreamInfo>&& InputLayoutVisitor::get
 		std::ostringstream ss;
 		ss << inputElements[i].SemanticName << inputElements[i].SemanticIndex;
 		info.name = ss.str();
+
+		switch (inputElements[i].Format)
+		{
+		case DXGI_FORMAT_R32_FLOAT:
+			info.type = Mesh::FLT1;
+			info.size = 4;
+			break;
+		case DXGI_FORMAT_R32G32_FLOAT:
+			info.type = Mesh::FLT2;
+			info.size = 8;
+			break;
+		case DXGI_FORMAT_R32G32B32_FLOAT:
+			info.type = Mesh::FLT3;
+			info.size = 12;
+			break;
+		case DXGI_FORMAT_R32G32B32A32_FLOAT:
+			info.type = Mesh::FLT4;
+			info.size = 16;
+			break;
+		default:
+			break;
+		}
 	}
 
 	return std::move(streamsInfo);
