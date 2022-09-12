@@ -1,5 +1,6 @@
 #pragma once
 #include "All.h"
+#include "Mesh.h"
 #include <WinDef.h>
 #include <dxgiformat.h>
 #include <dxgi.h>
@@ -13,6 +14,7 @@ class GraphicsCore
 
 public:
 	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
+	void draw(Mesh& mesh);
 	int run();
 
 private:

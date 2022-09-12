@@ -1,5 +1,6 @@
 #include "GraphicsCore.h"
 #include "Shader.h"
+#include "ResourceManager.h"
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -140,6 +141,20 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UIN
 	// 9. Process shaders
 
 	processShaders(device);
+}
+
+void GraphicsCore::draw(Mesh& mesh)
+{
+	std::string technique = mesh.getTechnique();
+	std::string pass = mesh.getPass();
+
+	const std::vector<ResourceManager::InputLayoutStreamInfo>* streamsInfo = resourceManager.getStreamsInfo(technique, pass);
+	if (streamsInfo == nullptr)
+		return;
+
+	uint32_t elementSize = 0;
+	for (const auto& si : *streamsInfo)
+		elementSize += si.size;
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)

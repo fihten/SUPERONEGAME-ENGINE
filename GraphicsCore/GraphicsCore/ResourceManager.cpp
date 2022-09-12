@@ -71,3 +71,16 @@ ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::stri
 
 	return RegisterMessage::OK;
 }
+
+const std::vector<ResourceManager::InputLayoutStreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	if (techniqueRes.passes.count(passName) == 0)
+		return nullptr;
+
+	const TechniqueResource::PassResource& passRes = techniqueRes.passes.at(passName);
+	return &passRes.streamsInfo;
+}

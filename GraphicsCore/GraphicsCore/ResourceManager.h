@@ -51,6 +51,8 @@ public:
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>&& streamsInfo);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix);
 
+	const std::vector<InputLayoutStreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
+
 };
 
 extern ResourceManager resourceManager;
