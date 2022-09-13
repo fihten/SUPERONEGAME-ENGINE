@@ -183,3 +183,27 @@ const std::vector<uint32_t>* Mesh::getIndicies() const
 {
 	return &indicies;
 }
+
+std::string Mesh::getName() const
+{
+	return name;
+}
+
+void Mesh::setName(const std::string& name)
+{
+	this->name = name;
+}
+
+uint32_t Mesh::getVerticesCount() const
+{
+	uint32_t count = 0;
+	for (const auto& flt1_stream : flt1_streams)
+		count = std::max<uint32_t>(count, flt1_stream.second.size());
+	for (const auto& flt2_stream : flt2_streams)
+		count = std::max<uint32_t>(count, flt2_stream.second.size());
+	for (const auto& flt3_stream : flt3_streams)
+		count = std::max<uint32_t>(count, flt3_stream.second.size());
+	for (const auto& flt4_stream : flt4_streams)
+		count = std::max<uint32_t>(count, flt4_stream.second.size());
+	return count;
+}

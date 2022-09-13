@@ -155,6 +155,46 @@ void GraphicsCore::draw(Mesh& mesh)
 	uint32_t elementSize = 0;
 	for (const auto& si : *streamsInfo)
 		elementSize += si.size;
+
+	uint32_t verticesCount = mesh.getVerticesCount();
+	uint32_t bytes = verticesCount * elementSize;
+
+	char* data = (char*)std::malloc(bytes);
+	for (int i = 0; i < verticesCount; ++i)
+	{
+		for (const auto& si : *streamsInfo)
+		{
+			const void* stream = mesh.getStream(si.name, si.type);
+			switch (si.type)
+			{
+			case Mesh::FLT1:
+			{
+				const std::vector<flt1>& s = *(const std::vector<flt1>*)stream;
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				break; 
+			}
+			case Mesh::FLT2:
+			{
+				const std::vector<flt2>& s = *(const std::vector<flt2>*)stream;
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				break;
+			}
+			case Mesh::FLT3:
+			{
+				const std::vector<flt3>& s = *(const std::vector<flt3>*)stream;
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				break;
+			}
+			case Mesh::FLT4:
+			{
+				const std::vector<flt4>& s = *(const std::vector<flt4>*)stream;
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				break;
+			}
+			}
+			data += si.size;
+		}
+	}
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)

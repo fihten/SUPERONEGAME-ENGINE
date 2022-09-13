@@ -11,6 +11,8 @@
 
 class Mesh
 {
+	std::string name = "";
+
 	std::vector<std::pair<std::string, std::vector<flt1>>> flt1_streams;
 	std::vector<std::pair<std::string, std::vector<flt2>>> flt2_streams;
 	std::vector<std::pair<std::string, std::vector<flt3>>> flt3_streams;
@@ -33,6 +35,11 @@ public:
 	};
 	const void* getStream(const std::string& name, StreamType type) const;
 	const std::vector<uint32_t>* getIndicies() const;
+	
+	std::string getName() const;
+	void setName(const std::string& name);
+
+	uint32_t getVerticesCount() const;
 
 	friend Mesh&& createCube();
 };
