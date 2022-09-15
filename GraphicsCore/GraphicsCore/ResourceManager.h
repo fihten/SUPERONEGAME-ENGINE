@@ -16,7 +16,7 @@ class ResourceManager
 		struct PassResource
 		{
 			const ID3DX11EffectPass* pass = nullptr;
-			const ID3D11InputLayout* inputLayout = nullptr;
+			ID3D11InputLayout* inputLayout = nullptr;
 
 			std::vector<InputLayoutStreamInfo> streamsInfo;
 		};
@@ -47,12 +47,12 @@ public:
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
 	RegisterMessage registerPass(const std::string& techniqueName, const std::string& passName, const ID3DX11EffectPass* pass);
-	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout);
+	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout);
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>&& streamsInfo);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix);
 
 	const std::vector<InputLayoutStreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
-
+	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
 };
 
 extern ResourceManager resourceManager;

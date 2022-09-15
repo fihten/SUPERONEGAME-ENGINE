@@ -28,7 +28,7 @@ ResourceManager::RegisterMessage ResourceManager::registerPass(const std::string
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerInputLayout(const std::string& techniqueName, const std::string& passName, const ID3D11InputLayout* inputLayout)
+ResourceManager::RegisterMessage ResourceManager::registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -83,4 +83,16 @@ const std::vector<ResourceManager::InputLayoutStreamInfo>* ResourceManager::getS
 
 	const TechniqueResource::PassResource& passRes = techniqueRes.passes.at(passName);
 	return &passRes.streamsInfo;
+}
+
+ID3D11InputLayout* ResourceManager::getInputLayout(const std::string& techniqueName, const std::string& passName) const
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	if (techniqueRes.passes.count(passName) == 0)
+		return nullptr;
+
+	return techniqueRes.passes.at(passName).inputLayout;
 }

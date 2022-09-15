@@ -226,6 +226,12 @@ void GraphicsCore::draw(Mesh& mesh)
 	ID3D11Buffer* mIB;
 	device->CreateBuffer(&ibd, &iinitData, &mIB);
 
+	context->IASetInputLayout(resourceManager.getInputLayout(technique, pass));
+	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	uint32_t offset = 0;
+	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
+	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_FLOAT, 0);
 
 }
 
