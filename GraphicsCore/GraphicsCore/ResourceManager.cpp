@@ -13,7 +13,7 @@ ResourceManager::RegisterMessage ResourceManager::registerTechnique(const std::s
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerPass(const std::string& techniqueName, const std::string& passName, const ID3DX11EffectPass* pass)
+ResourceManager::RegisterMessage ResourceManager::registerPass(const std::string& techniqueName, const std::string& passName, ID3DX11EffectPass* pass)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -95,4 +95,16 @@ ID3D11InputLayout* ResourceManager::getInputLayout(const std::string& techniqueN
 		return nullptr;
 
 	return techniqueRes.passes.at(passName).inputLayout;
+}
+
+ID3DX11EffectPass* ResourceManager::getPass(const std::string& techniqueName, const std::string& passName) const
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	if (techniqueRes.passes.count(passName) == 0)
+		return nullptr;
+
+	return techniqueRes.passes.at(passName).pass;
 }

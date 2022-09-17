@@ -40,6 +40,7 @@ public:
 	void setName(const std::string& name);
 
 	uint32_t getVerticesCount() const;
+	uint32_t getIndicesCount() const;
 
 	friend Mesh&& createCube();
 };

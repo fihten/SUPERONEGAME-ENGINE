@@ -145,10 +145,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UIN
 
 void GraphicsCore::draw(Mesh& mesh)
 {
-	std::string technique = mesh.getTechnique();
-	std::string pass = mesh.getPass();
+	std::string sTechnique = mesh.getTechnique();
+	std::string sPass = mesh.getPass();
 
-	const std::vector<ResourceManager::InputLayoutStreamInfo>* streamsInfo = resourceManager.getStreamsInfo(technique, pass);
+	const std::vector<ResourceManager::InputLayoutStreamInfo>* streamsInfo = resourceManager.getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
 		return;
 
@@ -214,7 +214,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	// Create index buffer
 	D3D11_BUFFER_DESC ibd;
 	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = mesh.getIndicies()->size() * sizeof(uint32_t);
+	ibd.ByteWidth = mesh.getIndicesCount() * sizeof(uint32_t);
 	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
 	ibd.CPUAccessFlags = 0;
 	ibd.MiscFlags = 0;
@@ -226,13 +226,23 @@ void GraphicsCore::draw(Mesh& mesh)
 	ID3D11Buffer* mIB;
 	device->CreateBuffer(&ibd, &iinitData, &mIB);
 
-	context->IASetInputLayout(resourceManager.getInputLayout(technique, pass));
+	auto* inputLayout = resourceManager.getInputLayout(sTechnique, sPass);
+	if (inputLayout == nullptr)
+		return;
+
+	context->IASetInputLayout(inputLayout);
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
 	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_FLOAT, 0);
 
+	auto* pass = resourceManager.getPass(sTechnique, sPass);
+	if (pass == nullptr)
+		return;
+
+	pass->Apply(0, context);
+	context->DrawIndexed(mesh.getIndicesCount(), 0, 0);
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)

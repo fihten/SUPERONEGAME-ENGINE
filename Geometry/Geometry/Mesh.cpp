@@ -207,3 +207,8 @@ uint32_t Mesh::getVerticesCount() const
 		count = std::max<uint32_t>(count, flt4_stream.second.size());
 	return count;
 }
+
+uint32_t Mesh::getIndicesCount() const
+{
+	return indicies.size();
+}
