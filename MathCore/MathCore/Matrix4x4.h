@@ -1,5 +1,7 @@
 #pragma once
 
+#define _USE_MATH_DEFINES // for C++
+#include <cmath>
 #include "Vec4d.h"
 
 template<class value_type>
