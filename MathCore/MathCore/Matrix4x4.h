@@ -46,6 +46,26 @@ public:
 
 		return r;
 	};
+
+	value_type& m00() { return m[0]; };
+	value_type& m01() { return m[1]; };
+	value_type& m02() { return m[2]; };
+	value_type& m03() { return m[3]; };
+
+	value_type& m10() { return m[4]; };
+	value_type& m11() { return m[5]; };
+	value_type& m12() { return m[6]; };
+	value_type& m13() { return m[7]; };
+
+	value_type& m20() { return m[8]; };
+	value_type& m21() { return m[9]; };
+	value_type& m22() { return m[10]; };
+	value_type& m23() { return m[11]; };
+
+	value_type& m30() { return m[12]; };
+	value_type& m31() { return m[13]; };
+	value_type& m32() { return m[14]; };
+	value_type& m33() { return m[15]; };
 };
 
 template<class value_type>

@@ -6,7 +6,7 @@
 class Camera
 {
 	flt3 position = flt3(0, 0, 0);
-	flt3 direction = flt3(0, 0, 1);
+	flt3 fwd = flt3(0, 0, 1);
 
 	float nearZ = 0.1;
 	float farZ = 100;
