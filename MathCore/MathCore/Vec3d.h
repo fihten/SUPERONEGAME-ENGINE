@@ -14,6 +14,10 @@ public:
 	Vec3d<value_type> operator*(const value_type& x) const;
 	Vec3d<value_type> operator/(const value_type& x) const;
 
+	value_type& x() { return v[0]; };
+	value_type& y() { return v[1]; };
+	value_type& z() { return v[2]; };
+
 	value_type length();
 	value_type normalize();
 
