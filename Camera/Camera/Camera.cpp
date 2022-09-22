@@ -46,3 +46,8 @@ void Camera::updateProj()
 	proj = makePerspectiveProjection<float>(aspectRatio, fovY, nearZ, farZ);
 	changed = false;
 }
+
+UINT Camera::processKey(UINT msg, WPARAM wparam, LPARAM lparam)
+{
+	return 0;
+}

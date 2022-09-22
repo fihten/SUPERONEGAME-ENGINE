@@ -2,6 +2,7 @@
 
 #include "Vec3d.h"
 #include "Matrix4x4.h"
+#include <Windows.h>
 
 class Camera
 {
@@ -22,6 +23,8 @@ class Camera
 public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
+
+	UINT processKey(UINT msg, WPARAM wparam, LPARAM lparam);
 
 private:
 	void updateView();
