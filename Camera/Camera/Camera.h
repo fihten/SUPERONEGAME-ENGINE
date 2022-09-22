@@ -25,4 +25,5 @@ public:
 
 private:
 	void updateView();
+	void updateProj();
 };

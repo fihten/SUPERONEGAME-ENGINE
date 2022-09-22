@@ -69,7 +69,7 @@ public:
 };
 
 template<class value_type>
-Matrix4x4<value_type> makePerspectiveProjection(const value_type& aspectRatio, const value_type& fovy, const value_type& near, const value_type& far)
+Matrix4x4<value_type>&& makePerspectiveProjection(const value_type& aspectRatio, const value_type& fovy, const value_type& near, const value_type& far)
 {
 	value_type fovy_ = fovy * M_PI / 180;
 	value_type tinv = 1 / tan(0.5 * fovy_);
@@ -84,7 +84,7 @@ Matrix4x4<value_type> makePerspectiveProjection(const value_type& aspectRatio, c
 }
 
 template<class value_type>
-Matrix4x4<value_type> makeOrthographicProjection(const value_type& left, const value_type& right, const value_type& bottom, const value_type& top, const value_type& near, const value_type& far)
+Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& left, const value_type& right, const value_type& bottom, const value_type& top, const value_type& near, const value_type& far)
 {
 	return Matrix4x4<value_type>(
 		2.0 / (right - left), 0, 0, 0,
