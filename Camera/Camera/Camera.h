@@ -20,6 +20,9 @@ class Camera
 
 	bool changed = true;
 
+	float walkVelocity = 1;
+	float runVelocity = 5;
+
 public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
@@ -29,4 +32,7 @@ public:
 private:
 	void updateView();
 	void updateProj();
+
+	void walk(float dt);
+	void run(float dt);
 };

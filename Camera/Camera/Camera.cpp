@@ -51,3 +51,17 @@ UINT Camera::processKey(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	return 0;
 }
+
+void Camera::walk(float dt)
+{
+	float l = walkVelocity * dt;
+	position = position + fwd * l;
+	changed = true;
+}
+
+void Camera::run(float dt)
+{
+	float l = runVelocity * dt;
+	position = position + fwd * l;
+	changed = true;
+}
