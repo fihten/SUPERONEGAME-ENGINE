@@ -2,6 +2,7 @@
 
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
+#include "Vec3d.h"
 #include "Vec4d.h"
 
 template<class value_type>
@@ -92,6 +93,32 @@ Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& left, const
 		0, 0, 1.0 / (far - near), 0,
 		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -near / (far - near), 1
 		);
+}
+
+template<class value_type>
+Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type angle)
+{
+	Matrix4x4<value_type> rot;
+
+	Vec3d<value_type> b[3] = { Vec3d<value_type>(1,0,0),Vec3d<value_type>(0,1,0),Vec3d<value_type>(0,0,1) };
+	float threshold = 0.1f;
+	for (int i = 0; i < 3; ++i)
+	{
+		if (dot(axis, b[i]) / axis.length() > threshold)
+		{
+			Vec3d<value_type> i = cross(b[i], axis);
+			Vec3d<value_type> j = cross(axis, i);
+			Vec3d<value_type> k = cross(i, j);
+
+			i.normalize();
+			j.normalize();
+			k.normalize();
+
+			break;
+		}
+	}
+
+	return rot;
 }
 
 typedef Matrix4x4<float> flt4x4;
