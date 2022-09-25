@@ -24,7 +24,7 @@ public:
 		m[12] = m30;	m[13] = m31;	m[14] = m32;	m[15] = m33;
 	};
 
-	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
+	friend Vec4d<value_type>&& operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
 	{
 		Vec4d<value_type> r;
 
@@ -36,7 +36,7 @@ public:
 		return r;
 	};
 
-	friend Vec4d<value_type> operator*(const Matrix4x4<value_type>& m, const Vec4d<value_type>& v)
+	friend Vec4d<value_type>&& operator*(const Matrix4x4<value_type>& m, const Vec4d<value_type>& v)
 	{
 		Vec4d<value_type> r;
 
@@ -47,6 +47,24 @@ public:
 
 		return r;
 	};
+
+	friend Matrix4x4<value_type>&& operator*(const Matrix4x4<value_type>& x, const Matrix4x4<value_type>& y)
+	{
+		Matrix4x4<value_type> r;
+
+		int n = 4;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				r.m[i * n + j] = 0;
+				for (int k = 0; k < n; ++k)
+					r.m[i * n + j] += x.m[i * n + k] * y.m[k * n + j];
+			}
+		}
+
+		return r;
+	}
 
 	value_type& m00() { return m[0]; };
 	value_type& m01() { return m[1]; };
