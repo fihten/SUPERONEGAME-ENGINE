@@ -116,6 +116,8 @@ Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& left, const
 template<class value_type>
 Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type angle)
 {
+	angle = M_PI * angle / 180;
+
 	Matrix4x4<value_type> rot;
 
 	Vec3d<value_type> b[3] = { Vec3d<value_type>(1,0,0),Vec3d<value_type>(0,1,0),Vec3d<value_type>(0,0,1) };
@@ -131,6 +133,14 @@ Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type an
 			i.normalize();
 			j.normalize();
 			k.normalize();
+
+			Matrix4x4<value_type> m1;
+			m1.m00() = i.x(); m1.m01() = j.x(); m1.m02() = k.x(); m1.m03() = 0;
+			m1.m10() = i.y(); m1.m11() = j.y(); m1.m12() = k.y(); m1.m13() = 0;
+			m1.m20() = i.z(); m1.m21() = j.z(); m1.m22() = k.z(); m1.m23() = 0;
+			m1.m30() = 0;     m1.m31() = 0;     m1.m32() = 0;     m1.m33() = 1;
+
+			Matrix4x4<value_type> m2;
 
 			break;
 		}
