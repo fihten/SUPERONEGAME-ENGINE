@@ -117,6 +117,8 @@ template<class value_type>
 Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type angle)
 {
 	angle = M_PI * angle / 180;
+	float c = cos(angle);
+	float s = sin(angle);
 
 	Matrix4x4<value_type> rot;
 
@@ -141,6 +143,11 @@ Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type an
 			m1.m30() = 0;     m1.m31() = 0;     m1.m32() = 0;     m1.m33() = 1;
 
 			Matrix4x4<value_type> m2;
+			m2.m00() = c;  m2.m01() = s; m2.m02() = 0; m2.m03() = 0;
+			m2.m10() = -s; m2.m11() = c; m2.m12() = 0; m2.m13() = 0;
+			m2.m20() = 0;  m2.m21() = 0; m2.m22() = 1; m2.m23() = 0;
+			m2.m30() = 0;  m2.m31() = 0; m2.m32() = 0; m2.m33() = 1;
+
 
 			break;
 		}
