@@ -23,6 +23,8 @@ class Camera
 	float walkVelocity = 1;
 	float runVelocity = 5;
 
+	float rotateCoeff = 1;
+
 public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
@@ -35,4 +37,10 @@ private:
 
 	void walk(float dt);
 	void run(float dt);
+
+	void lookUp(float d);
+	void lookDown(float d);
+
+	void lookLeft(float d);
+	void lookRight(float d);
 };

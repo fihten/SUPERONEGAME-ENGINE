@@ -59,13 +59,13 @@ Vec3d<value_type>&& cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& 
 template<class value_type>
 Vec3d<value_type> operator*(const Vec3d<value_type>& vec, const value_type& x)
 {
-	return Vec3d<value_type>(x * v.v[0], x * v.v[1], x * v.v[2]);
+	return Vec3d<value_type>(x * vec.v[0], x * vec.v[1], x * vec.v[2]);
 }
 
 template<class value_type>
 Vec3d<value_type> operator*(const value_type& x, const Vec3d<value_type>& vec)
 {
-	return Vec3d<value_type>(x * v.v[0], x * v.v[1], x * v.v[2]);
+	return Vec3d<value_type>(x * vec.v[0], x * vec.v[1], x * vec.v[2]);
 }
 
 template<class value_type>

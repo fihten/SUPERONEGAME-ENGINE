@@ -148,6 +148,13 @@ Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type an
 			m2.m20() = 0;  m2.m21() = 0; m2.m22() = 1; m2.m23() = 0;
 			m2.m30() = 0;  m2.m31() = 0; m2.m32() = 0; m2.m33() = 1;
 
+			Matrix4x4<value_type> m3;
+			m3.m00() = i.x(); m3.m01() = i.y(); m3.m02() = i.z(); m3.m03() = 0;
+			m3.m10() = j.x(); m3.m11() = j.y(); m3.m12() = j.z(); m3.m13() = 0;
+			m3.m20() = k.x(); m3.m21() = k.y(); m3.m22() = k.z(); m3.m23() = 0;
+			m3.m30() = 0;     m3.m31() = 0;     m3.m32() = 0;     m3.m33() = 1;
+
+			rot = m1 * m2 * m3;
 
 			break;
 		}

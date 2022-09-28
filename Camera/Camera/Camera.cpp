@@ -65,3 +65,11 @@ void Camera::run(float dt)
 	position = position + fwd * l;
 	changed = true;
 }
+
+void Camera::lookUp(float d)
+{
+	float angle = abs(rotateCoeff * d);
+	flt3 right = cross(fwd, flt3(0, 1, 0));
+	Matrix4x4<float> rot = makeRotate<float>(right, angle);
+	
+}
