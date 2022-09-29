@@ -1,6 +1,9 @@
 #pragma once
 
 template<class value_type>
+class Matrix4x4;
+
+template<class value_type>
 class Vec3d
 {
 	value_type v[3];
@@ -17,13 +20,14 @@ public:
 	value_type& y() { return v[1]; };
 	value_type& z() { return v[2]; };
 
-	value_type length();
+	value_type length() const;
 	value_type normalize();
 
 	friend value_type dot(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
 	friend Vec3d<value_type>&& cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
 	friend Vec3d<value_type> operator*(const Vec3d<value_type>& vec, const value_type& x);
 	friend Vec3d<value_type> operator*(const value_type& x, const Vec3d<value_type>& vec);
+	friend Vec3d<value_type> operator*(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m);
 };
 
 template<class value_type>
@@ -69,7 +73,7 @@ Vec3d<value_type> operator*(const value_type& x, const Vec3d<value_type>& vec)
 }
 
 template<class value_type>
-value_type Vec3d<value_type>::length()
+value_type Vec3d<value_type>::length() const
 {
 	return std::sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
 }

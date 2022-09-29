@@ -11,6 +11,14 @@ class Matrix4x4
 	value_type m[16];
 
 public:
+	Matrix4x4()
+	{
+		m[0] = 1;		m[1] = 0;		m[2] = 0;		m[3] = 0;
+		m[4] = 0;		m[5] = 1;		m[6] = 0;		m[7] = 0;
+		m[8] = 0;		m[9] = 0;		m[10] = 1;	    m[11] = 0;
+		m[12] = 0;	    m[13] = 0;	    m[14] = 0;	    m[15] = 1;
+	};
+
 	Matrix4x4(
 		const value_type& m00, const value_type& m01, const value_type& m02, const value_type& m03,
 		const value_type& m10, const value_type& m11, const value_type& m12, const value_type& m13,
@@ -24,7 +32,7 @@ public:
 		m[12] = m30;	m[13] = m31;	m[14] = m32;	m[15] = m33;
 	};
 
-	friend Vec4d<value_type>&& operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
+	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
 	{
 		Vec4d<value_type> r;
 
@@ -36,7 +44,7 @@ public:
 		return r;
 	};
 
-	friend Vec4d<value_type>&& operator*(const Matrix4x4<value_type>& m, const Vec4d<value_type>& v)
+	friend Vec4d<value_type> operator*(const Matrix4x4<value_type>& m, const Vec4d<value_type>& v)
 	{
 		Vec4d<value_type> r;
 
@@ -48,7 +56,29 @@ public:
 		return r;
 	};
 
-	friend Matrix4x4<value_type>&& operator*(const Matrix4x4<value_type>& x, const Matrix4x4<value_type>& y)
+	friend Vec3d<value_type> operator*(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m)
+	{
+		Vec3d<value_type> r;
+
+		r.x() = v.v[0] * m.m[0] + v.v[1] * m.m[4] + v.v[2] * m.m[8];
+		r.y() = v.v[0] * m.m[1] + v.v[1] * m.m[5] + v.v[2] * m.m[9];
+		r.z() = v.v[0] * m.m[2] + v.v[1] * m.m[6] + v.v[2] * m.m[10];
+
+		return r;
+	};
+
+	friend Vec3d<value_type> operator*(const Matrix4x4<value_type>& m, const Vec3d<value_type>& v)
+	{
+		Vec3d<value_type> r;
+
+		r.x() = m.m[0] * v.x() + m.m[1] * v.y() + m.m[2] * v.z();
+		r.y() = m.m[4] * v.x() + m.m[5] * v.y() + m.m[6] * v.z();
+		r.z() = m.m[8] * v.x() + m.m[9] * v.y() + m.m[10] * v.z();
+
+		return r;
+	};
+
+	friend Matrix4x4<value_type> operator*(const Matrix4x4<value_type>& x, const Matrix4x4<value_type>& y)
 	{
 		Matrix4x4<value_type> r;
 
@@ -114,7 +144,7 @@ Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& left, const
 }
 
 template<class value_type>
-Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type angle)
+Matrix4x4<value_type> makeRotate(const Vec3d<value_type>&  axis, value_type angle)
 {
 	angle = M_PI * angle / 180;
 	float c = cos(angle);
@@ -124,11 +154,11 @@ Matrix4x4<value_type>&& makeRotate(const Vec3d<value_type>&  axis, value_type an
 
 	Vec3d<value_type> b[3] = { Vec3d<value_type>(1,0,0),Vec3d<value_type>(0,1,0),Vec3d<value_type>(0,0,1) };
 	float threshold = 0.1f;
-	for (int i = 0; i < 3; ++i)
+	for (int index = 0; index < 3; ++index)
 	{
-		if (dot(axis, b[i]) / axis.length() > threshold)
+		if (dot(axis, b[index]) / axis.length() > threshold)
 		{
-			Vec3d<value_type> i = cross(b[i], axis);
+			Vec3d<value_type> i = cross(b[index], axis);
 			Vec3d<value_type> j = cross(axis, i);
 			Vec3d<value_type> k = cross(i, j);
 
