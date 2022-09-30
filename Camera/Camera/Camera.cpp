@@ -73,3 +73,27 @@ void Camera::lookUp(float d)
 	Matrix4x4<float> rot = makeRotate<float>(right, angle);
 	fwd = fwd * rot;
 }
+
+void Camera::lookDown(float d)
+{
+	float angle = -abs(rotateCoeff * d);
+	flt3 right = cross(fwd, flt3(0, 1, 0));
+	Matrix4x4<float> rot = makeRotate<float>(right, angle);
+	fwd = fwd * rot;
+}
+
+void Camera::lookLeft(float d)
+{
+	float angle = abs(rotateCoeff * d);
+	flt3 up(0, 1, 0);
+	Matrix4x4<float> rot = makeRotate<float>(up, angle);
+	fwd = fwd * rot;
+}
+
+void Camera::lookRight(float d)
+{
+	float angle = -abs(rotateCoeff * d);
+	flt3 up(0, 1, 0);
+	Matrix4x4<float> rot = makeRotate<float>(up, angle);
+	fwd = fwd * rot;
+}
