@@ -43,4 +43,10 @@ private:
 
 	void lookLeft(float d);
 	void lookRight(float d);
+
+	void rightSidestep(float dt);
+	void leftSidestep(float dt);
+
+	void rightSidefaststep(float dt);
+	void leftSidefaststep(float dt);
 };
