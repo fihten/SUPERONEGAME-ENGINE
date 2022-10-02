@@ -3,6 +3,10 @@
 #include "Vec3d.h"
 #include "Matrix4x4.h"
 #include <Windows.h>
+#include <map>
+#include <string>
+
+
 
 class Camera
 {
@@ -30,7 +34,6 @@ public:
 	const flt4x4& getProj();
 
 	UINT processKey(UINT msg, WPARAM wparam, LPARAM lparam);
-
 private:
 	void updateView();
 	void updateProj();
@@ -49,4 +52,18 @@ private:
 
 	void rightSidefaststep(float dt);
 	void leftSidefaststep(float dt);
+
+	std::map<std::string, Camera::Control> controls =
+	{
+		{"walk", &Camera::walk},
+		{"run", &Camera::run},
+		{"lookUp", &Camera::lookUp},
+		{"lookDown", &Camera::lookDown},
+		{"lookLeft", &Camera::lookLeft},
+		{"lookRight", &Camera::lookRight},
+		{"rightSidestep", &Camera::rightSidestep},
+		{"leftSidestep", &Camera::leftSidestep},
+		{"rightSidefaststep", &Camera::rightSidefaststep},
+		{"leftSidefaststep", &Camera::leftSidefaststep}
+	};
 };
