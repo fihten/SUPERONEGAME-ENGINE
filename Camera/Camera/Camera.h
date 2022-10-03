@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <map>
 #include <string>
-
+#include <list>
 
 
 class Camera
@@ -53,6 +53,7 @@ private:
 	void rightSidefaststep(float dt);
 	void leftSidefaststep(float dt);
 
+	typedef void(Camera::* Control)(float);
 	std::map<std::string, Camera::Control> controls =
 	{
 		{"walk", &Camera::walk},
@@ -65,5 +66,15 @@ private:
 		{"leftSidestep", &Camera::leftSidestep},
 		{"rightSidefaststep", &Camera::rightSidefaststep},
 		{"leftSidefaststep", &Camera::leftSidefaststep}
+	};
+
+	class ControlNode
+	{
+
+	};
+	class Key :public ControlNode
+	{
+		UINT key;
+		std::list<ControlNode*> childs;
 	};
 };
