@@ -5,7 +5,7 @@
 #include <Windows.h>
 #include <map>
 #include <string>
-#include <list>
+#include <vector>
 
 
 class Camera
@@ -24,8 +24,9 @@ class Camera
 
 	bool changed = true;
 
-	float walkVelocity = 1;
-	float runVelocity = 5;
+	float rotateVelocity = 1;
+	float walkVelocity = 1 / rotateVelocity;
+	float runVelocity = 5 / rotateVelocity;
 
 	float rotateCoeff = 1;
 
@@ -33,7 +34,7 @@ public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
 
-	UINT processKey(UINT msg, WPARAM wparam, LPARAM lparam);
+	UINT processKey(UINT msg, WPARAM wparam, LPARAM lparam, float dt);
 private:
 	void updateView();
 	void updateProj();
@@ -53,8 +54,8 @@ private:
 	void rightSidefaststep(float dt);
 	void leftSidefaststep(float dt);
 
-	typedef void(Camera::* Control)(float);
-	std::map<std::string, Camera::Control> controls =
+	typedef void(Camera::* Operation)(float);
+	std::map<std::string, Camera::Operation> operations =
 	{
 		{"walk", &Camera::walk},
 		{"run", &Camera::run},
@@ -68,13 +69,12 @@ private:
 		{"leftSidefaststep", &Camera::leftSidefaststep}
 	};
 
-	class ControlNode
+	struct LinkOfKeyAndOperation
 	{
+		UINT key = 0;
+		std::string operation = "";
+	};
+	std::vector<LinkOfKeyAndOperation> LinksOfKeysAndOperations;
 
-	};
-	class Key :public ControlNode
-	{
-		UINT key;
-		std::list<ControlNode*> childs;
-	};
+	Operation getOperation(UINT vkKey) const;
 };

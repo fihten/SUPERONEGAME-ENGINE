@@ -47,8 +47,18 @@ void Camera::updateProj()
 	changed = false;
 }
 
-UINT Camera::processKey(UINT msg, WPARAM wparam, LPARAM lparam)
+UINT Camera::processKey(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
 {
+	switch (msg)
+	{
+	case WM_KEYDOWN:
+	{
+		Operation op = getOperation(wparam);
+		(this->*op)(rotateVelocity * dt);
+	}
+	return 0;
+	}
+
 	return 0;
 }
 
@@ -136,4 +146,20 @@ void Camera::leftSidefaststep(float dt)
 	right.normalize();
 	position = position - right * l;
 	changed = true;
+}
+
+Camera::Operation Camera::getOperation(UINT vkKey) const
+{
+	for (const auto& link : LinksOfKeysAndOperations)
+	{
+		if (link.key == vkKey)
+		{
+			auto it = operations.find(link.operation);
+			if (it == operations.end())
+				return nullptr;
+			return operations.at(link.operation);
+		}
+	}
+
+	return nullptr;
 }
