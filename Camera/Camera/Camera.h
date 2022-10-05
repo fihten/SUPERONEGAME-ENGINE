@@ -34,7 +34,9 @@ public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
 
-	UINT processKey(UINT msg, WPARAM wparam, LPARAM lparam, float dt);
+	UINT processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt);
+	bool loadCFG(const std::string& cfg);
+
 private:
 	void updateView();
 	void updateProj();

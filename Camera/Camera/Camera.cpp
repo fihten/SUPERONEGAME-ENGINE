@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Camera.h"
+#include <fstream>
 
 const flt4x4& Camera::getView()
 {
@@ -47,13 +48,16 @@ void Camera::updateProj()
 	changed = false;
 }
 
-UINT Camera::processKey(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
+UINT Camera::processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
 {
 	switch (msg)
 	{
 	case WM_KEYDOWN:
 	{
 		Operation op = getOperation(wparam);
+		if (op == nullptr)
+			return 0;
+
 		(this->*op)(rotateVelocity * dt);
 	}
 	return 0;
@@ -162,4 +166,28 @@ Camera::Operation Camera::getOperation(UINT vkKey) const
 	}
 
 	return nullptr;
+}
+
+bool Camera::loadCFG(const std::string& cfg)
+{
+	std::ifstream file(cfg);
+	if (!file)
+		return false;
+
+	while (!file.eof())
+	{
+		UINT vkKey;
+		file >> vkKey;
+
+		std::string operation;
+		file >> operation;
+
+		LinkOfKeyAndOperation link;
+		link.key = vkKey;
+		link.operation = operation;
+		LinksOfKeysAndOperations.push_back(link);
+	}
+	file.close();
+
+	return true;
 }
