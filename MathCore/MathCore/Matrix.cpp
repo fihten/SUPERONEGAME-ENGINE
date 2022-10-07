@@ -1,7 +1,6 @@
 #include "pch.h"
 #include "Matrix.h"
 
-#define _USE_MATH_DEFINES // for C++
 #include <cmath>
 #include <float.h>
 

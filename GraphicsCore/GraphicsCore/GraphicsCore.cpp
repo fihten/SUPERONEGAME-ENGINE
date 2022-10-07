@@ -1,6 +1,7 @@
 #include "GraphicsCore.h"
 #include "Shader.h"
 #include "ResourceManager.h"
+#include "Cameras.h"
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -141,6 +142,9 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UIN
 	// 9. Process shaders
 
 	processShaders(device);
+
+	// 10. load cameras cfgs
+	loadCamerasCFGs();
 }
 
 void GraphicsCore::draw(Mesh& mesh)

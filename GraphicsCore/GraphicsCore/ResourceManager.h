@@ -24,6 +24,9 @@ class ResourceManager
 
 		// matrices
 		std::map<std::string, const ID3DX11EffectMatrixVariable*> matrices;
+
+		// location of variable
+		std::map<std::string, std::string> locationOfVariable;
 	};
 	std::map<std::string, TechniqueResource> techniques;
 
@@ -54,6 +57,7 @@ public:
 	const std::vector<InputLayoutStreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
 	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
+	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
 };
 
 extern ResourceManager resourceManager;

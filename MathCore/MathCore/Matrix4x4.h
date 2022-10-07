@@ -1,6 +1,5 @@
 #pragma once
 
-#define _USE_MATH_DEFINES // for C++
 #include <cmath>
 #include "Vec3d.h"
 #include "Vec4d.h"
@@ -118,28 +117,28 @@ public:
 };
 
 template<class value_type>
-Matrix4x4<value_type>&& makePerspectiveProjection(const value_type& aspectRatio, const value_type& fovy, const value_type& near, const value_type& far)
+Matrix4x4<value_type>&& makePerspectiveProjection(const value_type& _aspectRatio, const value_type& _fovy, const value_type& _near, const value_type& _far)
 {
-	value_type fovy_ = fovy * M_PI / 180;
-	value_type tinv = 1 / tan(0.5 * fovy_);
-	value_type m22 = far / (far - near);
+	value_type fovy = _fovy * M_PI / 180;
+	value_type tinv = 1 / tan(0.5 * fovy);
+	value_type m22 = _far / (_far - _near);
 
 	return Matrix4x4<value_type>(
-		tinv / aspectRatio, value_type(0), value_type(0), value_type(0),
+		tinv / _aspectRatio, value_type(0), value_type(0), value_type(0),
 		value_type(0), tinv, value_type(0), value_type(0),
 		value_type(0), value_type(0), m22, value_type(0),
-		value_type(0), value_type(0), -near * m22, value_type(0)
+		value_type(0), value_type(0), -_near * m22, value_type(0)
 		);
 }
 
 template<class value_type>
-Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& left, const value_type& right, const value_type& bottom, const value_type& top, const value_type& near, const value_type& far)
+Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& _left, const value_type& _right, const value_type& _bottom, const value_type& _top, const value_type& _near, const value_type& _far)
 {
 	return Matrix4x4<value_type>(
-		2.0 / (right - left), 0, 0, 0,
-		0, 2.0 / (top - bottom), 0, 0,
-		0, 0, 1.0 / (far - near), 0,
-		-(right + left) / (right - left), -(top + bottom) / (top - bottom), -near / (far - near), 1
+		2.0 / (_right - _left), 0, 0, 0,
+		0, 2.0 / (_top - _bottom), 0, 0,
+		0, 0, 1.0 / (_far - _near), 0,
+		-(_right + _left) / (_right - _left), -(_top + _bottom) / (_top - _bottom), -_near / (_far - _near), 1
 		);
 }
 

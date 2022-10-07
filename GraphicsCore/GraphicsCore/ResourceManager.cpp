@@ -108,3 +108,15 @@ ID3DX11EffectPass* ResourceManager::getPass(const std::string& techniqueName, co
 
 	return techniqueRes.passes.at(passName).pass;
 }
+
+const std::string& ResourceManager::getVariableLocation(const std::string& techniqueName, const std::string& variable) const
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	if (techniqueRes.locationOfVariable.count(variable) == 0)
+		return "";
+
+	return techniqueRes.locationOfVariable.at(variable);
+}
