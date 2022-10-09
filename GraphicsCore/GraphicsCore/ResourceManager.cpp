@@ -112,11 +112,20 @@ ID3DX11EffectPass* ResourceManager::getPass(const std::string& techniqueName, co
 const std::string& ResourceManager::getVariableLocation(const std::string& techniqueName, const std::string& variable) const
 {
 	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+		return "";
 
 	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	if (techniqueRes.locationOfVariable.count(variable) == 0)
 		return "";
 
 	return techniqueRes.locationOfVariable.at(variable);
+}
+
+const std::map<std::string, const ID3DX11EffectMatrixVariable*>& ResourceManager::getMatrices(const std::string& techniqueName) const
+{
+	if (techniques.count(techniqueName) == 0)
+		return std::map<std::string, const ID3DX11EffectMatrixVariable*>();
+
+	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	return techniqueRes.matrices;
 }

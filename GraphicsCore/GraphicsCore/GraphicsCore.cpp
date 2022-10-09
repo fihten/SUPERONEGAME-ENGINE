@@ -152,6 +152,29 @@ void GraphicsCore::draw(Mesh& mesh)
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
+	auto& matrices = resourceManager.getMatrices(sTechnique);
+	for (auto& m : matrices)
+	{
+		std::string place = resourceManager.getVariableLocation(sTechnique, m.first);
+		size_t pos = place.find("camera[");
+		if (pos == 0)
+		{
+			size_t beg = 7;
+			size_t end = place.find(']', beg);
+
+			int index = std::atoi(std::string(place, beg, end).c_str());
+			
+			beg = end + 2;
+			std::string what(place, beg, std::string::npos);
+			if (what == std::string("WVP"))
+			{
+
+			}
+
+			continue;
+		}
+	}
+
 	const std::vector<ResourceManager::InputLayoutStreamInfo>* streamsInfo = resourceManager.getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
 		return;

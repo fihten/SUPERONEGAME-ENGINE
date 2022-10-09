@@ -58,6 +58,7 @@ public:
 	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
 	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
+	const std::map<std::string, const ID3DX11EffectMatrixVariable*>& getMatrices(const std::string& techniqueName) const;
 };
 
 extern ResourceManager resourceManager;
