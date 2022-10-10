@@ -152,11 +152,12 @@ void GraphicsCore::draw(Mesh& mesh)
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
-	auto& matrices = resourceManager.getMatrices(sTechnique);
+	std::map<std::string, ID3DX11EffectMatrixVariable*> matrices;
+	resourceManager.getMatrices(sTechnique, matrices);
 	for (auto& m : matrices)
 	{
 		std::string place = resourceManager.getVariableLocation(sTechnique, m.first);
-		size_t pos = place.find("camera[");
+		size_t pos = place.find("cameras[");
 		if (pos == 0)
 		{
 			size_t beg = 7;
@@ -168,7 +169,11 @@ void GraphicsCore::draw(Mesh& mesh)
 			std::string what(place, beg, std::string::npos);
 			if (what == std::string("WVP"))
 			{
+				const flt4x4& v = cameras[index].getView();
+				const flt4x4& p = cameras[index].getProj();
+				flt4x4 wvp = v * p;
 
+				m.second->SetMatrix(wvp.getBuf());
 			}
 
 			continue;

@@ -31,6 +31,8 @@ public:
 		m[12] = m30;	m[13] = m31;	m[14] = m32;	m[15] = m33;
 	};
 
+	const value_type* getBuf() const { return m; };
+
 	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
 	{
 		Vec4d<value_type> r;

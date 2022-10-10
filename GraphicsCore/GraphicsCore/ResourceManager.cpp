@@ -58,7 +58,7 @@ ResourceManager::RegisterMessage ResourceManager::registerStreamsInfo(const std:
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::string& techniqueName, const std::string& matrixName, const ID3DX11EffectMatrixVariable* matrix)
+ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::string& techniqueName, const std::string& matrixName, ID3DX11EffectMatrixVariable* matrix)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -121,11 +121,12 @@ const std::string& ResourceManager::getVariableLocation(const std::string& techn
 	return techniqueRes.locationOfVariable.at(variable);
 }
 
-const std::map<std::string, const ID3DX11EffectMatrixVariable*>& ResourceManager::getMatrices(const std::string& techniqueName) const
+void ResourceManager::getMatrices(const std::string& techniqueName, std::map<std::string, ID3DX11EffectMatrixVariable*>& matrices)
 {
+	matrices.clear();
 	if (techniques.count(techniqueName) == 0)
-		return std::map<std::string, const ID3DX11EffectMatrixVariable*>();
+		return;
 
-	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.matrices;
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	matrices = techniqueRes.matrices;
 }
