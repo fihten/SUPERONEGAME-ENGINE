@@ -112,3 +112,32 @@ void processShaders(ID3D11Device* device)
 	for (const auto& pathToShader : pathsToShaders)
 		processShader(device, pathToShader.c_str());
 }
+
+std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::string& path)
+{
+	std::ifstream config(path);
+
+	config.seekg(0, config.end);
+	int length = config.tellg();
+	config.seekg(0, config.beg);
+
+	char* szConfig = new char[length + 1];
+	config.read(szConfig, length);
+	szConfig[length] = 0;
+
+	std::string sConfig(szConfig);
+	char name[] = "locations_of_variables";
+	
+	size_t beg = 0;
+	beg = sConfig.find(name, beg);
+	if (beg == std::string::npos)
+		return std::map<std::string, std::string>();
+
+	beg += sizeof name / sizeof * name;
+	beg = sConfig.find("{", beg);
+	beg += 1;
+
+
+
+	return std::map<std::string, std::string>();
+}
