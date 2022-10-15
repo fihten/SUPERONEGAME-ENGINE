@@ -137,7 +137,49 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 	beg = sConfig.find("{", beg);
 	beg += 1;
 
+	const char skipSymbols[5] =
+	{
+		32, // space
+		9,  // tab
+		10, // line feed
+		13, // carriage return
+		0
+	};
+	const char stopSymbols[7] =
+	{
+		32, // space
+		9,  // tab
+		10, // line feed
+		13, // carriage return
+		'=',
+		';',
+		0
+	};
+	std::map<std::string, std::string> variableLocations;
 
+	for (;;)
+	{
+		beg = sConfig.find_first_not_of(skipSymbols, beg);
+		if (sConfig[beg] == '}')
+			break;
 
-	return std::map<std::string, std::string>();
+		size_t end = sConfig.find_first_of(stopSymbols, beg);
+		std::string variable(sConfig, beg, end - beg);
+
+		beg = end;
+		beg = sConfig.find('=', beg);
+		beg += 1;
+
+		beg = sConfig.find_first_not_of(skipSymbols, beg);
+
+		end = sConfig.find_first_of(stopSymbols, beg);
+		std::string location(sConfig, beg, end - beg);
+
+		variableLocations[variable] = location;
+
+		beg = end;
+		beg = sConfig.find(';', beg);
+		beg += 1;
+	}
+	return std::move(variableLocations);
 }
