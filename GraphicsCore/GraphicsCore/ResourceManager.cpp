@@ -72,6 +72,17 @@ ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::stri
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerVariableLocations(const std::string& techniqueName, const std::map<std::string, std::string>& locationOfVariable)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	techniqueRes.locationOfVariable = locationOfVariable;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<ResourceManager::InputLayoutStreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
 {
 	if (techniques.count(techniqueName) == 0)

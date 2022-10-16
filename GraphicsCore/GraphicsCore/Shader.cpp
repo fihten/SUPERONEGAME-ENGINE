@@ -13,106 +13,6 @@
 
 using namespace boost::filesystem;
 
-void processShader(ID3D11Device* device, LPCTSTR path)
-{
-	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
-
-	ID3DX11Effect* mShader = nullptr;
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-	D3DX11CompileFromFile(path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
-	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
-
-	// interpret shader
-	std::ifstream shaderFile(path);
-
-	shaderFile.seekg(0, shaderFile.end);
-	int length = shaderFile.tellg();
-	shaderFile.seekg(0, shaderFile.beg);
-
-	char* shaderText = new char[length + 1];
-	shaderFile.read(shaderText, length);
-	shaderText[length] = 0;
-
-	ShaderInterpreter interpreter;
-	interpreter.setShaderText(shaderText);
-	ShaderUnits::SHADER* shader = interpreter.build();
-
-	ShadersNamesVisitor shadersNamesVisitor;
-	shader->query(&shadersNamesVisitor);
-
-	ElementsOfCbufferVisitor elementsOfCbufferVisitor;
-	shader->query(&elementsOfCbufferVisitor);
-
-	ElementOfCbuffer* elementsOfCbuffers = nullptr;
-	int countOfCbufferElements = 0;
-	elementsOfCbufferVisitor.getElements(elementsOfCbuffers, countOfCbufferElements);
-
-	for (int i = 0; i < countOfCbufferElements; ++i)
-		elementsOfCbuffers[i].v = mShader->GetVariableByName(elementsOfCbuffers[i].name.c_str());
-
-	std::vector<ShadersNamesVisitor::ShadersNames> shadersNames = shadersNamesVisitor.getShadersNames();
-	for (auto& sn : shadersNames)
-	{
-		ID3DX11EffectTechnique* technique = mShader->GetTechniqueByName(sn.technique.c_str());
-		resourceManager.registerTechnique(sn.technique, technique);
-
-		for (int i = 0; i < sn.passes.size(); ++i)
-		{
-			ID3DX11EffectPass* pass = technique->GetPassByName(sn.passes[i].c_str());
-			resourceManager.registerPass(sn.technique, sn.passes[i], pass);
-
-			InputLayoutVisitor inputLayoutVisitor;
-			inputLayoutVisitor.setShaderName(sn.shaders[i]);
-
-			shader->query(&inputLayoutVisitor);
-
-			D3DX11_PASS_DESC passDesc;
-			pass->GetDesc(&passDesc);
-
-			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
-			resourceManager.registerInputLayout(sn.technique, sn.passes[i], inputLayout);
-			resourceManager.registerStreamsInfo(sn.technique, sn.passes[i], inputLayoutVisitor.getStreamsInfo());
-		}
-
-		for (int i = 0; i < countOfCbufferElements; ++i)
-		{
-			if (elementsOfCbuffers[i].type == std::string("float4x4"))
-				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
-		}
-	}
-}
-
-void getPathsToShaders(std::vector<std::basic_string<TCHAR>>& pathsToShaders)
-{
-	pathsToShaders.clear();
-
-	TCHAR shadersFolder[200];
-	int sz = sizeof shadersFolder / sizeof * shadersFolder;
-	GetEnvironmentVariable(_T("SHADERS"), shadersFolder, sz);
-	
-	path p(shadersFolder);
-	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
-	{
-		if (!is_directory(i->path()))
-			pathsToShaders.push_back(std::basic_string<TCHAR>(shadersFolder) + _T("//") + i->path().filename().c_str());
-		else
-			continue;
-	}
-}
-
-void processShaders(ID3D11Device* device)
-{
-	std::vector<std::basic_string<TCHAR>> pathsToShaders;
-	getPathsToShaders(pathsToShaders);
-	for (const auto& pathToShader : pathsToShaders)
-		processShader(device, pathToShader.c_str());
-}
-
 std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::string& path)
 {
 	std::ifstream config(path);
@@ -127,7 +27,7 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 
 	std::string sConfig(szConfig);
 	char name[] = "locations_of_variables";
-	
+
 	size_t beg = 0;
 	beg = sConfig.find(name, beg);
 	if (beg == std::string::npos)
@@ -182,4 +82,133 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 		beg += 1;
 	}
 	return std::move(variableLocations);
+}
+
+void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
+{
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3DX11Effect* mShader = nullptr;
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	D3DX11CompileFromFile(shader_path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
+
+	// interpret shader
+	std::ifstream shaderFile(shader_path);
+
+	shaderFile.seekg(0, shaderFile.end);
+	int length = shaderFile.tellg();
+	shaderFile.seekg(0, shaderFile.beg);
+
+	char* shaderText = new char[length + 1];
+	shaderFile.read(shaderText, length);
+	shaderText[length] = 0;
+
+	ShaderInterpreter interpreter;
+	interpreter.setShaderText(shaderText);
+	ShaderUnits::SHADER* shader = interpreter.build();
+
+	ShadersNamesVisitor shadersNamesVisitor;
+	shader->query(&shadersNamesVisitor);
+
+	ElementsOfCbufferVisitor elementsOfCbufferVisitor;
+	shader->query(&elementsOfCbufferVisitor);
+
+	ElementOfCbuffer* elementsOfCbuffers = nullptr;
+	int countOfCbufferElements = 0;
+	elementsOfCbufferVisitor.getElements(elementsOfCbuffers, countOfCbufferElements);
+
+	for (int i = 0; i < countOfCbufferElements; ++i)
+		elementsOfCbuffers[i].v = mShader->GetVariableByName(elementsOfCbuffers[i].name.c_str());
+
+	std::map<std::string, std::string> variableLocations = loadVariableLocationsFromFile(config_path);
+
+	std::vector<ShadersNamesVisitor::ShadersNames> shadersNames = shadersNamesVisitor.getShadersNames();
+	for (auto& sn : shadersNames)
+	{
+		ID3DX11EffectTechnique* technique = mShader->GetTechniqueByName(sn.technique.c_str());
+		resourceManager.registerTechnique(sn.technique, technique);
+		resourceManager.registerVariableLocations(sn.technique, variableLocations);
+
+		for (int i = 0; i < sn.passes.size(); ++i)
+		{
+			ID3DX11EffectPass* pass = technique->GetPassByName(sn.passes[i].c_str());
+			resourceManager.registerPass(sn.technique, sn.passes[i], pass);
+
+			InputLayoutVisitor inputLayoutVisitor;
+			inputLayoutVisitor.setShaderName(sn.shaders[i]);
+
+			shader->query(&inputLayoutVisitor);
+
+			D3DX11_PASS_DESC passDesc;
+			pass->GetDesc(&passDesc);
+
+			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
+			resourceManager.registerInputLayout(sn.technique, sn.passes[i], inputLayout);
+			resourceManager.registerStreamsInfo(sn.technique, sn.passes[i], inputLayoutVisitor.getStreamsInfo());
+		}
+
+		for (int i = 0; i < countOfCbufferElements; ++i)
+		{
+			if (elementsOfCbuffers[i].type == std::string("float4x4"))
+				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
+		}
+	}
+}
+
+void getPathsToShaders(std::vector<std::basic_string<TCHAR>>& pathsToShaders)
+{
+	pathsToShaders.clear();
+
+	TCHAR shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariable(_T("SHADERS"), shadersFolder, sz);
+	
+	path p(shadersFolder);
+	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
+	{
+		if (!is_directory(i->path()))
+			pathsToShaders.push_back(std::basic_string<TCHAR>(shadersFolder) + _T("//") + i->path().filename().c_str());
+		else
+			continue;
+	}
+}
+
+void getPathsToShadersConfigs(std::vector<std::string>& pathsToShadersConfigs)
+{
+	pathsToShadersConfigs.clear();
+
+	TCHAR shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariable(_T("SHADERS"), shadersFolder, sz);
+
+	char shadersConfigsFolder[200];
+	sz = sizeof shadersConfigsFolder / sizeof * shadersConfigsFolder;
+	GetEnvironmentVariableA("CONFIGS", shadersConfigsFolder, sz);
+
+	path p(shadersFolder);
+	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
+	{
+		if (!is_directory(i->path()))
+			pathsToShadersConfigs.push_back(std::string(shadersConfigsFolder) + "//" + i->path().filename().string());
+		else
+			continue;
+	}
+}
+
+void processShaders(ID3D11Device* device)
+{
+	std::vector<std::basic_string<TCHAR>> pathsToShaders;
+	getPathsToShaders(pathsToShaders);
+
+	std::vector<std::string> pathsToShadersConfigs;
+	getPathsToShadersConfigs(pathsToShadersConfigs);
+
+	for (int i = 0; i < pathsToShaders.size(); ++i)
+		processShader(device, pathsToShaders[i].c_str(), pathsToShadersConfigs[i].c_str());
 }
