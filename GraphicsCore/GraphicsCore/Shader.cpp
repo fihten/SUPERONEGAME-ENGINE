@@ -195,7 +195,7 @@ void getPathsToShadersConfigs(std::vector<std::string>& pathsToShadersConfigs)
 	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
 	{
 		if (!is_directory(i->path()))
-			pathsToShadersConfigs.push_back(std::string(shadersConfigsFolder) + "//" + i->path().filename().string());
+			pathsToShadersConfigs.push_back(std::string(shadersConfigsFolder) + "//" + i->path().filename().string() + ".cfg");
 		else
 			continue;
 	}
