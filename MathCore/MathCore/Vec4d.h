@@ -12,6 +12,8 @@ public:
 	Vec4d<value_type> operator+(const Vec4d<value_type>& v) const;
 	Vec4d<value_type> operator-(const Vec4d<value_type>& v) const;
 	
+	const value_type* getBuf() const { return v; };
+
 	value_type& x() { return v[0]; };
 	value_type& y() { return v[1]; };
 	value_type& z() { return v[2]; };

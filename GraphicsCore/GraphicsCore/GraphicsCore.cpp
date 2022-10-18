@@ -3,8 +3,10 @@
 #include "ResourceManager.h"
 #include "Cameras.h"
 
-void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
+void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
+	this->drawFunc = drawFunc;
+
 	mWidth = width;
 	mHeight = height;
 
@@ -145,6 +147,19 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UIN
 
 	// 10. load cameras cfgs
 	loadCamerasCFGs();
+}
+
+void GraphicsCore::startFrame()
+{
+	flt4 white(1, 1, 1, 1);
+	context->ClearRenderTargetView(mRenderTargetView, white.getBuf());
+
+	context->ClearDepthStencilView(mDepthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
+}
+
+void GraphicsCore::endFrame()
+{
+	mSwapChain->Present(0, 0);
 }
 
 void GraphicsCore::draw(Mesh& mesh)
@@ -357,7 +372,7 @@ int GraphicsCore::run()
 		// Otherwise, do animation/game stuff.
 		else
 		{
-
+			drawFunc(this);
 		}
 	}
 	return (int)msg.wParam;

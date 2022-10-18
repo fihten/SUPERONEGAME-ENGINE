@@ -5,7 +5,10 @@
 #include <dxgiformat.h>
 #include <dxgi.h>
 
+class GraphicsCore;
+
 typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
+typedef void (*DRAW_FUNC)(GraphicsCore*);
 
 class GraphicsCore
 {
@@ -13,13 +16,18 @@ class GraphicsCore
 	ID3D11DeviceContext* context = 0;
 
 public:
-	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
-	void draw(Mesh& mesh);
-	int run();
+	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
+	
+	void startFrame();
+	void endFrame();
 
+	void draw(Mesh& mesh);
+	
+	int run();
+	void resize(UINT width, UINT height);
+	
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
-	void resize(UINT width, UINT height);
 
 private:
 	UINT mWidth = 0;
@@ -37,4 +45,6 @@ private:
 
 	ID3D11Texture2D* mDepthStencilBuffer = 0;
 	ID3D11DepthStencilView* mDepthStencilView;
+
+	DRAW_FUNC drawFunc = nullptr;
 };
