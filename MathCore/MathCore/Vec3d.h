@@ -4,6 +4,24 @@ template<class value_type>
 class Matrix4x4;
 
 template<class value_type>
+class Vec3d;
+
+template<class value_type>
+value_type dot(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
+
+template<class value_type>
+Vec3d<value_type>&& cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
+
+template<class value_type>
+Vec3d<value_type> operator*(const Vec3d<value_type>& vec, const value_type& x);
+
+template<class value_type>
+Vec3d<value_type> operator*(const value_type& x, const Vec3d<value_type>& vec);
+
+template<class value_type>
+Vec3d<value_type> operator*(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m);
+
+template<class value_type>
 class Vec3d
 {
 	value_type v[3];
@@ -23,11 +41,11 @@ public:
 	value_type length() const;
 	value_type normalize();
 
-	friend value_type dot(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
-	friend Vec3d<value_type>&& cross(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
-	friend Vec3d<value_type> operator*(const Vec3d<value_type>& vec, const value_type& x);
-	friend Vec3d<value_type> operator*(const value_type& x, const Vec3d<value_type>& vec);
-	friend Vec3d<value_type> operator*(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m);
+	friend value_type dot<>(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
+	friend Vec3d<value_type>&& cross<>(const Vec3d<value_type>& v1, const Vec3d<value_type>& v2);
+	friend Vec3d<value_type> operator*<>(const Vec3d<value_type>& vec, const value_type& x);
+	friend Vec3d<value_type> operator*<>(const value_type& x, const Vec3d<value_type>& vec);
+	friend Vec3d<value_type> operator*<>(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m);
 };
 
 template<class value_type>

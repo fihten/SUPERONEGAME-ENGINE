@@ -57,18 +57,18 @@ public:
 		return r;
 	};
 
-	friend Vec3d<value_type> operator*(const Vec3d<value_type>& v, const Matrix4x4<value_type>& m)
+	friend Vec3d<value_type> operator*(Vec3d<value_type>& v, Matrix4x4<value_type>& m)
 	{
 		Vec3d<value_type> r;
 
-		r.x() = v.v[0] * m.m[0] + v.v[1] * m.m[4] + v.v[2] * m.m[8];
-		r.y() = v.v[0] * m.m[1] + v.v[1] * m.m[5] + v.v[2] * m.m[9];
-		r.z() = v.v[0] * m.m[2] + v.v[1] * m.m[6] + v.v[2] * m.m[10];
+		r.x() = v.x() * m.m[0] + v.y() * m.m[4] + v.z() * m.m[8];
+		r.y() = v.x() * m.m[1] + v.y() * m.m[5] + v.z() * m.m[9];
+		r.z() = v.x() * m.m[2] + v.y() * m.m[6] + v.z() * m.m[10];
 
 		return r;
 	};
 
-	friend Vec3d<value_type> operator*(const Matrix4x4<value_type>& m, const Vec3d<value_type>& v)
+	friend Vec3d<value_type> operator*(Matrix4x4<value_type>& m, Vec3d<value_type>& v)
 	{
 		Vec3d<value_type> r;
 

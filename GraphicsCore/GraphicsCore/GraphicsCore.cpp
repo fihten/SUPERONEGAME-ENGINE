@@ -81,7 +81,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 
 	// Finally got the IDXGIFactory interface
 	IDXGIFactory* dxgiFactory = 0;
-	dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)dxgiFactory);
+	dxgiAdapter->GetParent(__uuidof(IDXGIFactory), (void**)&dxgiFactory);
 
 	// Now, create the SwapChain
 	dxgiFactory->CreateSwapChain(device, &sd, &mSwapChain);

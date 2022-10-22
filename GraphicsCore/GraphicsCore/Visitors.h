@@ -95,7 +95,6 @@ public:
 	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
 
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
-	void startVisit(const ShaderUnits::VARIABLE* pVARIABLE);
 
 	void getElements(ElementOfCbuffer*& pElements, int& count);
 

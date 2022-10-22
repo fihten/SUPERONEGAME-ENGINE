@@ -139,10 +139,10 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
 
 ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength)
 {
-	ID3D11InputLayout** inputLayout = nullptr;
-	device->CreateInputLayout(inputElements, inputElementsCount, shaderByteCode, byteCodeLength, inputLayout);
+	ID3D11InputLayout* inputLayout = nullptr;
+	device->CreateInputLayout(inputElements, inputElementsCount, shaderByteCode, byteCodeLength, &inputLayout);
 
-	return *inputLayout;
+	return inputLayout;
 }
 
 std::vector<ResourceManager::InputLayoutStreamInfo>&& InputLayoutVisitor::getStreamsInfo()
@@ -205,6 +205,7 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVAR
 	{
 		++elementsCount;
 		withinVariableDeclaration = true;
+		elements[elementsCount - 1].name = pVARIABLE_DECL->getName();
 	}
 }
 
@@ -218,12 +219,6 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4
 {
 	if (withinCbuffer && withinVariableDeclaration)
 		elements[elementsCount - 1].type = "float4x4";
-}
-
-void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE* pVARIABLE)
-{
-	if (withinCbuffer && withinVariableDeclaration)
-		elements[elementsCount - 1].name = pVARIABLE->getName();
 }
 
 void ElementsOfCbufferVisitor::getElements(ElementOfCbuffer*& pElements, int& count)

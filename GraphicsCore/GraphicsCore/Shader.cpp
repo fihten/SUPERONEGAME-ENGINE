@@ -13,7 +13,7 @@
 
 using namespace boost::filesystem;
 
-std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::string& path)
+void loadVariableLocationsFromFile(const std::string& path, std::map<std::string, std::string>& variableLocations)
 {
 	std::ifstream config(path);
 
@@ -31,7 +31,7 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 	size_t beg = 0;
 	beg = sConfig.find(name, beg);
 	if (beg == std::string::npos)
-		return std::map<std::string, std::string>();
+		return;
 
 	beg += sizeof name / sizeof * name;
 	beg = sConfig.find("{", beg);
@@ -55,7 +55,6 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 		';',
 		0
 	};
-	std::map<std::string, std::string> variableLocations;
 
 	for (;;)
 	{
@@ -81,7 +80,6 @@ std::map<std::string, std::string>&& loadVariableLocationsFromFile(const std::st
 		beg = sConfig.find(';', beg);
 		beg += 1;
 	}
-	return std::move(variableLocations);
 }
 
 void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
@@ -126,7 +124,8 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	for (int i = 0; i < countOfCbufferElements; ++i)
 		elementsOfCbuffers[i].v = mShader->GetVariableByName(elementsOfCbuffers[i].name.c_str());
 
-	std::map<std::string, std::string> variableLocations = loadVariableLocationsFromFile(config_path);
+	std::map<std::string, std::string> variableLocations;
+	loadVariableLocationsFromFile(config_path, variableLocations);
 
 	std::vector<ShadersNamesVisitor::ShadersNames> shadersNames = shadersNamesVisitor.getShadersNames();
 	for (auto& sn : shadersNames)
@@ -173,7 +172,7 @@ void getPathsToShaders(std::vector<std::basic_string<TCHAR>>& pathsToShaders)
 	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
 	{
 		if (!is_directory(i->path()))
-			pathsToShaders.push_back(std::basic_string<TCHAR>(shadersFolder) + _T("//") + i->path().filename().c_str());
+			pathsToShaders.push_back(std::basic_string<TCHAR>(shadersFolder) + _T("\\") + i->path().filename().c_str());
 		else
 			continue;
 	}
@@ -195,7 +194,7 @@ void getPathsToShadersConfigs(std::vector<std::string>& pathsToShadersConfigs)
 	for (auto i = directory_iterator(p); i != directory_iterator(); i++)
 	{
 		if (!is_directory(i->path()))
-			pathsToShadersConfigs.push_back(std::string(shadersConfigsFolder) + "//" + i->path().filename().string() + ".cfg");
+			pathsToShadersConfigs.push_back(std::string(shadersConfigsFolder) + "\\" + i->path().filename().string() + ".cfg");
 		else
 			continue;
 	}
