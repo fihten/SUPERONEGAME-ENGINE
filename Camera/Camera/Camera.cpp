@@ -48,7 +48,7 @@ void Camera::updateProj()
 	changed = false;
 }
 
-UINT Camera::processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
+Camera::Behaviour Camera::processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
 {
 	switch (msg)
 	{
@@ -56,14 +56,14 @@ UINT Camera::processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt)
 	{
 		Operation op = getOperation(wparam);
 		if (op == nullptr)
-			return 0;
+			return CONTINUE;
 
 		(this->*op)(rotateVelocity * dt);
 	}
-	return 0;
+	return EXIT;
 	}
 
-	return 0;
+	return CONTINUE;
 }
 
 void Camera::walk(float dt)

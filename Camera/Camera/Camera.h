@@ -34,7 +34,12 @@ public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
 
-	UINT processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt);
+	enum Behaviour
+	{
+		CONTINUE,
+		EXIT
+	};
+	Behaviour processMessage(UINT msg, WPARAM wparam, LPARAM lparam, float dt);
 	bool loadCFG(const std::string& cfg);
 
 private:

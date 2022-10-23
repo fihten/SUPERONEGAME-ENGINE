@@ -41,10 +41,10 @@ private:
 	bool mWindowed = false;
 
 	IDXGISwapChain* mSwapChain = 0;
-	ID3D11RenderTargetView* mRenderTargetView;
+	ID3D11RenderTargetView* mRenderTargetView = 0;
 
 	ID3D11Texture2D* mDepthStencilBuffer = 0;
-	ID3D11DepthStencilView* mDepthStencilView;
+	ID3D11DepthStencilView* mDepthStencilView = 0;
 
 	DRAW_FUNC drawFunc = nullptr;
 };

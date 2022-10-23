@@ -380,6 +380,19 @@ int GraphicsCore::run()
 
 void GraphicsCore::resize(UINT width, UINT height)
 {
+	if (!mDepthStencilBuffer)
+		return;
+	if (!mDepthStencilView)
+		return;
+	if (!mRenderTargetView)
+		return;
+	if (!mSwapChain)
+		return;
+	if (!device)
+		return;
+	if (!context)
+		return;
+
 	// Destroy depth/stencil buffer and depth/stencil view
 	mDepthStencilBuffer->Release();
 	mDepthStencilView->Release();
@@ -417,6 +430,7 @@ void GraphicsCore::resize(UINT width, UINT height)
 	ID3D11Texture2D* backBuffer;
 	mSwapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)(&backBuffer));
 	device->CreateRenderTargetView(backBuffer, 0, &mRenderTargetView);
+	backBuffer->Release();
 
 	context->OMSetRenderTargets(1, &mRenderTargetView, mDepthStencilView);
 

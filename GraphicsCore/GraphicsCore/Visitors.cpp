@@ -99,8 +99,13 @@ void InputLayoutVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE
 	auto& desc = inputElements[inputElementsCount];
 
 	size_t pos = semanticName.find_last_not_of("0123456789");
-	desc.SemanticName = semanticName.substr(0, pos).c_str();
-	desc.SemanticIndex = std::atoi(semanticName.substr(pos).c_str());
+	
+	char* buffer = new char[pos + 2];
+	semanticName.copy(buffer, pos + 1, 0);
+	buffer[pos + 1] = 0;
+	desc.SemanticName = buffer;
+
+	desc.SemanticIndex = std::atoi(semanticName.substr(pos + 1).c_str());
 	
 	desc.AlignedByteOffset = alignedByteOffset;
 
