@@ -3,7 +3,7 @@
 #include <algorithm>
 #include "Mesh.h"
 
-Mesh&& createCube()
+Mesh createCube()
 {
 	Mesh m;
 
@@ -98,7 +98,7 @@ Mesh&& createCube()
 	m.params["technique"] = "Demo";
 	m.params["pass"] = "P0";
 
-	return std::move(m);
+	return m;
 }
 
 std::string Mesh::getTechnique() const

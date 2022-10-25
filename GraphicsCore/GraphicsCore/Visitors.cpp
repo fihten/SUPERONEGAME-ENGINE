@@ -150,15 +150,17 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 	return inputLayout;
 }
 
-std::vector<ResourceManager::InputLayoutStreamInfo>&& InputLayoutVisitor::getStreamsInfo()
+void InputLayoutVisitor::getStreamsInfo(std::vector<ResourceManager::InputLayoutStreamInfo>& streamsInfo)
 {
-	std::vector<ResourceManager::InputLayoutStreamInfo> streamsInfo(inputElementsCount);
+	streamsInfo.resize(inputElementsCount);
 	for (int i = 0; i < inputElementsCount; ++i)
 	{
 		auto& info = streamsInfo[i];
 
 		std::ostringstream ss;
-		ss << inputElements[i].SemanticName << inputElements[i].SemanticIndex;
+		ss << inputElements[i].SemanticName;
+		if (inputElements[i].SemanticIndex > 0)
+			ss << inputElements[i].SemanticIndex;
 		info.name = ss.str();
 
 		switch (inputElements[i].Format)
@@ -183,8 +185,6 @@ std::vector<ResourceManager::InputLayoutStreamInfo>&& InputLayoutVisitor::getStr
 			break;
 		}
 	}
-
-	return std::move(streamsInfo);
 }
 
 /*________________________________ElementsOfCbufferVisitor________________________________*/

@@ -10,7 +10,7 @@
 
 class Camera
 {
-	flt3 position = flt3(0, 0, 0);
+	flt3 position = flt3(0, 0, -2);
 	flt3 fwd = flt3(0, 0, 1);
 
 	float nearZ = 0.1;
@@ -24,7 +24,7 @@ class Camera
 
 	bool changed = true;
 
-	float rotateVelocity = 1;
+	float rotateVelocity = 10;
 	float walkVelocity = 1 / rotateVelocity;
 	float runVelocity = 5 / rotateVelocity;
 

@@ -9,6 +9,9 @@
 #include "Vec3d.h"
 #include "Vec4d.h"
 
+class Mesh;
+Mesh createCube();
+
 class Mesh
 {
 	std::string name = "";
@@ -23,6 +26,71 @@ class Mesh
 	std::map<std::string, std::string> params;
 
 public:
+	Mesh()
+	{
+
+	}
+
+	Mesh(const Mesh& m)
+	{
+		this->name = m.name;
+
+		this->flt1_streams = m.flt1_streams;
+		this->flt2_streams = m.flt2_streams;
+		this->flt3_streams = m.flt3_streams;
+		this->flt4_streams = m.flt4_streams;
+
+		this->indicies = m.indicies;
+
+		this->params = m.params;
+	}
+
+	Mesh(Mesh&& m)
+	{
+		this->name = std::move(m.name);
+
+		this->flt1_streams = std::move(m.flt1_streams);
+		this->flt2_streams = std::move(m.flt2_streams);
+		this->flt3_streams = std::move(m.flt3_streams);
+		this->flt4_streams = std::move(m.flt4_streams);
+
+		this->indicies = std::move(m.indicies);
+
+		this->params = std::move(m.params);
+	}
+
+	Mesh& operator=(Mesh&& m)
+	{
+		this->name = std::move(m.name);
+
+		this->flt1_streams = std::move(m.flt1_streams);
+		this->flt2_streams = std::move(m.flt2_streams);
+		this->flt3_streams = std::move(m.flt3_streams);
+		this->flt4_streams = std::move(m.flt4_streams);
+
+		this->indicies = std::move(m.indicies);
+
+		this->params = std::move(m.params);
+
+		return *this;
+	}
+
+	Mesh& operator=(const Mesh& m)
+	{
+		this->name = m.name;
+
+		this->flt1_streams = m.flt1_streams;
+		this->flt2_streams = m.flt2_streams;
+		this->flt3_streams = m.flt3_streams;
+		this->flt4_streams = m.flt4_streams;
+
+		this->indicies = m.indicies;
+
+		this->params = m.params;
+
+		return *this;
+	}
+
 	std::string getTechnique() const;
 	std::string getPass() const;
 
@@ -42,5 +110,5 @@ public:
 	uint32_t getVerticesCount() const;
 	uint32_t getIndicesCount() const;
 
-	friend Mesh&& createCube();
+	friend Mesh createCube();
 };

@@ -43,7 +43,7 @@ ResourceManager::RegisterMessage ResourceManager::registerInputLayout(const std:
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>&& streamsInfo)
+ResourceManager::RegisterMessage ResourceManager::registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>& streamsInfo)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;

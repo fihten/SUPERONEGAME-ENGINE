@@ -1,6 +1,7 @@
 #include "GraphicsCore.h"
 #include "Cameras.h"
 #include "Timer.h"
+#include "Mesh.h"
 #include <Windows.h>
 
 GraphicsCore graphicsCore;
@@ -36,6 +37,8 @@ void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
 
+	static Mesh cube(createCube());
+	graphicsCore->draw(cube);
 
 	graphicsCore->endFrame();
 }

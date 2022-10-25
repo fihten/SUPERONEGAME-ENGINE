@@ -149,7 +149,10 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 
 			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
 			resourceManager.registerInputLayout(sn.technique, sn.passes[i], inputLayout);
-			resourceManager.registerStreamsInfo(sn.technique, sn.passes[i], inputLayoutVisitor.getStreamsInfo());
+
+			std::vector<ResourceManager::InputLayoutStreamInfo> streamsInfo;
+			inputLayoutVisitor.getStreamsInfo(streamsInfo);
+			resourceManager.registerStreamsInfo(sn.technique, sn.passes[i], streamsInfo);
 		}
 
 		for (int i = 0; i < countOfCbufferElements; ++i)

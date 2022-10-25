@@ -67,7 +67,7 @@ public:
 
 public:
 	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
-	std::vector<ResourceManager::InputLayoutStreamInfo>&& getStreamsInfo();
+	void getStreamsInfo(std::vector<ResourceManager::InputLayoutStreamInfo>& streamsInfo);
 };
 
 #define ELEMENTS_OF_CBUFFER_MAX_COUNT 32

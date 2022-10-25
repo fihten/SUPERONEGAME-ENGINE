@@ -282,7 +282,7 @@ void GraphicsCore::draw(Mesh& mesh)
 
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
-	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_FLOAT, 0);
+	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 
 	auto* pass = resourceManager.getPass(sTechnique, sPass);
 	if (pass == nullptr)
