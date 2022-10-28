@@ -42,58 +42,58 @@ Mesh createCube()
 	auto& inds = m.indicies;
 	
 	// bottom
-	inds.push_back(0);
+	inds.push_back(2);
 	inds.push_back(1);
-	inds.push_back(2);
-	
 	inds.push_back(0);
-	inds.push_back(2);
+	
 	inds.push_back(3);
+	inds.push_back(2);
+	inds.push_back(0);
 
 	// top
-	inds.push_back(6);
+	inds.push_back(4);
 	inds.push_back(5);
-	inds.push_back(4);
-
 	inds.push_back(6);
-	inds.push_back(4);
+
 	inds.push_back(7);
+	inds.push_back(4);
+	inds.push_back(6);
 
 	// front 
-	inds.push_back(2);
+	inds.push_back(7);
 	inds.push_back(6);
-	inds.push_back(7);
-
 	inds.push_back(2);
-	inds.push_back(7);
+
 	inds.push_back(3);
+	inds.push_back(7);
+	inds.push_back(2);
 
 	// back
-	inds.push_back(4);
+	inds.push_back(1);
 	inds.push_back(5);
-	inds.push_back(1);
-
 	inds.push_back(4);
-	inds.push_back(1);
+
 	inds.push_back(0);
+	inds.push_back(1);
+	inds.push_back(4);
 
 	// right
+	inds.push_back(1);
+	inds.push_back(6);
 	inds.push_back(5);
-	inds.push_back(6);
-	inds.push_back(1);
 
-	inds.push_back(6);
-	inds.push_back(2);
 	inds.push_back(1);
+	inds.push_back(2);
+	inds.push_back(6);
 
 	// left
-	inds.push_back(7);
+	inds.push_back(0);
 	inds.push_back(4);
-	inds.push_back(0);
-
 	inds.push_back(7);
-	inds.push_back(0);
+
 	inds.push_back(3);
+	inds.push_back(0);
+	inds.push_back(7);
 
 	m.params["technique"] = "Demo";
 	m.params["pass"] = "P0";

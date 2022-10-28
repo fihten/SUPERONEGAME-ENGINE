@@ -119,7 +119,7 @@ public:
 };
 
 template<class value_type>
-Matrix4x4<value_type>&& makePerspectiveProjection(const value_type& _aspectRatio, const value_type& _fovy, const value_type& _near, const value_type& _far)
+Matrix4x4<value_type> makePerspectiveProjection(const value_type& _aspectRatio, const value_type& _fovy, const value_type& _near, const value_type& _far)
 {
 	value_type fovy = _fovy * M_PI / 180;
 	value_type tinv = 1 / tan(0.5 * fovy);
@@ -128,13 +128,13 @@ Matrix4x4<value_type>&& makePerspectiveProjection(const value_type& _aspectRatio
 	return Matrix4x4<value_type>(
 		tinv / _aspectRatio, value_type(0), value_type(0), value_type(0),
 		value_type(0), tinv, value_type(0), value_type(0),
-		value_type(0), value_type(0), m22, value_type(0),
+		value_type(0), value_type(0), m22, value_type(1),
 		value_type(0), value_type(0), -_near * m22, value_type(0)
 		);
 }
 
 template<class value_type>
-Matrix4x4<value_type>&& makeOrthographicProjection(const value_type& _left, const value_type& _right, const value_type& _bottom, const value_type& _top, const value_type& _near, const value_type& _far)
+Matrix4x4<value_type> makeOrthographicProjection(const value_type& _left, const value_type& _right, const value_type& _bottom, const value_type& _top, const value_type& _near, const value_type& _far)
 {
 	return Matrix4x4<value_type>(
 		2.0 / (_right - _left), 0, 0, 0,
@@ -157,11 +157,11 @@ Matrix4x4<value_type> makeRotate(const Vec3d<value_type>&  axis, value_type angl
 	float threshold = 0.1f;
 	for (int index = 0; index < 3; ++index)
 	{
-		if (dot(axis, b[index]) / axis.length() > threshold)
+		if (cross<value_type>(axis, b[index]).length() / axis.length() > threshold)
 		{
-			Vec3d<value_type> i = cross(b[index], axis);
-			Vec3d<value_type> j = cross(axis, i);
-			Vec3d<value_type> k = cross(i, j);
+			Vec3d<value_type> i = cross<value_type>(b[index], axis);
+			Vec3d<value_type> j = cross<value_type>(axis, i);
+			Vec3d<value_type> k = cross<value_type>(i, j);
 
 			i.normalize();
 			j.normalize();

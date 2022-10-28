@@ -188,7 +188,7 @@ void GraphicsCore::draw(Mesh& mesh)
 				const flt4x4& p = cameras[index].getProj();
 				flt4x4 wvp = v * p;
 
-				m.second->SetMatrix(wvp.getBuf());
+				m.second->SetMatrix(reinterpret_cast<float*>(&wvp));
 			}
 
 			continue;
@@ -207,6 +207,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	uint32_t bytes = verticesCount * elementSize;
 
 	char* data = (char*)std::malloc(bytes);
+	char* dataElement = data;
 	for (int i = 0; i < verticesCount; ++i)
 	{
 		for (const auto& si : *streamsInfo)
@@ -217,29 +218,29 @@ void GraphicsCore::draw(Mesh& mesh)
 			case Mesh::FLT1:
 			{
 				const std::vector<flt1>& s = *(const std::vector<flt1>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break; 
 			}
 			case Mesh::FLT2:
 			{
 				const std::vector<flt2>& s = *(const std::vector<flt2>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
 			case Mesh::FLT3:
 			{
 				const std::vector<flt3>& s = *(const std::vector<flt3>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
 			case Mesh::FLT4:
 			{
 				const std::vector<flt4>& s = *(const std::vector<flt4>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, data);
+				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
 			}
-			data += si.size;
+			dataElement += si.size;
 		}
 	}
 
@@ -257,6 +258,8 @@ void GraphicsCore::draw(Mesh& mesh)
 
 	ID3D11Buffer* mVB;
 	device->CreateBuffer(&vbd, &vinitData, &mVB);
+
+	free((void*)data);
 
 	// Create index buffer
 	D3D11_BUFFER_DESC ibd;
@@ -283,6 +286,9 @@ void GraphicsCore::draw(Mesh& mesh)
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
 	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
+
+	mIB->Release();
+	mVB->Release();
 
 	auto* pass = resourceManager.getPass(sTechnique, sPass);
 	if (pass == nullptr)
