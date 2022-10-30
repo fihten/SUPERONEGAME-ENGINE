@@ -265,6 +265,8 @@ void GraphicsCore::draw(Mesh& mesh)
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
+		resourceManager.registerVertexBuffer(sTechnique, sPass, mesh.id, mVB);
+
 		free((void*)data);
 	}
 
@@ -284,6 +286,8 @@ void GraphicsCore::draw(Mesh& mesh)
 		iinitData.pSysMem = mesh.getIndicies()->data();
 
 		device->CreateBuffer(&ibd, &iinitData, &mIB);
+
+		resourceManager.registerIndexBuffer(sTechnique, sPass, mesh.id, mIB);
 	}
 
 	auto* inputLayout = resourceManager.getInputLayout(sTechnique, sPass);
