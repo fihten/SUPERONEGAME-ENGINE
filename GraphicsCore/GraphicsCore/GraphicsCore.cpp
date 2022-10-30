@@ -10,6 +10,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	mWidth = width;
 	mHeight = height;
 
+	// Set cameras aspects
+	for (int i = 0; i < CAMERAS_NUMBER; ++i)
+		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
+
 	mEnable4xMsaa = enable4xMsaa;
 
 	mWindowed = windowed;
@@ -184,8 +188,8 @@ void GraphicsCore::draw(Mesh& mesh)
 			std::string what(place, beg, std::string::npos);
 			if (what == std::string("WVP"))
 			{
-				const flt4x4& v = cameras[index].getView();
-				const flt4x4& p = cameras[index].getProj();
+				const flt4x4& v = cameras()[index].getView();
+				const flt4x4& p = cameras()[index].getProj();
 				flt4x4 wvp = v * p;
 
 				m.second->SetMatrix(reinterpret_cast<float*>(&wvp));
@@ -203,78 +207,84 @@ void GraphicsCore::draw(Mesh& mesh)
 	for (const auto& si : *streamsInfo)
 		elementSize += si.size;
 
-	uint32_t verticesCount = mesh.getVerticesCount();
-	uint32_t bytes = verticesCount * elementSize;
-
-	char* data = (char*)std::malloc(bytes);
-	char* dataElement = data;
-	for (int i = 0; i < verticesCount; ++i)
+	ID3D11Buffer* mVB = resourceManager.getVertexBuffer(sTechnique, sPass, mesh.id);
+	if (mVB == nullptr)
 	{
-		for (const auto& si : *streamsInfo)
+		uint32_t verticesCount = mesh.getVerticesCount();
+		uint32_t bytes = verticesCount * elementSize;
+
+		char* data = (char*)std::malloc(bytes);
+		char* dataElement = data;
+		for (int i = 0; i < verticesCount; ++i)
 		{
-			const void* stream = mesh.getStream(si.name, si.type);
-			switch (si.type)
+			for (const auto& si : *streamsInfo)
 			{
-			case Mesh::FLT1:
-			{
-				const std::vector<flt1>& s = *(const std::vector<flt1>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
-				break; 
+				const void* stream = mesh.getStream(si.name, si.type);
+				switch (si.type)
+				{
+				case Mesh::FLT1:
+				{
+					const std::vector<flt1>& s = *(const std::vector<flt1>*)stream;
+					std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
+					break;
+				}
+				case Mesh::FLT2:
+				{
+					const std::vector<flt2>& s = *(const std::vector<flt2>*)stream;
+					std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
+					break;
+				}
+				case Mesh::FLT3:
+				{
+					const std::vector<flt3>& s = *(const std::vector<flt3>*)stream;
+					std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
+					break;
+				}
+				case Mesh::FLT4:
+				{
+					const std::vector<flt4>& s = *(const std::vector<flt4>*)stream;
+					std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
+					break;
+				}
+				}
+				dataElement += si.size;
 			}
-			case Mesh::FLT2:
-			{
-				const std::vector<flt2>& s = *(const std::vector<flt2>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
-				break;
-			}
-			case Mesh::FLT3:
-			{
-				const std::vector<flt3>& s = *(const std::vector<flt3>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
-				break;
-			}
-			case Mesh::FLT4:
-			{
-				const std::vector<flt4>& s = *(const std::vector<flt4>*)stream;
-				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
-				break;
-			}
-			}
-			dataElement += si.size;
 		}
+
+		// Create vertex buffer
+		D3D11_BUFFER_DESC vbd;
+		vbd.Usage = D3D11_USAGE_IMMUTABLE;
+		vbd.ByteWidth = bytes;
+		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vbd.CPUAccessFlags = 0;
+		vbd.MiscFlags = 0;
+		vbd.StructureByteStride = 0;
+
+		D3D11_SUBRESOURCE_DATA vinitData;
+		vinitData.pSysMem = data;
+
+		device->CreateBuffer(&vbd, &vinitData, &mVB);
+
+		free((void*)data);
 	}
 
-	// Create vertex buffer
-	D3D11_BUFFER_DESC vbd;
-	vbd.Usage = D3D11_USAGE_IMMUTABLE;
-	vbd.ByteWidth = bytes;
-	vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	vbd.CPUAccessFlags = 0;
-	vbd.MiscFlags = 0;
-	vbd.StructureByteStride = 0;
-	
-	D3D11_SUBRESOURCE_DATA vinitData;
-	vinitData.pSysMem = data;
+	ID3D11Buffer* mIB = resourceManager.getIndexBuffer(sTechnique, sPass, mesh.id);
+	if (mIB == nullptr)
+	{
+		// Create index buffer
+		D3D11_BUFFER_DESC ibd;
+		ibd.Usage = D3D11_USAGE_IMMUTABLE;
+		ibd.ByteWidth = mesh.getIndicesCount() * sizeof(uint32_t);
+		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibd.CPUAccessFlags = 0;
+		ibd.MiscFlags = 0;
+		ibd.StructureByteStride = 0;
 
-	ID3D11Buffer* mVB;
-	device->CreateBuffer(&vbd, &vinitData, &mVB);
+		D3D11_SUBRESOURCE_DATA iinitData;
+		iinitData.pSysMem = mesh.getIndicies()->data();
 
-	free((void*)data);
-
-	// Create index buffer
-	D3D11_BUFFER_DESC ibd;
-	ibd.Usage = D3D11_USAGE_IMMUTABLE;
-	ibd.ByteWidth = mesh.getIndicesCount() * sizeof(uint32_t);
-	ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
-	ibd.CPUAccessFlags = 0;
-	ibd.MiscFlags = 0;
-	ibd.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA iinitData;
-	iinitData.pSysMem = mesh.getIndicies()->data();
-
-	ID3D11Buffer* mIB;
-	device->CreateBuffer(&ibd, &iinitData, &mIB);
+		device->CreateBuffer(&ibd, &iinitData, &mIB);
+	}
 
 	auto* inputLayout = resourceManager.getInputLayout(sTechnique, sPass);
 	if (inputLayout == nullptr)
@@ -286,9 +296,6 @@ void GraphicsCore::draw(Mesh& mesh)
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
 	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
-
-	mIB->Release();
-	mVB->Release();
 
 	auto* pass = resourceManager.getPass(sTechnique, sPass);
 	if (pass == nullptr)
@@ -338,8 +345,8 @@ bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndPro
 		WS_OVERLAPPEDWINDOW, // style flags
 		CW_USEDEFAULT, // x-coordinate
 		CW_USEDEFAULT, // y-coordinate
-		CW_USEDEFAULT, // width
-		CW_USEDEFAULT, // height
+		mWidth, // width
+		mHeight, // height
 		0, // parent window
 		0, // menu handle
 		instanceHandle, // app instance
@@ -452,4 +459,8 @@ void GraphicsCore::resize(UINT width, UINT height)
 
 	mWidth = width;
 	mHeight = height;
+
+	// Set cameras aspects
+	for (int i = 0; i < CAMERAS_NUMBER; ++i)
+		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }

@@ -3,6 +3,8 @@
 #include <algorithm>
 #include "Mesh.h"
 
+uint32_t Mesh::instanceNumber = 0;
+
 Mesh createCube()
 {
 	Mesh m;

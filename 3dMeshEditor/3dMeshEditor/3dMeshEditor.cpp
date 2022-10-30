@@ -28,7 +28,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	float dt = Timer::Instance()->elapsedTime();
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
-		cameras[i].processMessage(msg,wparam,lparam, dt);
+		cameras()[i].processMessage(msg,wparam,lparam, dt);
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -45,7 +45,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
-	graphicsCore.init(hInstance, iCmdShow, WndProc, drawFunc, 100, 200, true, false);
+	graphicsCore.init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
 	return graphicsCore.run();
 }

@@ -83,6 +83,40 @@ ResourceManager::RegisterMessage ResourceManager::registerVariableLocations(cons
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (pass.vertexBuffers.count(meshId))
+		pass.vertexBuffers[meshId]->Release();
+	pass.vertexBuffers[meshId] = vertexBuffer;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (pass.indexBuffers.count(meshId))
+		pass.indexBuffers[meshId]->Release();
+	pass.indexBuffers[meshId] = indexBuffer;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<ResourceManager::InputLayoutStreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
 {
 	if (techniques.count(techniqueName) == 0)
@@ -140,4 +174,36 @@ void ResourceManager::getMatrices(const std::string& techniqueName, std::map<std
 
 	TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	matrices = techniqueRes.matrices;
+}
+
+ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return nullptr;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (pass.vertexBuffers.count(meshId) == 0)
+		return nullptr;
+
+	return pass.vertexBuffers[meshId];
+}
+
+ID3D11Buffer* ResourceManager::getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)
+{
+	if (techniques.count(techniqueName) == 0)
+		return nullptr;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return nullptr;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (pass.indexBuffers.count(meshId) == 0)
+		return nullptr;
+
+	return pass.indexBuffers[meshId];
 }

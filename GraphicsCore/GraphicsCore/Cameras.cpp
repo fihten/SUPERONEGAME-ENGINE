@@ -2,8 +2,11 @@
 #include <tchar.h>
 #include <string>
 
-Camera cameras[CAMERAS_NUMBER];
-
+Camera* cameras()
+{
+	static Camera c[CAMERAS_NUMBER];
+	return c;
+}
 void loadCamerasCFGs()
 {
 	char cfgsFolder[200];
@@ -16,6 +19,6 @@ void loadCamerasCFGs()
 		char szCameraCFG[200];
 		sprintf(szCameraCFG, sCameraCFGtemplate.c_str(), i);
 
-		cameras[i].loadCFG(szCameraCFG);
+		cameras()[i].loadCFG(szCameraCFG);
 	}
 }

@@ -42,6 +42,12 @@ const flt4x4& Camera::getProj()
 	return proj;
 }
 
+void Camera::setAspectRatio(float aspectRatio)
+{
+	this->aspectRatio = aspectRatio;
+	this->changed = true;
+}
+
 void Camera::updateProj()
 {
 	proj = makePerspectiveProjection<float>(aspectRatio, fovY, nearZ, farZ);

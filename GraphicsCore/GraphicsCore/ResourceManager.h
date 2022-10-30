@@ -19,6 +19,9 @@ class ResourceManager
 			ID3D11InputLayout* inputLayout = nullptr;
 
 			std::vector<InputLayoutStreamInfo> streamsInfo;
+
+			std::map<uint32_t, ID3D11Buffer*> vertexBuffers;
+			std::map<uint32_t, ID3D11Buffer*> indexBuffers;
 		};
 		std::map<std::string, PassResource> passes;
 
@@ -54,12 +57,16 @@ public:
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>& streamsInfo);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, ID3DX11EffectMatrixVariable* matrix);
 	RegisterMessage registerVariableLocations(const std::string& techniqueName, const std::map<std::string, std::string>& locationOfVariable);
+	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
+	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);
 
 	const std::vector<InputLayoutStreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
 	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
 	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
 	void getMatrices(const std::string& techniqueName, std::map<std::string, ID3DX11EffectMatrixVariable*>& matrices);
+	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
+	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 };
 
 extern ResourceManager resourceManager;

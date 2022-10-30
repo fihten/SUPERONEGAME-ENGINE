@@ -34,6 +34,8 @@ public:
 	const flt4x4& getView();
 	const flt4x4& getProj();
 
+	void setAspectRatio(float aspectRatio);
+
 	enum Behaviour
 	{
 		CONTINUE,

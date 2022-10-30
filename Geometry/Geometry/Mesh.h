@@ -14,6 +14,7 @@ Mesh createCube();
 
 class Mesh
 {
+	static uint32_t instanceNumber;
 	std::string name = "";
 
 	std::vector<std::pair<std::string, std::vector<flt1>>> flt1_streams;
@@ -26,13 +27,15 @@ class Mesh
 	std::map<std::string, std::string> params;
 
 public:
-	Mesh()
+	Mesh():id(instanceNumber)
 	{
-
+		++instanceNumber;
 	}
 
-	Mesh(const Mesh& m)
+	Mesh(const Mesh& m):id(instanceNumber)
 	{
+		++instanceNumber;
+
 		this->name = m.name;
 
 		this->flt1_streams = m.flt1_streams;
@@ -45,8 +48,10 @@ public:
 		this->params = m.params;
 	}
 
-	Mesh(Mesh&& m)
+	Mesh(Mesh&& m):id(instanceNumber)
 	{
+		++instanceNumber;
+
 		this->name = std::move(m.name);
 
 		this->flt1_streams = std::move(m.flt1_streams);
@@ -111,4 +116,7 @@ public:
 	uint32_t getIndicesCount() const;
 
 	friend Mesh createCube();
+
+public:
+	const uint32_t id;
 };
