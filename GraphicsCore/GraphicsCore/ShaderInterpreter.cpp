@@ -82,6 +82,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			variable();
 			break;
 
+		case State::NUMBER:
+			number();
+			break;
+
 		case State::UNARY_MINUS:
 			unaryMinus();
 			break;
@@ -514,7 +518,7 @@ void ShaderInterpreter::unknown()
 	word = std::string("");
 	if (!words.empty())
 		word = words.front();
-	if (word != std::string("("))
+	if (word != std::string("(") && !isNumber(word.c_str()))
 	{
 		currentState = State::VARIABLE;
 		return;
@@ -761,6 +765,29 @@ void ShaderInterpreter::creatingBinaryMultiply()
 void ShaderInterpreter::variable()
 {
 	ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
+	var->setName(userName);
+	userName = std::string("");
+
+	componentStack.push(var);
+
+	std::string word = words.front();
+	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))
+		currentState = State::FINISH_EXPRESSION;
+	if (word == std::string("-"))
+		currentState = State::BINARY_MINUS;
+	if (word == std::string("+"))
+		currentState = State::BINARY_PLUS;
+	if (word == std::string("*"))
+		currentState = State::BINARY_MULTIPLY;
+	if (word == std::string("/"))
+		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("="))
+		currentState = State::ASSIGNMENT;
+}
+
+void ShaderInterpreter::number()
+{
+	ShaderUnits::ShaderComponent* var = new ShaderUnits::NUMBER();
 	var->setName(userName);
 	userName = std::string("");
 

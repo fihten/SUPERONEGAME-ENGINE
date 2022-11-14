@@ -197,6 +197,12 @@ void ShaderUnits::VARIABLE::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::NUMBER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::VARIABLE_DECL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
