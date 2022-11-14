@@ -12,3 +12,6 @@ std::string readWord(
 	const std::string& stopSymbols,
 	int& currentIndex
 );
+
+bool isNumber(const char* str);
+float getNumber(const char* str);

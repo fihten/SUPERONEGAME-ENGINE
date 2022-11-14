@@ -1,4 +1,5 @@
 #include "StringUtils.h"
+#include <sstream>
 
 int skipSymbols(const char* str, const char* skippedSymbols, int currentIndex)
 {
@@ -58,4 +59,31 @@ std::string readWord(
 		word = str[currentIndex++];
 
 	return word;
+}
+
+bool isNumber(const char* str)
+{
+	std::istringstream iss(str);
+	
+	float f = 0.0f;
+	iss >> f;
+	if (iss.rdstate() & std::ios_base::failbit)
+		return false;
+
+	std::string s;
+	iss >> s;
+	if (s.length() != 0 && std::strcmp(s.c_str(), "f") != 0)
+		return false;
+
+	return true;
+}
+
+float getNumber(const char* str)
+{
+	std::istringstream iss(str);
+
+	float f = 0.0f;
+	iss >> f;
+
+	return f;
 }
