@@ -518,9 +518,14 @@ void ShaderInterpreter::unknown()
 	word = std::string("");
 	if (!words.empty())
 		word = words.front();
-	if (word != std::string("(") && !isNumber(word.c_str()))
+	if (word != std::string("(") && !isNumber(userName.c_str()))
 	{
 		currentState = State::VARIABLE;
+		return;
+	}
+	if (word != std::string("(") && isNumber(userName.c_str()))
+	{
+		currentState = State::NUMBER;
 		return;
 	}
 	if (word == std::string("("))
