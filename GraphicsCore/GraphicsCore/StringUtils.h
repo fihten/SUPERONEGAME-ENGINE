@@ -15,3 +15,5 @@ std::string readWord(
 
 bool isNumber(const char* str);
 float getNumber(const char* str);
+
+bool isComment(const char* str);

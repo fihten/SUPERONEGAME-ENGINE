@@ -89,3 +89,14 @@ float getNumber(const char* str)
 
 	return f;
 }
+
+bool isComment(const char* str)
+{
+	if (std::strlen(str) < 2)
+		return false;
+	if (str[0] != '/')
+		return false;
+	if (str[1] != '/')
+		return false;
+	return true;
+}
