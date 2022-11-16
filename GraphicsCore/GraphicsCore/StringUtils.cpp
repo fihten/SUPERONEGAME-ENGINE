@@ -51,7 +51,9 @@ std::string readWord(
 )
 {
 	size_t from = skipSymbols(str.c_str(), skippedSymbols.c_str(), currentIndex);
-	size_t to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);
+
+	bool isComment = str[from] == '/' && str[from + 1] == '/';
+	size_t to = nextStopSymbol(str.c_str(), isComment ? "\n" : stopSymbols.c_str(), from);
 	
 	currentIndex = to;
 	std::string word = str.substr(from, to - from);
