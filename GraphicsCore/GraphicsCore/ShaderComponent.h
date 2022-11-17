@@ -232,6 +232,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class COMMENT : public Leaf
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class VARIABLE_DECL : public ShaderComposite
 	{
 	public:
