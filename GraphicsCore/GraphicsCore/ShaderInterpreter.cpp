@@ -86,6 +86,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			number();
 			break;
 
+		case State::COMMENT:
+			comment();
+			break;
+
 		case State::UNARY_MINUS:
 			unaryMinus();
 			break;
@@ -518,7 +522,7 @@ void ShaderInterpreter::unknown()
 	word = std::string("");
 	if (!words.empty())
 		word = words.front();
-	if (word != std::string("(") && !isNumber(userName.c_str()))
+	if (word != std::string("(") && !isNumber(userName.c_str()) && !isComment(userName.c_str()))
 	{
 		currentState = State::VARIABLE;
 		return;
@@ -526,6 +530,11 @@ void ShaderInterpreter::unknown()
 	if (word != std::string("(") && isNumber(userName.c_str()))
 	{
 		currentState = State::NUMBER;
+		return;
+	}
+	if (isComment(userName.c_str()))
+	{
+		currentState = State::COMMENT;
 		return;
 	}
 	if (word == std::string("("))
@@ -811,6 +820,16 @@ void ShaderInterpreter::number()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+}
+
+void ShaderInterpreter::comment()
+{
+	ShaderUnits::ShaderComponent* var = new ShaderUnits::COMMENT();
+	var->setName(userName);
+	userName = std::string("");
+
+	componentStack.top()->add(var);
+	currentState = State::UNKNOWN;
 }
 
 void ShaderInterpreter::unaryMinus()

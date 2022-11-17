@@ -58,6 +58,7 @@ class ShaderInterpreter
 		CREATING_BINARY_MULTIPLY,
 		VARIABLE,
 		NUMBER,
+		COMMENT,
 		UNARY_MINUS,
 		UNARY_PLUS,
 		FUNCTION_CALL,
@@ -131,8 +132,8 @@ class ShaderInterpreter
 
 	std::string userName = "";
 	void variable();
-
 	void number();
+	void comment();
 
 	void unaryMinus();
 	void unaryPlus();
