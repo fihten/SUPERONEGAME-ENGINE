@@ -78,6 +78,14 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			creatingBinaryMultiply();
 			break;
 
+		case State::GREATER_THAN:
+			greaterThan();
+			break;
+
+		case State::CREATING_GREATER_THAN:
+			creatingGreaterThan();
+			break;
+
 		case State::VARIABLE:
 			variable();
 			break;
@@ -774,6 +782,28 @@ void ShaderInterpreter::creatingBinaryMultiply()
 
 	statesStack.push(State::BINARY_MULTIPLY);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderInterpreter::greaterThan()
+{
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
+
+	if (lastState == State::BINARY_DIVIDE ||
+		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::BINARY_MINUS ||
+		lastState == State::BINARY_PLUS ||
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_GREATER_THAN;
+}
+
+void ShaderInterpreter::creatingGreaterThan()
+{
+
 }
 
 void ShaderInterpreter::variable()

@@ -52,10 +52,12 @@ class ShaderInterpreter
 		BINARY_PLUS,
 		BINARY_MULTIPLY,
 		BINARY_DIVIDE,
+		GREATER_THAN,
 		CREATING_BINARY_MINUS,
 		CREATING_BINARY_PLUS,
 		CREATING_BINARY_DIVIDE,
 		CREATING_BINARY_MULTIPLY,
+		CREATING_GREATER_THAN,
 		VARIABLE,
 		NUMBER,
 		COMMENT,
@@ -129,6 +131,9 @@ class ShaderInterpreter
 
 	void binaryMultiply();
 	void creatingBinaryMultiply();
+
+	void greaterThan();
+	void creatingGreaterThan();
 
 	std::string userName = "";
 	void variable();
