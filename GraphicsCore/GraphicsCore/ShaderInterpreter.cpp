@@ -622,6 +622,12 @@ void ShaderInterpreter::finishExpression()
 		currentState = State::BINARY_DIVIDE;
 		return;
 	}
+	if (op && word == std::string(">"))
+	{
+		statesStack.pop();
+		currentState = State::GREATER_THAN;
+		return;
+	}
 
 	State lastState = State::UNKNOWN;
 	if (!statesStack.empty())
@@ -656,6 +662,7 @@ bool ShaderInterpreter::isOperationState(State state) const
 		state == State::BINARY_PLUS ||
 		state == State::UNARY_MINUS ||
 		state == State::UNARY_PLUS ||
+		state == State::GREATER_THAN ||
 		state == State::ASSIGNMENT
 		)
 		return true;
@@ -803,7 +810,18 @@ void ShaderInterpreter::greaterThan()
 
 void ShaderInterpreter::creatingGreaterThan()
 {
+	words.pop();
 
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* greaterThanOp = new ShaderUnits::GREATER_THAN();
+	greaterThanOp->add(leftOperand);
+
+	componentStack.push(greaterThanOp);
+
+	statesStack.push(State::GREATER_THAN);
+	currentState = State::UNKNOWN;
 }
 
 void ShaderInterpreter::variable()

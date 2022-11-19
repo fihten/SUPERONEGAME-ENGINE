@@ -268,6 +268,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class GREATER_THAN : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class UNARY_MINUS : public ShaderComposite
 	{
 	public:
