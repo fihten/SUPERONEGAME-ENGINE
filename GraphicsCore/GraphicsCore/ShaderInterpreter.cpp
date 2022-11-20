@@ -574,6 +574,8 @@ void ShaderInterpreter::bracketsUnaryOperatorClose()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
 }
 
 void ShaderInterpreter::finishExpression()
@@ -845,6 +847,8 @@ void ShaderInterpreter::variable()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
 }
 
 void ShaderInterpreter::number()
@@ -868,6 +872,8 @@ void ShaderInterpreter::number()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
 }
 
 void ShaderInterpreter::comment()
@@ -941,6 +947,8 @@ void ShaderInterpreter::argumentsListCloseBracket()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
 }
 
 void ShaderInterpreter::assignment()

@@ -189,6 +189,12 @@ public:
 		std::cout << "*" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::GREATER_THAN* pGREATER_THAN)
+	{
+		printSpaces();
+		std::cout << ">" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::UNARY_MINUS* pUNARY_MINUS)
 	{
 		printSpaces();
@@ -322,6 +328,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::BINARY_MULTIPLY* pBINARY_MULTIPLY)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::GREATER_THAN* pGREATER_THAN)
 	{
 		numberOfSpaces -= 4;
 	};
