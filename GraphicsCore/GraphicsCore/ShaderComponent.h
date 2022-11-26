@@ -328,4 +328,9 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class IF_NODE : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
 }

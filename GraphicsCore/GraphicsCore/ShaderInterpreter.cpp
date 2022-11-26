@@ -281,6 +281,14 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::INSERT_RETURN:
 			insertReturn();
 			break;
+
+		case State::IF:
+			ifState();
+			break;
+
+		case State::INSERT_IF_CONDITION:
+			insertIfCondition();
+			break;
 		}
 	}
 
@@ -521,6 +529,20 @@ void ShaderInterpreter::unknown()
 	{
 		words.pop();
 		currentState = State::UNKNOWN;
+
+		return;
+	}
+	if (word == std::string("if"))
+	{
+		words.pop();
+		currentState = State::IF;
+
+		return;
+	}
+	if (word == std::string(")") && statesStack.top() == State::IF_CONDITION)
+	{
+		words.pop();
+		currentState = State::INSERT_IF_CONDITION;
 
 		return;
 	}
@@ -1681,4 +1703,47 @@ void ShaderInterpreter::insertReturn()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void ShaderInterpreter::ifState()
+{
+	ShaderUnits::ShaderComponent* pIf = new ShaderUnits::IF_NODE();
+	componentStack.push(pIf);
+	statesStack.push(State::IF);
+
+	words.pop();
+	currentState = State::IF_CONDITION;
+
+	return;
+}
+
+void ShaderInterpreter::ifCondition()
+{
+	ShaderUnits::ShaderComponent* pIfCondition = new ShaderUnits::ROUND_BRACKETS();
+	componentStack.push(pIfCondition);
+	statesStack.push(State::IF_CONDITION);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderInterpreter::insertIfCondition()
+{
+	ShaderUnits::ShaderComponent* pIfCondition = componentStack.top();
+	componentStack.pop();
+	statesStack.pop();
+
+	ShaderUnits::ShaderComponent* pIf = componentStack.top();
+	pIf->add(pIfCondition);
+
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::IF_BODY;
+
+		return;
+	}
+	currentState = State::UNKNOWN;
 }

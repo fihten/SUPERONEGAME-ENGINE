@@ -106,7 +106,16 @@ class ShaderInterpreter
 		VS_5_0,
 		PS_5_0,
 		RETURN,
-		INSERT_RETURN
+		INSERT_RETURN,
+		IF,
+		IF_CONDITION,
+		INSERT_IF_CONDITION,
+		IF_BODY,
+		INSERT_IF_BODY,
+		ELSE,
+		ELSE_BODY,
+		INSERT_ELSE_BODY,
+		INSERT_ENTIRE_IF
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -211,6 +220,10 @@ class ShaderInterpreter
 
 	void returnState();
 	void insertReturn();
+
+	void ifState();
+	void ifCondition();
+	void insertIfCondition();
 
 	struct DeclarationFunctionOrVariable
 	{

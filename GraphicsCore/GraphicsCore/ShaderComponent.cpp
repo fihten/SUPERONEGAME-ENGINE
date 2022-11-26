@@ -328,3 +328,11 @@ void ShaderUnits::RETURN::query(ShaderVisitor* visitor)
 		ch->query(visitor);
 	visitor->finishVisit(this);
 }
+
+void ShaderUnits::IF_NODE::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
