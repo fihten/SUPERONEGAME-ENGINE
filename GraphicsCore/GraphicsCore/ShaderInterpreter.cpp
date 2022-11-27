@@ -289,6 +289,18 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::INSERT_IF_CONDITION:
 			insertIfCondition();
 			break;
+
+		case State::IF_BODY:
+			ifBody();
+			break;
+
+		case State::INSERT_IF_BODY:
+			insertIfBody();
+			break;
+
+		case State::INSERT_ENTIRE_IF:
+			insertEntireIf();
+			break;
 		}
 	}
 
@@ -543,6 +555,20 @@ void ShaderInterpreter::unknown()
 	{
 		words.pop();
 		currentState = State::INSERT_IF_CONDITION;
+
+		return;
+	}
+	if (word == "}" && statesStack.top() == State::IF_BODY)
+	{
+		words.pop();
+		currentState = State::INSERT_IF_BODY;
+
+		return;
+	}
+	if (word == ";" && statesStack.top() == State::IF)
+	{
+		words.pop();
+		currentState = State::INSERT_IF_BODY;
 
 		return;
 	}
@@ -1720,6 +1746,7 @@ void ShaderInterpreter::ifState()
 void ShaderInterpreter::ifCondition()
 {
 	ShaderUnits::ShaderComponent* pIfCondition = new ShaderUnits::ROUND_BRACKETS();
+	pIfCondition->setName(std::string("if_condition"));
 	componentStack.push(pIfCondition);
 	statesStack.push(State::IF_CONDITION);
 
@@ -1747,3 +1774,55 @@ void ShaderInterpreter::insertIfCondition()
 	}
 	currentState = State::UNKNOWN;
 }
+
+void ShaderInterpreter::ifBody()
+{
+	ShaderUnits::ShaderComponent* pIfBody = new ShaderUnits::CURLY_BRACKETS();
+	pIfBody->setName(std::string("if_body"));
+	componentStack.push(pIfBody);
+	statesStack.push(State::IF_BODY);
+
+	currentState = State::UNKNOWN;
+	
+	return;
+}
+
+void ShaderInterpreter::insertIfBody()
+{
+	ShaderUnits::ShaderComponent* pIfBody = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pIf = componentStack.top();
+	pIf->add(pIfBody);
+
+	if (!statesStack.empty() && statesStack.top() == State::IF_BODY)
+		statesStack.pop();
+
+	std::string word = words.front();
+	if (word == "else")
+	{
+		words.pop();
+		currentState = State::ELSE;
+
+		return;
+	}
+
+	currentState = State::INSERT_ENTIRE_IF;
+
+	return;
+}
+
+void ShaderInterpreter::insertEntireIf()
+{
+	ShaderUnits::ShaderComponent* pIf = componentStack.top();
+	componentStack.pop();
+	statesStack.pop();
+
+	ShaderUnits::ShaderComponent* pParent = componentStack.top();
+	pParent->add(pIf);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
