@@ -227,6 +227,8 @@ class ShaderInterpreter
 	void ifBody();
 	void insertIfBody();
 	void insertEntireIf();
+	void elseState();
+	void elseBody();
 
 	struct DeclarationFunctionOrVariable
 	{

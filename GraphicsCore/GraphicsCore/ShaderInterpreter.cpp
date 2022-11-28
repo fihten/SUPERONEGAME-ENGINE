@@ -301,6 +301,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::INSERT_ENTIRE_IF:
 			insertEntireIf();
 			break;
+
+		case State::ELSE:
+			elseState();
+			break;
 		}
 	}
 
@@ -558,17 +562,31 @@ void ShaderInterpreter::unknown()
 
 		return;
 	}
-	if (word == "}" && statesStack.top() == State::IF_BODY)
+	if (word == std::string("}") && statesStack.top() == State::IF_BODY)
 	{
 		words.pop();
 		currentState = State::INSERT_IF_BODY;
 
 		return;
 	}
-	if (word == ";" && statesStack.top() == State::IF)
+	if (word == std::string(";") && statesStack.top() == State::IF)
 	{
 		words.pop();
 		currentState = State::INSERT_IF_BODY;
+
+		return;
+	}
+	if (word == std::string(";") && statesStack.top() == State::ELSE)
+	{
+		words.pop();
+		currentState = INSERT_ELSE_BODY;
+
+		return;
+	}
+	if (word == std::string("}") && statesStack.top() == State::ELSE_BODY)
+	{
+		words.pop();
+		currentState = INSERT_ELSE_BODY;
 
 		return;
 	}
@@ -1799,7 +1817,7 @@ void ShaderInterpreter::insertIfBody()
 		statesStack.pop();
 
 	std::string word = words.front();
-	if (word == "else")
+	if (word == std::string("else"))
 	{
 		words.pop();
 		currentState = State::ELSE;
@@ -1826,3 +1844,34 @@ void ShaderInterpreter::insertEntireIf()
 	return;
 }
 
+void ShaderInterpreter::elseState()
+{
+	ShaderUnits::ShaderComponent* pElse = new ShaderUnits::CURLY_BRACKETS();
+	componentStack.push(pElse);
+	statesStack.push(State::ELSE);
+
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::ELSE_BODY;
+
+		return;
+	}
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderInterpreter::elseBody()
+{
+	ShaderUnits::ShaderComponent* pElseBody = new ShaderUnits::CURLY_BRACKETS();
+	pElseBody->setName("else_body");
+
+	componentStack.push(pElseBody);
+	statesStack.push(State::ELSE_BODY);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
