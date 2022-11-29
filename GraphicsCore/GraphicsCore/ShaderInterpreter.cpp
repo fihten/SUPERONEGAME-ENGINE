@@ -1846,8 +1846,6 @@ void ShaderInterpreter::insertEntireIf()
 
 void ShaderInterpreter::elseState()
 {
-	ShaderUnits::ShaderComponent* pElse = new ShaderUnits::CURLY_BRACKETS();
-	componentStack.push(pElse);
 	statesStack.push(State::ELSE);
 
 	std::string word = words.front();
@@ -1866,12 +1864,30 @@ void ShaderInterpreter::elseState()
 void ShaderInterpreter::elseBody()
 {
 	ShaderUnits::ShaderComponent* pElseBody = new ShaderUnits::CURLY_BRACKETS();
-	pElseBody->setName("else_body");
 
 	componentStack.push(pElseBody);
 	statesStack.push(State::ELSE_BODY);
 
 	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void ShaderInterpreter::insertElseBody()
+{
+	ShaderUnits::ShaderComponent* pElseBody = componentStack.top();
+	componentStack.pop();
+
+	State prevState = statesStack.top();
+	statesStack.pop();
+	if (prevState == State::ELSE_BODY)
+		statesStack.pop();
+
+	pElseBody->setName("else_body");
+	ShaderUnits::ShaderComponent* pIf = componentStack.top();
+	pIf->add(pElseBody);
+
+	currentState = State::INSERT_ENTIRE_IF;
 
 	return;
 }
