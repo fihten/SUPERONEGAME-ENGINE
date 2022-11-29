@@ -1796,7 +1796,6 @@ void ShaderInterpreter::insertIfCondition()
 void ShaderInterpreter::ifBody()
 {
 	ShaderUnits::ShaderComponent* pIfBody = new ShaderUnits::CURLY_BRACKETS();
-	pIfBody->setName(std::string("if_body"));
 	componentStack.push(pIfBody);
 	statesStack.push(State::IF_BODY);
 
@@ -1810,6 +1809,7 @@ void ShaderInterpreter::insertIfBody()
 	ShaderUnits::ShaderComponent* pIfBody = componentStack.top();
 	componentStack.pop();
 
+	pIfBody->setName(std::string("if_body"));
 	ShaderUnits::ShaderComponent* pIf = componentStack.top();
 	pIf->add(pIfBody);
 
