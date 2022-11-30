@@ -256,6 +256,12 @@ public:
 		numberOfSpaces += 4;
 	};
 	void startVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
+	void startVisit(const ShaderUnits::IF_NODE* pIF_NODE) 
+	{
+		printSpaces();
+		std::cout << "if" << std::endl;
+		numberOfSpaces += 4;
+	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -376,6 +382,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
+	void finishVisit(const ShaderUnits::IF_NODE* pIF_NODE)
+	{
+		numberOfSpaces -= 4;
+	};
 };
 
 int main()
