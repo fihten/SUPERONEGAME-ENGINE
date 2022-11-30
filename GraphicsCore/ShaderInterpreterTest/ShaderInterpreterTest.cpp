@@ -228,7 +228,7 @@ public:
 	void startVisit(const ShaderUnits::ROUND_BRACKETS* pROUND_BRACKETS)
 	{
 		printSpaces();
-		std::cout << "()" << std::endl;
+		std::cout << "(" << pROUND_BRACKETS->getName() << ")" << std::endl;
 		numberOfSpaces += 4;
 	};
 	void startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS)
@@ -240,7 +240,7 @@ public:
 	void startVisit(const ShaderUnits::CURLY_BRACKETS* pCURLY_BRACKETS)
 	{
 		printSpaces();
-		std::cout << "{}" << std::endl;
+		std::cout << "{" << pCURLY_BRACKETS->getName() << "}" << std::endl;
 		numberOfSpaces += 4;
 	};
 	void startVisit(const ShaderUnits::RETURN* pRETURN)
