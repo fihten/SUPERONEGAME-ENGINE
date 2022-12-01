@@ -354,8 +354,6 @@ void ShaderInterpreter::unknown()
 	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) 
 		&& !statesStack.empty() && statesStack.top() == State::VARIABLE_DECLARATION)
 	{
-		if (word != std::string(")"))
-			words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
@@ -536,9 +534,7 @@ void ShaderInterpreter::unknown()
 	}
 	if (word == std::string(";") && !statesStack.empty() && statesStack.top() == State::RETURN)
 	{
-		words.pop();
 		currentState = State::INSERT_RETURN;
-
 		return;
 	}
 	if (word == std::string(";") || word == std::string(",") || word == std::string(")") || word == std::string("}"))
@@ -710,16 +706,12 @@ void ShaderInterpreter::finishExpression()
 
 		ShaderUnits::ShaderComponent* composite = componentStack.top();
 		composite->add(componentToAdd);
-
-		if (word != std::string(")") && word != std::string(";"))
-			words.pop();
 	}
 	if ((word == std::string(")") || word == std::string(";") || word == std::string(",")) && lastState == State::VARIABLE_DECLARATION)
 	{
 		decls.top().value = componentStack.top();
 		componentStack.pop();
 	}
-	
 }
 
 bool ShaderInterpreter::isOperationState(State state) const
@@ -1209,7 +1201,6 @@ void ShaderInterpreter::signatureCloseBracket()
 	}
 	if (word == std::string(";"))
 	{
-		words.pop();
 		currentState = State::INSERT_FUNCTION_DECLARATION;
 		return;
 	}
@@ -1410,9 +1401,8 @@ void ShaderInterpreter::variableDeclaration()
 		currentState = State::SEMANTIC;
 		return;
 	}
-	if (word == std::string(";"))
+	if (word == std::string(";") || word == std::string(")"))
 	{
-		words.pop();
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
