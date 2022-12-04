@@ -313,6 +313,7 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case ELSE_BODY:
 			elseBody();
 			break;
+
 		case INSERT_ELSE_BODY:
 			insertElseBody();
 			break;
@@ -1824,10 +1825,22 @@ void ShaderInterpreter::insertEntireIf()
 {
 	ShaderUnits::ShaderComponent* pIf = componentStack.top();
 	componentStack.pop();
-	statesStack.pop();
 
 	ShaderUnits::ShaderComponent* pParent = componentStack.top();
 	pParent->add(pIf);
+
+	statesStack.pop();
+	
+	if (!statesStack.empty() && statesStack.top() == State::IF)
+	{
+		currentState = INSERT_IF_BODY;
+		return;
+	}
+	if (!statesStack.empty() && statesStack.top() == State::ELSE)
+	{
+		currentState = INSERT_ELSE_BODY;
+		return;
+	}
 
 	currentState = State::UNKNOWN;
 

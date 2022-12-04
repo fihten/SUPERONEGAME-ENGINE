@@ -14,8 +14,12 @@ void VSdemo(float3 iPosL:POSITION, float4 iColor:COLOR, out float4 oPosH:SV_POSI
 	}
 	else
 	{
-		float a = 10;
+		if (1)
+		{
+			float a = 10;
+		}
 	}
+
 	float a = (1 + ((5 + a) * l + 10)) * 100;
 	oPosH = mul(float4(iPosL,1), WVP);
 	oColor = iColor;	
