@@ -19,6 +19,31 @@ void VSdemo(float3 iPosL:POSITION, float4 iColor:COLOR, out float4 oPosH:SV_POSI
 			float a = 10;
 		}
 	}
+	if (a > b)
+		if (1)
+			w;
+		else
+			if (5 > 5)
+				t = 5;
+			else
+				if (t > t)
+					t = 6;
+				else
+					r = i;
+	else
+		if (u)
+			e = o + t;
+		else
+			w = w - r;
+
+	if (diffuseFactor > 0.0f)
+	{
+		float3 v = reflect(-lightVec, normal);
+		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
+
+		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
+		spec = specFactor * mat.Specular * L.Specular;
+	}
 
 	float a = (1 + ((5 + a) * l + 10)) * 100;
 	oPosH = mul(float4(iPosL,1), WVP);
