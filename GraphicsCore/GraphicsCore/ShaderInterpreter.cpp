@@ -343,6 +343,13 @@ void ShaderInterpreter::unknown()
 
 		return;
 	}
+	if (word == std::string("["))
+	{
+		words.pop();
+		currentState = State::ATTRIBUTE;
+
+		return;
+	}
 	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
@@ -1749,6 +1756,12 @@ void ShaderInterpreter::insertReturn()
 void ShaderInterpreter::ifState()
 {
 	ShaderUnits::ShaderComponent* pIf = new ShaderUnits::IF_NODE();
+	if (pFlatten)
+	{
+		pIf->add(pFlatten);
+		pFlatten = nullptr;
+	}
+
 	componentStack.push(pIf);
 	statesStack.push(State::IF);
 
@@ -1907,11 +1920,19 @@ void ShaderInterpreter::insertElseBody()
 
 void ShaderInterpreter::attribute()
 {
+	std::string word = words.front();
+	if (word == std::string("flatten"))
+	{
+		words.pop();
+		currentState = State::FLATTEN;
 
+		return;
+	}
 }
 
 void ShaderInterpreter::flatten()
 {
-
+	pFlatten = new ShaderUnits::FLATTEN();
+	currentState = State::UNKNOWN;
 }
 

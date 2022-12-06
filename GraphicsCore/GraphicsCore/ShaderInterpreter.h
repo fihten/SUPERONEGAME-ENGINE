@@ -235,6 +235,7 @@ class ShaderInterpreter
 
 	void attribute();
 	void flatten();
+	ShaderUnits::FLATTEN* pFlatten = nullptr;
 
 	struct DeclarationFunctionOrVariable
 	{
