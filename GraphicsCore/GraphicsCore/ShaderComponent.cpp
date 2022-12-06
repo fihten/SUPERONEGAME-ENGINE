@@ -336,3 +336,15 @@ void ShaderUnits::IF_NODE::query(ShaderVisitor* visitor)
 		ch->query(visitor);
 	visitor->finishVisit(this);
 }
+
+void ShaderUnits::ATTRIBUTE::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::FLATTEN::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}

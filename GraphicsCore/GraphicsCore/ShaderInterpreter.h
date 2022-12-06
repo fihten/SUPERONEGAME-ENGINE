@@ -115,7 +115,9 @@ class ShaderInterpreter
 		ELSE,
 		ELSE_BODY,
 		INSERT_ELSE_BODY,
-		INSERT_ENTIRE_IF
+		INSERT_ENTIRE_IF,
+		ATTRIBUTE,
+		FLATTEN
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -230,6 +232,9 @@ class ShaderInterpreter
 	void elseState();
 	void elseBody();
 	void insertElseBody();
+
+	void attribute();
+	void flatten();
 
 	struct DeclarationFunctionOrVariable
 	{

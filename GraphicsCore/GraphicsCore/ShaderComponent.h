@@ -333,4 +333,16 @@ namespace ShaderUnits
 	public:
 		void query(ShaderVisitor* visitor);
 	};
+
+	class ATTRIBUTE : public Leaf
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
+	class FLATTEN : public ATTRIBUTE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
 }

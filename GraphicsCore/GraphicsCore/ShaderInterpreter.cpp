@@ -317,6 +317,14 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case INSERT_ELSE_BODY:
 			insertElseBody();
 			break;
+
+		case State::ATTRIBUTE:
+			attribute();
+			break;
+
+		case State::FLATTEN:
+			flatten();
+			break;
 		}
 	}
 
@@ -1896,3 +1904,14 @@ void ShaderInterpreter::insertElseBody()
 
 	return;
 }
+
+void ShaderInterpreter::attribute()
+{
+
+}
+
+void ShaderInterpreter::flatten()
+{
+
+}
+
