@@ -262,6 +262,11 @@ public:
 		std::cout << "if" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::FLATTEN* pFLATTEN)
+	{
+		printSpaces();
+		std::cout << "[flatten]" << std::endl;
+	}
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -386,6 +391,7 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
+	void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 };
 
 int main()

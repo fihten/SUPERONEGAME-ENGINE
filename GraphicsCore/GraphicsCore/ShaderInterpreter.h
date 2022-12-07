@@ -16,7 +16,7 @@ class ShaderInterpreter
 		0   
 	};
 
-	const char stopSymbols[17] = 
+	const char stopSymbols[19] = 
 	{
 			32, // space
 			9,  // tab
@@ -34,6 +34,8 @@ class ShaderInterpreter
 			'*',
 			'/',
 			'=',
+			'[',
+			']',
 			0
 	};
 

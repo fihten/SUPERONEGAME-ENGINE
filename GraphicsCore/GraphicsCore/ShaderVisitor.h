@@ -50,6 +50,7 @@ public:
 	virtual void startVisit(const ShaderUnits::SHADER* pSHADER) {};
 	virtual void startVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
 	virtual void startVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
+	virtual void startVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 
 	virtual void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
@@ -96,4 +97,5 @@ public:
 	virtual void finishVisit(const ShaderUnits::SHADER* pSHADER) {};
 	virtual void finishVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
 	virtual void finishVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
+	virtual void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 };

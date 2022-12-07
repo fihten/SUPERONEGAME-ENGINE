@@ -35,7 +35,8 @@ void VSdemo(float3 iPosL:POSITION, float4 iColor:COLOR, out float4 oPosH:SV_POSI
 			e = o + t;
 		else
 			w = w - r;
-
+	
+	[flatten]
 	if (diffuseFactor > 0.0f)
 	{
 		float3 v = reflect(-lightVec, normal);

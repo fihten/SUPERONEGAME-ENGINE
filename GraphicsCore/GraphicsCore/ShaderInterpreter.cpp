@@ -1934,5 +1934,6 @@ void ShaderInterpreter::flatten()
 {
 	pFlatten = new ShaderUnits::FLATTEN();
 	currentState = State::UNKNOWN;
+	words.pop();
 }
 
