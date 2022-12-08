@@ -325,6 +325,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::FLATTEN:
 			flatten();
 			break;
+
+		case State::DIVIDES_ASSIGN:
+			dividesAssign();
+			break;
 		}
 	}
 
@@ -1937,3 +1941,7 @@ void ShaderInterpreter::flatten()
 	words.pop();
 }
 
+void ShaderInterpreter::dividesAssign()
+{
+
+}

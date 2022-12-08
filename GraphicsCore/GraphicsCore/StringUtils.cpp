@@ -53,8 +53,15 @@ std::string readWord(
 	size_t from = skipSymbols(str.c_str(), skippedSymbols.c_str(), currentIndex);
 
 	bool isComment = str[from] == '/' && str[from + 1] == '/';
-	size_t to = nextStopSymbol(str.c_str(), isComment ? "\n" : stopSymbols.c_str(), from);
-	
+	bool isDividesAssign = str[from] == '/' && str[from + 1] == '=';
+	size_t to = 0;
+	if (isComment)
+		to = nextStopSymbol(str.c_str(), "\n", from);
+	else if (isDividesAssign)
+		to = from + 2;
+	else
+		to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);
+
 	currentIndex = to;
 	std::string word = str.substr(from, to - from);
 	if (word == "" && str[currentIndex])
@@ -97,6 +104,17 @@ bool isComment(const char* str)
 	if (str[0] != '/')
 		return false;
 	if (str[1] != '/')
+		return false;
+	return true;
+}
+
+bool isDividesAssign(const char* str)
+{
+	if (std::strlen(str) != 2)
+		return false;
+	if (str[0] != '/')
+		return false;
+	if (str[1] != '=')
 		return false;
 	return true;
 }

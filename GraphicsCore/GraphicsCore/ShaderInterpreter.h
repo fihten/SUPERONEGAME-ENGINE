@@ -119,7 +119,8 @@ class ShaderInterpreter
 		INSERT_ELSE_BODY,
 		INSERT_ENTIRE_IF,
 		ATTRIBUTE,
-		FLATTEN
+		FLATTEN,
+		DIVIDES_ASSIGN
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -238,6 +239,8 @@ class ShaderInterpreter
 	void attribute();
 	void flatten();
 	ShaderUnits::FLATTEN* pFlatten = nullptr;
+
+	void dividesAssign();
 
 	struct DeclarationFunctionOrVariable
 	{
