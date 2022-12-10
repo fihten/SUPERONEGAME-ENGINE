@@ -754,7 +754,8 @@ bool ShaderInterpreter::isOperationState(State state) const
 		state == State::UNARY_MINUS ||
 		state == State::UNARY_PLUS ||
 		state == State::GREATER_THAN ||
-		state == State::ASSIGNMENT
+		state == State::ASSIGNMENT ||
+		state == State::DIVIDES_ASSIGN
 		)
 		return true;
 
@@ -936,6 +937,8 @@ void ShaderInterpreter::variable()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string("/="))
+		currentState = State::DIVIDES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 }
@@ -961,6 +964,8 @@ void ShaderInterpreter::number()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string("/="))
+		currentState = State::DIVIDES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 }
@@ -1943,5 +1948,15 @@ void ShaderInterpreter::flatten()
 
 void ShaderInterpreter::dividesAssign()
 {
+	words.pop();
 
+	ShaderUnits::ShaderComponent* leftValue = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* dividesAssignOp = new ShaderUnits::DIVIDES_ASSIGN();
+	dividesAssignOp->add(leftValue);
+	componentStack.push(dividesAssignOp);
+
+	statesStack.push(State::DIVIDES_ASSIGN);
+	currentState = State::UNKNOWN;
 }
