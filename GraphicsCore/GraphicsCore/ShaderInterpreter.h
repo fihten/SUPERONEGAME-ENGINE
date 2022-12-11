@@ -120,7 +120,8 @@ class ShaderInterpreter
 		INSERT_ENTIRE_IF,
 		ATTRIBUTE,
 		FLATTEN,
-		DIVIDES_ASSIGN
+		DIVIDES_ASSIGN,
+		MULTIPLIES_ASSIGN
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -241,6 +242,7 @@ class ShaderInterpreter
 	ShaderUnits::FLATTEN* pFlatten = nullptr;
 
 	void dividesAssign();
+	void multipliesAssign();
 
 	struct DeclarationFunctionOrVariable
 	{

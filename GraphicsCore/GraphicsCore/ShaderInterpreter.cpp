@@ -329,6 +329,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::DIVIDES_ASSIGN:
 			dividesAssign();
 			break;
+
+		case State::MULTIPLIES_ASSIGN:
+			multipliesAssign();
+			break;
 		}
 	}
 
@@ -1959,4 +1963,9 @@ void ShaderInterpreter::dividesAssign()
 
 	statesStack.push(State::DIVIDES_ASSIGN);
 	currentState = State::UNKNOWN;
+}
+
+void ShaderInterpreter::multipliesAssign()
+{
+
 }
