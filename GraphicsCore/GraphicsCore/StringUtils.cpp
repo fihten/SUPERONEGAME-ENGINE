@@ -54,10 +54,11 @@ std::string readWord(
 
 	bool isComment = str[from] == '/' && str[from + 1] == '/';
 	bool isDividesAssign = str[from] == '/' && str[from + 1] == '=';
+	bool isMultipliesAssign = str[from] == '*' && str[from + 1] == '=';
 	size_t to = 0;
 	if (isComment)
 		to = nextStopSymbol(str.c_str(), "\n", from);
-	else if (isDividesAssign)
+	else if (isDividesAssign || isMultipliesAssign)
 		to = from + 2;
 	else
 		to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);
@@ -104,17 +105,6 @@ bool isComment(const char* str)
 	if (str[0] != '/')
 		return false;
 	if (str[1] != '/')
-		return false;
-	return true;
-}
-
-bool isDividesAssign(const char* str)
-{
-	if (std::strlen(str) != 2)
-		return false;
-	if (str[0] != '/')
-		return false;
-	if (str[1] != '=')
 		return false;
 	return true;
 }

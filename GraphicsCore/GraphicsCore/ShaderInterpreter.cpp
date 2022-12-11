@@ -759,7 +759,8 @@ bool ShaderInterpreter::isOperationState(State state) const
 		state == State::UNARY_PLUS ||
 		state == State::GREATER_THAN ||
 		state == State::ASSIGNMENT ||
-		state == State::DIVIDES_ASSIGN
+		state == State::DIVIDES_ASSIGN ||
+		state == State::MULTIPLIES_ASSIGN
 		)
 		return true;
 
@@ -943,6 +944,8 @@ void ShaderInterpreter::variable()
 		currentState = State::ASSIGNMENT;
 	if (word == std::string("/="))
 		currentState = State::DIVIDES_ASSIGN;
+	if (word == std::string("*="))
+		currentState = State::MULTIPLIES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 }
@@ -970,6 +973,8 @@ void ShaderInterpreter::number()
 		currentState = State::ASSIGNMENT;
 	if (word == std::string("/="))
 		currentState = State::DIVIDES_ASSIGN;
+	if (word == std::string("*="))
+		currentState = State::MULTIPLIES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 }
