@@ -10,6 +10,8 @@ void VSdemo(float3 iPosL:POSITION, float4 iColor:COLOR, out float4 oPosH:SV_POSI
 	// Normalize the light vector.
 	lightVec /= d;
 
+	diffuse *= att;
+
 	if (a > b)
 	{
 		a = b;

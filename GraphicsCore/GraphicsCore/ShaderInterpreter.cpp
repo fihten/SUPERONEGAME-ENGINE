@@ -1972,5 +1972,15 @@ void ShaderInterpreter::dividesAssign()
 
 void ShaderInterpreter::multipliesAssign()
 {
+	words.pop();
 
+	ShaderUnits::ShaderComponent* leftValue = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* multipliesAssignOp = new ShaderUnits::MULTIPLIES_ASSIGN();
+	multipliesAssignOp->add(leftValue);
+	componentStack.push(multipliesAssignOp);
+
+	statesStack.push(State::MULTIPLIES_ASSIGN);
+	currentState = State::UNKNOWN;
 }

@@ -219,6 +219,12 @@ public:
 		std::cout << "/=" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN)
+	{
+		printSpaces();
+		std::cout << "*=" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11)
 	{
 		printSpaces();
@@ -365,6 +371,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::DIVIDES_ASSIGN* pDIVIDES_ASSIGN)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN)
 	{
 		numberOfSpaces -= 4;
 	};

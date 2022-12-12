@@ -298,6 +298,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class MULTIPLIES_ASSIGN :public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class TECHNIQUE11 : public ShaderComposite
 	{
 	public:

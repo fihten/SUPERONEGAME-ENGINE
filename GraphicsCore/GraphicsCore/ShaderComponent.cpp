@@ -289,6 +289,14 @@ void ShaderUnits::DIVIDES_ASSIGN::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::MULTIPLIES_ASSIGN::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::TECHNIQUE11::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
