@@ -12,5 +12,6 @@ enum Directive
 
 std::string preprocess(
 	const std::string& code,
+	const std::string& dir,
 	std::map<std::string, std::string>& defines
 );
