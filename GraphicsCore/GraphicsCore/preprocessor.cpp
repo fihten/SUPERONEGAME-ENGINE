@@ -8,6 +8,14 @@ void processInclude(
 	std::map<std::string, std::string>& defines,
 	std::string& code
 );
+void processIfndef(
+	const std::string& code,
+	int from, int& to,
+	const std::string& line,
+	const std::string& dir,
+	std::map<std::string, std::string>& defines,
+	std::string& res
+);
 
 std::string preprocess(
 	const std::string& code,
@@ -28,7 +36,7 @@ std::string preprocess(
 			processInclude(line, dir, defines, res);
 			break;
 		case IFNDEF:
-
+			processIfndef(code, start, end, line, dir, defines, res);
 			break;
 		case DEFINE:
 
@@ -55,6 +63,18 @@ void processInclude(
 	const std::string& dir,
 	std::map<std::string, std::string>& defines,
 	std::string& code
+)
+{
+
+}
+
+void processIfndef(
+	const std::string& code,
+	int from, int& to,
+	const std::string& line,
+	const std::string& dir,
+	std::map<std::string, std::string>& defines,
+	std::string& res
 )
 {
 
