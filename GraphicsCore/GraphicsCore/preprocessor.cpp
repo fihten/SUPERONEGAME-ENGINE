@@ -17,6 +17,14 @@ void processIfndef(
 	std::string& res
 );
 
+void processDefine(
+	const std::string& code,
+	int from, int& to,
+	const std::string& line,
+	std::map<std::string, std::string>& defines,
+	std::string& res
+);
+
 std::string preprocess(
 	const std::string& code,
 	const std::string& dir,
@@ -39,7 +47,7 @@ std::string preprocess(
 			processIfndef(code, start, end, line, dir, defines, res);
 			break;
 		case DEFINE:
-
+			processDefine(code, start, end, line, defines);
 			break;
 		case NONE:
 
@@ -73,6 +81,17 @@ void processIfndef(
 	int from, int& to,
 	const std::string& line,
 	const std::string& dir,
+	std::map<std::string, std::string>& defines,
+	std::string& res
+)
+{
+
+}
+
+void processDefine(
+	const std::string& code,
+	int from, int& to,
+	const std::string& line,
 	std::map<std::string, std::string>& defines,
 	std::string& res
 )
