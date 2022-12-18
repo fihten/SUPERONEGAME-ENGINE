@@ -16,7 +16,6 @@ void processIfndef(
 	std::map<std::string, std::string>& defines,
 	std::string& res
 );
-
 void processDefine(
 	const std::string& code,
 	int from, int& to,
@@ -24,6 +23,7 @@ void processDefine(
 	std::map<std::string, std::string>& defines,
 	std::string& res
 );
+void insertLine(const std::string& line, std::string& code);
 
 std::string preprocess(
 	const std::string& code,
@@ -47,10 +47,10 @@ std::string preprocess(
 			processIfndef(code, start, end, line, dir, defines, res);
 			break;
 		case DEFINE:
-			processDefine(code, start, end, line, defines);
+			processDefine(code, start, end, line, defines, res);
 			break;
 		case NONE:
-
+			insertLine(line, res);
 			break;
 		}
 	}
@@ -58,7 +58,11 @@ std::string preprocess(
 
 bool fetchLine(const std::string& code, int start, int& end, std::string& line)
 {
-
+	end = code.find('\n', start);
+	if (end == std::string::npos)
+		return false;
+	line = code.substr(start, end - start);
+	return true;
 }
 
 Directive fetchDirective(const std::string& line)
@@ -95,6 +99,11 @@ void processDefine(
 	std::map<std::string, std::string>& defines,
 	std::string& res
 )
+{
+
+}
+
+void insertLine(const std::string& line, std::string& code)
 {
 
 }
