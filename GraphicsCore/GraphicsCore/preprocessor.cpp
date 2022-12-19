@@ -54,6 +54,7 @@ std::string preprocess(
 			break;
 		}
 	}
+	return res;
 }
 
 bool fetchLine(const std::string& code, int start, int& end, std::string& line)
@@ -67,7 +68,13 @@ bool fetchLine(const std::string& code, int start, int& end, std::string& line)
 
 Directive fetchDirective(const std::string& line)
 {
-
+	if (line.find("#include") != std::string::npos)
+		return Directive::INCLUDE;
+	if (line.find("#ifndef") != std::string::npos)
+		return Directive::IFNDEF;
+	if (line.find("#define") != std::string::npos)
+		return Directive::DEFINE;
+	return Directive::NONE;
 }
 
 void processInclude(
