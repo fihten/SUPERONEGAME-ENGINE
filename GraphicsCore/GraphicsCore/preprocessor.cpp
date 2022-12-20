@@ -1,4 +1,5 @@
 #include "preprocessor.h"
+#include <fstream>
 
 bool fetchLine(const std::string& code, int start, int& end, std::string& line);
 Directive fetchDirective(const std::string& line);
@@ -84,7 +85,26 @@ void processInclude(
 	std::string& code
 )
 {
+	int dirBegin = line.find('"') + 1;
+	int dirEnd = line.find('"', dirBegin);
+	std::string directory = line.substr(dirBegin, dirEnd - dirBegin);
+	directory = dir + "\\" + directory;
 
+	std::ifstream file(directory);
+	file.seekg(0, file.end);
+	int n = (int)file.tellg();
+	file.seekg(0, file.beg);
+
+	char* szIncludedCode = new char[n + 1];
+	szIncludedCode[n] = 0;
+	file.read(szIncludedCode, n);
+
+	std::string sIncludedCode(szIncludedCode);
+	sIncludedCode = preprocess(sIncludedCode, dir, defines);
+	
+	code += sIncludedCode;
+	
+	delete[] szIncludedCode;
 }
 
 void processIfndef(
