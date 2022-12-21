@@ -28,13 +28,14 @@ void insertLine(const std::string& line, std::string& code);
 
 std::string preprocess(
 	const std::string& code,
+	int from, int& to,
 	const std::string& dir,
 	std::map<std::string, std::string>& defines
 )
 {
 	std::string res = "";
 	std::string line = "";
-	int start = 0;
+	int start = from;
 	int end = 0;
 	// lines fetching
 	while (fetchLine(res, start, end, line))
@@ -100,7 +101,8 @@ void processInclude(
 	file.read(szIncludedCode, n);
 
 	std::string sIncludedCode(szIncludedCode);
-	sIncludedCode = preprocess(sIncludedCode, dir, defines);
+	int to = 0;
+	sIncludedCode = preprocess(sIncludedCode, 0, to, dir, defines);
 	
 	code += sIncludedCode;
 	
@@ -116,7 +118,22 @@ void processIfndef(
 	std::string& res
 )
 {
+	int ifndefStart = line.find("#ifndef", 0);
+	int ifndefEnd = line.find(' ', ifndefStart + 1);
 
+	int macrosStart = line.find_first_not_of(' ', ifndefEnd);
+	int macrosEnd = line.find(' ', macrosStart);
+	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart);
+
+	std::string inserted = preprocess(code, from, to, dir, defines);
+	if (defines.find(macros) == defines.end())
+	{
+		res += inserted;
+	}
+	else
+	{
+
+	}
 }
 
 void processDefine(
