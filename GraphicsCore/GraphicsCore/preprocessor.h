@@ -7,7 +7,9 @@ enum Directive
 	INCLUDE,
 	IFNDEF,
 	DEFINE,
-	NONE
+	NONE,
+	ELSE,
+	ENDIF
 };
 
 std::string preprocess(

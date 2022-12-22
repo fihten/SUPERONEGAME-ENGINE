@@ -76,6 +76,10 @@ Directive fetchDirective(const std::string& line)
 		return Directive::IFNDEF;
 	if (line.find("#define") != std::string::npos)
 		return Directive::DEFINE;
+	if (line.find("#else") != std::string::npos)
+		return Directive::ELSE;
+	if (line.find("#endif") != std::string::npos)
+		return Directive::ENDIF;
 	return Directive::NONE;
 }
 
@@ -125,14 +129,31 @@ void processIfndef(
 	int macrosEnd = line.find(' ', macrosStart);
 	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart);
 
-	std::string inserted = preprocess(code, from, to, dir, defines);
+	std::map<std::string, std::string> defines0;
+	std::string ifndefBranch = preprocess(code, from, to, dir, defines0);
+	
+	std::string line0 = "";
+	std::string elseBranch = "";
+	std::map<std::string, std::string> defines1;
+	if (fetchLine(code, to + 1, to, line0))
+	{
+		if (fetchDirective(line0) == Directive::ELSE)
+		{
+			elseBranch = preprocess(code, to + 1, to, dir, defines1);
+			std::string tmpLine = "";
+			fetchLine(code, to + 1, to, tmpLine);
+		}
+	}
+
 	if (defines.find(macros) == defines.end())
 	{
-		res += inserted;
+		defines.insert(defines0.begin(), defines0.end());
+		res += ifndefBranch;
 	}
 	else
 	{
-
+		defines.insert(defines1.begin(), defines1.end());
+		res += elseBranch;
 	}
 }
 
