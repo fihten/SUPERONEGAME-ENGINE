@@ -1,5 +1,6 @@
 #include "preprocessor.h"
 #include <fstream>
+#include <algorithm>
 
 bool fetchLine(const std::string& code, int start, int& end, std::string& line);
 Directive fetchDirective(const std::string& line);
@@ -46,15 +47,20 @@ std::string preprocess(
 			processInclude(line, dir, defines, res);
 			break;
 		case IFNDEF:
-			processIfndef(code, start, end, line, dir, defines, res);
+			processIfndef(code, end + 1, end, line, dir, defines, res);
 			break;
 		case DEFINE:
-			processDefine(code, start, end, line, defines, res);
+			processDefine(code, end + 1, end, line, defines, res);
 			break;
+		case ELSE:
+		case ENDIF:
+			end = start;
+			return res;
 		case NONE:
 			insertLine(line, res);
 			break;
 		}
+		start = end + 1;
 	}
 	return res;
 }
@@ -165,6 +171,19 @@ void processDefine(
 	std::string& res
 )
 {
+	int defineStart = line.find("#define");
+	int defineEnd = line.find(' ', defineStart);
+
+	int macrosStart = line.find_first_not_of(' ', defineEnd);
+	int macrosEnd = line.find_first_of(" (", macrosStart);
+	if (line[macrosEnd] == '(')
+		macrosEnd = line.find_first_of(')', macrosEnd);
+
+	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart + 1);
+	auto newEnd = std::remove(macros.begin(), macros.end(), ' ');
+	int newLen = newEnd - macros.begin();
+	macros.resize(newLen, ' ');
+
 
 }
 
