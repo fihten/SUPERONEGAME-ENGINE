@@ -177,14 +177,36 @@ void processDefine(
 	int macrosStart = line.find_first_not_of(' ', defineEnd);
 	int macrosEnd = line.find_first_of(" (", macrosStart);
 	if (line[macrosEnd] == '(')
-		macrosEnd = line.find_first_of(')', macrosEnd);
+		macrosEnd = line.find_first_of(')', macrosEnd) + 1;
 
-	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart + 1);
+	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart);
 	auto newEnd = std::remove(macros.begin(), macros.end(), ' ');
 	int newLen = newEnd - macros.begin();
 	macros.resize(newLen, ' ');
 
+	std::string macrosValue = "";
+	std::string tmpLine = line;
+	int firstCh = macrosEnd;
+	int lastCh = 0;
+	bool lastIsBackSlash = false;
+	do
+	{
+		lastCh = tmpLine.find_last_not_of(' ');
+		lastIsBackSlash = tmpLine[lastCh] == '\\';
+		
+		lastCh = lastIsBackSlash ? lastCh : lastCh + 1;
+		macrosValue += tmpLine.substr(firstCh, lastCh - firstCh);
+		macrosValue += "\n";
+		
+		firstCh = 0;
+		if (lastIsBackSlash)
+		{
+			fetchLine(code, from, to, tmpLine);
+			from = to + 1;
+		}
+	} while (lastIsBackSlash);
 
+	defines[macros] = macrosValue;
 }
 
 void insertLine(const std::string& line, std::string& code)
