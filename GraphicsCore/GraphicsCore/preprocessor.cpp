@@ -37,9 +37,9 @@ std::string preprocess(
 	std::string res = "";
 	std::string line = "";
 	int start = from;
-	int end = 0;
+	to = 0;
 	// lines fetching
-	while (fetchLine(res, start, end, line))
+	while (fetchLine(code, start, to, line))
 	{
 		switch (fetchDirective(line))
 		{
@@ -47,20 +47,20 @@ std::string preprocess(
 			processInclude(line, dir, defines, res);
 			break;
 		case IFNDEF:
-			processIfndef(code, end + 1, end, line, dir, defines, res);
+			processIfndef(code, to + 1, to, line, dir, defines, res);
 			break;
 		case DEFINE:
-			processDefine(code, end + 1, end, line, defines, res);
+			processDefine(code, to + 1, to, line, defines, res);
 			break;
 		case ELSE:
 		case ENDIF:
-			end = start;
+			to = start - 1;
 			return res;
 		case NONE:
 			insertLine(line, res);
 			break;
 		}
-		start = end + 1;
+		start = to + 1;
 	}
 	return res;
 }
@@ -69,7 +69,10 @@ bool fetchLine(const std::string& code, int start, int& end, std::string& line)
 {
 	end = code.find('\n', start);
 	if (end == std::string::npos)
+	{
+		end = code.length() - 1;
 		return false;
+	}
 	line = code.substr(start, end - start);
 	return true;
 }
@@ -113,7 +116,6 @@ void processInclude(
 	std::string sIncludedCode(szIncludedCode);
 	int to = 0;
 	sIncludedCode = preprocess(sIncludedCode, 0, to, dir, defines);
-	
 	code += sIncludedCode;
 	
 	delete[] szIncludedCode;
@@ -176,7 +178,9 @@ void processDefine(
 
 	int macrosStart = line.find_first_not_of(' ', defineEnd);
 	int macrosEnd = line.find_first_of(" (", macrosStart);
-	if (line[macrosEnd] == '(')
+	if (macrosEnd == std::string::npos)
+		macrosEnd = line.length();
+	if (macrosEnd < line.length() && line[macrosEnd] == '(')
 		macrosEnd = line.find_first_of(')', macrosEnd) + 1;
 
 	std::string macros = line.substr(macrosStart, macrosEnd - macrosStart);
@@ -198,6 +202,8 @@ void processDefine(
 		macrosValue += tmpLine.substr(firstCh, lastCh - firstCh);
 		macrosValue += "\n";
 		
+		res += tmpLine + "\n";
+
 		firstCh = 0;
 		if (lastIsBackSlash)
 		{
@@ -211,5 +217,5 @@ void processDefine(
 
 void insertLine(const std::string& line, std::string& code)
 {
-
+	code += line + "\n";
 }

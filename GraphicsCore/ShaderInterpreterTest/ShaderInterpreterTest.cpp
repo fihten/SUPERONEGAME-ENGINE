@@ -5,6 +5,7 @@
 #include <fstream>
 #include "ShaderVisitor.h"
 #include "ShaderInterpreter.h"
+#include "preprocessor.h"
 
 class PrintVisitor : public ShaderVisitor
 {
@@ -441,6 +442,23 @@ int main()
 		delete []buff;
 	}
 
+	{
+		std::cout << std::endl << "-------------------------------------------------------------" << std::endl;
+		std::ifstream file("C:\\3dEngine\\Shaders\\LightingDemo.fx");
+		
+		file.seekg(0, file.end);
+		int length = file.tellg();
+		file.seekg(0, file.beg);
+
+		char* buff = new char[length + 1];
+		file.read(buff, length);
+		buff[length] = 0;
+
+		int to = 0;
+		std::map<std::string, std::string> defines;
+		std::string code = preprocess(buff, 0, to, "C:\\3dEngine\\Shaders\\", defines);
+		std::cout << code;
+	}
 }
 
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
