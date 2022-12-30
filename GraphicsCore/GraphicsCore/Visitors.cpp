@@ -231,3 +231,15 @@ void ElementsOfCbufferVisitor::getElements(ElementOfCbuffer*& pElements, int& co
 	pElements = elements;
 	count = elementsCount;
 }
+
+/*________________________________IsFileAShader________________________________*/
+
+void IsFileAShader::startVisit(const ShaderUnits::SHADER* pSHADER)
+{
+	f = false;
+}
+
+void IsFileAShader::startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11)
+{
+	f = true;
+}

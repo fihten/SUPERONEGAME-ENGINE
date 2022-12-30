@@ -102,3 +102,13 @@ private:
 	ElementOfCbuffer elements[ELEMENTS_OF_CBUFFER_MAX_COUNT];
 	int elementsCount = 0;
 };
+
+class IsFileAShader :public ShaderVisitor
+{
+	void startVisit(const ShaderUnits::SHADER* pSHADER);
+	void startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11);
+
+	bool f = false;
+public:
+	bool fileIsAShader() { return f; }
+};
