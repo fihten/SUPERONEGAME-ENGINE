@@ -11,6 +11,8 @@
 #include "Visitors.h"
 #include "ResourceManager.h"
 
+#include "preprocessor.h"
+
 using namespace boost::filesystem;
 
 void loadVariableLocationsFromFile(const std::string& path, std::map<std::string, std::string>& variableLocations)
@@ -93,7 +95,9 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	ID3DX11Effect* mShader = nullptr;
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
-	D3DX11CompileFromFile(shader_path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	HRESULT res = D3DX11CompileFromFile(shader_path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+		return;
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
 
 	// interpret shader
@@ -107,8 +111,18 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	shaderFile.read(shaderText, length);
 	shaderText[length] = 0;
 
+	int to = 0;
+	
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SHADERS", shadersFolder, sz);
+
+	std::map<std::string, std::string> defines;
+
+	std::string sShaderText = preprocess(shaderText, 0, to, shadersFolder, defines);
+
 	ShaderInterpreter interpreter;
-	interpreter.setShaderText(shaderText);
+	interpreter.setShaderText(sShaderText);
 	ShaderUnits::SHADER* shader = interpreter.build();
 
 	ShadersNamesVisitor shadersNamesVisitor;
