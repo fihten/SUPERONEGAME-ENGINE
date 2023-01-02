@@ -121,7 +121,11 @@ class ShaderInterpreter
 		ATTRIBUTE,
 		FLATTEN,
 		DIVIDES_ASSIGN,
-		MULTIPLIES_ASSIGN
+		MULTIPLIES_ASSIGN,
+		STRUCT,
+		STRUCT_NAME,
+		STRUCT_BODY_OPEN_BRACKET,
+		INSERT_STRUCT
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;

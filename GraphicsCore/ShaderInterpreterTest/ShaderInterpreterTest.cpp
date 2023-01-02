@@ -417,7 +417,7 @@ public:
 
 int main()
 {
-	std::ifstream file("C:\\3dEngine\\Shaders\\Demo.fx");
+	std::ifstream file("C:\\3dEngine\\Shaders\\LightingDemo.fx");
 	if (file)
 	{
 		file.seekg(0, file.end);
