@@ -1984,3 +1984,23 @@ void ShaderInterpreter::multipliesAssign()
 	statesStack.push(State::MULTIPLIES_ASSIGN);
 	currentState = State::UNKNOWN;
 }
+
+void ShaderInterpreter::structState()
+{
+
+}
+
+void ShaderInterpreter::structName()
+{
+
+}
+
+void ShaderInterpreter::insertStruct()
+{
+
+}
+
+void ShaderInterpreter::structBodyOpenBracket()
+{
+
+}

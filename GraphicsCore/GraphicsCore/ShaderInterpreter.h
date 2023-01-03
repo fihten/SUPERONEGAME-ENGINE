@@ -213,6 +213,11 @@ class ShaderInterpreter
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
 
+	void structState();
+	void structName();
+	void insertStruct();
+	void structBodyOpenBracket();
+
 	ShaderUnits::ShaderComponent* tech = nullptr;
 	void technique11state();
 	void insertTechnique11();
