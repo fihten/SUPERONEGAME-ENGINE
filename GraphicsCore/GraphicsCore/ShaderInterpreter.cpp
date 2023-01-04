@@ -333,6 +333,22 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::MULTIPLIES_ASSIGN:
 			multipliesAssign();
 			break;
+
+		case State::STRUCT:
+			structState();
+			break;
+
+		case State::STRUCT_NAME:
+			structName();
+			break;
+
+		case State::STRUCT_BODY_OPEN_BRACKET:
+			structBodyOpenBracket();
+			break;
+
+		case State::INSERT_STRUCT:
+			insertStruct();
+			break;
 		}
 	}
 
