@@ -2003,20 +2003,75 @@ void ShaderInterpreter::multipliesAssign()
 
 void ShaderInterpreter::structState()
 {
-
+	statesStack.push(State::STRUCT);
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::STRUCT_BODY_OPEN_BRACKET;
+		return;
+	}
+	// non-predefined word
+	{
+		currentState = State::STRUCT_NAME;
+		return;
+	}
 }
 
 void ShaderInterpreter::structName()
 {
+	std::string structName = words.front();
+	words.pop();
 
+	structDecl.name = structName;
+
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::STRUCT_BODY_OPEN_BRACKET;
+
+		return;
+	}
+	if (word == std::string(";"))
+	{
+		currentState = State::INSERT_STRUCT;
+		return;
+	}
 }
 
 void ShaderInterpreter::insertStruct()
 {
+	if (statesStack.top() == State::STRUCT_BODY_OPEN_BRACKET)
+		statesStack.pop();
+	if (statesStack.top() == State::STRUCT)
+		statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pStruct = new ShaderUnits::STRUCT();
+	if (structDecl.name != std::string(""))
+		pStruct->setName(structDecl.name);
+	if (structDecl.body)
+		pStruct->add(structDecl.body);
+	structDecl.clear();
+
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
+	parent->add(pStruct);
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void ShaderInterpreter::structBodyOpenBracket()
 {
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
+	structDecl.body = body;
+	componentStack.push(body);
 
+	statesStack.push(State::STRUCT_BODY_OPEN_BRACKET);
+	currentState = State::UNKNOWN;
+
+	return;
 }

@@ -213,6 +213,15 @@ class ShaderInterpreter
 	void insertCbuffer();
 	void cbufferBodyOpenBracket();
 
+	struct StructDefinition
+	{
+		std::string name = "";
+		ShaderUnits::ShaderComponent* body = nullptr;
+
+		void clear() { name = ""; body = nullptr; }
+	};
+	StructDefinition structDecl;
+
 	void structState();
 	void structName();
 	void insertStruct();
