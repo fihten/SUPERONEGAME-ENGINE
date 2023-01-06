@@ -513,6 +513,20 @@ void ShaderInterpreter::unknown()
 
 		return;
 	}
+	if (word == std::string("struct"))
+	{
+		words.pop();
+		currentState = State::STRUCT;
+
+		return;
+	}
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::STRUCT_BODY_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::INSERT_STRUCT;
+
+		return;
+	}
 	if (word == std::string("technique11"))
 	{
 		words.pop();
