@@ -2,6 +2,7 @@
 #include <string>
 #include <queue>
 #include <stack>
+#include <map>
 
 #include "ShaderComponent.h"
 
@@ -226,6 +227,7 @@ class ShaderInterpreter
 	void structName();
 	void insertStruct();
 	void structBodyOpenBracket();
+	std::map<std::string, ShaderUnits::ShaderComponent*> userTypes;
 
 	ShaderUnits::ShaderComponent* tech = nullptr;
 	void technique11state();

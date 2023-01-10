@@ -2073,6 +2073,8 @@ void ShaderInterpreter::insertStruct()
 	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pStruct);
 
+	userTypes[structDecl.name] = pStruct;
+
 	currentState = State::UNKNOWN;
 
 	return;

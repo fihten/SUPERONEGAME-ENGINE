@@ -12,19 +12,34 @@ namespace ShaderUnits
 	class ShaderComponent
 	{
 		std::string name = "";
-		ShaderComponent* parent = nullptr;
+		std::list<ShaderComponent*> parents;
 
 	private:
-		void setParent(ShaderComponent* parent) { this->parent = parent; };
-		ShaderComponent* getParent() { return parent; };
+		void addParent(ShaderComponent* parent) 
+		{ 
+			if (std::find(parents.begin(), parents.end(), parent) == parents.end())
+				parents.push_back(parent);
+		};
+		void removeParent(ShaderComponent* parent) 
+		{
+			if (std::find(parents.begin(), parents.end(), parent) != parents.end())
+				parents.remove(parent);
+		}
+		std::list<ShaderComponent*> getParents() { return parents; };
 
 	private:
 		friend class ShaderComposite;
 
 	public:
-		virtual ~ShaderComponent() {};
+		virtual ~ShaderComponent() 
+		{
+			auto parents = this->getParents();
+			for (auto parent : parents)
+				parent->remove(this);
+		};
 	public:
 		virtual void add(ShaderComponent* component) {};
+		virtual void remove(ShaderComponent* component) {};
 		virtual void query(ShaderVisitor* visitor);
 		void setName(const std::string& name) { this->name = name; };
 		std::string getName() const { return name; };
@@ -38,14 +53,25 @@ namespace ShaderUnits
 		~ShaderComposite()
 		{
 			for (auto* child : childs)
+			{
+				child->removeParent(this);
 				delete child;
+			}
 		};
 	public:
 		void add(ShaderComponent* component)
 		{
-			component->setParent(this);
+			component->addParent(this);
 			childs.push_back(component);
 		};
+		void remove(ShaderComponent* component)
+		{
+			if (std::find(childs.begin(), childs.end(), component) != childs.end())
+			{
+				childs.remove(component);
+				component->removeParent(this);
+			}
+		}
 		void query(ShaderVisitor* visitor);
 	};
 
