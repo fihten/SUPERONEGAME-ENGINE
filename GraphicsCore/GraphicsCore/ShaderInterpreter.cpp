@@ -1222,6 +1222,11 @@ void ShaderInterpreter::float4x4State()
 	}
 }
 
+void ShaderInterpreter::userTypeState()
+{
+
+}
+
 void ShaderInterpreter::customName()
 {
 	std::string word = words.front();

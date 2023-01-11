@@ -76,6 +76,7 @@ class ShaderInterpreter
 		FLOAT3,
 		FLOAT4,
 		FLOAT4X4,
+		USER_TYPE,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
 		SIGNATURE_OPEN_BRACKET,
@@ -175,6 +176,7 @@ class ShaderInterpreter
 	void float3State();
 	void float4State();
 	void float4x4State();
+	void userTypeState();
 	void customName();
 	
 	void functionDeclaration();
@@ -228,6 +230,7 @@ class ShaderInterpreter
 	void insertStruct();
 	void structBodyOpenBracket();
 	std::map<std::string, ShaderUnits::ShaderComponent*> userTypes;
+	ShaderUnits::ShaderComponent* userType = nullptr;
 
 	ShaderUnits::ShaderComponent* tech = nullptr;
 	void technique11state();
