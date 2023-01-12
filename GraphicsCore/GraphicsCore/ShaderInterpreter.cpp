@@ -146,6 +146,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			float4x4State();
 			break;
 
+		case State::USER_TYPE:
+			userTypeState();
+			break;
+
 		case State::CUSTOM_NAME:
 			customName();
 			break;
@@ -461,6 +465,15 @@ void ShaderInterpreter::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT4X4;
+
+		return;
+	}
+	if (userTypes.count(word))
+	{
+		words.pop();
+		currentState = State::USER_TYPE;
+
+		userType = userTypes[word];
 
 		return;
 	}
@@ -1224,7 +1237,24 @@ void ShaderInterpreter::float4x4State()
 
 void ShaderInterpreter::userTypeState()
 {
+	std::string word = words.front();
+	if (word != std::string("("))
+	{
+		words.pop();
 
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
+
+		decl.type = userType;
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+
+		userType = nullptr;
+
+		return;
+	}
 }
 
 void ShaderInterpreter::customName()
