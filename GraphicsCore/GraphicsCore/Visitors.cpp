@@ -72,6 +72,16 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
 		format = "float4";
 }
 
+void InputLayoutVisitor::startVisit(const ShaderUnits::STRUCT* pStruct)
+{
+	++withinStruct;
+}
+
+void InputLayoutVisitor::finishVisit(const ShaderUnits::STRUCT* pStruct)
+{
+	--withinStruct;
+}
+
 void InputLayoutVisitor::startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC)
 {
 	if (withinShaderDeclaration)
@@ -80,7 +90,8 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC)
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
-	inVariable = true;
+	if (withinStruct == 0)
+		inVariable = true;
 	semanticName = "";
 	format = "";
 }
@@ -106,7 +117,8 @@ void InputLayoutVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE
 	desc.SemanticName = buffer;
 
 	desc.SemanticIndex = std::atoi(semanticName.substr(pos + 1).c_str());
-	
+	semanticName = "";
+
 	desc.AlignedByteOffset = alignedByteOffset;
 
 	if (format == std::string("float"))

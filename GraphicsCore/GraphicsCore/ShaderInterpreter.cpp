@@ -26,14 +26,14 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			break;
 	}
 
-	while (!words.empty())
+	while (!words.empty() || currentState != State::UNKNOWN)
 	{
 		switch (currentState)
 		{
 		case State::UNKNOWN:
 			unknown();
 			break;
-		
+
 		case State::BRACKETS_UNARY_OPERATOR_OPEN:
 			bracketsUnaryOperatorOpen();
 			break;
@@ -1502,7 +1502,7 @@ void ShaderInterpreter::variableDeclaration()
 		currentState = State::SEMANTIC;
 		return;
 	}
-	if (word == std::string(";") || word == std::string(")"))
+	if (word == std::string(";") || word == std::string(")") || word == std::string(","))
 	{
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
@@ -2101,14 +2101,15 @@ void ShaderInterpreter::insertStruct()
 		pStruct->setName(structDecl.name);
 	if (structDecl.body)
 		pStruct->add(structDecl.body);
+
+	userTypes[structDecl.name] = pStruct;
+	
 	structDecl.clear();
 
 	componentStack.pop();
 
 	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pStruct);
-
-	userTypes[structDecl.name] = pStruct;
 
 	currentState = State::UNKNOWN;
 

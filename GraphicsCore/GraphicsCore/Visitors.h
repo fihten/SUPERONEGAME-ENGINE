@@ -39,6 +39,7 @@ class InputLayoutVisitor : public ShaderVisitor
 	std::string shaderName = "";
 
 	bool withinShaderDeclaration = false;
+	int withinStruct = 0;
 	bool inVariable = true;
 
 	std::string semanticName = "";
@@ -57,6 +58,9 @@ public:
 	void startVisit(const ShaderUnits::FLOAT2* pFLOAT2);
 	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
 	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
+
+	void startVisit(const ShaderUnits::STRUCT* pStruct);
+	void finishVisit(const ShaderUnits::STRUCT* pStruct);
 
 	void startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC);
 

@@ -3,69 +3,27 @@ cbuffer cbPerObject
 	float4x4 WVP;
 }
 
-struct VertexOut
+struct V_IN
 {
-	float4 PosH : SV_POSITION;
-	float3 PosW : POSITION;
-	float3 NormalW : NORMAL;
+	float3 posL : POSITION;
+	float4 color : COLOR;
 };
 
-void f(float a);
- 
-void VSdemo(float3 iPosL:POSITION, float4 iColor:COLOR, out float4 oPosH:SV_POSITION, out float4 oColor:COLOR)
+struct V_OUT
 {
-	// Normalize the light vector.
-	lightVec /= d;
+	float4 posH : SV_POSITION;
+	float4 color : COLOR;
+};
 
-	diffuse *= att;
-
-	if (a > b)
-	{
-		a = b;
-		c = ((100 * ((a * b - t) * 10 - 20)) + 50) * andrusha;
-	}
-	else
-	{
-		if (1)
-		{
-			float a = 10;
-		}
-	}
-	if (a > b)
-		if (1)
-			w;
-		else
-			if (5 > 5)
-				t = 5;
-			else
-				if (t > t)
-					t = 6;
-				else
-					r = i;
-	else
-		if (u)
-			e = o + t;
-		else
-			w = w - r;
-	
-	[flatten]
-	if (diffuseFactor > 0.0f)
-	{
-		float3 v = reflect(-lightVec, normal);
-		float specFactor = pow(max(dot(v, toEye), 0.0f), mat.Specular.w);
-
-		diffuse = diffuseFactor * mat.Diffuse * L.Diffuse;
-		spec = specFactor * mat.Specular * L.Specular;
-	}
-
-	float a = (1 + ((5 + a) * l + 10)) * 100;
-	oPosH = mul(float4(iPosL,1), WVP);
-	oColor = iColor;	
+void VSdemo(V_IN vin, out V_OUT vout)
+{
+	vout.posH = mul(float4(vin.posL,1), WVP);
+	vout.color = vin.color;
 }
 
-float4 PSdemo(float4 posH:SV_POSITION, float4 color:COLOR):SV_Target
+float4 PSdemo(V_OUT pin):SV_Target
 {
-	return color;
+	return pin.color;
 }
 
 technique11 Demo
