@@ -117,6 +117,14 @@ void ShaderUnits::MUL::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::FLOAT3_CONSTRUCTOR::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::FLOAT4_CONSTRUCTOR::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

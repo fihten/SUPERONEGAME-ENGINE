@@ -175,6 +175,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class FLOAT3_CONSTRUCTOR : public FUNCTION_CALL
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class FLOAT4_CONSTRUCTOR : public FUNCTION_CALL
 	{
 	public:

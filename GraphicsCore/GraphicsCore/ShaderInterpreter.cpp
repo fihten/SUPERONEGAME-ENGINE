@@ -222,6 +222,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			mulState();
 			break;
 
+		case State::FLOAT3_CONSTRUCTOR:
+			float3constructor();
+			break;
+
 		case State::FLOAT4_CONSTRUCTOR:
 			float4constructor();
 			break;
@@ -966,6 +970,13 @@ void ShaderInterpreter::creatingGreaterThan()
 
 void ShaderInterpreter::variable()
 {
+	// It is hack
+	if (words.empty())
+	{
+		currentState = State::UNKNOWN;
+		return;
+	}
+
 	ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
 	var->setName(userName);
 	userName = std::string("");
@@ -1580,6 +1591,11 @@ void ShaderInterpreter::mulState()
 
 		return;
 	}
+}
+
+void ShaderInterpreter::float3constructor()
+{
+
 }
 
 void ShaderInterpreter::float4constructor()

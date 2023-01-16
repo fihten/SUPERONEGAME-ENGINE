@@ -202,7 +202,7 @@ void processDefine(
 		macrosValue += tmpLine.substr(firstCh, lastCh - firstCh);
 		macrosValue += "\n";
 		
-		res += tmpLine + "\n";
+//		res += tmpLine + "\n";
 
 		firstCh = 0;
 		if (lastIsBackSlash)

@@ -417,7 +417,7 @@ public:
 
 int main()
 {
-	std::ifstream file("C:\\3dEngine\\Shaders\\Demo.fx");
+	std::ifstream file("C:\\3dEngine\\Shaders\\LightingDemo.fx");
 	if (file)
 	{
 		file.seekg(0, file.end);
@@ -428,7 +428,9 @@ int main()
 		file.read(buff, length);
 		buff[length] = 0;
 
-		std::string shaderText(buff);
+		int to = 0;
+		std::map<std::string, std::string> defines;
+		std::string shaderText = preprocess(buff, 0, to, "C:\\3dEngine\\Shaders\\", defines);
 
 		ShaderInterpreter interpreter;
 		interpreter.setShaderText(shaderText);

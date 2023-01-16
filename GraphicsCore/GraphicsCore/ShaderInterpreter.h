@@ -95,6 +95,7 @@ class ShaderInterpreter
 		INOUT_,
 		UNIFORM_,
 		MUL,
+		FLOAT3_CONSTRUCTOR,
 		FLOAT4_CONSTRUCTOR,
 		CBUFFER,
 		CBUFFER_NAME,
@@ -200,6 +201,7 @@ class ShaderInterpreter
 	ShaderUnits::ShaderComponent* modifier = nullptr;
 
 	void mulState();
+	void float3constructor();
 	void float4constructor();
 
 	struct CbufferDefinition
