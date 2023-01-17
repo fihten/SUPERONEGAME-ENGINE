@@ -1197,6 +1197,13 @@ void ShaderInterpreter::float3State()
 		currentState = State::CUSTOM_NAME;
 		return;
 	}
+	if (word == std::string("("))
+	{
+		words.pop();
+		currentState = State::FLOAT3_CONSTRUCTOR;
+
+		return;
+	}
 }
 
 void ShaderInterpreter::float4State()
@@ -1595,7 +1602,13 @@ void ShaderInterpreter::mulState()
 
 void ShaderInterpreter::float3constructor()
 {
+	ShaderUnits::ShaderComponent* pFloat3Constructor = new ShaderUnits::FLOAT3_CONSTRUCTOR();
+	componentStack.push(pFloat3Constructor);
 
+	statesStack.push(State::FLOAT3_CONSTRUCTOR);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	return;
 }
 
 void ShaderInterpreter::float4constructor()

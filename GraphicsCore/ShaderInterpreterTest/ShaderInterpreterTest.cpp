@@ -91,6 +91,12 @@ public:
 		std::cout << "mul" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR)
+	{
+		printSpaces();
+		std::cout << "constructor of float3" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR)
 	{
 		printSpaces();
@@ -310,6 +316,10 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
+	void finishVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR)
 	{
 		numberOfSpaces -= 4;
@@ -417,7 +427,7 @@ public:
 
 int main()
 {
-	std::ifstream file("C:\\3dEngine\\Shaders\\LightingDemo.fx");
+	std::ifstream file("C:\\3dEngine\\Shaders\\Demo.fx");
 	if (file)
 	{
 		file.seekg(0, file.end);
