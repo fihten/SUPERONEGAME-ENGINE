@@ -389,4 +389,16 @@ namespace ShaderUnits
 	public:
 		void query(ShaderVisitor* visitor);
 	};
+
+	class SELECTED_FIELD : public VARIABLE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
+	class SELECTED_METHOD : public FUNCTION_CALL
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
 }

@@ -372,3 +372,15 @@ void ShaderUnits::FLATTEN::query(ShaderVisitor* visitor)
 	visitor->startVisit(this);
 	visitor->finishVisit(this);
 }
+
+void ShaderUnits::SELECTED_FIELD::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::SELECTED_METHOD::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
