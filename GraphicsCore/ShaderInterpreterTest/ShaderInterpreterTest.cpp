@@ -155,6 +155,7 @@ public:
 	{
 		printSpaces();
 		std::cout << "Variable " << pVARIABLE->getName() << std::endl;
+		numberOfSpaces += 4;
 	};
 	void startVisit(const ShaderUnits::NUMBER* pNUMBER)
 	{
@@ -342,7 +343,10 @@ public:
 	void finishVisit(const ShaderUnits::OUT_MODIFIER* pOUT) {};
 	void finishVisit(const ShaderUnits::INOUT_MODIFIER* pINOUT) {};
 	void finishVisit(const ShaderUnits::UNIFORM* pUNIFORM) {};
-	void finishVisit(const ShaderUnits::VARIABLE* pVARIABLE) {};
+	void finishVisit(const ShaderUnits::VARIABLE* pVARIABLE) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderUnits::NUMBER* pNUMBER) {};
 	void finishVisit(const ShaderUnits::COMMENT* pCOMMENT) {};
 	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)

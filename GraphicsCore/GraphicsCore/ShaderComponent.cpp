@@ -202,6 +202,8 @@ void ShaderUnits::UNIFORM::query(ShaderVisitor* visitor)
 void ShaderUnits::VARIABLE::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
 	visitor->finishVisit(this);
 }
 

@@ -252,7 +252,7 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
-	class VARIABLE : public Leaf
+	class VARIABLE : public ShaderComposite
 	{
 	public:
 		void query(ShaderVisitor* visitor);
