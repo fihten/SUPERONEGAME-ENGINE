@@ -128,7 +128,8 @@ class ShaderInterpreter
 		STRUCT,
 		STRUCT_NAME,
 		STRUCT_BODY_OPEN_BRACKET,
-		INSERT_STRUCT
+		INSERT_STRUCT,
+		SELECTED_FIELD
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -268,6 +269,8 @@ class ShaderInterpreter
 
 	void dividesAssign();
 	void multipliesAssign();
+
+	void selectedField();
 
 	struct DeclarationFunctionOrVariable
 	{

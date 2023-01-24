@@ -357,6 +357,11 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::INSERT_STRUCT:
 			insertStruct();
 			break;
+
+		case State::SELECTED_FIELD:
+			selectedField();
+			break;
+
 		}
 	}
 
@@ -978,10 +983,25 @@ void ShaderInterpreter::variable()
 	}
 
 	ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
-	var->setName(userName);
-	userName = std::string("");
 
+	std::string varName = userName;
+	var->setName(varName);
 	componentStack.push(var);
+
+	int pos = varName.find(".", 0);
+	if (pos != varName.npos)
+	{
+		varName = varName.substr(0, pos);
+		userName = userName.substr(pos + 1);
+
+		var->setName(varName);
+
+		currentState = State::SELECTED_FIELD;
+		return;
+	}
+
+	
+	userName = std::string("");
 
 	std::string word = words.front();
 	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))
@@ -2155,4 +2175,9 @@ void ShaderInterpreter::structBodyOpenBracket()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void ShaderInterpreter::selectedField()
+{
+
 }
