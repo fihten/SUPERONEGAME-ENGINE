@@ -982,26 +982,35 @@ void ShaderInterpreter::variable()
 		return;
 	}
 
-	ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
-
-	std::string varName = userName;
-	var->setName(varName);
-	componentStack.push(var);
-
-	int pos = varName.find(".", 0);
-	if (pos != varName.npos)
+	if (selectedFM_head == nullptr)
 	{
-		varName = varName.substr(0, pos);
-		userName = userName.substr(pos + 1);
+		ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
 
+		std::string varName = userName;
 		var->setName(varName);
+		componentStack.push(var);
 
-		currentState = State::SELECTED_FIELD;
-		return;
+		int pos = varName.find(".", 0);
+		if (pos != varName.npos)
+		{
+			varName = varName.substr(0, pos);
+			userName = userName.substr(pos + 1);
+
+			var->setName(varName);
+
+			currentState = State::SELECTED_FIELD;
+			return;
+		}
+
+		userName = std::string("");
 	}
-
-	
-	userName = std::string("");
+	else
+	{
+		ShaderUnits::ShaderComponent* var = componentStack.top();
+		var->add(selectedFM_head);
+		selectedFM_head = nullptr;
+		selectedFM_tail = nullptr;
+	}
 
 	std::string word = words.front();
 	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))

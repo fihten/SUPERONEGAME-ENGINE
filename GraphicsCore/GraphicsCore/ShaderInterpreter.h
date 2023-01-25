@@ -271,6 +271,8 @@ class ShaderInterpreter
 	void multipliesAssign();
 
 	void selectedField();
+	ShaderUnits::ShaderComponent* selectedFM_head = nullptr;
+	ShaderUnits::ShaderComponent* selectedFM_tail = nullptr;
 
 	struct DeclarationFunctionOrVariable
 	{
