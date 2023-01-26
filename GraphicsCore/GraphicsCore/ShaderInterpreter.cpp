@@ -2188,5 +2188,31 @@ void ShaderInterpreter::structBodyOpenBracket()
 
 void ShaderInterpreter::selectedField()
 {
+	std::string fieldName = userName;
+	ShaderUnits::ShaderComponent* field = new ShaderUnits::SELECTED_FIELD();
+	field->setName(fieldName);
+	if (selectedFM_tail)
+	{
+		selectedFM_tail->add(field);
+		selectedFM_tail = field;
+	}
+	else
+	{
+		selectedFM_head = field;
+		selectedFM_tail = field;
+	}
 
+	int pos = userName.find(".", 0);
+	if (pos != userName.npos)
+	{
+		fieldName = fieldName.substr(0, pos);
+		userName = userName.substr(pos + 1);
+		currentState = State::SELECTED_FIELD;
+		return;
+	}
+
+	userName = "";
+	currentState = State::UNKNOWN;
+
+	return;
 }
