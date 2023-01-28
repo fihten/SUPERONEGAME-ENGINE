@@ -17,7 +17,7 @@ struct V_OUT
 
 void VSdemo(V_IN vin, out V_OUT vout)
 {
-	vout.posH = mul(float4(vin.posL,1), WVP);
+	vout.posH.xyz = mul(float4(vin.posL,1), WVP);
 	vout.color = vin.color;
 }
 

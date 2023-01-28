@@ -2207,12 +2207,15 @@ void ShaderInterpreter::selectedField()
 	{
 		fieldName = fieldName.substr(0, pos);
 		userName = userName.substr(pos + 1);
+
+		field->setName(fieldName);
+
 		currentState = State::SELECTED_FIELD;
 		return;
 	}
 
 	userName = "";
-	currentState = State::UNKNOWN;
+	currentState = State::VARIABLE;
 
 	return;
 }

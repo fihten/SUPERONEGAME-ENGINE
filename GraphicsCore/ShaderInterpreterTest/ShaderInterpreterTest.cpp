@@ -287,6 +287,12 @@ public:
 		printSpaces();
 		std::cout << "[flatten]" << std::endl;
 	}
+	void startVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
+	{
+		printSpaces();
+		std::cout << "selected field: " << pSELECTED_FIELD->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -427,6 +433,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
+	void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
+	{
+		numberOfSpaces -= 4;
+	}
 };
 
 int main()
