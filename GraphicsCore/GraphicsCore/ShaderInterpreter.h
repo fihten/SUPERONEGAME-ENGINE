@@ -129,7 +129,9 @@ class ShaderInterpreter
 		STRUCT_NAME,
 		STRUCT_BODY_OPEN_BRACKET,
 		INSERT_STRUCT,
-		SELECTED_FIELD
+		DETERMINE_TYPE_OF_SELECTION,
+		SELECTED_FIELD,
+		SELECTED_METHOD
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -270,7 +272,10 @@ class ShaderInterpreter
 	void dividesAssign();
 	void multipliesAssign();
 
+	void determineTypeOfSelection();
 	void selectedField();
+	void selectedMethod();
+	// FM stands for field/method
 	ShaderUnits::ShaderComponent* selectedFM_head = nullptr;
 	ShaderUnits::ShaderComponent* selectedFM_tail = nullptr;
 

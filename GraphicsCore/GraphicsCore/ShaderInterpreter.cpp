@@ -358,10 +358,17 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			insertStruct();
 			break;
 
+		case State::DETERMINE_TYPE_OF_SELECTION:
+			determineTypeOfSelection();
+			break;
+
 		case State::SELECTED_FIELD:
 			selectedField();
 			break;
 
+		case State::SELECTED_METHOD:
+			selectedMethod();
+			break;
 		}
 	}
 
@@ -2186,6 +2193,11 @@ void ShaderInterpreter::structBodyOpenBracket()
 	return;
 }
 
+void ShaderInterpreter::determineTypeOfSelection()
+{
+
+}
+
 void ShaderInterpreter::selectedField()
 {
 	std::string fieldName = userName;
@@ -2218,4 +2230,9 @@ void ShaderInterpreter::selectedField()
 	currentState = State::VARIABLE;
 
 	return;
+}
+
+void ShaderInterpreter::selectedMethod()
+{
+
 }
