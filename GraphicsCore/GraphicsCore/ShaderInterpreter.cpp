@@ -989,6 +989,13 @@ void ShaderInterpreter::variable()
 		return;
 	}
 
+	if (userName[0] == '.')
+	{
+		currentState = State::DETERMINE_TYPE_OF_SELECTION;
+		userName = userName.substr(1);
+		return;
+	}
+
 	if (selectedFM_head == nullptr)
 	{
 		ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
@@ -1005,7 +1012,7 @@ void ShaderInterpreter::variable()
 
 			var->setName(varName);
 
-			currentState = State::SELECTED_FIELD;
+			currentState = State::DETERMINE_TYPE_OF_SELECTION;
 			return;
 		}
 
@@ -1099,13 +1106,27 @@ void ShaderInterpreter::unaryPlus()
 
 void ShaderInterpreter::functionCall()
 {
+	statesStack.push(State::FUNCTION_CALL);
+
+	if (userName[0] == '.')
+	{
+		userName = userName.substr(1);
+		currentState = State::DETERMINE_TYPE_OF_SELECTION;
+		return;
+	}
+
+	if (userName.find('.') != userName.npos)
+	{
+		currentState = State::VARIABLE;
+		return;
+	}
+
 	ShaderUnits::ShaderComponent* functionCallOp = new ShaderUnits::FUNCTION_CALL();
 	functionCallOp->setName(userName);
 	userName = std::string("");
 
 	componentStack.push(functionCallOp);
 
-	statesStack.push(State::FUNCTION_CALL);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 }
 
