@@ -2216,7 +2216,17 @@ void ShaderInterpreter::structBodyOpenBracket()
 
 void ShaderInterpreter::determineTypeOfSelection()
 {
-
+	int pos = userName.find('.');
+	if (pos != userName.npos || statesStack.top() != State::FUNCTION_CALL)
+	{
+		currentState = State::SELECTED_FIELD;
+		return;
+	}
+	if (statesStack.top() == State::FUNCTION_CALL)
+	{
+		currentState = State::SELECTED_METHOD;
+		return;
+	}
 }
 
 void ShaderInterpreter::selectedField()
