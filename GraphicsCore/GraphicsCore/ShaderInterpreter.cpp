@@ -2253,7 +2253,13 @@ void ShaderInterpreter::selectedField()
 
 		field->setName(fieldName);
 
-		currentState = State::SELECTED_FIELD;
+		currentState = State::DETERMINE_TYPE_OF_SELECTION;
+		return;
+	}
+	if (statesStack.top() == State::ARGUMENTS_LIST_CLOSE_BRACKET)
+	{
+		statesStack.pop();
+		currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
 		return;
 	}
 
