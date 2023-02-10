@@ -2271,5 +2271,21 @@ void ShaderInterpreter::selectedField()
 
 void ShaderInterpreter::selectedMethod()
 {
+	std::string methodName = userName;
+	ShaderUnits::ShaderComponent* method = new ShaderUnits::SELECTED_METHOD();
+	method->setName(methodName);
+	if (selectedFM_tail)
+	{
+		selectedFM_tail->add(method);
+		selectedFM_tail = method;
+	}
+	else
+	{
+		selectedFM_head = method;
+		selectedFM_tail = method;
+	}
 
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+	
+	return;
 }
