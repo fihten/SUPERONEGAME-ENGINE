@@ -293,6 +293,12 @@ public:
 		std::cout << "selected field: " << pSELECTED_FIELD->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD)
+	{
+		printSpaces();
+		std::cout << "selected method: " << pSELECTED_METHOD->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -434,6 +440,10 @@ public:
 	};
 	void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 	void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
+	{
+		numberOfSpaces -= 4;
+	}
+	void finishVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD)
 	{
 		numberOfSpaces -= 4;
 	}

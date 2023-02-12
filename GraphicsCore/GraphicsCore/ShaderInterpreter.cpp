@@ -1141,28 +1141,70 @@ void ShaderInterpreter::argumentsListOpenBracket()
 
 void ShaderInterpreter::argumentsListCloseBracket()
 {
-	statesStack.pop();
-	statesStack.pop();
+	std::string word = words.front();
+	if (statesStack.top() != State::ARGUMENTS_LIST_CLOSE_BRACKET)
+	{
+		if (selectedFM_head != nullptr)
+		{
+			if (statesStack.top() != State::ARGUMENTS_LIST_OPEN_BRACKET)
+			{
+				currentState = State::VARIABLE;
+				return;
+			}
+
+			ShaderUnits::ShaderComponent* func = componentStack.top();
+			func->add(selectedFM_head);
+			selectedFM_head = nullptr;
+			selectedFM_tail = nullptr;
+		}
+		else
+		{
+			ShaderUnits::ShaderComponent* arguments = componentStack.top();
+			componentStack.pop();
+
+			ShaderUnits::ShaderComponent* func = componentStack.top();
+			func->add(arguments);
+
+			if (word[0] == '.')
+			{
+				statesStack.push(State::ARGUMENTS_LIST_CLOSE_BRACKET);
+				currentState = State::UNKNOWN;
+				return;
+			}
+		}
+
+		statesStack.pop();
+		statesStack.pop();
+
+		if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
+			currentState = State::FINISH_EXPRESSION;
+		if (word == std::string("+"))
+			currentState = State::BINARY_PLUS;
+		if (word == std::string("-"))
+			currentState = State::BINARY_MINUS;
+		if (word == std::string("*"))
+			currentState = State::BINARY_MULTIPLY;
+		if (word == std::string("/"))
+			currentState = State::BINARY_DIVIDE;
+		if (word == std::string(">"))
+			currentState = State::GREATER_THAN;
+		return;
+	}
 
 	ShaderUnits::ShaderComponent* arguments = componentStack.top();
 	componentStack.pop();
 
-	ShaderUnits::ShaderComponent* func = componentStack.top();
+	ShaderUnits::ShaderComponent* func = selectedFM_tail;
 	func->add(arguments);
 
-	std::string word = words.front();
-	if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
-		currentState = State::FINISH_EXPRESSION;
-	if (word == std::string("+"))
-		currentState = State::BINARY_PLUS;
-	if (word == std::string("-"))
-		currentState = State::BINARY_MINUS;
-	if (word == std::string("*"))
-		currentState = State::BINARY_MULTIPLY;
-	if (word == std::string("/"))
-		currentState = State::BINARY_DIVIDE;
-	if (word == std::string(">"))
-		currentState = State::GREATER_THAN;
+	if (word[0] == '.')
+	{
+		currentState = State::UNKNOWN;
+		return;
+	}
+	statesStack.pop();
+
+	currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
 }
 
 void ShaderInterpreter::assignment()
