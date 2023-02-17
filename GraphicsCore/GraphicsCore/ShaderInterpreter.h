@@ -276,8 +276,8 @@ class ShaderInterpreter
 	void selectedField();
 	void selectedMethod();
 	// FM stands for field/method
-	ShaderUnits::ShaderComponent* selectedFM_head = nullptr;
-	ShaderUnits::ShaderComponent* selectedFM_tail = nullptr;
+	std::stack<ShaderUnits::ShaderComponent*> selectedFM_head;
+	std::stack<ShaderUnits::ShaderComponent*> selectedFM_tail;
 
 	struct DeclarationFunctionOrVariable
 	{

@@ -996,7 +996,7 @@ void ShaderInterpreter::variable()
 		return;
 	}
 
-	if (selectedFM_head == nullptr)
+	if (!userName.empty())
 	{
 		ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
 
@@ -1012,6 +1012,9 @@ void ShaderInterpreter::variable()
 
 			var->setName(varName);
 
+			selectedFM_head.push(nullptr);
+			selectedFM_tail.push(nullptr);
+
 			currentState = State::DETERMINE_TYPE_OF_SELECTION;
 			return;
 		}
@@ -1021,9 +1024,9 @@ void ShaderInterpreter::variable()
 	else
 	{
 		ShaderUnits::ShaderComponent* var = componentStack.top();
-		var->add(selectedFM_head);
-		selectedFM_head = nullptr;
-		selectedFM_tail = nullptr;
+		var->add(selectedFM_head.top());
+		selectedFM_head.pop();
+		selectedFM_tail.pop();
 	}
 
 	std::string word = words.front();
@@ -1127,6 +1130,9 @@ void ShaderInterpreter::functionCall()
 
 	componentStack.push(functionCallOp);
 
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 }
 
@@ -1142,69 +1148,70 @@ void ShaderInterpreter::argumentsListOpenBracket()
 void ShaderInterpreter::argumentsListCloseBracket()
 {
 	std::string word = words.front();
-	if (statesStack.top() != State::ARGUMENTS_LIST_CLOSE_BRACKET)
+
+	// Define if we have selected method
+	if (selectedFM_tail.top() != nullptr)
 	{
-		if (selectedFM_head != nullptr)
-		{
-			if (statesStack.top() != State::ARGUMENTS_LIST_OPEN_BRACKET)
-			{
-				currentState = State::VARIABLE;
-				return;
-			}
-
-			ShaderUnits::ShaderComponent* func = componentStack.top();
-			func->add(selectedFM_head);
-			selectedFM_head = nullptr;
-			selectedFM_tail = nullptr;
-		}
-		else
-		{
-			ShaderUnits::ShaderComponent* arguments = componentStack.top();
-			componentStack.pop();
-
-			ShaderUnits::ShaderComponent* func = componentStack.top();
-			func->add(arguments);
-
-			if (word[0] == '.')
-			{
-				statesStack.push(State::ARGUMENTS_LIST_CLOSE_BRACKET);
-				currentState = State::UNKNOWN;
-				return;
-			}
-		}
-
 		statesStack.pop();
 		statesStack.pop();
 
-		if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
-			currentState = State::FINISH_EXPRESSION;
-		if (word == std::string("+"))
-			currentState = State::BINARY_PLUS;
-		if (word == std::string("-"))
-			currentState = State::BINARY_MINUS;
-		if (word == std::string("*"))
-			currentState = State::BINARY_MULTIPLY;
-		if (word == std::string("/"))
-			currentState = State::BINARY_DIVIDE;
-		if (word == std::string(">"))
-			currentState = State::GREATER_THAN;
+		ShaderUnits::ShaderComponent* arguments = componentStack.top();
+		componentStack.pop();
+
+		ShaderUnits::ShaderComponent* func = selectedFM_tail.top();
+		func->add(arguments);
+
+		if (word[0] == '.')
+		{
+			currentState = State::UNKNOWN;
+			return;
+		}
+
+		if (statesStack.top() == State::ARGUMENTS_LIST_CLOSE_BRACKET)
+		{
+			selectedFM_tail.top() = nullptr;
+			currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
+			statesStack.pop();
+			return;
+		}
+
+		currentState = State::VARIABLE;
 		return;
 	}
+
+	if (word[0] == '.')
+	{
+		statesStack.push(State::ARGUMENTS_LIST_CLOSE_BRACKET);
+		currentState = State::UNKNOWN;
+		return;
+	}
+
+	statesStack.pop();
+	statesStack.pop();
 
 	ShaderUnits::ShaderComponent* arguments = componentStack.top();
 	componentStack.pop();
 
-	ShaderUnits::ShaderComponent* func = selectedFM_tail;
+	ShaderUnits::ShaderComponent* func = componentStack.top();
 	func->add(arguments);
 
-	if (word[0] == '.')
-	{
-		currentState = State::UNKNOWN;
-		return;
-	}
-	statesStack.pop();
+	if (selectedFM_head.top() != nullptr)
+		func->add(selectedFM_head.top());
+	selectedFM_head.pop();
+	selectedFM_tail.pop();
 
-	currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
+	if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
+		currentState = State::FINISH_EXPRESSION;
+	if (word == std::string("+"))
+		currentState = State::BINARY_PLUS;
+	if (word == std::string("-"))
+		currentState = State::BINARY_MINUS;
+	if (word == std::string("*"))
+		currentState = State::BINARY_MULTIPLY;
+	if (word == std::string("/"))
+		currentState = State::BINARY_DIVIDE;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
 }
 
 void ShaderInterpreter::assignment()
@@ -1695,6 +1702,9 @@ void ShaderInterpreter::mulState()
 		words.pop();
 		currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
+		selectedFM_head.push(nullptr);
+		selectedFM_tail.push(nullptr);
+
 		return;
 	}
 }
@@ -1707,6 +1717,9 @@ void ShaderInterpreter::float3constructor()
 	statesStack.push(State::FLOAT3_CONSTRUCTOR);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
 	return;
 }
 
@@ -1717,6 +1730,9 @@ void ShaderInterpreter::float4constructor()
 
 	statesStack.push(State::FLOAT4_CONSTRUCTOR);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
 
 	return;
 }
@@ -1874,6 +1890,9 @@ void ShaderInterpreter::setVertexShaderState()
 
 	words.pop();
 
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
 	return;
 }
 
@@ -1887,6 +1906,9 @@ void ShaderInterpreter::setPixelShaderState()
 
 	words.pop();
 
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
 	return;
 }
 
@@ -1899,6 +1921,9 @@ void ShaderInterpreter::compileShader()
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
 	words.pop();
+
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
 
 	return;
 }
@@ -2276,15 +2301,15 @@ void ShaderInterpreter::selectedField()
 	std::string fieldName = userName;
 	ShaderUnits::ShaderComponent* field = new ShaderUnits::SELECTED_FIELD();
 	field->setName(fieldName);
-	if (selectedFM_tail)
+	if (selectedFM_tail.top())
 	{
-		selectedFM_tail->add(field);
-		selectedFM_tail = field;
+		selectedFM_tail.top()->add(field);
+		selectedFM_tail.top() = field;
 	}
 	else
 	{
-		selectedFM_head = field;
-		selectedFM_tail = field;
+		selectedFM_head.top() = field;
+		selectedFM_tail.top() = field;
 	}
 
 	int pos = userName.find(".", 0);
@@ -2316,15 +2341,15 @@ void ShaderInterpreter::selectedMethod()
 	std::string methodName = userName;
 	ShaderUnits::ShaderComponent* method = new ShaderUnits::SELECTED_METHOD();
 	method->setName(methodName);
-	if (selectedFM_tail)
+	if (selectedFM_tail.top())
 	{
-		selectedFM_tail->add(method);
-		selectedFM_tail = method;
+		selectedFM_tail.top()->add(method);
+		selectedFM_tail.top() = method;
 	}
 	else
 	{
-		selectedFM_head = method;
-		selectedFM_tail = method;
+		selectedFM_head.top() = method;
+		selectedFM_tail.top() = method;
 	}
 
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
