@@ -2325,6 +2325,7 @@ void ShaderInterpreter::selectedField()
 	}
 	if (statesStack.top() == State::ARGUMENTS_LIST_CLOSE_BRACKET)
 	{
+		selectedFM_tail.top() = nullptr;
 		statesStack.pop();
 		currentState = State::ARGUMENTS_LIST_CLOSE_BRACKET;
 		return;

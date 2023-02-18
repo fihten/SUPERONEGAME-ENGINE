@@ -17,7 +17,7 @@ struct V_OUT
 
 void VSdemo(V_IN vin, out V_OUT vout)
 {
-	texture.sample(a, b, c).xyz;
+	vout.PosW = mul(float4(vin.PosL, 1.0f).xy(), gWorld).xyz(a, b).xy;
 	vout.posH.xyz = mul(float4(vin.posL,1), WVP);
 	vout.color = vin.color;
 }
