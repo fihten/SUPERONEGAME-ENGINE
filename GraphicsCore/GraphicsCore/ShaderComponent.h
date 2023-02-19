@@ -97,6 +97,12 @@ namespace ShaderUnits
 
 	};
 
+	class FLOAT3X3 : public TYPE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class FLOAT4X4 : public TYPE
 	{
 	public:

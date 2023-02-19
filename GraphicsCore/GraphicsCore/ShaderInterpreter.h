@@ -75,6 +75,7 @@ class ShaderInterpreter
 		FLOAT2,
 		FLOAT3,
 		FLOAT4,
+		FLOAT3X3,
 		FLOAT4X4,
 		USER_TYPE,
 		CUSTOM_NAME,
@@ -179,6 +180,7 @@ class ShaderInterpreter
 	void float2State();
 	void float3State();
 	void float4State();
+	void float3x3State();
 	void float4x4State();
 	void userTypeState();
 	void customName();

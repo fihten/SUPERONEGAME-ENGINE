@@ -1339,6 +1339,26 @@ void ShaderInterpreter::float4State()
 	}
 }
 
+void ShaderInterpreter::float3x3State()
+{
+	std::string word = words.front();
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		ShaderInterpreter::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ShaderUnits::FLOAT3X3();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+
+		return;
+	}
+}
+
 void ShaderInterpreter::float4x4State()
 {
 	std::string word = words.front();
