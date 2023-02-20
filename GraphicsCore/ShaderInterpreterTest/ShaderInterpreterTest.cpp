@@ -22,6 +22,11 @@ public:
 		std::cout << "CBUFFER " << pCBUFFER->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::FLOAT3X3* pFLOAT3X3)
+	{
+		printSpaces();
+		std::cout << "float3x3" << std::endl;
+	};
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4)
 	{
 		printSpaces();

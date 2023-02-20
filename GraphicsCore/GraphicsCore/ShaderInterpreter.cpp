@@ -142,6 +142,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			float4State();
 			break;
 
+		case State::FLOAT3X3:
+			float3x3State();
+			break;
+
 		case State::FLOAT4X4:
 			float4x4State();
 			break;
@@ -474,6 +478,13 @@ void ShaderInterpreter::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT4;
+
+		return;
+	}
+	if (word == std::string("float3x3"))
+	{
+		words.pop();
+		currentState = State::FLOAT3X3;
 
 		return;
 	}
