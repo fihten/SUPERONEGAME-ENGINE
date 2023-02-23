@@ -132,7 +132,9 @@ class ShaderInterpreter
 		INSERT_STRUCT,
 		DETERMINE_TYPE_OF_SELECTION,
 		SELECTED_FIELD,
-		SELECTED_METHOD
+		SELECTED_METHOD,
+		CAST,
+		UPDATE_CAST
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -293,8 +295,13 @@ class ShaderInterpreter
 	};
 	std::stack<ShaderInterpreter::DeclarationFunctionOrVariable> decls;
 
+	void cast();
+	void updateCast();
+
 private:
 	bool isOperationState(State state) const;
+	bool isCast(const std::queue<std::string>& words) const;
+	bool isType(const std::string& str) const;
 
 public:
 	void setShaderText(const std::string& shaderText)

@@ -396,3 +396,11 @@ void ShaderUnits::SELECTED_METHOD::query(ShaderVisitor* visitor)
 		ch->query(visitor);
 	visitor->finishVisit(this);
 }
+
+void ShaderUnits::CAST::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}

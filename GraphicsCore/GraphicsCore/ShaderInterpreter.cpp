@@ -373,6 +373,15 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 		case State::SELECTED_METHOD:
 			selectedMethod();
 			break;
+
+		case State::CAST:
+			cast();
+			break;
+
+		case State::UPDATE_CAST:
+			updateCast();
+			break;
+
 		}
 	}
 
@@ -827,6 +836,7 @@ bool ShaderInterpreter::isOperationState(State state) const
 		state == State::BINARY_PLUS ||
 		state == State::UNARY_MINUS ||
 		state == State::UNARY_PLUS ||
+		state == State::CAST ||
 		state == State::GREATER_THAN ||
 		state == State::ASSIGNMENT ||
 		state == State::DIVIDES_ASSIGN ||
@@ -834,6 +844,39 @@ bool ShaderInterpreter::isOperationState(State state) const
 		)
 		return true;
 
+	return false;
+}
+
+bool ShaderInterpreter::isCast(const std::queue<std::string>& words) const
+{
+	if (words.size() < 3)
+		return false;
+	auto it = words._Get_container().begin();
+	if (std::strcmp(it->c_str(), "(") != 0)
+		return false;
+	if (!isType(*(it + 1)))
+		return false;
+	if (std::strcmp((it + 2)->c_str(), "(") != 0)
+		return false;
+	return true;
+}
+
+bool ShaderInterpreter::isType(const std::string& str) const
+{
+	if (userTypes.count(str))
+		return true;
+	if (std::strcmp(str.c_str(), "float"))
+		return true;
+	if (std::strcmp(str.c_str(), "float2"))
+		return true;
+	if (std::strcmp(str.c_str(), "float3"))
+		return true;
+	if (std::strcmp(str.c_str(), "float4"))
+		return true;
+	if (std::strcmp(str.c_str(), "float3x3"))
+		return true;
+	if (std::strcmp(str.c_str(), "float4x4"))
+		return true;
 	return false;
 }
 
@@ -2387,4 +2430,14 @@ void ShaderInterpreter::selectedMethod()
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 	
 	return;
+}
+
+void ShaderInterpreter::cast()
+{
+
+}
+
+void ShaderInterpreter::updateCast()
+{
+
 }

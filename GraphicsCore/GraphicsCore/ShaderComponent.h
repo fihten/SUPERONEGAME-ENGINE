@@ -407,4 +407,10 @@ namespace ShaderUnits
 	public:
 		void query(ShaderVisitor* visitor);
 	};
+
+	class CAST : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
 }
