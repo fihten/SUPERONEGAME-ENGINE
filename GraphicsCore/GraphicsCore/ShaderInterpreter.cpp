@@ -856,7 +856,7 @@ bool ShaderInterpreter::isCast(const std::queue<std::string>& words) const
 		return false;
 	if (!isType(*(it + 1)))
 		return false;
-	if (std::strcmp((it + 2)->c_str(), "(") != 0)
+	if (std::strcmp((it + 2)->c_str(), ")") != 0)
 		return false;
 	return true;
 }
