@@ -392,6 +392,14 @@ void ShaderInterpreter::unknown()
 {
 	std::string word = words.front();
 
+	if (isCast(words))
+	{
+		words.pop();
+		currentState = State::CAST;
+
+		return;
+	}
+
 	// open round brackets
 	if (word == std::string("("))
 	{
@@ -2434,7 +2442,62 @@ void ShaderInterpreter::selectedMethod()
 
 void ShaderInterpreter::cast()
 {
+	ShaderUnits::CAST* castOp = new ShaderUnits::CAST();
+	componentStack.push(castOp);
+	statesStack.push(State::CAST);
 
+	std::string word = words.front();
+	if (word == std::string("float"))
+	{
+		words.pop();
+		currentState = State::FLOAT1;
+
+		return;
+	}
+	if (word == std::string("float2"))
+	{
+		words.pop();
+		currentState = State::FLOAT2;
+
+		return;
+	}
+	if (word == std::string("float3"))
+	{
+		words.pop();
+		currentState = State::FLOAT3;
+
+		return;
+	}
+	if (word == std::string("float4"))
+	{
+		words.pop();
+		currentState = State::FLOAT4;
+
+		return;
+	}
+	if (word == std::string("float3x3"))
+	{
+		words.pop();
+		currentState = State::FLOAT3X3;
+
+		return;
+	}
+	if (word == std::string("float4x4"))
+	{
+		words.pop();
+		currentState = State::FLOAT4X4;
+
+		return;
+	}
+	if (userTypes.count(word))
+	{
+		words.pop();
+		currentState = State::USER_TYPE;
+
+		userType = userTypes[word];
+
+		return;
+	}
 }
 
 void ShaderInterpreter::updateCast()
