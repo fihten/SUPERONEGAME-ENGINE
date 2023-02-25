@@ -304,6 +304,12 @@ public:
 		std::cout << "selected method: " << pSELECTED_METHOD->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::CAST* pCAST)
+	{
+		printSpaces();
+		std::cout << "CASTING" << std::endl;
+		numberOfSpaces += 4;
+	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -447,11 +453,15 @@ public:
 	void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
 	{
 		numberOfSpaces -= 4;
-	}
+	};
 	void finishVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD)
 	{
 		numberOfSpaces -= 4;
-	}
+	};
+	void finishVisit(const ShaderUnits::CAST* pCAST)
+	{
+		numberOfSpaces -= 4;
+	};
 };
 
 int main()

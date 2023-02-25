@@ -57,6 +57,7 @@ public:
 	virtual void startVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN) {};
 	virtual void startVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};
 	virtual void startVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD) {};
+	virtual void startVisit(const ShaderUnits::CAST* pCAST) {};
 
 	virtual void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT3X3* pFloat3X3) {};
@@ -110,4 +111,5 @@ public:
 	virtual void finishVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN) {};
 	virtual void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};
 	virtual void finishVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD) {};
+	virtual void finishVisit(const ShaderUnits::CAST* pCAST) {};
 };

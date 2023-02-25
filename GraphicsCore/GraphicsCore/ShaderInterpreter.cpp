@@ -1313,6 +1313,17 @@ void ShaderInterpreter::voidState()
 void ShaderInterpreter::floatState()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT1* type = new ShaderUnits::FLOAT1();
+		componentStack.push(type);
+		
+		currentState = State::UPDATE_CAST;
+		
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1332,6 +1343,17 @@ void ShaderInterpreter::floatState()
 void ShaderInterpreter::float2State()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT2* type = new ShaderUnits::FLOAT2();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1351,6 +1373,17 @@ void ShaderInterpreter::float2State()
 void ShaderInterpreter::float3State()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT3* type = new ShaderUnits::FLOAT3();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1377,6 +1410,17 @@ void ShaderInterpreter::float3State()
 void ShaderInterpreter::float4State()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT4* type = new ShaderUnits::FLOAT4();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1404,6 +1448,17 @@ void ShaderInterpreter::float4State()
 void ShaderInterpreter::float3x3State()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT3X3* type = new ShaderUnits::FLOAT3X3();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1424,6 +1479,17 @@ void ShaderInterpreter::float3x3State()
 void ShaderInterpreter::float4x4State()
 {
 	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT4X4* type = new ShaderUnits::FLOAT4X4();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -1444,6 +1510,17 @@ void ShaderInterpreter::float4x4State()
 void ShaderInterpreter::userTypeState()
 {
 	std::string word = words.front();
+	if (statesStack.top() == State::CAST)
+	{
+		words.pop();
+		
+		componentStack.push(userType);
+		userType = nullptr;
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -2502,5 +2579,11 @@ void ShaderInterpreter::cast()
 
 void ShaderInterpreter::updateCast()
 {
+	ShaderUnits::ShaderComponent* type = componentStack.top();
+	componentStack.pop();
 
+	ShaderUnits::ShaderComponent* castOp = componentStack.top();
+	castOp->add(type);
+
+	currentState = State::UNKNOWN;
 }
