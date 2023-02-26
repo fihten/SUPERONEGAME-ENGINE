@@ -53,6 +53,7 @@ public:
 	virtual void startVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
 	virtual void startVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
 	virtual void startVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
+	virtual void startVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN) {};
 	virtual void startVisit(const ShaderUnits::DIVIDES_ASSIGN* pDIVIDES_ASSIGN) {};
 	virtual void startVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN) {};
 	virtual void startVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};
@@ -107,6 +108,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
 	virtual void finishVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
 	virtual void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
+	virtual void finishVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN) {};
 	virtual void finishVisit(const ShaderUnits::DIVIDES_ASSIGN* pDIVIDES_ASSIGN) {};
 	virtual void finishVisit(const ShaderUnits::MULTIPLIES_ASSIGN* pMULTIPLIES_ASSIGN) {};
 	virtual void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};

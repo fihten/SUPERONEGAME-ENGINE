@@ -53,12 +53,13 @@ std::string readWord(
 	size_t from = skipSymbols(str.c_str(), skippedSymbols.c_str(), currentIndex);
 
 	bool isComment = str[from] == '/' && str[from + 1] == '/';
+	bool isAdditionAssign = str[from] == '+' && str[from + 1] == '=';
 	bool isDividesAssign = str[from] == '/' && str[from + 1] == '=';
 	bool isMultipliesAssign = str[from] == '*' && str[from + 1] == '=';
 	size_t to = 0;
 	if (isComment)
 		to = nextStopSymbol(str.c_str(), "\n", from);
-	else if (isDividesAssign || isMultipliesAssign)
+	else if (isDividesAssign || isMultipliesAssign || isAdditionAssign)
 		to = from + 2;
 	else
 		to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);

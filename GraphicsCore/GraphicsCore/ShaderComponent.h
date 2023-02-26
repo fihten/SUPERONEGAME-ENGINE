@@ -330,6 +330,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class ADDITION_ASSIGN :public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class DIVIDES_ASSIGN :public ShaderComposite
 	{
 	public:

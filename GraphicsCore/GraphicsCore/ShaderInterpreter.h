@@ -124,6 +124,7 @@ class ShaderInterpreter
 		INSERT_ENTIRE_IF,
 		ATTRIBUTE,
 		FLATTEN,
+		ADDITION_ASSIGN,
 		DIVIDES_ASSIGN,
 		MULTIPLIES_ASSIGN,
 		STRUCT,
@@ -273,6 +274,7 @@ class ShaderInterpreter
 	void flatten();
 	ShaderUnits::FLATTEN* pFlatten = nullptr;
 
+	void additionAssign();
 	void dividesAssign();
 	void multipliesAssign();
 

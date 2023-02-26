@@ -226,6 +226,12 @@ public:
 		std::cout << "=" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN)
+	{
+		printSpaces();
+		std::cout << "+=" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::DIVIDES_ASSIGN* pDIVIDES_ASSIGN)
 	{
 		printSpaces();
@@ -408,6 +414,10 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
+	void finishVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderUnits::DIVIDES_ASSIGN* pDIVIDES_ASSIGN)
 	{
 		numberOfSpaces -= 4;
@@ -466,7 +476,7 @@ public:
 
 int main()
 {
-	std::ifstream file("C:\\3dEngine\\Shaders\\Demo.fx");
+	std::ifstream file("C:\\3dEngine\\Shaders\\LightingDemo.fx");
 	if (file)
 	{
 		file.seekg(0, file.end);

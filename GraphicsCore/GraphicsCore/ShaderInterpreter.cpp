@@ -338,6 +338,10 @@ ShaderUnits::SHADER* ShaderInterpreter::build()
 			flatten();
 			break;
 
+		case State::ADDITION_ASSIGN:
+			additionAssign();
+			break;
+
 		case State::DIVIDES_ASSIGN:
 			dividesAssign();
 			break;
@@ -847,6 +851,7 @@ bool ShaderInterpreter::isOperationState(State state) const
 		state == State::CAST ||
 		state == State::GREATER_THAN ||
 		state == State::ASSIGNMENT ||
+		state == State::ADDITION_ASSIGN ||
 		state == State::DIVIDES_ASSIGN ||
 		state == State::MULTIPLIES_ASSIGN
 		)
@@ -1104,6 +1109,8 @@ void ShaderInterpreter::variable()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string("+="))
+		currentState = State::ADDITION_ASSIGN;
 	if (word == std::string("/="))
 		currentState = State::DIVIDES_ASSIGN;
 	if (word == std::string("*="))
@@ -1133,6 +1140,8 @@ void ShaderInterpreter::number()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
+	if (word == std::string("+="))
+		currentState = State::ADDITION_ASSIGN;
 	if (word == std::string("/="))
 		currentState = State::DIVIDES_ASSIGN;
 	if (word == std::string("*="))
@@ -1510,7 +1519,7 @@ void ShaderInterpreter::float4x4State()
 void ShaderInterpreter::userTypeState()
 {
 	std::string word = words.front();
-	if (statesStack.top() == State::CAST)
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
 	{
 		words.pop();
 		
@@ -2330,6 +2339,21 @@ void ShaderInterpreter::flatten()
 	pFlatten = new ShaderUnits::FLATTEN();
 	currentState = State::UNKNOWN;
 	words.pop();
+}
+
+void ShaderInterpreter::additionAssign()
+{
+	words.pop();
+
+	ShaderUnits::ShaderComponent* leftValue = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* additionAssignOp = new ShaderUnits::ADDITION_ASSIGN();
+	additionAssignOp->add(leftValue);
+	componentStack.push(additionAssignOp);
+
+	statesStack.push(State::ADDITION_ASSIGN);
+	currentState = State::UNKNOWN;
 }
 
 void ShaderInterpreter::dividesAssign()
