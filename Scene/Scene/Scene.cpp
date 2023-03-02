@@ -16,7 +16,18 @@ Scene::Node::~Node()
 	childs.clear();
 }
 
-void Scene::Node::addChild(const Scene::Node* n)
+void Scene::Node::addChild(Node* n)
 {
 	childs.push_back(n);
+	n->parent = this;
+}
+
+Scene::Scene()
+{
+	root = new Scene::RootNode(nextId++);
+}
+
+Scene::~Scene()
+{
+	delete root;
 }

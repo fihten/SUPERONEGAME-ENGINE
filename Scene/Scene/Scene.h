@@ -9,17 +9,19 @@ class Scene
 	class Node
 	{
 		NodeID ID = -1;
-		std::list<const Scene::Node*> childs;
+		Node* parent = nullptr;
+		std::list<Node*> childs;
 	public:
 		Node(NodeID id);
 		virtual ~Node();
 
-		void addChild(const Scene::Node* n);
+		virtual void addChild(Node* n);
 	};
 
 	class RootNode : public Node
 	{
-
+	public:
+		RootNode(NodeID id) :Node(id) {}
 	};
 
 	class TransformNode : public Node
@@ -40,5 +42,6 @@ class Scene
 	RootNode* root = nullptr;
 
 public:
-	
+	Scene();
+	~Scene();
 };
