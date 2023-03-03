@@ -119,4 +119,6 @@ public:
 
 public:
 	const uint32_t id;
+	void* scene = nullptr;
+	int nodeID = -1;
 };

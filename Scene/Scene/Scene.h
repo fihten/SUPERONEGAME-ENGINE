@@ -16,6 +16,7 @@ class Scene
 		virtual ~Node();
 
 		virtual void addChild(Node* n);
+		virtual Node* findNodeByID(NodeID id);
 	};
 
 	class RootNode : public Node
@@ -44,4 +45,7 @@ class Scene
 public:
 	Scene();
 	~Scene();
+
+	NodeID addTransformNode(const flt4x4& pos, NodeID id);
+	NodeID addMeshNode(Mesh* mesh, NodeID id);
 };
