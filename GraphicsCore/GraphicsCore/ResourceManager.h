@@ -8,6 +8,7 @@
 class ResourceManager
 {
 	struct InputLayoutStreamInfo;
+	struct StructInfo;
 	struct TechniqueResource
 	{
 		const ID3DX11EffectTechnique* technique = nullptr;
@@ -27,6 +28,9 @@ class ResourceManager
 
 		// matrices
 		std::map<std::string, ID3DX11EffectMatrixVariable*> matrices;
+
+		// structures
+		std::map<std::string, StructInfo> structures;
 
 		// location of variable
 		std::map<std::string, std::string> locationOfVariable;
@@ -49,6 +53,23 @@ public:
 		std::string name;
 		Mesh::StreamType type;
 		uint32_t size;
+	};
+
+#define MAX_COUNT_OF_FIELDS 16
+	struct StructInfo
+	{
+		std::string name = "";
+
+		struct FieldInfo
+		{
+			unsigned int offset = 0;
+			unsigned int bytes = 0;
+			std::string name = "";
+		};
+		FieldInfo fields[MAX_COUNT_OF_FIELDS];
+		int fieldsCount;
+
+		ID3DX11EffectVariable* ptr = nullptr;
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
