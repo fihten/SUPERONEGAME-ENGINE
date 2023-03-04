@@ -9,14 +9,16 @@ class Scene
 	class Node
 	{
 		NodeID ID = -1;
-		Node* parent = nullptr;
 		std::list<Node*> childs;
+	protected:
+		Node* parent = nullptr;
 	public:
 		Node(NodeID id);
 		virtual ~Node();
 
 		virtual void addChild(Node* n);
 		virtual Node* findNodeByID(NodeID id);
+		virtual flt4x4 getPos() const;
 	};
 
 	class RootNode : public Node
@@ -30,6 +32,7 @@ class Scene
 		flt4x4 pos;
 	public:
 		TransformNode(NodeID id, const flt4x4& pos) :Node(id), pos(pos) {}
+		flt4x4 getPos() const;
 	};
 
 	class MeshNode : public Node

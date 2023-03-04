@@ -45,6 +45,16 @@ Scene::Node* Scene::Node::findNodeByID(NodeID id)
 	return nullptr;
 }
 
+flt4x4 Scene::Node::getPos() const
+{
+	return parent ? parent->getPos() : flt4x4();
+}
+
+flt4x4 Scene::TransformNode::getPos() const
+{
+	return parent ? parent->getPos() * pos : pos;
+}
+
 NodeID Scene::addTransformNode(const flt4x4& pos, NodeID id)
 {
 	Scene::Node* node = root->findNodeByID(id);

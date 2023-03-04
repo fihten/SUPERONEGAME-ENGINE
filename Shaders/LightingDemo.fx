@@ -1,11 +1,5 @@
 #include "LightHelper.fx"
 
-#ifndef SHIT
-float govno = 1.0f;
-#else
-float3 shit = 5.10f;
-#endif
-
 cbuffer cbPerFrame
 {
 	DirectionalLight gDirLight;
