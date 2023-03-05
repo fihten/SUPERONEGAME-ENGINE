@@ -173,6 +173,10 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 		{
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
 				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
+			if (elementsOfCbuffers[i].type.find("struct ") != std::string::npos)
+			{
+				std::string structName = elementsOfCbuffers[i].type.substr(7);
+			}
 		}
 	}
 }

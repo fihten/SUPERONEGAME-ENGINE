@@ -267,3 +267,87 @@ void IsFileAShader::startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11)
 {
 	f = true;
 }
+
+/*________________________________StructVisitor________________________________*/
+
+void StructVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
+{
+	structAlreadyVisited = false;
+	structInfo.fieldsCount = 0;
+	structInfo.name = structName;
+}
+
+void StructVisitor::startVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	if (pSTRUCT->getName() == structName && !structAlreadyVisited)
+		withinStruct = true;
+}
+
+void StructVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	if (withinStruct)
+		structAlreadyVisited = true;
+	withinStruct = false;
+}
+
+void StructVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
+{
+	if (withinStruct)
+	{
+		withinVariableDeclaration = true;
+		structInfo.fields[structInfo.fieldsCount].name = pVARIABLE_DECL->getName();
+	}
+}
+
+void StructVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
+{
+	withinVariableDeclaration = false;
+}
+
+void StructVisitor::startVisit(const ShaderUnits::FLOAT1* pFLOAT1)
+{
+	if (withinStruct && withinVariableDeclaration)
+	{
+		structInfo.fields[structInfo.fieldsCount].bytes = 4;
+		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+		
+		fieldOffset += 4;
+		structInfo.fieldsCount += 1;
+	}
+}
+
+void StructVisitor::startVisit(const ShaderUnits::FLOAT2* pFLOAT2)
+{
+	if (withinStruct && withinVariableDeclaration)
+	{
+		structInfo.fields[structInfo.fieldsCount].bytes = 8;
+		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+
+		fieldOffset += 8;
+		structInfo.fieldsCount += 1;
+	}
+}
+
+void StructVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
+{
+	if (withinStruct && withinVariableDeclaration)
+	{
+		structInfo.fields[structInfo.fieldsCount].bytes = 12;
+		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+
+		fieldOffset += 12;
+		structInfo.fieldsCount += 1;
+	}
+}
+
+void StructVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
+{
+	if (withinStruct && withinVariableDeclaration)
+	{
+		structInfo.fields[structInfo.fieldsCount].bytes = 16;
+		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+
+		fieldOffset += 16;
+		structInfo.fieldsCount += 1;
+	}
+}

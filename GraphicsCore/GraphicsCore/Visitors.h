@@ -120,3 +120,28 @@ class IsFileAShader :public ShaderVisitor
 public:
 	bool fileIsAShader() { return f; }
 };
+
+class StructVisitor :public ShaderVisitor
+{
+	bool structAlreadyVisited = false;
+	bool withinStruct = false;
+	bool withinVariableDeclaration = false;
+	unsigned int fieldOffset = 0;
+public:
+	std::string structName = "";
+	ResourceManager::StructInfo structInfo;
+
+public:
+	void startVisit(const ShaderUnits::SHADER* pSHADER);
+
+	void startVisit(const ShaderUnits::STRUCT* pSTRUCT);
+	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT);
+
+	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+
+	void startVisit(const ShaderUnits::FLOAT1* pFLOAT1);
+	void startVisit(const ShaderUnits::FLOAT2* pFLOAT2);
+	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
+	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
+};
