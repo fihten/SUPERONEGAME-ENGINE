@@ -45,7 +45,8 @@ public:
 		TECHNIQUE_DOESNT_EXIST,
 		PASS_ALREADY_EXISTS,
 		PASS_DOESNT_EXIST,
-		MATRIX_ALREADY_EXISTS
+		MATRIX_ALREADY_EXISTS,
+		STRUCT_ALREADY_EXISTS
 	};
 
 	struct InputLayoutStreamInfo
@@ -77,6 +78,7 @@ public:
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout);
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutStreamInfo>& streamsInfo);
 	RegisterMessage registerMatrix(const std::string& techniqueName, const std::string& matrixName, ID3DX11EffectMatrixVariable* matrix);
+	RegisterMessage registerStruct(const std::string& techniqueName, const std::string& structName, const StructInfo& structInfo);
 	RegisterMessage registerVariableLocations(const std::string& techniqueName, const std::map<std::string, std::string>& locationOfVariable);
 	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
 	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);

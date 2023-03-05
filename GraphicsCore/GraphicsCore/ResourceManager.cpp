@@ -72,6 +72,20 @@ ResourceManager::RegisterMessage ResourceManager::registerMatrix(const std::stri
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerStruct(const std::string& techniqueName, const std::string& structName, const StructInfo& structInfo)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.structures.count(structName) != 0)
+		return RegisterMessage::STRUCT_ALREADY_EXISTS;
+
+	techniqueRes.structures[structName] = structInfo;
+
+	return RegisterMessage::OK;
+}
+
 ResourceManager::RegisterMessage ResourceManager::registerVariableLocations(const std::string& techniqueName, const std::map<std::string, std::string>& locationOfVariable)
 {
 	if (techniques.count(techniqueName) == 0)

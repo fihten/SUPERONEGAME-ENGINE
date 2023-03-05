@@ -236,7 +236,7 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::STRUCT* pSTRUCT)
 {
 	withinStruct = true;
 	if (withinCbuffer && withinVariableDeclaration)
-		elements[elementsCount - 1].type = pSTRUCT->getName();
+		elements[elementsCount - 1].type = std::string("struct ") + pSTRUCT->getName();
 }
 
 void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
