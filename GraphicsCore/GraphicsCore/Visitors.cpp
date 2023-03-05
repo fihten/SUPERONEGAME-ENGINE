@@ -232,9 +232,21 @@ void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVA
 		withinVariableDeclaration = false;
 }
 
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	withinStruct = true;
+	if (withinCbuffer && withinVariableDeclaration)
+		elements[elementsCount - 1].type = pSTRUCT->getName();
+}
+
+void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	withinStruct = false;
+}
+
 void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4)
 {
-	if (withinCbuffer && withinVariableDeclaration)
+	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
 		elements[elementsCount - 1].type = "float4x4";
 }
 

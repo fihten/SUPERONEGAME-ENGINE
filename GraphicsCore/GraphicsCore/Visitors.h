@@ -89,6 +89,7 @@ class ElementsOfCbufferVisitor : public ShaderVisitor
 {
 	bool withinCbuffer = false;
 	bool withinVariableDeclaration = false;
+	bool withinStruct = false;
 public:
 	void startVisit(const ShaderUnits::SHADER* pSHADER);
 
@@ -97,6 +98,9 @@ public:
 
 	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
 	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+
+	void startVisit(const ShaderUnits::STRUCT* pSTRUCT);
+	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT);
 
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
 
