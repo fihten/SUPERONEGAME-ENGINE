@@ -88,6 +88,7 @@ public:
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
 	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
 	void getMatrices(const std::string& techniqueName, std::map<std::string, ID3DX11EffectMatrixVariable*>& matrices);
+	void getStructures(const std::string& techniqueName, std::map<std::string, StructInfo>& structs);
 	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 };

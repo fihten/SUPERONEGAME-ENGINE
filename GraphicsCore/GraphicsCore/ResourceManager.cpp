@@ -190,6 +190,16 @@ void ResourceManager::getMatrices(const std::string& techniqueName, std::map<std
 	matrices = techniqueRes.matrices;
 }
 
+void ResourceManager::getStructures(const std::string& techniqueName, std::map<std::string, StructInfo>& structs)
+{
+	structs.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	structs = techniqueRes.structures;
+}
+
 ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)
 {
 	if (techniques.count(techniqueName) == 0)
