@@ -272,6 +272,7 @@ void IsFileAShader::startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11)
 
 void StructVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
 {
+	fieldOffset = 0;
 	structAlreadyVisited = false;
 	structInfo.fieldsCount = 0;
 	structInfo.name = structName;
@@ -286,7 +287,10 @@ void StructVisitor::startVisit(const ShaderUnits::STRUCT* pSTRUCT)
 void StructVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
 {
 	if (withinStruct)
+	{
 		structAlreadyVisited = true;
+		structInfo.bytes = fieldOffset;
+	}
 	withinStruct = false;
 }
 
@@ -310,7 +314,8 @@ void StructVisitor::startVisit(const ShaderUnits::FLOAT1* pFLOAT1)
 	{
 		structInfo.fields[structInfo.fieldsCount].bytes = 4;
 		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
-		
+		structInfo.fields[structInfo.fieldsCount].type = "float";
+
 		fieldOffset += 4;
 		structInfo.fieldsCount += 1;
 	}
@@ -322,6 +327,7 @@ void StructVisitor::startVisit(const ShaderUnits::FLOAT2* pFLOAT2)
 	{
 		structInfo.fields[structInfo.fieldsCount].bytes = 8;
 		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+		structInfo.fields[structInfo.fieldsCount].type = "float2";
 
 		fieldOffset += 8;
 		structInfo.fieldsCount += 1;
@@ -334,6 +340,7 @@ void StructVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
 	{
 		structInfo.fields[structInfo.fieldsCount].bytes = 12;
 		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+		structInfo.fields[structInfo.fieldsCount].type = "float3";
 
 		fieldOffset += 12;
 		structInfo.fieldsCount += 1;
@@ -346,6 +353,7 @@ void StructVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
 	{
 		structInfo.fields[structInfo.fieldsCount].bytes = 16;
 		structInfo.fields[structInfo.fieldsCount].offset = fieldOffset;
+		structInfo.fields[structInfo.fieldsCount].type = "float4";
 
 		fieldOffset += 16;
 		structInfo.fieldsCount += 1;

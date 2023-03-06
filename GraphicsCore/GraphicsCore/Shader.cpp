@@ -175,7 +175,13 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
 			if (elementsOfCbuffers[i].type.find("struct ") != std::string::npos)
 			{
-				std::string structName = elementsOfCbuffers[i].type.substr(7);
+				StructVisitor structVisitor;
+				structVisitor.structName = elementsOfCbuffers[i].type.substr(7);
+				shader->query(&structVisitor);
+
+				auto structInfo = structVisitor.structInfo;
+				structInfo.ptr = elementsOfCbuffers[i].v;
+				resourceManager.registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
 			}
 		}
 	}

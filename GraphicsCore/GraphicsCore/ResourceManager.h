@@ -65,10 +65,12 @@ public:
 		{
 			unsigned int offset = 0;
 			unsigned int bytes = 0;
+			std::string type = "";
 			std::string name = "";
 		};
 		FieldInfo fields[MAX_COUNT_OF_FIELDS];
-		int fieldsCount;
+		unsigned int fieldsCount;
+		unsigned int bytes;
 
 		ID3DX11EffectVariable* ptr = nullptr;
 	};
