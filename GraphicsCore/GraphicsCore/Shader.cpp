@@ -84,7 +84,7 @@ void loadVariableLocationsFromFile(const std::string& path, std::map<std::string
 	}
 }
 
-void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
+ID3DX11Effect* createEffect(ID3D11Device* device, LPCTSTR shader_path)
 {
 	DWORD shaderFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -99,6 +99,13 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	if (res != S_OK)
 		return;
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
+
+	return mShader;
+}
+
+void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
+{
+	ID3DX11Effect* mShader = createEffect(device, shader_path);
 
 	// interpret shader
 	std::ifstream shaderFile(shader_path);
