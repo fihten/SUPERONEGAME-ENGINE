@@ -6,6 +6,8 @@ class ShaderVisitor;
 
 namespace ShaderUnits
 {
+	class ShaderComposite;
+
 	class ShaderComponent
 	{
 		std::string name = "";
