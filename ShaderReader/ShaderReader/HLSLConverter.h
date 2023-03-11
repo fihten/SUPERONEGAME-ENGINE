@@ -2,6 +2,7 @@
 
 #include "ShaderConverter.h"
 #include "ShaderComponent.h"
+#include "HLSLShader.h"
 #include <queue>
 #include <stack>
 #include <map>
@@ -274,5 +275,5 @@ public:
 	HLSLConverter();
 
 	void convertWord(const std::string& word);
-	ShaderUnits::SHADER* getShader();
+	void getShader(HLSLShader& hlslShader);
 };

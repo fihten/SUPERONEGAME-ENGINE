@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "HLSLConverter.h"
 #include "StringUtils.h"
+#include <utility>
 
 HLSLConverter::HLSLConverter()
 {
@@ -12,7 +13,7 @@ void HLSLConverter::convertWord(const std::string& word)
 	words.push(word);
 }
 
-ShaderUnits::SHADER* HLSLConverter::getShader()
+void HLSLConverter::getShader(HLSLShader& hlslShader)
 {
 	statesStack = std::stack<State>();
 
@@ -383,7 +384,7 @@ ShaderUnits::SHADER* HLSLConverter::getShader()
 		}
 	}
 
-	return dynamic_cast<ShaderUnits::SHADER*>(componentStack.top());
+	hlslShader.shader = dynamic_cast<ShaderUnits::SHADER*>(componentStack.top());
 }
 
 void HLSLConverter::unknown()
