@@ -1,5 +1,6 @@
 #include "Shader.h"
-#include "ShaderInterpreter.h"
+#include "ShaderReader.h"
+#include "HLSLConverter.h"
 #include <d3dx11async.h>
 #include <fstream>
 #include <cstddef>
@@ -97,7 +98,7 @@ ID3DX11Effect* createEffect(ID3D11Device* device, LPCTSTR shader_path)
 	ID3D10Blob* compilationMsgs = 0;
 	HRESULT res = D3DX11CompileFromFile(shader_path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
 	if (res != S_OK)
-		return;
+		return nullptr;
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
 
 	return mShader;
@@ -107,36 +108,20 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 {
 	ID3DX11Effect* mShader = createEffect(device, shader_path);
 
-	// interpret shader
-	std::ifstream shaderFile(shader_path);
+	ShaderReader reader;
+	reader.openShader(shader_path);
 
-	shaderFile.seekg(0, shaderFile.end);
-	int length = shaderFile.tellg();
-	shaderFile.seekg(0, shaderFile.beg);
+	HLSLConverter converter;
+	reader.parseShader(converter);
 
-	char* shaderText = new char[length + 1];
-	shaderFile.read(shaderText, length);
-	shaderText[length] = 0;
-
-	int to = 0;
-	
-	char shadersFolder[200];
-	int sz = sizeof shadersFolder / sizeof * shadersFolder;
-	GetEnvironmentVariableA("SHADERS", shadersFolder, sz);
-
-	std::map<std::string, std::string> defines;
-
-	std::string sShaderText = preprocess(shaderText, 0, to, shadersFolder, defines);
-
-	ShaderInterpreter interpreter;
-	interpreter.setShaderText(sShaderText);
-	ShaderUnits::SHADER* shader = interpreter.build();
+	HLSLShader shader;
+	converter.getShader(shader);
 
 	ShadersNamesVisitor shadersNamesVisitor;
-	shader->query(&shadersNamesVisitor);
+	shader.query(&shadersNamesVisitor);
 
 	ElementsOfCbufferVisitor elementsOfCbufferVisitor;
-	shader->query(&elementsOfCbufferVisitor);
+	shader.query(&elementsOfCbufferVisitor);
 
 	ElementOfCbuffer* elementsOfCbuffers = nullptr;
 	int countOfCbufferElements = 0;
@@ -163,7 +148,7 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 			InputLayoutVisitor inputLayoutVisitor;
 			inputLayoutVisitor.setShaderName(sn.shaders[i]);
 
-			shader->query(&inputLayoutVisitor);
+			shader.query(&inputLayoutVisitor);
 
 			D3DX11_PASS_DESC passDesc;
 			pass->GetDesc(&passDesc);
@@ -184,7 +169,7 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 			{
 				StructVisitor structVisitor;
 				structVisitor.structName = elementsOfCbuffers[i].type.substr(7);
-				shader->query(&structVisitor);
+				shader.query(&structVisitor);
 
 				auto structInfo = structVisitor.structInfo;
 				structInfo.ptr = elementsOfCbuffers[i].v;
