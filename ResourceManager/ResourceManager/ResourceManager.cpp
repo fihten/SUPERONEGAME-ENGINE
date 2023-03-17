@@ -1,3 +1,6 @@
+#include "pch.h"
+#include "framework.h"
+
 #include "ResourceManager.h"
 
 ResourceManager resourceManager;
