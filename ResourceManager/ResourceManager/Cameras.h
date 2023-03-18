@@ -2,6 +2,6 @@
 #include "Camera.h"
 
 #define CAMERAS_NUMBER 16
-Camera* cameras();
+Camera * cameras();
 
 void loadCamerasCFGs();

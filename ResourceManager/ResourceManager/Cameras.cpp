@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "Cameras.h"
 #include <tchar.h>
 #include <string>
@@ -12,7 +13,7 @@ void loadCamerasCFGs()
 	char cfgsFolder[200];
 	int sz = sizeof cfgsFolder / sizeof * cfgsFolder;
 	GetEnvironmentVariableA("CONFIGS", cfgsFolder, sz);
-	
+
 	std::string sCameraCFGtemplate = std::string(cfgsFolder) + "\\Camera%d.cfg";
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 	{
