@@ -2,39 +2,10 @@
 
 #include <map>
 #include <string>
-#include <d3dx11effect.h>
-#include "Mesh.h"
+#include "TechniqueResource.h"
 
 class ResourceManager
 {
-	struct InputLayoutStreamInfo;
-	struct StructInfo;
-	struct TechniqueResource
-	{
-		const ID3DX11EffectTechnique* technique = nullptr;
-
-		// passes
-		struct PassResource
-		{
-			ID3DX11EffectPass* pass = nullptr;
-			ID3D11InputLayout* inputLayout = nullptr;
-
-			std::vector<InputLayoutStreamInfo> streamsInfo;
-
-			std::map<uint32_t, ID3D11Buffer*> vertexBuffers;
-			std::map<uint32_t, ID3D11Buffer*> indexBuffers;
-		};
-		std::map<std::string, PassResource> passes;
-
-		// matrices
-		std::map<std::string, ID3DX11EffectMatrixVariable*> matrices;
-
-		// structures
-		std::map<std::string, StructInfo> structures;
-
-		// location of variable
-		std::map<std::string, std::string> locationOfVariable;
-	};
 	std::map<std::string, TechniqueResource> techniques;
 
 public:
@@ -47,32 +18,6 @@ public:
 		PASS_DOESNT_EXIST,
 		MATRIX_ALREADY_EXISTS,
 		STRUCT_ALREADY_EXISTS
-	};
-
-	struct InputLayoutStreamInfo
-	{
-		std::string name;
-		Mesh::StreamType type;
-		uint32_t size;
-	};
-
-#define MAX_COUNT_OF_FIELDS 16
-	struct StructInfo
-	{
-		std::string name = "";
-
-		struct FieldInfo
-		{
-			unsigned int offset = 0;
-			unsigned int bytes = 0;
-			std::string type = "";
-			std::string name = "";
-		};
-		FieldInfo fields[MAX_COUNT_OF_FIELDS];
-		unsigned int fieldsCount;
-		unsigned int bytes;
-
-		ID3DX11EffectVariable* ptr = nullptr;
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
