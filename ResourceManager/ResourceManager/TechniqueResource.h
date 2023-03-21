@@ -4,7 +4,7 @@
 
 struct TechniqueResource
 {
-	const ID3DX11EffectTechnique* technique = nullptr;
+	const ID3DX11EffectTechnique* ptr = nullptr;
 
 	// passes
 	std::map<std::string, PassResource> passes;
