@@ -137,13 +137,14 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	for (auto& sn : shadersNames)
 	{
 		ID3DX11EffectTechnique* technique = mShader->GetTechniqueByName(sn.technique.c_str());
-		resourceManager.registerTechnique(sn.technique, technique);
-		resourceManager.registerVariableLocations(sn.technique, variableLocations);
+		ResourceManager::instance()->registerTechnique(sn.technique, technique);
+		for (auto& vl : variableLocations)
+			ResourceManager::instance()->registerVariableLocation(sn.technique, vl.first, vl.second);
 
 		for (int i = 0; i < sn.passes.size(); ++i)
 		{
 			ID3DX11EffectPass* pass = technique->GetPassByName(sn.passes[i].c_str());
-			resourceManager.registerPass(sn.technique, sn.passes[i], pass);
+			ResourceManager::instance()->registerPass(sn.technique, sn.passes[i], pass);
 
 			InputLayoutVisitor inputLayoutVisitor;
 			inputLayoutVisitor.setShaderName(sn.shaders[i]);
@@ -154,17 +155,17 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 			pass->GetDesc(&passDesc);
 
 			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
-			resourceManager.registerInputLayout(sn.technique, sn.passes[i], inputLayout);
+			ResourceManager::instance()->registerInputLayout(sn.technique, sn.passes[i], inputLayout);
 
-			std::vector<ResourceManager::InputLayoutStreamInfo> streamsInfo;
+			std::vector<InputLayoutResource::StreamInfo> streamsInfo;
 			inputLayoutVisitor.getStreamsInfo(streamsInfo);
-			resourceManager.registerStreamsInfo(sn.technique, sn.passes[i], streamsInfo);
+			ResourceManager::instance()->registerStreamsInfo(sn.technique, sn.passes[i], streamsInfo);
 		}
 
 		for (int i = 0; i < countOfCbufferElements; ++i)
 		{
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
-				resourceManager.registerMatrix(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
+				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
 			if (elementsOfCbuffers[i].type.find("struct ") != std::string::npos)
 			{
 				StructVisitor structVisitor;
@@ -173,7 +174,7 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 
 				auto structInfo = structVisitor.structInfo;
 				structInfo.ptr = elementsOfCbuffers[i].v;
-				resourceManager.registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
+				ResourceManager::instance()->registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
 			}
 		}
 	}

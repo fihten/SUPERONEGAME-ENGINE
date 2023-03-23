@@ -162,7 +162,7 @@ ID3D11InputLayout* InputLayoutVisitor::getInputLayout(ID3D11Device* device, cons
 	return inputLayout;
 }
 
-void InputLayoutVisitor::getStreamsInfo(std::vector<ResourceManager::InputLayoutStreamInfo>& streamsInfo)
+void InputLayoutVisitor::getStreamsInfo(std::vector<InputLayoutResource::StreamInfo>& streamsInfo)
 {
 	streamsInfo.resize(inputElementsCount);
 	for (int i = 0; i < inputElementsCount; ++i)

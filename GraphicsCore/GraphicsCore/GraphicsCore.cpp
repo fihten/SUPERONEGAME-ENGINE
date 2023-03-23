@@ -171,11 +171,11 @@ void GraphicsCore::draw(Mesh& mesh)
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
-	std::map<std::string, ID3DX11EffectMatrixVariable*> matrices;
-	resourceManager.getMatrices(sTechnique, matrices);
-	for (auto& m : matrices)
+	std::map<std::string, Float4x4Resource> flt4x4s;
+	ResourceManager::instance()->getFloat4x4s(sTechnique, flt4x4s);
+	for (auto& f4x4 : flt4x4s)
 	{
-		std::string place = resourceManager.getVariableLocation(sTechnique, m.first);
+		std::string place = ResourceManager::instance()->getVariableLocation(sTechnique, f4x4.first);
 		size_t pos = place.find("cameras[");
 		if (pos == 0)
 		{
@@ -192,14 +192,14 @@ void GraphicsCore::draw(Mesh& mesh)
 				const flt4x4& p = cameras()[index].getProj();
 				flt4x4 wvp = v * p;
 
-				m.second->SetMatrix(reinterpret_cast<float*>(&wvp));
+				f4x4.second.ptr->SetMatrix(reinterpret_cast<float*>(&wvp));
 			}
 
 			continue;
 		}
 	}
 
-	const std::vector<ResourceManager::InputLayoutStreamInfo>* streamsInfo = resourceManager.getStreamsInfo(sTechnique, sPass);
+	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
 		return;
 
@@ -207,7 +207,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	for (const auto& si : *streamsInfo)
 		elementSize += si.size;
 
-	ID3D11Buffer* mVB = resourceManager.getVertexBuffer(sTechnique, sPass, mesh.id);
+	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(sTechnique, sPass, mesh.id);
 	if (mVB == nullptr)
 	{
 		uint32_t verticesCount = mesh.getVerticesCount();
@@ -265,12 +265,12 @@ void GraphicsCore::draw(Mesh& mesh)
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
-		resourceManager.registerVertexBuffer(sTechnique, sPass, mesh.id, mVB);
+		ResourceManager::instance()->registerVertexBuffer(sTechnique, sPass, mesh.id, mVB);
 
 		free((void*)data);
 	}
 
-	ID3D11Buffer* mIB = resourceManager.getIndexBuffer(sTechnique, sPass, mesh.id);
+	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(sTechnique, sPass, mesh.id);
 	if (mIB == nullptr)
 	{
 		// Create index buffer
@@ -287,10 +287,10 @@ void GraphicsCore::draw(Mesh& mesh)
 
 		device->CreateBuffer(&ibd, &iinitData, &mIB);
 
-		resourceManager.registerIndexBuffer(sTechnique, sPass, mesh.id, mIB);
+		ResourceManager::instance()->registerIndexBuffer(sTechnique, sPass, mesh.id, mIB);
 	}
 
-	auto* inputLayout = resourceManager.getInputLayout(sTechnique, sPass);
+	auto* inputLayout = ResourceManager::instance()->getInputLayout(sTechnique, sPass);
 	if (inputLayout == nullptr)
 		return;
 
@@ -301,7 +301,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
 	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 
-	auto* pass = resourceManager.getPass(sTechnique, sPass);
+	auto* pass = ResourceManager::instance()->getPass(sTechnique, sPass);
 	if (pass == nullptr)
 		return;
 

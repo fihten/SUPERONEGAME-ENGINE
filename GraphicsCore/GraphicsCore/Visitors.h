@@ -71,7 +71,7 @@ public:
 
 public:
 	ID3D11InputLayout* getInputLayout(ID3D11Device* device, const void* shaderByteCode, size_t byteCodeLength);
-	void getStreamsInfo(std::vector<ResourceManager::InputLayoutStreamInfo>& streamsInfo);
+	void getStreamsInfo(std::vector<InputLayoutResource::StreamInfo>& streamsInfo);
 };
 
 #define ELEMENTS_OF_CBUFFER_MAX_COUNT 32
@@ -129,7 +129,7 @@ class StructVisitor :public ShaderVisitor
 	unsigned int fieldOffset = 0;
 public:
 	std::string structName = "";
-	ResourceManager::StructInfo structInfo;
+	StructResource structInfo;
 
 public:
 	void startVisit(const ShaderUnits::SHADER* pSHADER);
