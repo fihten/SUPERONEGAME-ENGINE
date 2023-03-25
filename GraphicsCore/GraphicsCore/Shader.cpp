@@ -98,25 +98,17 @@ ID3DX11Effect* createEffect(ID3D11Device* device, LPCTSTR shader_path)
 	ID3D10Blob* compilationMsgs = 0;
 	HRESULT res = D3DX11CompileFromFile(shader_path, 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
 	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
 		return nullptr;
+	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);
 
 	return mShader;
 }
 
-void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
+void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* mShader, LPCSTR config_path)
 {
-	ID3DX11Effect* mShader = createEffect(device, shader_path);
-
-	ShaderReader reader;
-	reader.openShader(shader_path);
-
-	HLSLConverter converter;
-	reader.parseShader(converter);
-
-	HLSLShader shader;
-	converter.getShader(shader);
-
 	ShadersNamesVisitor shadersNamesVisitor;
 	shader.query(&shadersNamesVisitor);
 
@@ -138,9 +130,6 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 	{
 		ID3DX11EffectTechnique* technique = mShader->GetTechniqueByName(sn.technique.c_str());
 		ResourceManager::instance()->registerTechnique(sn.technique, technique);
-		for (auto& vl : variableLocations)
-			ResourceManager::instance()->registerVariableLocation(sn.technique, vl.first, vl.second);
-
 		for (int i = 0; i < sn.passes.size(); ++i)
 		{
 			ID3DX11EffectPass* pass = technique->GetPassByName(sn.passes[i].c_str());
@@ -165,7 +154,17 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 		for (int i = 0; i < countOfCbufferElements; ++i)
 		{
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
+			{
 				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
+				if (variableLocations.count(elementsOfCbuffers[i].name) == 1)
+				{
+					ResourceManager::instance()->registerVariableLocation(
+						sn.technique,
+						elementsOfCbuffers[i].name,
+						variableLocations[elementsOfCbuffers[i].name]
+					);
+				}
+			}
 			if (elementsOfCbuffers[i].type.find("struct ") != std::string::npos)
 			{
 				StructVisitor structVisitor;
@@ -178,6 +177,24 @@ void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path
 			}
 		}
 	}
+}
+
+void processShader(ID3D11Device* device, LPCTSTR shader_path, LPCSTR config_path)
+{
+	ID3DX11Effect* mShader = createEffect(device, shader_path);
+	if (mShader == nullptr)
+		return;
+
+	ShaderReader reader;
+	reader.openShader(shader_path);
+
+	HLSLConverter converter;
+	reader.parseShader(converter);
+
+	HLSLShader shader;
+	converter.getShader(shader);
+
+	registerResources(shader, device, mShader, config_path);
 }
 
 void getPathsToShaders(std::vector<std::basic_string<TCHAR>>& pathsToShaders)

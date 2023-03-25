@@ -60,14 +60,14 @@ float4 PS(VertexOut pin) : SV_Target
 
 	ComputeDirectionalLight(gMaterial, gDirLight,
 		pin.NormalW, toEyeW, A, D, S);
-	ambiend += A;
+	ambient += A;
 	diffuse += D;
 	spec += S;
 
 	ComputePointLight(gMaterial, gPointLight,
 		pin.PosW, pin.NormalW, toEyeW, A, D, S);
 	ambient += A;
-	difuse += D;
+	diffuse += D;
 	spec += S;
 
 	ComputeSpotLight(gMaterial, gSpotLight,
@@ -91,5 +91,5 @@ technique11 LightTech
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PS()));
-	};
+	}
 };

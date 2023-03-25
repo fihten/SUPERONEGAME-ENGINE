@@ -218,7 +218,7 @@ void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 
 void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
-	if (withinCbuffer)
+	if (withinCbuffer && !withinStruct)
 	{
 		++elementsCount;
 		withinVariableDeclaration = true;
