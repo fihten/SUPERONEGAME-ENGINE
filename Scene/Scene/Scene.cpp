@@ -25,6 +25,7 @@ void Scene::Node::addChild(Node* n)
 Scene::Scene()
 {
 	root = new Scene::RootNode(nextId++);
+	root->scene = this;
 }
 
 Scene::~Scene()
@@ -62,7 +63,9 @@ NodeID Scene::addTransformNode(const flt4x4& pos, NodeID id)
 		return NodeID(-1);
 
 	id = nextId;
-	node->addChild(new Scene::TransformNode(nextId++, pos));
+	Node* addedNode = new Scene::TransformNode(nextId++, pos);
+	addedNode->scene = this;
+	node->addChild(addedNode);
 
 	return id;
 }
@@ -74,10 +77,40 @@ NodeID Scene::addMeshNode(Mesh* mesh, NodeID id)
 		return NodeID(-1);
 
 	id = nextId;
-	node->addChild(new Scene::MeshNode(nextId++, mesh));
+	Node* addedNode = new Scene::MeshNode(nextId++, mesh);
+	addedNode->scene = this;
+	node->addChild(addedNode);
 
 	mesh->scene = (void*)this;
 	mesh->nodeID = (int)id;
 
 	return id;
+}
+
+std::string Scene::Node::getParam(const std::string& paramName) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName);
+
+	std::string paramValue = "";
+	if (params.count(paramName) == 1)
+		paramValue = params.at(paramName);
+	return paramValue;
+}
+
+std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = root->findNodeByID(id);
+	std::string paramValue = "";
+	if (node->params.count(paramName) == 1)
+		paramValue = node->params.at(paramName);
+
+	return paramValue;
 }
