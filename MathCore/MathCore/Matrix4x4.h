@@ -31,6 +31,10 @@ public:
 		m[12] = m30;	m[13] = m31;	m[14] = m32;	m[15] = m33;
 	};
 
+	Matrix4x4(const std::string& str) {
+		stringToNumbers(str, dynamic_cast<float*>(&m), sizeof m / sizeof * m);
+	};
+
 	const value_type* getBuf() const { return m; };
 
 	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)

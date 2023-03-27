@@ -1,4 +1,6 @@
 #pragma once
+#include <string>
+#include "StringToNumbers.h"
 
 template<class value_type>
 class Vec1d
@@ -7,6 +9,7 @@ class Vec1d
 public:
 	Vec1d() { v = value_type(0); };
 	Vec1d(value_type v) { this->v = v; };
+	Vec1d(const std::string& str) { stringToNumbers(str, dynamic_cast<float*>(&v), 1); };
 
 	Vec1d<value_type> operator+(const Vec1d<value_type>&) const;
 	Vec1d<value_type> operator-(const Vec1d<value_type>&) const;
