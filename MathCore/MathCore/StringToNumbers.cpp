@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "StringToNumbers.h"
 
 void stringToNumbers(const std::string& str, float numbers[], int maxCount)
