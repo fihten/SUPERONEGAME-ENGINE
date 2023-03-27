@@ -32,7 +32,7 @@ public:
 	};
 
 	Matrix4x4(const std::string& str) {
-		stringToNumbers(str, dynamic_cast<float*>(&m), sizeof m / sizeof * m);
+		stringToNumbers(str, dynamic_cast<float*>(m), sizeof m / sizeof * m);
 	};
 
 	const value_type* getBuf() const { return m; };
