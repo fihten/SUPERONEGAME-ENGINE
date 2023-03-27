@@ -1,4 +1,5 @@
 #pragma once
+#include "StringToNumbers.h"
 
 template<class value_type>
 class Vec2d

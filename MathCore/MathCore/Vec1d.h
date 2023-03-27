@@ -1,5 +1,4 @@
 #pragma once
-#include <string>
 #include "StringToNumbers.h"
 
 template<class value_type>
