@@ -1,5 +1,6 @@
 #pragma once
 #include "StringToNumbers.h"
+#include "NumbersToString.h"
 
 #include <cmath>
 #include "Vec3d.h"
@@ -33,7 +34,7 @@ public:
 	};
 
 	Matrix4x4(const std::string& str) {
-		stringToNumbers(str, dynamic_cast<float*>(m), sizeof m / sizeof * m);
+		stringToNumbers(str, (float*)(m), sizeof m / sizeof * m);
 	};
 
 	const value_type* getBuf() const { return m; };
@@ -101,6 +102,10 @@ public:
 
 		return r;
 	}
+
+	operator std::string()const {
+		return numbersToString((float*)(m), sizeof m / sizeof * m);
+	};
 
 	value_type& m00() { return m[0]; };
 	value_type& m01() { return m[1]; };

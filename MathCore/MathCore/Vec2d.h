@@ -1,5 +1,6 @@
 #pragma once
 #include "StringToNumbers.h"
+#include "NumbersToString.h"
 
 template<class value_type>
 class Vec2d
@@ -10,11 +11,14 @@ public:
 	Vec2d() { v[0] = value_type(0); v[1] = value_type(0); };
 	Vec2d(const value_type& x, const value_type& y) { v[0] = x; v[1] = y; };
 	Vec2d(const std::string& str) { 
-		stringToNumbers(str, dynamic_cast<float*>(v), sizeof v / sizeof * v); 
+		stringToNumbers(str, (float*)(v), sizeof v / sizeof * v); 
 	};
 
 	Vec2d<value_type> operator+(const Vec2d<value_type>& v) const;
 	Vec2d<value_type> operator-(const Vec2d<value_type>& v) const;
+	operator std::string()const { 
+		return numbersToString((float*)(v), sizeof v / sizeof * v); 
+	};
 
 	friend value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
 	friend value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
