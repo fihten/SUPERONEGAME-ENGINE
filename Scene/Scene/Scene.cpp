@@ -56,6 +56,26 @@ flt4x4 Scene::TransformNode::getPos() const
 	return parent ? parent->getPos() * pos : pos;
 }
 
+void Scene::TransformNode::accept(Visitor* visitor) const
+{
+	visitor->startVisit(this);
+
+	for (auto& child : childs)
+		child->accept(visitor);
+
+	visitor->finishVisit(this);
+}
+
+void Scene::MeshNode::accept(Visitor* visitor) const
+{
+	visitor->startVisit(this);
+
+	for (auto& child : childs)
+		child->accept(visitor);
+
+	visitor->finishVisit(this);
+}
+
 NodeID Scene::addTransformNode(const flt4x4& pos, NodeID id)
 {
 	Scene::Node* node = root->findNodeByID(id);
@@ -98,6 +118,26 @@ std::string Scene::Node::getParam(const std::string& paramName) const
 	return paramValue;
 }
 
+void Scene::Node::accept(Visitor* visitor) const
+{
+	visitor->startVisit(this);
+
+	for (auto& child : childs)
+		child->accept(visitor);
+
+	visitor->finishVisit(this);
+}
+
+void Scene::RootNode::accept(Visitor* visitor) const
+{
+	visitor->startVisit(this);
+
+	for (auto& child : childs)
+		child->accept(visitor);
+
+	visitor->finishVisit(this);
+}
+
 std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 {
 	if (paramsLocations.count(id) == 1)
@@ -113,4 +153,9 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 		paramValue = node->params.at(paramName);
 
 	return paramValue;
+}
+
+void Scene::accept(Visitor* visitor) const
+{
+	root->accept(visitor);
 }
