@@ -199,6 +199,37 @@ void GraphicsCore::draw(Mesh& mesh)
 		}
 	}
 
+	std::map<std::string, StructResource> structs;
+	ResourceManager::instance()->getStructures(sTechnique, structs);
+	for (auto& s : structs)
+	{
+		std::string name = s.first;
+		StructResource sr = s.second;
+		
+		char* structData = (char*)std::malloc(sr.bytes);
+		for (int f = 0; f < sr.fieldsCount; ++f)
+		{
+			auto& fr = sr.fields[f];
+			char* fieldPtr = structData + fr.offset;
+			if (fr.type == std::string("float"))
+			{
+				float& floatVariable = *((float*)(fieldPtr));
+			}
+			if (fr.type == std::string("float2"))
+			{
+				flt2& float2Variable = *((flt2*)(fieldPtr));
+			}
+			if (fr.type == std::string("float3"))
+			{
+				flt3& float3Variable = *((flt3*)(fieldPtr));
+			}
+			if (fr.type == std::string("float4"))
+			{
+				flt4& float4Variable = *((flt4*)(fieldPtr));
+			}
+		}
+	}
+
 	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
 		return;
