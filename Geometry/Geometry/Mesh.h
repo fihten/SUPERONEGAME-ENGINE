@@ -115,6 +115,8 @@ public:
 	uint32_t getVerticesCount() const;
 	uint32_t getIndicesCount() const;
 
+	std::string getParam(const std::string& param) const;
+
 	friend Mesh createCube();
 
 public:

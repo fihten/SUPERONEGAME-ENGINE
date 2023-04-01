@@ -203,31 +203,41 @@ void GraphicsCore::draw(Mesh& mesh)
 	ResourceManager::instance()->getStructures(sTechnique, structs);
 	for (auto& s : structs)
 	{
-		std::string name = s.first;
-		StructResource sr = s.second;
+		const std::string& name = s.first;
+		StructResource& sr = s.second;
 		
 		char* structData = (char*)std::malloc(sr.bytes);
 		for (int f = 0; f < sr.fieldsCount; ++f)
 		{
 			auto& fr = sr.fields[f];
+
+			std::string fieldName = name + "::" + fr.name;
+			std::string sValue = mesh.getParam(fieldName);
+			
 			char* fieldPtr = structData + fr.offset;
 			if (fr.type == std::string("float"))
 			{
 				float& floatVariable = *((float*)(fieldPtr));
+				floatVariable = std::atof(sValue.c_str());
 			}
 			if (fr.type == std::string("float2"))
 			{
 				flt2& float2Variable = *((flt2*)(fieldPtr));
+				float2Variable = sValue;
 			}
 			if (fr.type == std::string("float3"))
 			{
 				flt3& float3Variable = *((flt3*)(fieldPtr));
+				float3Variable = sValue;
 			}
 			if (fr.type == std::string("float4"))
 			{
 				flt4& float4Variable = *((flt4*)(fieldPtr));
+				float4Variable = sValue;
 			}
 		}
+		sr.ptr->SetRawValue((void*)structData, 0, sr.bytes);
+		free((void*)structData);
 	}
 
 	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);

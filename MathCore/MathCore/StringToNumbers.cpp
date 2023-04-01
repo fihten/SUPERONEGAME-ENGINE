@@ -3,6 +3,8 @@
 
 void stringToNumbers(const std::string& str, float numbers[], int maxCount)
 {
+	std::memset((void*)numbers, 0, maxCount * sizeof(float));
+
 	int pos = str.find_first_of("{");
 	if (pos == str.npos)
 		return;

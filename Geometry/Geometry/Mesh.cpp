@@ -214,3 +214,10 @@ uint32_t Mesh::getIndicesCount() const
 {
 	return indicies.size();
 }
+
+std::string Mesh::getParam(const std::string& param) const
+{
+	if (params.count(param) == 0)
+		return "";
+	return params.at(param);
+}
