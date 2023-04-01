@@ -154,17 +154,18 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 		for (int i = 0; i < countOfCbufferElements; ++i)
 		{
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
-			{
 				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
-				if (variableLocations.count(elementsOfCbuffers[i].name) == 1)
-				{
-					ResourceManager::instance()->registerVariableLocation(
-						sn.technique,
-						elementsOfCbuffers[i].name,
-						variableLocations[elementsOfCbuffers[i].name]
-					);
-				}
+			if (elementsOfCbuffers[i].type == std::string("float3"))
+				ResourceManager::instance()->registerFloat3(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v);
+			if (variableLocations.count(elementsOfCbuffers[i].name) == 1)
+			{
+				ResourceManager::instance()->registerVariableLocation(
+					sn.technique,
+					elementsOfCbuffers[i].name,
+					variableLocations[elementsOfCbuffers[i].name]
+				);
 			}
+
 			if (elementsOfCbuffers[i].type.find("struct ") != std::string::npos)
 			{
 				StructVisitor structVisitor;

@@ -8,6 +8,12 @@ struct Float4x4Resource
 	ID3DX11EffectMatrixVariable* ptr = nullptr;
 };
 
+struct Float3Resource
+{
+	std::string location = "";
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
 #define MAX_COUNT_OF_FIELDS 16
 struct StructResource
 {

@@ -21,6 +21,7 @@ public:
 		PASS_ALREADY_EXISTS,
 		PASS_DOESNT_EXIST,
 		FLOAT4X4_ALREADY_EXISTS,
+		FLOAT3_ALREADY_EXISTS,
 		VARIABLE_DOESNT_EXIST,
 		STRUCT_ALREADY_EXISTS
 	};
@@ -30,6 +31,7 @@ public:
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout);
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutResource::StreamInfo>& streamsInfo);
 	RegisterMessage registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4);
+	RegisterMessage registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3);
 	RegisterMessage registerStruct(const std::string& techniqueName, const std::string& structName, const StructResource& structRes);
 	RegisterMessage registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation);
 	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
@@ -40,6 +42,7 @@ public:
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
 	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
 	void getFloat4x4s(const std::string& techniqueName, std::map<std::string, Float4x4Resource>& flt4x4s);
+	void getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s);
 	void getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs);
 	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);

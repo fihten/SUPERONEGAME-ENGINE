@@ -75,6 +75,20 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat4x4(const std::st
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.float3s.count(flt3Name) != 0)
+		return RegisterMessage::FLOAT3_ALREADY_EXISTS;
+
+	techniqueRes.float3s[flt3Name].ptr = flt3;
+
+	return RegisterMessage::OK;
+}
+
 ResourceManager::RegisterMessage ResourceManager::registerStruct(const std::string& techniqueName, const std::string& structName, const StructResource& structRes)
 {
 	if (techniques.count(techniqueName) == 0)
@@ -98,6 +112,11 @@ ResourceManager::RegisterMessage ResourceManager::registerVariableLocation(const
 	if (techniqueRes.float4x4s.count(varName) != 0)
 	{
 		techniqueRes.float4x4s[varName].location = varLocation;
+		return RegisterMessage::OK;
+	}
+	if (techniqueRes.float3s.count(varName) != 0)
+	{
+		techniqueRes.float3s[varName].location = varLocation;
 		return RegisterMessage::OK;
 	}
 
@@ -183,6 +202,8 @@ const std::string& ResourceManager::getVariableLocation(const std::string& techn
 	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	if (techniqueRes.float4x4s.count(variable) != 0)
 		return techniqueRes.float4x4s.at(variable).location;
+	if (techniqueRes.float3s.count(variable) != 0)
+		return techniqueRes.float3s.at(variable).location;
 
 	return "";
 }
@@ -195,6 +216,16 @@ void ResourceManager::getFloat4x4s(const std::string& techniqueName, std::map<st
 
 	TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	flt4x4s = techniqueRes.float4x4s;
+}
+
+void ResourceManager::getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s)
+{
+	flt3s.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	flt3s = techniqueRes.float3s;
 }
 
 void ResourceManager::getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs)
