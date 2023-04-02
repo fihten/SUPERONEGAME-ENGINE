@@ -2,6 +2,7 @@
 #include "Shader.h"
 #include "ResourceManager.h"
 #include "Cameras.h"
+#include "auto_ptr.h"
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -171,74 +172,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
-	std::map<std::string, Float4x4Resource> flt4x4s;
-	ResourceManager::instance()->getFloat4x4s(sTechnique, flt4x4s);
-	for (auto& f4x4 : flt4x4s)
-	{
-		std::string place = ResourceManager::instance()->getVariableLocation(sTechnique, f4x4.first);
-		size_t pos = place.find("cameras[");
-		if (pos == 0)
-		{
-			size_t beg = 7;
-			size_t end = place.find(']', beg);
-
-			int index = std::atoi(std::string(place, beg, end - beg).c_str());
-			
-			beg = end + 2;
-			std::string what(place, beg, std::string::npos);
-			if (what == std::string("WVP"))
-			{
-				const flt4x4& v = cameras()[index].getView();
-				const flt4x4& p = cameras()[index].getProj();
-				flt4x4 wvp = v * p;
-
-				f4x4.second.ptr->SetMatrix(reinterpret_cast<float*>(&wvp));
-			}
-
-			continue;
-		}
-	}
-
-	std::map<std::string, StructResource> structs;
-	ResourceManager::instance()->getStructures(sTechnique, structs);
-	for (auto& s : structs)
-	{
-		const std::string& name = s.first;
-		StructResource& sr = s.second;
-		
-		char* structData = (char*)std::malloc(sr.bytes);
-		for (int f = 0; f < sr.fieldsCount; ++f)
-		{
-			auto& fr = sr.fields[f];
-
-			std::string fieldName = name + "::" + fr.name;
-			std::string sValue = mesh.getParam(fieldName);
-			
-			char* fieldPtr = structData + fr.offset;
-			if (fr.type == std::string("float"))
-			{
-				float& floatVariable = *((float*)(fieldPtr));
-				floatVariable = std::atof(sValue.c_str());
-			}
-			if (fr.type == std::string("float2"))
-			{
-				flt2& float2Variable = *((flt2*)(fieldPtr));
-				float2Variable = sValue;
-			}
-			if (fr.type == std::string("float3"))
-			{
-				flt3& float3Variable = *((flt3*)(fieldPtr));
-				float3Variable = sValue;
-			}
-			if (fr.type == std::string("float4"))
-			{
-				flt4& float4Variable = *((flt4*)(fieldPtr));
-				float4Variable = sValue;
-			}
-		}
-		sr.ptr->SetRawValue((void*)structData, 0, sr.bytes);
-		free((void*)structData);
-	}
+	setVariablesOnGPU(mesh);
 
 	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
@@ -508,4 +442,128 @@ void GraphicsCore::resize(UINT width, UINT height)
 	// Set cameras aspects
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
+}
+
+flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
+{
+	flt4x4 res;
+
+	std::string tech = mesh.getTechnique();
+	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+	size_t pos = place.find("cameras[");
+	if (pos == 0)
+	{
+		size_t beg = 7;
+		size_t end = place.find(']', beg);
+
+		int index = std::atoi(std::string(place, beg, end - beg).c_str());
+
+		beg = end + 2;
+		std::string what(place, beg, std::string::npos);
+		if (what == std::string("WVP"))
+		{
+			const flt4x4& v = cameras()[index].getView();
+			const flt4x4& p = cameras()[index].getProj();
+			res = v * p;
+		}
+	}
+
+	return res;
+}
+
+flt3 GraphicsCore::getFloat3(Mesh& mesh, const std::string& var) const
+{
+	return flt3();
+}
+
+void* GraphicsCore::getStruct(Mesh& mesh, const std::string& var, int* bytes) const
+{
+	std::string tech = mesh.getTechnique();
+
+	std::map<std::string, StructResource> structs;
+	ResourceManager::instance()->getStructures(tech, structs);
+
+	StructResource& sr = structs[var];
+
+	char* structData = (char*)std::malloc(sr.bytes);
+	for (int f = 0; f < sr.fieldsCount; ++f)
+	{
+		auto& fr = sr.fields[f];
+
+		std::string fieldName = var + "." + fr.name;
+		std::string sValue = mesh.getParam(fieldName);
+
+		char* fieldPtr = structData + fr.offset;
+		if (fr.type == std::string("float"))
+		{
+			float& floatVariable = *((float*)(fieldPtr));
+			floatVariable = std::atof(sValue.c_str());
+		}
+		if (fr.type == std::string("float2"))
+		{
+			flt2& float2Variable = *((flt2*)(fieldPtr));
+			float2Variable = sValue;
+		}
+		if (fr.type == std::string("float3"))
+		{
+			flt3& float3Variable = *((flt3*)(fieldPtr));
+			float3Variable = sValue;
+		}
+		if (fr.type == std::string("float4"))
+		{
+			flt4& float4Variable = *((flt4*)(fieldPtr));
+			float4Variable = sValue;
+		}
+	}
+	if (bytes)
+		*bytes = sr.bytes;
+
+	return structData;
+}
+
+void GraphicsCore::setFloat4x4sOnGPU(Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Float4x4Resource> flt4x4s;
+	ResourceManager::instance()->getFloat4x4s(sTechnique, flt4x4s);
+	for (auto& f4x4 : flt4x4s)
+	{
+		flt4x4 v = getFloat4x4(mesh, f4x4.first);
+		f4x4.second.ptr->SetMatrix(reinterpret_cast<float*>(&v));
+	}
+}
+
+void GraphicsCore::setFloat3sOnGPU(Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Float3Resource> flt3s;
+	ResourceManager::instance()->getFloat3s(sTechnique, flt3s);
+	for (auto& f3 : flt3s)
+	{
+		flt3 v = getFloat3(mesh, f3.first);
+		f3.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 3 * sizeof(float));
+	}
+}
+
+void GraphicsCore::setStructsOnGPU(Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, StructResource> structs;
+	ResourceManager::instance()->getStructures(sTechnique, structs);
+	for (auto& s : structs)
+	{
+		int bytes = 0;
+		auto_ptr structData = getStruct(mesh, s.first, &bytes);
+		s.second.ptr->SetRawValue(structData.ptr, 0, bytes);
+	}
+}
+
+void GraphicsCore::setVariablesOnGPU(Mesh& mesh)
+{
+	setFloat3sOnGPU(mesh);
+	setFloat4x4sOnGPU(mesh);
+	setStructsOnGPU(mesh);
 }

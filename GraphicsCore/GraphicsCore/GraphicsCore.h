@@ -1,9 +1,11 @@
 #pragma once
 #include "All.h"
 #include "Mesh.h"
+#include "Matrix4x4.h"
 #include <WinDef.h>
 #include <dxgiformat.h>
 #include <dxgi.h>
+#include <memory>
 
 class GraphicsCore;
 
@@ -28,6 +30,16 @@ public:
 	
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
+
+	flt4x4 getFloat4x4(Mesh& mesh, const std::string& var) const;
+	flt3 getFloat3(Mesh& mesh, const std::string& var) const;
+	void* getStruct(Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
+	
+	void setFloat4x4sOnGPU(Mesh& mesh);
+	void setFloat3sOnGPU(Mesh& mesh);
+	void setStructsOnGPU(Mesh& mesh);
+
+	void setVariablesOnGPU(Mesh& mesh);
 
 private:
 	UINT mWidth = 0;
