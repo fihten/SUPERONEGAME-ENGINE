@@ -35,11 +35,18 @@ private:
 	flt3 getFloat3(Mesh& mesh, const std::string& var) const;
 	void* getStruct(Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
 	
+	ID3D11Buffer* getVertexBuffer(Mesh& mesh, uint32_t* elementSize) const;
+	void* fetchVerticesFromMesh(Mesh& mesh) const;
+
+	ID3D11Buffer* getIndexBuffer(Mesh& mesh) const;
+
 	void setFloat4x4sOnGPU(Mesh& mesh);
 	void setFloat3sOnGPU(Mesh& mesh);
 	void setStructsOnGPU(Mesh& mesh);
 
 	void setVariablesOnGPU(Mesh& mesh);
+
+	void setGeometryOnGPU(Mesh& mesh);
 
 private:
 	UINT mWidth = 0;
