@@ -8,6 +8,7 @@
 #include "Vec2d.h"
 #include "Vec3d.h"
 #include "Vec4d.h"
+#include "Matrix4x4.h"
 
 class Mesh;
 Mesh createCube();
@@ -116,6 +117,7 @@ public:
 	uint32_t getIndicesCount() const;
 
 	std::string getParam(const std::string& param) const;
+	flt4x4 getPosition() { return flt4x4(); }
 
 	friend Mesh createCube();
 

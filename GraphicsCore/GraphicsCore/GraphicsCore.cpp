@@ -351,31 +351,60 @@ flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
 	std::string tech = mesh.getTechnique();
 	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
 
-	auto itPlace = std::remove_if(place.begin(), place.end(), [&](char c)->bool {return c == ' '; });
-	place = place.substr(0, itPlace - place.begin());
+	auto placeEnd = std::remove_if(place.begin(), place.end(), [&](char c)->bool {return c == ' '; });
+	place = place.substr(0, placeEnd - place.begin());
 
 	size_t startOfMultiplier = 0;
-	while (startOfMultiplier != place.npos)
+	while (startOfMultiplier != place.length() + 1)
 	{
 		size_t endOfMultiplier = place.find_first_of('*', startOfMultiplier);
-		std::string subPlace = place.substr(startOfMultiplier, endOfMultiplier - startOfMultiplier);
+		if (endOfMultiplier == std::string::npos)
+			endOfMultiplier = place.length();
 
-		size_t pos = subPlace.find("cameras[");
+		std::string multiplier = place.substr(startOfMultiplier, endOfMultiplier - startOfMultiplier);
+		startOfMultiplier = endOfMultiplier + 1;
+
+		if (multiplier == std::string(""))
+			continue;
+
+		size_t pos = multiplier.find("cameras[");
 		if (pos == 0)
 		{
 			size_t beg = 7;
-			size_t end = subPlace.find(']', beg);
+			size_t end = multiplier.find(']', beg);
 
-			int index = std::atoi(std::string(subPlace, beg, end - beg).c_str());
+			int index = std::atoi(std::string(multiplier, beg, end - beg).c_str());
 
 			beg = end + 2;
-			std::string what(subPlace, beg, std::string::npos);
+			std::string what(multiplier, beg, std::string::npos);
 			if (what == std::string("WVP"))
 			{
 				const flt4x4& v = cameras()[index].getView();
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * v * p;
 			}
+			if (what == std::string("VP"))
+			{
+				const flt4x4& v = cameras()[index].getView();
+				const flt4x4& p = cameras()[index].getProj();
+				res = res * v * p;
+			}
+			if (what == std::string("V"))
+			{
+				const flt4x4& v = cameras()[index].getView();
+				res = res * v;
+			}
+			if (what == std::string("P"))
+			{
+				const flt4x4& p = cameras()[index].getProj();
+				res = res * p;
+			}
+			continue;
+		}
+		if (multiplier == std::string("position_in_scene"))
+		{
+			res = res * mesh.getPosition();
+			continue;
 		}
 	}
 
@@ -384,7 +413,18 @@ flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
 
 flt3 GraphicsCore::getFloat3(Mesh& mesh, const std::string& var) const
 {
-	return flt3();
+	flt3 res;
+
+	std::string tech = mesh.getTechnique();
+	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+
+	if (place == std::string("position_in_scene"))
+	{
+		flt4x4 pos = mesh.getPosition();
+		res = flt3(pos.m30(), pos.m31(), pos.m32());
+	}
+
+	return res;
 }
 
 void* GraphicsCore::getStruct(Mesh& mesh, const std::string& var, int* bytes) const
