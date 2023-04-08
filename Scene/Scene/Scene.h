@@ -88,5 +88,6 @@ public:
 	NodeID addMeshNode(Mesh* mesh, NodeID id);
 
 	std::string getNodeParam(NodeID id, const std::string& paramName) const;
+	flt4x4 getNodePosition(NodeID id) const;
 	void accept(Visitor* visitor) const;
 };

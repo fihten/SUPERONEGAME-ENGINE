@@ -166,6 +166,14 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 	return paramValue;
 }
 
+flt4x4 Scene::getNodePosition(NodeID id) const
+{
+	Node* node = root->findNodeByID(id);
+	if (node == nullptr)
+		return flt4x4();
+	return node->getPos();
+}
+
 void Scene::accept(Visitor* visitor) const
 {
 	root->accept(visitor);
