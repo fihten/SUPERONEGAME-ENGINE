@@ -31,6 +31,8 @@ class Camera
 	float rotateCoeff = 1;
 
 public:
+	const flt3& getEyePos();
+	const flt3& getFwd();
 	const flt4x4& getView();
 	const flt4x4& getProj();
 

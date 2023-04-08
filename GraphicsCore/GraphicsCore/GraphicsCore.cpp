@@ -408,8 +408,8 @@ flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
 		}
 		if (multiplier == std::string("inverse_transpose_of_position_in_scene"))
 		{
-			flt4x4 w = mesh.getPosition();
-			
+			res = res * mesh.getPosition().inverse().transpose();
+			continue;
 		}
 	}
 
@@ -423,6 +423,25 @@ flt3 GraphicsCore::getFloat3(Mesh& mesh, const std::string& var) const
 	std::string tech = mesh.getTechnique();
 	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
 
+	size_t pos = place.find("cameras[");
+	if (pos == 0)
+	{
+		size_t beg = 7;
+		size_t end = place.find(']', beg);
+
+		int index = std::atoi(std::string(place, beg, end - beg).c_str());
+
+		beg = end + 2;
+		std::string what(place, beg, std::string::npos);
+		if (what == std::string("eye_pos"))
+		{
+			res = cameras()[index].getEyePos();
+		}
+		if (what == std::string("fwd"))
+		{
+			res = cameras()[index].getFwd();
+		}
+	}
 	if (place == std::string("position_in_scene"))
 	{
 		flt4x4 pos = mesh.getPosition();

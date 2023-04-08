@@ -2,6 +2,16 @@
 #include "Camera.h"
 #include <fstream>
 
+const flt3& Camera::getEyePos()
+{
+	return position;
+}
+
+const flt3& Camera::getFwd()
+{
+	return fwd;
+}
+
 const flt4x4& Camera::getView()
 {
 	if (changed)
