@@ -23,7 +23,7 @@ public:
 	void startFrame();
 	void endFrame();
 
-	void draw(Mesh& mesh);
+	void draw(const Mesh& mesh);
 	
 	int run();
 	void resize(UINT width, UINT height);
@@ -31,22 +31,22 @@ public:
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
-	flt4x4 getFloat4x4(Mesh& mesh, const std::string& var) const;
-	flt3 getFloat3(Mesh& mesh, const std::string& var) const;
-	void* getStruct(Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
+	flt4x4 getFloat4x4(const Mesh& mesh, const std::string& var) const;
+	flt3 getFloat3(const Mesh& mesh, const std::string& var) const;
+	void* getStruct(const Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
 	
-	ID3D11Buffer* getVertexBuffer(Mesh& mesh, uint32_t* elementSize) const;
-	void* fetchVerticesFromMesh(Mesh& mesh) const;
+	ID3D11Buffer* getVertexBuffer(const Mesh& mesh, uint32_t* elementSize) const;
+	void* fetchVerticesFromMesh(const Mesh& mesh) const;
 
-	ID3D11Buffer* getIndexBuffer(Mesh& mesh) const;
+	ID3D11Buffer* getIndexBuffer(const Mesh& mesh) const;
 
-	void setFloat4x4sOnGPU(Mesh& mesh);
-	void setFloat3sOnGPU(Mesh& mesh);
-	void setStructsOnGPU(Mesh& mesh);
+	void setFloat4x4sOnGPU(const Mesh& mesh);
+	void setFloat3sOnGPU(const Mesh& mesh);
+	void setStructsOnGPU(const Mesh& mesh);
 
-	void setVariablesOnGPU(Mesh& mesh);
+	void setVariablesOnGPU(const Mesh& mesh);
 
-	void setGeometryOnGPU(Mesh& mesh);
+	void setGeometryOnGPU(const Mesh& mesh);
 
 private:
 	UINT mWidth = 0;

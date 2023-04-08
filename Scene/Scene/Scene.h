@@ -48,24 +48,25 @@ public:
 
 	class MeshNode : public Node
 	{
-		const Mesh* mesh = nullptr;
 	public:
 		MeshNode(NodeID id, const Mesh* mesh) :Node(id), mesh(mesh) {}
 		virtual void accept(Visitor* visitor) const;
+
+		const Mesh* mesh = nullptr;
 	};
 
 	class Visitor
 	{
 	public:
-		virtual void startVisit(const Node* node) = 0;
-		virtual void startVisit(const RootNode* node) = 0;
-		virtual void startVisit(const TransformNode* node) = 0;
-		virtual void startVisit(const MeshNode* node) = 0;
+		virtual void startVisit(const Node* node) {}
+		virtual void startVisit(const RootNode* node) {}
+		virtual void startVisit(const TransformNode* node) {}
+		virtual void startVisit(const MeshNode* node) {}
 
-		virtual void finishVisit(const Node* node) = 0;
-		virtual void finishVisit(const RootNode* node) = 0;
-		virtual void finishVisit(const TransformNode* node) = 0;
-		virtual void finishVisit(const MeshNode* node) = 0;
+		virtual void finishVisit(const Node* node) {}
+		virtual void finishVisit(const RootNode* node) {}
+		virtual void finishVisit(const TransformNode* node) {}
+		virtual void finishVisit(const MeshNode* node) {}
 	};
 
 private:

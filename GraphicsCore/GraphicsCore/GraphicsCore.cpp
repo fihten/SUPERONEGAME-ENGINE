@@ -168,7 +168,7 @@ void GraphicsCore::endFrame()
 	mSwapChain->Present(0, 0);
 }
 
-void GraphicsCore::draw(Mesh& mesh)
+void GraphicsCore::draw(const Mesh& mesh)
 {
 	setVariablesOnGPU(mesh);
 	setGeometryOnGPU(mesh);
@@ -344,7 +344,7 @@ void GraphicsCore::resize(UINT width, UINT height)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }
 
-flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
+flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, const std::string& var) const
 {
 	flt4x4 res;
 
@@ -416,7 +416,7 @@ flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
 	return res;
 }
 
-flt3 GraphicsCore::getFloat3(Mesh& mesh, const std::string& var) const
+flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
 {
 	flt3 res;
 
@@ -451,7 +451,7 @@ flt3 GraphicsCore::getFloat3(Mesh& mesh, const std::string& var) const
 	return res;
 }
 
-void* GraphicsCore::getStruct(Mesh& mesh, const std::string& var, int* bytes) const
+void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* bytes) const
 {
 	std::string tech = mesh.getTechnique();
 
@@ -496,7 +496,7 @@ void* GraphicsCore::getStruct(Mesh& mesh, const std::string& var, int* bytes) co
 	return structData;
 }
 
-ID3D11Buffer* GraphicsCore::getVertexBuffer(Mesh& mesh, uint32_t* elementSize) const
+ID3D11Buffer* GraphicsCore::getVertexBuffer(const Mesh& mesh, uint32_t* elementSize) const
 {
 	(*elementSize) = 0;
 
@@ -537,7 +537,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(Mesh& mesh, uint32_t* elementSize) c
 	return mVB;
 }
 
-void* GraphicsCore::fetchVerticesFromMesh(Mesh& mesh) const
+void* GraphicsCore::fetchVerticesFromMesh(const Mesh& mesh) const
 {
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
@@ -593,7 +593,7 @@ void* GraphicsCore::fetchVerticesFromMesh(Mesh& mesh) const
 	return (void*)data;
 }
 
-ID3D11Buffer* GraphicsCore::getIndexBuffer(Mesh& mesh) const
+ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 {
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
@@ -620,7 +620,7 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(Mesh& mesh) const
 	return mIB;
 }
 
-void GraphicsCore::setFloat4x4sOnGPU(Mesh& mesh)
+void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();
 
@@ -633,7 +633,7 @@ void GraphicsCore::setFloat4x4sOnGPU(Mesh& mesh)
 	}
 }
 
-void GraphicsCore::setFloat3sOnGPU(Mesh& mesh)
+void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();
 
@@ -646,7 +646,7 @@ void GraphicsCore::setFloat3sOnGPU(Mesh& mesh)
 	}
 }
 
-void GraphicsCore::setStructsOnGPU(Mesh& mesh)
+void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();
 
@@ -660,14 +660,14 @@ void GraphicsCore::setStructsOnGPU(Mesh& mesh)
 	}
 }
 
-void GraphicsCore::setVariablesOnGPU(Mesh& mesh)
+void GraphicsCore::setVariablesOnGPU(const Mesh& mesh)
 {
 	setFloat3sOnGPU(mesh);
 	setFloat4x4sOnGPU(mesh);
 	setStructsOnGPU(mesh);
 }
 
-void GraphicsCore::setGeometryOnGPU(Mesh& mesh)
+void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 {
 	uint32_t elementSize = 0;
 	ID3D11Buffer* mVB = getVertexBuffer(mesh, &elementSize);
