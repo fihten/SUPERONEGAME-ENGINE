@@ -1,6 +1,7 @@
 #pragma once
 #include "StringToNumbers.h"
 #include "NumbersToString.h"
+#include "MatrixUtils.h"
 
 #include <cmath>
 #include "Vec3d.h"
@@ -38,6 +39,41 @@ public:
 	};
 
 	const value_type* getBuf() const { return m; };
+
+	Matrix4x4 inverse() const
+	{
+		Matrix4x4 ret;
+
+		value_type d = det(m);
+		int rows = 4;
+		int columns = 4;
+		for (int r = 0; r < rows; ++r)
+		{
+			for (int c = 0; c < columns; ++c)
+			{
+				ret.m[r * columns + c] = det(m, c, r) / d;
+			}
+		}
+
+		return ret;
+	}
+
+	Matrix4x4 transpose() const
+	{
+		Matrix4x4 ret;
+
+		int rows = 4;
+		int columns = 4;
+		for (int r = 0; r < rows; ++r)
+		{
+			for (int c = 0; c < columns; ++c)
+			{
+				ret.m[r * columns + c] = m[c * columns + r];
+			}
+		}
+
+		return ret;
+	}
 
 	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
 	{

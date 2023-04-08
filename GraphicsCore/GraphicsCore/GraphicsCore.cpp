@@ -406,6 +406,11 @@ flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, const std::string& var) const
 			res = res * mesh.getPosition();
 			continue;
 		}
+		if (multiplier == std::string("inverse_transpose_of_position_in_scene"))
+		{
+			flt4x4 w = mesh.getPosition();
+			
+		}
 	}
 
 	return res;
