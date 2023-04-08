@@ -152,6 +152,17 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 	if (node->params.count(paramName) == 1)
 		paramValue = node->params.at(paramName);
 
+	if (paramValue == std::string("node_position"))
+	{
+		flt4x4 pos = node->getPos();
+		return flt3(pos.m30(), pos.m31(), pos.m32());
+	}
+	if (paramValue == std::string("node_axis_z"))
+	{
+		flt4x4 pos = node->getPos();
+		return flt3(pos.m20(), pos.m21(), pos.m22());
+	}
+
 	return paramValue;
 }
 
