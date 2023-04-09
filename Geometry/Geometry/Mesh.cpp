@@ -26,19 +26,111 @@ Mesh createCube()
 	pts.push_back(flt3(0.5, 0.5, 0.5));
 	pts.push_back(flt3(0.5, -0.5, 0.5));
 
+	// left
+	pts.push_back(flt3(-0.5, -0.5, -0.5));
+	pts.push_back(flt3(-0.5, -0.5, 0.5));
+	pts.push_back(flt3(0.5, -0.5, 0.5));
+	pts.push_back(flt3(0.5, -0.5, -0.5));
+
+	// right
+	pts.push_back(flt3(-0.5, 0.5, -0.5));
+	pts.push_back(flt3(-0.5, 0.5, 0.5));
+	pts.push_back(flt3(0.5, 0.5, 0.5));
+	pts.push_back(flt3(0.5, 0.5, -0.5));
+
+	// back
+	pts.push_back(flt3(-0.5, -0.5, -0.5));
+	pts.push_back(flt3(-0.5, -0.5, 0.5));
+	pts.push_back(flt3(-0.5, 0.5, 0.5));
+	pts.push_back(flt3(-0.5, 0.5, -0.5));
+
+	// front
+	pts.push_back(flt3(0.5, -0.5, -0.5));
+	pts.push_back(flt3(0.5, -0.5, 0.5));
+	pts.push_back(flt3(0.5, 0.5, 0.5));
+	pts.push_back(flt3(0.5, 0.5, -0.5));
+
+	// vertices normals
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+
+	auto& nms = m.flt3_streams.back().second;
+
+	// bottom
+	nms.push_back(flt3(0.0, 0.0, -1.0));
+	nms.push_back(flt3(0.0, 0.0, -1.0));
+	nms.push_back(flt3(0.0, 0.0, -1.0));
+	nms.push_back(flt3(0.0, 0.0, -1.0));
+
+	// top
+	nms.push_back(flt3(0.0, 0.0, 1.0));
+	nms.push_back(flt3(0.0, 0.0, 1.0));
+	nms.push_back(flt3(0.0, 0.0, 1.0));
+	nms.push_back(flt3(0.0, 0.0, 1.0));
+
+	// left
+	nms.push_back(flt3(0.0, -1.0, 0.0));
+	nms.push_back(flt3(0.0, -1.0, 0.0));
+	nms.push_back(flt3(0.0, -1.0, 0.0));
+	nms.push_back(flt3(0.0, -1.0, 0.0));
+
+	// right
+	nms.push_back(flt3(0.0, 1.0, 0.0));
+	nms.push_back(flt3(0.0, 1.0, 0.0));
+	nms.push_back(flt3(0.0, 1.0, 0.0));
+	nms.push_back(flt3(0.0, 1.0, 0.0));
+
+	// back
+	nms.push_back(flt3(-1.0, 0.0, 0.0));
+	nms.push_back(flt3(-1.0, 0.0, 0.0));
+	nms.push_back(flt3(-1.0, 0.0, 0.0));
+	nms.push_back(flt3(-1.0, 0.0, 0.0));
+
+	// front
+	nms.push_back(flt3(1.0, 0.0, 0.0));
+	nms.push_back(flt3(1.0, 0.0, 0.0));
+	nms.push_back(flt3(1.0, 0.0, 0.0));
+	nms.push_back(flt3(1.0, 0.0, 0.0));
+
 	// vertices colors
 	m.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
 
 	auto& clrs = m.flt4_streams.back().second;
-	clrs.push_back(flt4(0, 0, 0, 1));
-	clrs.push_back(flt4(0, 0, 1, 1));
-	clrs.push_back(flt4(0, 1, 0, 1));
-	clrs.push_back(flt4(0, 1, 1, 1));
-	clrs.push_back(flt4(1, 0, 0, 1));
-	clrs.push_back(flt4(1, 0, 1, 1));
-	clrs.push_back(flt4(1, 1, 0, 1));
-	clrs.push_back(flt4(1, 1, 1, 1));
+	
+	// bottom
+	clrs.push_back(flt4(0, 0, 1, 0));
+	clrs.push_back(flt4(0, 0, 1, 0));
+	clrs.push_back(flt4(0, 0, 1, 0));
+	clrs.push_back(flt4(0, 0, 1, 0));
 
+	// top
+	clrs.push_back(flt4(0, 1, 0, 0));
+	clrs.push_back(flt4(0, 1, 0, 0));
+	clrs.push_back(flt4(0, 1, 0, 0));
+	clrs.push_back(flt4(0, 1, 0, 0));
+
+	// left
+	clrs.push_back(flt4(0, 1, 1, 0));
+	clrs.push_back(flt4(0, 1, 1, 0));
+	clrs.push_back(flt4(0, 1, 1, 0));
+	clrs.push_back(flt4(0, 1, 1, 0));
+
+	// right
+	clrs.push_back(flt4(1, 0, 0, 0));
+	clrs.push_back(flt4(1, 0, 0, 0));
+	clrs.push_back(flt4(1, 0, 0, 0));
+	clrs.push_back(flt4(1, 0, 0, 0));
+
+	// back
+	clrs.push_back(flt4(1, 0, 1, 0));
+	clrs.push_back(flt4(1, 0, 1, 0));
+	clrs.push_back(flt4(1, 0, 1, 0));
+	clrs.push_back(flt4(1, 0, 1, 0));
+
+	// front
+	clrs.push_back(flt4(1, 1, 0, 0));
+	clrs.push_back(flt4(1, 1, 0, 0));
+	clrs.push_back(flt4(1, 1, 0, 0));
+	clrs.push_back(flt4(1, 1, 0, 0));
 
 	// indices
 	auto& inds = m.indicies;
@@ -57,47 +149,47 @@ Mesh createCube()
 	inds.push_back(5);
 	inds.push_back(6);
 
-	inds.push_back(7);
 	inds.push_back(4);
 	inds.push_back(6);
-
-	// front 
 	inds.push_back(7);
-	inds.push_back(6);
-	inds.push_back(2);
-
-	inds.push_back(3);
-	inds.push_back(7);
-	inds.push_back(2);
-
-	// back
-	inds.push_back(1);
-	inds.push_back(5);
-	inds.push_back(4);
-
-	inds.push_back(0);
-	inds.push_back(1);
-	inds.push_back(4);
-
-	// right
-	inds.push_back(1);
-	inds.push_back(6);
-	inds.push_back(5);
-
-	inds.push_back(1);
-	inds.push_back(2);
-	inds.push_back(6);
 
 	// left
-	inds.push_back(0);
-	inds.push_back(4);
-	inds.push_back(7);
+	inds.push_back(8);
+	inds.push_back(9);
+	inds.push_back(10);
 
-	inds.push_back(3);
-	inds.push_back(0);
-	inds.push_back(7);
+	inds.push_back(8);
+	inds.push_back(10);
+	inds.push_back(11);
 
-	m.params["technique"] = "Demo";
+	// right
+	inds.push_back(14);
+	inds.push_back(13);
+	inds.push_back(12);
+
+	inds.push_back(15);
+	inds.push_back(14);
+	inds.push_back(12);
+
+	// back
+	inds.push_back(18);
+	inds.push_back(17);
+	inds.push_back(16);
+
+	inds.push_back(19);
+	inds.push_back(18);
+	inds.push_back(16);
+
+	// front
+	inds.push_back(20);
+	inds.push_back(21);
+	inds.push_back(22);
+
+	inds.push_back(20);
+	inds.push_back(22);
+	inds.push_back(23);
+
+	m.params["technique"] = "LightTech";
 	m.params["pass"] = "P0";
 
 	return m;
