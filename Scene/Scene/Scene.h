@@ -27,6 +27,7 @@ public:
 		virtual Node* findNodeByID(NodeID id);
 		virtual flt4x4 getPos() const;
 		virtual std::string getParam(const std::string& paramName) const;
+		virtual void setParam(const std::string& paramName, const std::string& paramVal);
 		virtual void accept(Visitor* visitor) const;
 	};
 
@@ -86,6 +87,9 @@ public:
 
 	NodeID addTransformNode(const flt4x4& pos, NodeID id);
 	NodeID addMeshNode(Mesh* mesh, NodeID id);
+
+	void setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal);
+	void createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param);
 
 	std::string getNodeParam(NodeID id, const std::string& paramName) const;
 	flt4x4 getNodePosition(NodeID id) const;

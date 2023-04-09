@@ -118,6 +118,11 @@ std::string Scene::Node::getParam(const std::string& paramName) const
 	return paramValue;
 }
 
+void Scene::Node::setParam(const std::string& paramName, const std::string& paramVal)
+{
+	params[paramName] = paramVal;
+}
+
 void Scene::Node::accept(Visitor* visitor) const
 {
 	visitor->startVisit(this);
@@ -136,6 +141,19 @@ void Scene::RootNode::accept(Visitor* visitor) const
 		child->accept(visitor);
 
 	visitor->finishVisit(this);
+}
+
+void Scene::setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal)
+{
+	Node* node = root->findNodeByID(id);
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, paramVal);
+}
+
+void Scene::createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param)
+{
+	paramsLocations[reference].location[param] = referenced;
 }
 
 std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
