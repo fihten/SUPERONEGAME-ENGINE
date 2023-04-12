@@ -85,8 +85,8 @@ public:
 	Scene();
 	~Scene();
 
-	NodeID addTransformNode(const flt4x4& pos, NodeID id);
-	NodeID addMeshNode(Mesh* mesh, NodeID id);
+	NodeID addTransformNode(const flt4x4& pos, NodeID id = 0);
+	NodeID addMeshNode(Mesh* mesh, NodeID id = 0);
 
 	void setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal);
 	void createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param);

@@ -39,8 +39,9 @@ class InputLayoutVisitor : public ShaderVisitor
 	std::string shaderName = "";
 
 	bool withinShaderDeclaration = false;
+	bool withinArgumentsList = false;
 	int withinStruct = 0;
-	bool inVariable = true;
+	bool inVariable = false;
 
 	std::string semanticName = "";
 	std::string format = "";
@@ -51,6 +52,9 @@ public:
 	
 	void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
 	void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
+
+	void startVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST);
+	void finishVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST);
 
 	void startVisit(const ShaderUnits::OUT_MODIFIER* pOUT);
 
@@ -103,6 +107,7 @@ public:
 	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT);
 
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
+	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
 
 	void getElements(ElementOfCbuffer*& pElements, int& count);
 

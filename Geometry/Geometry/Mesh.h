@@ -97,8 +97,8 @@ public:
 		return *this;
 	}
 
-	std::string getTechnique() const;
-	std::string getPass() const;
+	virtual std::string getTechnique() const;
+	virtual std::string getPass() const;
 
 	enum StreamType
 	{
@@ -107,14 +107,14 @@ public:
 		FLT3,
 		FLT4
 	};
-	const void* getStream(const std::string& name, StreamType type) const;
-	const std::vector<uint32_t>* getIndicies() const;
+	virtual const void* getStream(const std::string& name, StreamType type) const;
+	virtual const std::vector<uint32_t>* getIndicies() const;
 	
-	std::string getName() const;
-	void setName(const std::string& name);
+	virtual std::string getName() const;
+	virtual void setName(const std::string& name);
 
-	uint32_t getVerticesCount() const;
-	uint32_t getIndicesCount() const;
+	virtual uint32_t getVerticesCount() const;
+	virtual uint32_t getIndicesCount() const;
 
 	virtual std::string getParam(const std::string& param) const;
 	virtual flt4x4 getPosition() const { return flt4x4(); }

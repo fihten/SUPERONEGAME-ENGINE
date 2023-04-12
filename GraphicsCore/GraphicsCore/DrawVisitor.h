@@ -12,6 +12,17 @@ class DrawVisitor :public Scene::Visitor
 	public:
 		MeshInScene(const Mesh* mesh) :mesh(mesh) {}
 
+		std::string getTechnique() const;
+		std::string getPass() const;
+		
+		const void* getStream(const std::string& name, StreamType type) const;
+		const std::vector<uint32_t>* getIndicies() const;
+
+		std::string getName() const;
+
+		uint32_t getVerticesCount() const;
+		uint32_t getIndicesCount() const;
+
 		std::string getParam(const std::string& param) const;
 		flt4x4 getPosition() const;
 	};

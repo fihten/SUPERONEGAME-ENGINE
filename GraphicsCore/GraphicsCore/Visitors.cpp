@@ -33,6 +33,7 @@ void ShadersNamesVisitor::startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 {
+	withinArgumentsList = false;
 	if (shaderName == pFUNCTION_DECL->getName())
 		withinShaderDeclaration = true;
 }
@@ -40,6 +41,18 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_
 void InputLayoutVisitor::finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 {
 	withinShaderDeclaration = false;
+}
+
+void InputLayoutVisitor::startVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST)
+{
+	if (withinShaderDeclaration && !withinStruct)
+		withinArgumentsList = true;
+}
+
+void InputLayoutVisitor::finishVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST)
+{
+	if (withinShaderDeclaration && !withinStruct)
+		withinArgumentsList = false;
 }
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::OUT_MODIFIER* pOUT)
@@ -90,7 +103,7 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC)
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
-	if (withinStruct == 0)
+	if (withinStruct == 0 && withinArgumentsList)
 		inVariable = true;
 	semanticName = "";
 	format = "";
@@ -248,6 +261,12 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4
 {
 	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
 		elements[elementsCount - 1].type = "float4x4";
+}
+
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
+{
+	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
+		elements[elementsCount - 1].type = "float3";
 }
 
 void ElementsOfCbufferVisitor::getElements(ElementOfCbuffer*& pElements, int& count)
