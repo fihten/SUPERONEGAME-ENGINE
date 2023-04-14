@@ -51,10 +51,9 @@ public:
 	void setShaderName(const std::string& shaderName) { this->shaderName = shaderName; };
 	
 	void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
-	void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
 
-	void startVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST);
-	void finishVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST);
+	void startVisit(const ShaderUnits::ROUND_BRACKETS* pARGUMENTS_LIST);
+	void finishVisit(const ShaderUnits::ROUND_BRACKETS* pARGUMENTS_LIST);
 
 	void startVisit(const ShaderUnits::OUT_MODIFIER* pOUT);
 

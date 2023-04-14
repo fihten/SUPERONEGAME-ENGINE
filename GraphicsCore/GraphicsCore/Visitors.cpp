@@ -38,21 +38,19 @@ void InputLayoutVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_
 		withinShaderDeclaration = true;
 }
 
-void InputLayoutVisitor::finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
+void InputLayoutVisitor::startVisit(const ShaderUnits::ROUND_BRACKETS* pARGUMENTS_LIST)
 {
-	withinShaderDeclaration = false;
-}
-
-void InputLayoutVisitor::startVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST)
-{
-	if (withinShaderDeclaration && !withinStruct)
+	if (withinShaderDeclaration)
 		withinArgumentsList = true;
 }
 
-void InputLayoutVisitor::finishVisit(const ShaderUnits::CURLY_BRACKETS* pARGUMENTS_LIST)
+void InputLayoutVisitor::finishVisit(const ShaderUnits::ROUND_BRACKETS* pARGUMENTS_LIST)
 {
-	if (withinShaderDeclaration && !withinStruct)
+	if (withinShaderDeclaration)
+	{
 		withinArgumentsList = false;
+		withinShaderDeclaration = false;
+	}
 }
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::OUT_MODIFIER* pOUT)

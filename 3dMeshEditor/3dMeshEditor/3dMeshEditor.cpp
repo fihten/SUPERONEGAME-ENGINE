@@ -51,9 +51,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	NodeID mesh = scene.addMeshNode(&cube);
 	
-	scene.setNodeParam(mesh, "gMaterial.Ambient", "{1,1,1,1}");
-	scene.setNodeParam(mesh, "gMaterial.Diffuse", "{1,1,1,1}");
-	scene.setNodeParam(mesh, "gMaterial.Specular", "{1,1,1,6}");
+	scene.setNodeParam(mesh, "gMaterial.Ambient", "{0.137f, 0.42f, 0.556f, 1.0f}");
+	scene.setNodeParam(mesh, "gMaterial.Diffuse", "{0.137f, 0.42f, 0.556f, 1.0f}");
+	scene.setNodeParam(mesh, "gMaterial.Specular", "{0.8f, 0.8f, 0.8f, 96.0f}");
 	scene.setNodeParam(mesh, "gMaterial.Reflect", "{0,0,0,0}");
 
 	NodeID dirLight = scene.addTransformNode(flt4x4(
@@ -63,9 +63,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		0, 0, -1, 1
 	));
 	
-	scene.setNodeParam(dirLight, "gDirLight.Ambient", "{0,0,0,1}");
-	scene.setNodeParam(dirLight, "gDirLight.Diffuse", "{1,0,0,1}");
-	scene.setNodeParam(dirLight, "gDirLight.Specular", "{1,0,0,6}");
+	scene.setNodeParam(dirLight, "gDirLight.Ambient", "{0.2f, 0.2f, 0.2f, 1.0f}");
+	scene.setNodeParam(dirLight, "gDirLight.Diffuse", "{0.5f, 0.5f, 0.5f, 1.0f}");
+	scene.setNodeParam(dirLight, "gDirLight.Specular", "{0.5f, 0.5f, 0.5f, 1.0f}");
 	scene.setNodeParam(dirLight, "gDirLight.Direction", "node_axis_z");
 	
 	scene.createNodeParamReference(mesh, dirLight, "gDirLight.Ambient");
@@ -80,12 +80,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		-1, 0, -1, 1
 	));
 
-	scene.setNodeParam(pointLight, "gPointLight.Ambient", "{0,0,0,1}");
-	scene.setNodeParam(pointLight, "gPointLight.Diffuse", "{0,1,0,1}");
-	scene.setNodeParam(pointLight, "gPointLight.Specular", "{0,1,0,16}");
-	scene.setNodeParam(pointLight, "gPointLight.Position", "position_in_scene");
+	scene.setNodeParam(pointLight, "gPointLight.Ambient", "{0.3f, 0.3f, 0.3f, 1.0f}");
+	scene.setNodeParam(pointLight, "gPointLight.Diffuse", "{0.7f, 0.7f, 0.7f, 1.0f}");
+	scene.setNodeParam(pointLight, "gPointLight.Specular", "{0.7f, 0.7f, 0.7f, 1.0f}");
+	scene.setNodeParam(pointLight, "gPointLight.Position", "node_position");
 	scene.setNodeParam(pointLight, "gPointLight.Range", "100");
-	scene.setNodeParam(pointLight, "gPointLight.Att", "{1,1,1}");
+	scene.setNodeParam(pointLight, "gPointLight.Att", "{0.0f, 0.1f, 0.0f}");
 
 	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Ambient");
 	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Diffuse");
@@ -101,14 +101,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 		-1, 0, 0, 1
 	));
 
-	scene.setNodeParam(spotLight, "gSpotLight.Ambient", "{0,0,0,1}");
-	scene.setNodeParam(spotLight, "gSpotLight.Diffuse", "{0,0,1,1}");
-	scene.setNodeParam(spotLight, "gSpotLight.Specular", "{0,0,1,16}");
-	scene.setNodeParam(spotLight, "gSpotLight.Position", "position_in_scene");
+	scene.setNodeParam(spotLight, "gSpotLight.Ambient", "{0.0f, 0.0f, 0.0f, 1.0f}");
+	scene.setNodeParam(spotLight, "gSpotLight.Diffuse", "{1.0f, 1.0f, 0.0f, 1.0f}");
+	scene.setNodeParam(spotLight, "gSpotLight.Specular", "{1.0f, 1.0f, 1.0f, 1.0f}");
+	scene.setNodeParam(spotLight, "gSpotLight.Position", "node_position");
 	scene.setNodeParam(spotLight, "gSpotLight.Range", "100");
 	scene.setNodeParam(spotLight, "gSpotLight.Direction", "node_axis_z");
 	scene.setNodeParam(spotLight, "gSpotLight.Spot", "10");
-	scene.setNodeParam(spotLight, "gSpotLight.Att", "{1,1,1}");
+	scene.setNodeParam(spotLight, "gSpotLight.Att", "{1.0f, 0.0f, 0.0f}");
 
 	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Ambient");
 	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Diffuse");
