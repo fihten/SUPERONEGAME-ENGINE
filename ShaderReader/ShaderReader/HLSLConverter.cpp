@@ -381,6 +381,13 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			updateCast();
 			break;
 
+		case State::COUNT_OF_ELEMENTS:
+			countOfElements();
+			break;
+
+		case State::INSERT_COUNT_OF_ELEMENTS:
+			insertCountOfElements();
+			break;
 		}
 	}
 
@@ -697,6 +704,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = INSERT_ELSE_BODY;
+
+		return;
+	}
+	if (word == std::string("]") && !statesStack.empty() && statesStack.top() == State::COUNT_OF_ELEMENTS)
+	{
+		words.pop();
+		currentState = INSERT_COUNT_OF_ELEMENTS;
 
 		return;
 	}
@@ -1794,6 +1808,12 @@ void HLSLConverter::variableDeclaration()
 		currentState = State::INSERT_VARIABLE_DECLARATION;
 		return;
 	}
+	if (word == std::string("["))
+	{
+		words.pop();
+		currentState = State::COUNT_OF_ELEMENTS;
+		return;
+	}
 }
 
 void HLSLConverter::insertVariableDeclaration()
@@ -2605,4 +2625,28 @@ void HLSLConverter::updateCast()
 	castOp->add(type);
 
 	currentState = State::UNKNOWN;
+}
+
+void HLSLConverter::countOfElements()
+{
+	ShaderUnits::SQUARE_BRACKETS* pCountOfElements = new ShaderUnits::SQUARE_BRACKETS();
+	componentStack.push(pCountOfElements);
+
+	statesStack.push(State::COUNT_OF_ELEMENTS);
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::insertCountOfElements()
+{
+	statesStack.pop();
+
+	DeclarationFunctionOrVariable& variableDeclaration = decls.top();
+	variableDeclaration.countOfElements = componentStack.top();
+	componentStack.pop();
+
+	currentState = State::VARIABLE_DECLARATION;
+
+	return;
 }

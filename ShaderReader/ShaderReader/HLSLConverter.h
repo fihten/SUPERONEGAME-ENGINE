@@ -101,7 +101,9 @@ class HLSLConverter :public ShaderConverter
 		SELECTED_FIELD,
 		SELECTED_METHOD,
 		CAST,
-		UPDATE_CAST
+		UPDATE_CAST,
+		COUNT_OF_ELEMENTS,
+		INSERT_COUNT_OF_ELEMENTS
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -256,6 +258,7 @@ class HLSLConverter :public ShaderConverter
 		ShaderUnits::ShaderComponent* modifier = nullptr;
 		ShaderUnits::ShaderComponent* type = nullptr;
 		std::string name = "";
+		ShaderUnits::ShaderComponent* countOfElements = nullptr;
 		ShaderUnits::ShaderComponent* signature = nullptr;
 		ShaderUnits::ShaderComponent* semantic = nullptr;
 		ShaderUnits::ShaderComponent* body = nullptr;
@@ -265,6 +268,9 @@ class HLSLConverter :public ShaderConverter
 
 	void cast();
 	void updateCast();
+
+	void countOfElements();
+	void insertCountOfElements();
 
 private:
 	bool isOperationState(State state) const;
