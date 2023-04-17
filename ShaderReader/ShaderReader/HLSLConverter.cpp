@@ -791,7 +791,13 @@ void HLSLConverter::finishExpression()
 		operation->add(operand);
 	}
 
-	if (op && (word == std::string(";") || word == std::string(",") || word == std::string(")")))
+	if (op && 
+		(
+			word == std::string(";") ||
+			word == std::string(",") ||
+			word == std::string(")") ||
+			word == std::string("]")
+			))
 	{
 		statesStack.pop();
 		return;
@@ -1106,8 +1112,12 @@ void HLSLConverter::variable()
 	}
 
 	std::string word = words.front();
-	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))
+	if (word == std::string(",") || word == std::string(";") ||
+		word == std::string(")") || word == std::string(":") ||
+		word == std::string("}") || word == std::string("]"))
+	{
 		currentState = State::FINISH_EXPRESSION;
+	}
 	if (word == std::string("-"))
 		currentState = State::BINARY_MINUS;
 	if (word == std::string("+"))
@@ -1137,7 +1147,9 @@ void HLSLConverter::number()
 	componentStack.push(var);
 
 	std::string word = words.front();
-	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string(":") || word == std::string("}"))
+	if (word == std::string(",") || word == std::string(";") ||
+		word == std::string(")") || word == std::string(":") ||
+		word == std::string("}") || word == std::string("]"))
 		currentState = State::FINISH_EXPRESSION;
 	if (word == std::string("-"))
 		currentState = State::BINARY_MINUS;
@@ -1828,6 +1840,8 @@ void HLSLConverter::insertVariableDeclaration()
 	pVariableDeclaration->setName(decls.top().name);
 	if (decls.top().semantic)
 		pVariableDeclaration->add(decls.top().semantic);
+	if (decls.top().countOfElements)
+		pVariableDeclaration->add(decls.top().countOfElements);
 	if (decls.top().value)
 		pVariableDeclaration->add(decls.top().value);
 
@@ -2641,9 +2655,9 @@ void HLSLConverter::countOfElements()
 void HLSLConverter::insertCountOfElements()
 {
 	statesStack.pop();
+	statesStack.pop();
 
-	DeclarationFunctionOrVariable& variableDeclaration = decls.top();
-	variableDeclaration.countOfElements = componentStack.top();
+	decls.top().countOfElements = componentStack.top();
 	componentStack.pop();
 
 	currentState = State::VARIABLE_DECLARATION;
