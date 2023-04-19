@@ -43,6 +43,7 @@ class HLSLConverter :public ShaderConverter
 		FLOAT4,
 		FLOAT3X3,
 		FLOAT4X4,
+		TEXTURE2D,
 		USER_TYPE,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
@@ -271,6 +272,8 @@ class HLSLConverter :public ShaderConverter
 
 	void countOfElements();
 	void insertCountOfElements();
+
+	void texture2dState();
 
 private:
 	bool isOperationState(State state) const;

@@ -145,6 +145,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			float4x4State();
 			break;
 
+		case State::TEXTURE2D:
+			texture2dState();
+			break;
+
 		case State::USER_TYPE:
 			userTypeState();
 			break;
@@ -515,6 +519,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::FLOAT4X4;
+
+		return;
+	}
+	if (word == std::string("Texture2D"))
+	{
+		words.pop();
+		currentState = State::TEXTURE2D;
 
 		return;
 	}
@@ -2663,4 +2674,19 @@ void HLSLConverter::insertCountOfElements()
 	currentState = State::VARIABLE_DECLARATION;
 
 	return;
+}
+
+void HLSLConverter::texture2dState()
+{
+	std::string word = words.front();
+	words.pop();
+
+	HLSLConverter::DeclarationFunctionOrVariable decl;
+
+	decl.type = new ShaderUnits::TEXTURE2D();
+	decl.name = word;
+
+	decls.push(decl);
+
+	currentState = State::CUSTOM_NAME;
 }
