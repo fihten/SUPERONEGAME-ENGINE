@@ -18,6 +18,12 @@ public:
 		std::cout << "CBUFFER " << pCBUFFER->getName() << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::SAMPLER_STATE* pSAMPLER_STATE)
+	{
+		printSpaces();
+		std::cout << "SamplerState " << pSAMPLER_STATE->getName() << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::FLOAT3X3* pFLOAT3X3)
 	{
 		printSpaces();
@@ -319,6 +325,10 @@ public:
 	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::SAMPLER_STATE* pSAMPLER_STATE)
 	{
 		numberOfSpaces -= 4;
 	};

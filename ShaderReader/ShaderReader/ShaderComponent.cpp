@@ -32,6 +32,14 @@ void ShaderUnits::CBUFFER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::SAMPLER_STATE::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::FLOAT3X3::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

@@ -6,6 +6,7 @@ class ShaderVisitor
 {
 public:
 	virtual void startVisit(const ShaderUnits::CBUFFER* pCBUFFER) {};
+	virtual void startVisit(const ShaderUnits::SAMPLER_STATE* pSAMPLER_STATE) {};
 	virtual void startVisit(const ShaderUnits::FLOAT3X3* pFLOAT3X3) {};
 	virtual void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	virtual void startVisit(const ShaderUnits::VOID_* pVOID) {};
@@ -62,6 +63,7 @@ public:
 	virtual void startVisit(const ShaderUnits::CAST* pCAST) {};
 
 	virtual void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER) {};
+	virtual void finishVisit(const ShaderUnits::SAMPLER_STATE* pSAMPLER_STATE) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT3X3* pFloat3X3) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	virtual void finishVisit(const ShaderUnits::VOID_* pVOID) {};

@@ -91,6 +91,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class SAMPLER_STATE : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class TYPE : public ShaderComposite
 	{
 
