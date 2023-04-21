@@ -249,6 +249,22 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			cbufferBodyOpenBracket();
 			break;
 
+		case State::SAMPLER_STATE:
+			samplerStateState();
+			break;
+
+		case State::SAMPLER_STATE_NAME:
+			samplerStateName();
+			break;
+
+		case State::INSERT_SAMPLER_STATE:
+			insertSamplerState();
+			break;
+
+		case State::SAMPLER_STATE_BODY_OPEN_BRACKET:
+			samplerStateBodyOpenBracket();
+			break;
+
 		case State::TECHNIQUE11:
 			technique11state();
 			break;
@@ -584,6 +600,20 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::INSERT_CBUFFER;
+
+		return;
+	}
+	if (word == std::string("SamplerState"))
+	{
+		words.pop();
+		currentState = State::SAMPLER_STATE;
+
+		return;
+	}
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::SAMPLER_STATE_BODY_OPEN_BRACKET)
+	{
+		words.pop();
+		currentState = State::INSERT_SAMPLER_STATE;
 
 		return;
 	}
@@ -2689,4 +2719,79 @@ void HLSLConverter::texture2dState()
 	decls.push(decl);
 
 	currentState = State::CUSTOM_NAME;
+}
+
+void HLSLConverter::samplerStateState()
+{
+	statesStack.push(State::SAMPLER_STATE);
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::SAMPLER_STATE_BODY_OPEN_BRACKET;
+		return;
+	}
+	// non-predefined word
+	{
+		currentState = State::SAMPLER_STATE_NAME;
+		return;
+	}
+}
+
+void HLSLConverter::samplerStateName()
+{
+	std::string samplerStateName = words.front();
+	words.pop();
+
+	samplerStateDecl.name = samplerStateName;
+
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::SAMPLER_STATE_BODY_OPEN_BRACKET;
+
+		return;
+	}
+	if (word == std::string(";"))
+	{
+		currentState = State::INSERT_SAMPLER_STATE;
+		return;
+	}
+}
+
+void HLSLConverter::insertSamplerState()
+{
+	if (statesStack.top() == State::SAMPLER_STATE_BODY_OPEN_BRACKET)
+		statesStack.pop();
+	if (statesStack.top() == State::SAMPLER_STATE)
+		statesStack.pop();
+
+	ShaderUnits::ShaderComponent* pSamplerState = new ShaderUnits::SAMPLER_STATE();
+	if (samplerStateDecl.name != std::string(""))
+		pSamplerState->setName(samplerStateDecl.name);
+	if (samplerStateDecl.body)
+		pSamplerState->add(samplerStateDecl.body);
+	samplerStateDecl.clear();
+
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
+	parent->add(pSamplerState);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::samplerStateBodyOpenBracket()
+{
+	ShaderUnits::ShaderComponent* body = new ShaderUnits::CURLY_BRACKETS();
+	samplerStateDecl.body = body;
+	componentStack.push(body);
+
+	statesStack.push(State::SAMPLER_STATE_BODY_OPEN_BRACKET);
+	currentState = State::UNKNOWN;
+
+	return;
 }

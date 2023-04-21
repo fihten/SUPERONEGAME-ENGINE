@@ -104,7 +104,11 @@ class HLSLConverter :public ShaderConverter
 		CAST,
 		UPDATE_CAST,
 		COUNT_OF_ELEMENTS,
-		INSERT_COUNT_OF_ELEMENTS
+		INSERT_COUNT_OF_ELEMENTS,
+		SAMPLER_STATE,
+		SAMPLER_STATE_NAME,
+		INSERT_SAMPLER_STATE,
+		SAMPLER_STATE_BODY_OPEN_BRACKET
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -274,6 +278,20 @@ class HLSLConverter :public ShaderConverter
 	void insertCountOfElements();
 
 	void texture2dState();
+
+	void samplerStateState();
+	void samplerStateName();
+	void insertSamplerState();
+	void samplerStateBodyOpenBracket();
+
+	struct SamplerStateDefinition
+	{
+		std::string name = "";
+		ShaderUnits::ShaderComponent* body = nullptr;
+
+		void clear() { name = ""; body = nullptr; }
+	};
+	SamplerStateDefinition samplerStateDecl;
 
 private:
 	bool isOperationState(State state) const;
