@@ -413,6 +413,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class UNROLL : public ATTRIBUTE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class SELECTED_FIELD : public VARIABLE
 	{
 	public:

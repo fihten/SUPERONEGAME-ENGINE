@@ -406,6 +406,12 @@ void ShaderUnits::FLATTEN::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::UNROLL::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::SELECTED_FIELD::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

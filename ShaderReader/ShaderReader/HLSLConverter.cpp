@@ -353,6 +353,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			flatten();
 			break;
 
+		case State::UNROLL:
+			unroll();
+			break;
+
 		case State::ADDITION_ASSIGN:
 			additionAssign();
 			break;
@@ -2409,6 +2413,11 @@ void HLSLConverter::flatten()
 	pFlatten = new ShaderUnits::FLATTEN();
 	currentState = State::UNKNOWN;
 	words.pop();
+}
+
+void HLSLConverter::unroll()
+{
+
 }
 
 void HLSLConverter::additionAssign()

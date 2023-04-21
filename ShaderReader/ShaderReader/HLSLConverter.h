@@ -91,6 +91,7 @@ class HLSLConverter :public ShaderConverter
 		INSERT_ENTIRE_IF,
 		ATTRIBUTE,
 		FLATTEN,
+		UNROLL,
 		ADDITION_ASSIGN,
 		DIVIDES_ASSIGN,
 		MULTIPLIES_ASSIGN,
@@ -246,6 +247,7 @@ class HLSLConverter :public ShaderConverter
 	void attribute();
 	void flatten();
 	ShaderUnits::FLATTEN* pFlatten = nullptr;
+	void unroll();
 
 	void additionAssign();
 	void dividesAssign();

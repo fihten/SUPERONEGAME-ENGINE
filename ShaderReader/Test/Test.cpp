@@ -305,6 +305,11 @@ public:
 		printSpaces();
 		std::cout << "[flatten]" << std::endl;
 	}
+	void startVisit(const ShaderUnits::UNROLL* pUNROLL)
+	{
+		printSpaces();
+		std::cout << "[unroll]" << std::endl;
+	}
 	void startVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
 	{
 		printSpaces();
@@ -472,6 +477,7 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
+	void finishVisit(const ShaderUnits::UNROLL* pUNROLL) {};
 	void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD)
 	{
 		numberOfSpaces -= 4;
