@@ -248,6 +248,7 @@ class HLSLConverter :public ShaderConverter
 	void flatten();
 	ShaderUnits::FLATTEN* pFlatten = nullptr;
 	void unroll();
+	ShaderUnits::UNROLL* pUnroll = nullptr;
 
 	void additionAssign();
 	void dividesAssign();

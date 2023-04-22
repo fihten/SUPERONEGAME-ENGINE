@@ -2406,6 +2406,13 @@ void HLSLConverter::attribute()
 
 		return;
 	}
+	if (word == std::string("unroll"))
+	{
+		words.pop();
+		currentState = State::UNROLL;
+
+		return;
+	}
 }
 
 void HLSLConverter::flatten()
@@ -2417,7 +2424,9 @@ void HLSLConverter::flatten()
 
 void HLSLConverter::unroll()
 {
-
+	pUnroll = new ShaderUnits::UNROLL();
+	currentState = State::UNKNOWN;
+	words.pop();
 }
 
 void HLSLConverter::additionAssign()
