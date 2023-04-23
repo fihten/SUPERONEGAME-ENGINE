@@ -394,6 +394,22 @@ void ShaderUnits::IF_NODE::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::FOR::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
+void ShaderUnits::INIT_EXPRESSION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::ATTRIBUTE::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

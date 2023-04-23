@@ -300,6 +300,18 @@ public:
 		std::cout << "if" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::FOR* pFOR)
+	{
+		printSpaces();
+		std::cout << "for" << std::endl;
+		numberOfSpaces += 4;
+	};
+	void startVisit(const ShaderUnits::INIT_EXPRESSION* pINIT_EXPRESSION)
+	{
+		printSpaces();
+		std::cout << "init-expression" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::FLATTEN* pFLATTEN)
 	{
 		printSpaces();
@@ -473,6 +485,14 @@ public:
 	};
 	void finishVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
 	void finishVisit(const ShaderUnits::IF_NODE* pIF_NODE)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::FOR* pFOR)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::INIT_EXPRESSION* pINIT_EXPRESSION)
 	{
 		numberOfSpaces -= 4;
 	};

@@ -401,6 +401,18 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class FOR : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
+	class INIT_EXPRESSION : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class ATTRIBUTE : public Leaf
 	{
 	public:
