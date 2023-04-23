@@ -109,7 +109,18 @@ class HLSLConverter :public ShaderConverter
 		SAMPLER_STATE,
 		SAMPLER_STATE_NAME,
 		INSERT_SAMPLER_STATE,
-		SAMPLER_STATE_BODY_OPEN_BRACKET
+		SAMPLER_STATE_BODY_OPEN_BRACKET,
+		FOR,
+		FOR_EXPRESSION_OPEN_BRACKET,
+		FOR_INIT_EXPRESSION,
+		FOR_COND_EXPRESSION,
+		FOR_LOOP_EXPRESSION,
+		INSERT_FOR_EXPRESSION,
+		FOR_BODY_OPEN_BRACKET,
+		INSERT_FOR_INIT_EXPRESSION,
+		INSERT_FOR_COND_EXPRESSION,
+		INSERT_FOR_LOOP_EXPRESSION,
+		INSERT_FOR
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -295,6 +306,18 @@ class HLSLConverter :public ShaderConverter
 		void clear() { name = ""; body = nullptr; }
 	};
 	SamplerStateDefinition samplerStateDecl;
+
+	void forState();
+	void forExpressionOpenBracket();
+	void forInitExpression();
+	void forCondExpression();
+	void forLoopExpression();
+	void insertForExpression();
+	void forBodyOpenBracket();
+	void insertForInitExpression();
+	void insertForCondExpression();
+	void insertForLoopExpression();
+	void insertFor();
 
 private:
 	bool isOperationState(State state) const;

@@ -412,6 +412,50 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 		case State::INSERT_COUNT_OF_ELEMENTS:
 			insertCountOfElements();
 			break;
+
+		case State::FOR:
+			forState();
+			break;
+
+		case State::FOR_EXPRESSION_OPEN_BRACKET:
+			forExpressionOpenBracket();
+			break;
+
+		case State::FOR_INIT_EXPRESSION:
+			forInitExpression();
+			break;
+
+		case State::FOR_COND_EXPRESSION:
+			forCondExpression();
+			break;
+
+		case State::FOR_LOOP_EXPRESSION:
+			forLoopExpression();
+			break;
+
+		case State::INSERT_FOR_EXPRESSION:
+			insertForExpression();
+			break;
+
+		case State::FOR_BODY_OPEN_BRACKET:
+			forBodyOpenBracket();
+			break;
+
+		case State::INSERT_FOR_INIT_EXPRESSION:
+			insertForInitExpression();
+			break;
+
+		case State::INSERT_FOR_COND_EXPRESSION:
+			insertForCondExpression();
+			break;
+
+		case State::INSERT_FOR_LOOP_EXPRESSION:
+			insertForLoopExpression();
+			break;
+
+		case State::INSERT_FOR:
+			insertFor();
+			break;
 		}
 	}
 
@@ -2812,4 +2856,59 @@ void HLSLConverter::samplerStateBodyOpenBracket()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void HLSLConverter::forState()
+{
+
+}
+
+void HLSLConverter::forExpressionOpenBracket()
+{
+
+}
+
+void HLSLConverter::forInitExpression()
+{
+
+}
+
+void HLSLConverter::forCondExpression()
+{
+
+}
+
+void HLSLConverter::forLoopExpression()
+{
+
+}
+
+void HLSLConverter::insertForExpression()
+{
+
+}
+
+void HLSLConverter::forBodyOpenBracket()
+{
+
+}
+
+void HLSLConverter::insertForInitExpression()
+{
+
+}
+
+void HLSLConverter::insertForCondExpression()
+{
+
+}
+
+void HLSLConverter::insertForLoopExpression()
+{
+
+}
+
+void HLSLConverter::insertFor()
+{
+
 }
