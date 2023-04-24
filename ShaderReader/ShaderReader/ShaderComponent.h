@@ -413,6 +413,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class COND_EXPRESSION : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class ATTRIBUTE : public Leaf
 	{
 	public:

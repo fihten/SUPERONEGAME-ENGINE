@@ -312,6 +312,12 @@ public:
 		std::cout << "init-expression" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::COND_EXPRESSION* pCOND_EXPRESSION)
+	{
+		printSpaces();
+		std::cout << "cond-expression" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::FLATTEN* pFLATTEN)
 	{
 		printSpaces();
@@ -493,6 +499,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::INIT_EXPRESSION* pINIT_EXPRESSION)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::COND_EXPRESSION* pCOND_EXPRESSION)
 	{
 		numberOfSpaces -= 4;
 	};

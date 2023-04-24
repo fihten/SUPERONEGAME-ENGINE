@@ -56,6 +56,7 @@ public:
 	virtual void startVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
 	virtual void startVisit(const ShaderUnits::FOR* pFOR) {};
 	virtual void startVisit(const ShaderUnits::INIT_EXPRESSION* pINIT_EXPRESSION) {};
+	virtual void startVisit(const ShaderUnits::COND_EXPRESSION* pCOND_EXPRESSION) {};
 	virtual void startVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 	virtual void startVisit(const ShaderUnits::UNROLL* pUNROLL) {};
 	virtual void startVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN) {};
@@ -116,6 +117,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::IF_NODE* pIF_NODE) {};
 	virtual void finishVisit(const ShaderUnits::FOR* pFOR) {};
 	virtual void finishVisit(const ShaderUnits::INIT_EXPRESSION* pINIT_EXPRESSION) {};
+	virtual void finishVisit(const ShaderUnits::COND_EXPRESSION* pCOND_EXPRESSION) {};
 	virtual void finishVisit(const ShaderUnits::FLATTEN* pFLATTEN) {};
 	virtual void finishVisit(const ShaderUnits::UNROLL* pUNROLL) {};
 	virtual void finishVisit(const ShaderUnits::ADDITION_ASSIGN* pADDITION_ASSIGN) {};
