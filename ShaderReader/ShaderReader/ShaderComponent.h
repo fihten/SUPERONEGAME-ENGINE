@@ -419,6 +419,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class LOOP_EXPRESSION : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class ATTRIBUTE : public Leaf
 	{
 	public:

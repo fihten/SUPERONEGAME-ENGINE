@@ -418,6 +418,14 @@ void ShaderUnits::COND_EXPRESSION::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::LOOP_EXPRESSION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::ATTRIBUTE::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
