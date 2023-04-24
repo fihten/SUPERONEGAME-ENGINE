@@ -796,6 +796,27 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("for"))
+	{
+		words.pop();
+		currentState = State::FOR;
+
+		return;
+	}
+	if (word == std::string(";") && !statesStack.empty() && statesStack.top() == State::FOR_INIT_EXPRESSION)
+	{
+		words.pop();
+		currentState = State::INSERT_FOR_INIT_EXPRESSION;
+
+		return;
+	}
+	if (word == std::string(";") && !statesStack.empty() && statesStack.top() == State::FOR_COND_EXPRESSION)
+	{
+		words.pop();
+		currentState = State::INSERT_FOR_COND_EXPRESSION;
+
+		return;
+	}
 	if (word == std::string("]") && !statesStack.empty() && statesStack.top() == State::COUNT_OF_ELEMENTS)
 	{
 		words.pop();
