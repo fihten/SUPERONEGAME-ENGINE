@@ -817,6 +817,26 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::FOR_LOOP_EXPRESSION)
+	{
+		words.pop();
+		currentState = State::INSERT_FOR_LOOP_EXPRESSION;
+
+		return;
+	}
+	if (
+		(word == std::string("}") && !statesStack.empty() &&
+			statesStack.top() == State::FOR_BODY_OPEN_BRACKET)
+		||
+		(word == std::string(";") && !statesStack.empty() &&
+			statesStack.top() == State::FOR)
+		)
+	{
+		words.pop();
+		currentState = State::INSERT_FOR;
+
+		return;
+	}
 	if (word == std::string("]") && !statesStack.empty() && statesStack.top() == State::COUNT_OF_ELEMENTS)
 	{
 		words.pop();
@@ -2881,27 +2901,56 @@ void HLSLConverter::samplerStateBodyOpenBracket()
 
 void HLSLConverter::forState()
 {
+	ShaderUnits::ShaderComponent* pFor = new ShaderUnits::FOR();
+	componentStack.push(pFor);
 
+	statesStack.push(State::FOR);
+
+	std::string word = words.front();
+	if (word == std::string("("))
+	{
+		words.pop();
+		currentState = State::FOR_EXPRESSION_OPEN_BRACKET;
+		return;
+	}
 }
 
 void HLSLConverter::forExpressionOpenBracket()
 {
+	ShaderUnits::ShaderComponent* pExpression = new ShaderUnits::ROUND_BRACKETS();
+	componentStack.push(pExpression);
 
+	currentState = State::FOR_INIT_EXPRESSION;
 }
 
 void HLSLConverter::forInitExpression()
 {
+	ShaderUnits::ShaderComponent* pInitExpression = new ShaderUnits::INIT_EXPRESSION();
+	componentStack.push(pInitExpression);
 
+	statesStack.push(State::FOR_INIT_EXPRESSION);
+
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::forCondExpression()
 {
+	ShaderUnits::ShaderComponent* pCondExpression = new ShaderUnits::COND_EXPRESSION();
+	componentStack.push(pCondExpression);
 
+	statesStack.push(State::FOR_COND_EXPRESSION);
+
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::forLoopExpression()
 {
+	ShaderUnits::ShaderComponent* pLoopExpression = new ShaderUnits::LOOP_EXPRESSION();
+	componentStack.push(pLoopExpression);
 
+	statesStack.push(State::FOR_LOOP_EXPRESSION);
+
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::insertForExpression()
@@ -2916,17 +2965,41 @@ void HLSLConverter::forBodyOpenBracket()
 
 void HLSLConverter::insertForInitExpression()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pInitExpression = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pExpression = componentStack.top();
+	pExpression->add(pInitExpression);
+
+	currentState = State::FOR_COND_EXPRESSION;
 }
 
 void HLSLConverter::insertForCondExpression()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pCondExpression = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pExpression = componentStack.top();
+	pExpression->add(pCondExpression);
+
+	currentState = State::FOR_LOOP_EXPRESSION;
 }
 
 void HLSLConverter::insertForLoopExpression()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pLoopExpression = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pExpression = componentStack.top();
+	pExpression->add(pLoopExpression);
+
+	currentState = State::INSERT_FOR_EXPRESSION;
 }
 
 void HLSLConverter::insertFor()
