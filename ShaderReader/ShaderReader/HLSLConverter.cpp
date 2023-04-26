@@ -2904,6 +2904,12 @@ void HLSLConverter::forState()
 	ShaderUnits::ShaderComponent* pFor = new ShaderUnits::FOR();
 	componentStack.push(pFor);
 
+	if (pUnroll)
+	{
+		pFor->add(pUnroll);
+		pUnroll = nullptr;
+	}
+
 	statesStack.push(State::FOR);
 
 	std::string word = words.front();
