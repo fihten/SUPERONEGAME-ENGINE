@@ -2955,12 +2955,32 @@ void HLSLConverter::forLoopExpression()
 
 void HLSLConverter::insertForExpression()
 {
+	ShaderUnits::ShaderComponent* pExpression = componentStack.top();
+	componentStack.pop();
 
+	ShaderUnits::ShaderComponent* pFor = componentStack.top();
+	pFor->add(pExpression);
+
+	std::string word = words.front();
+	if (word == std::string("{"))
+	{
+		words.pop();
+		currentState = State::FOR_BODY_OPEN_BRACKET;
+		return;
+	}
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::forBodyOpenBracket()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pForBody = new ShaderUnits::CURLY_BRACKETS();
+	componentStack.push(pForBody);
+
+	statesStack.push(State::FOR_BODY_OPEN_BRACKET);
+
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::insertForInitExpression()
@@ -3004,5 +3024,18 @@ void HLSLConverter::insertForLoopExpression()
 
 void HLSLConverter::insertFor()
 {
+	statesStack.pop();
+	
+	ShaderUnits::ShaderComponent* pForBody = componentStack.top();
+	componentStack.pop();
 
+	ShaderUnits::ShaderComponent* pFor = componentStack.top();
+	componentStack.pop();
+
+	pFor->add(pForBody);
+
+	ShaderUnits::ShaderComponent* pParent = componentStack.top();
+	pParent->add(pFor);
+
+	currentState = State::UNKNOWN;
 }
