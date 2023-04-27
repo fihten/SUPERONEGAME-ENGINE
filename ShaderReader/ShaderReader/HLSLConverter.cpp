@@ -1034,6 +1034,8 @@ bool HLSLConverter::isType(const std::string& str) const
 {
 	if (userTypes.count(str))
 		return true;
+	if (std::strcmp(str.c_str(), "int"))
+		return true;
 	if (std::strcmp(str.c_str(), "float"))
 		return true;
 	if (std::strcmp(str.c_str(), "float2"))
@@ -2762,6 +2764,13 @@ void HLSLConverter::cast()
 	statesStack.push(State::CAST);
 
 	std::string word = words.front();
+	if (word == std::string("int"))
+	{
+		words.pop();
+		currentState = State::INT1;
+
+		return;
+	}
 	if (word == std::string("float"))
 	{
 		words.pop();

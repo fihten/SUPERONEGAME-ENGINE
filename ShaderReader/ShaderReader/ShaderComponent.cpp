@@ -288,6 +288,14 @@ void ShaderUnits::BINARY_MULTIPLY::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::LESS_THAN::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::GREATER_THAN::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
