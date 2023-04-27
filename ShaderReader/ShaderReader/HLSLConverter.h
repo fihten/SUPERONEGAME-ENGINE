@@ -37,6 +37,7 @@ class HLSLConverter :public ShaderConverter
 		ARGUMENTS_LIST_CLOSE_BRACKET,
 		ASSIGNMENT,
 		VOID_,
+		INT1,
 		FLOAT1,
 		FLOAT2,
 		FLOAT3,
@@ -164,6 +165,7 @@ class HLSLConverter :public ShaderConverter
 	void assignment();
 
 	void voidState();
+	void intState();
 	void floatState();
 	void float2State();
 	void float3State();

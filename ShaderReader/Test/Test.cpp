@@ -39,6 +39,11 @@ public:
 		printSpaces();
 		std::cout << "void" << std::endl;
 	};
+	void startVisit(const ShaderUnits::INT1* pINT)
+	{
+		printSpaces();
+		std::cout << "int" << std::endl;
+	};
 	void startVisit(const ShaderUnits::FLOAT1* pFLOAT)
 	{
 		printSpaces();
@@ -363,6 +368,7 @@ public:
 	};
 	void finishVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	void finishVisit(const ShaderUnits::VOID_* pVOID) {};
+	void finishVisit(const ShaderUnits::INT1* pINT) {};
 	void finishVisit(const ShaderUnits::FLOAT1* pFLOAT) {};
 	void finishVisit(const ShaderUnits::FLOAT2* pFLOAT2) {};
 	void finishVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};

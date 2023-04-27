@@ -121,6 +121,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			voidState();
 			break;
 
+		case State::INT1:
+			intState();
+			break;
+
 		case State::FLOAT1:
 			floatState();
 			break;
@@ -541,6 +545,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::VOID_;
+
+		return;
+	}
+	if (word == std::string("int"))
+	{
+		words.pop();
+		currentState = State::INT1;
 
 		return;
 	}
@@ -1461,6 +1472,36 @@ void HLSLConverter::voidState()
 		HLSLConverter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ShaderUnits::VOID_();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void HLSLConverter::intState()
+{
+	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::INT1* type = new ShaderUnits::INT1();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ShaderUnits::INT1();
 		decl.name = word;
 
 		decls.push(decl);

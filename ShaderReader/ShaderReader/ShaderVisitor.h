@@ -10,6 +10,7 @@ public:
 	virtual void startVisit(const ShaderUnits::FLOAT3X3* pFLOAT3X3) {};
 	virtual void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	virtual void startVisit(const ShaderUnits::VOID_* pVOID) {};
+	virtual void startVisit(const ShaderUnits::INT1* pINT) {};
 	virtual void startVisit(const ShaderUnits::FLOAT1* pFLOAT) {};
 	virtual void startVisit(const ShaderUnits::FLOAT2* pFLOAT2) {};
 	virtual void startVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};
@@ -72,6 +73,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::FLOAT3X3* pFloat3X3) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	virtual void finishVisit(const ShaderUnits::VOID_* pVOID) {};
+	virtual void finishVisit(const ShaderUnits::INT1* pINT) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT1* pFLOAT) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT2* pFLOAT2) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};
