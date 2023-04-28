@@ -1224,12 +1224,35 @@ void HLSLConverter::creatingGreaterThan()
 
 void HLSLConverter::lessThan()
 {
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
 
+	if (lastState == State::BINARY_DIVIDE ||
+		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::BINARY_MINUS ||
+		lastState == State::BINARY_PLUS ||
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_LESS_THAN;
 }
 
 void HLSLConverter::creatingLessThan()
 {
+	words.pop();
 
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* lessThanOp = new ShaderUnits::LESS_THAN();
+	lessThanOp->add(leftOperand);
+
+	componentStack.push(lessThanOp);
+
+	statesStack.push(State::LESS_THAN);
+	currentState = State::UNKNOWN;
 }
 
 void HLSLConverter::variable()
