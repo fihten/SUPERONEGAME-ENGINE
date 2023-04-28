@@ -22,11 +22,13 @@ class HLSLConverter :public ShaderConverter
 		BINARY_MULTIPLY,
 		BINARY_DIVIDE,
 		GREATER_THAN,
+		LESS_THAN,
 		CREATING_BINARY_MINUS,
 		CREATING_BINARY_PLUS,
 		CREATING_BINARY_DIVIDE,
 		CREATING_BINARY_MULTIPLY,
 		CREATING_GREATER_THAN,
+		CREATING_LESS_THAN,
 		VARIABLE,
 		NUMBER,
 		COMMENT,
@@ -149,6 +151,9 @@ class HLSLConverter :public ShaderConverter
 
 	void greaterThan();
 	void creatingGreaterThan();
+
+	void lessThan();
+	void creatingLessThan();
 
 	std::string userName = "";
 	void variable();

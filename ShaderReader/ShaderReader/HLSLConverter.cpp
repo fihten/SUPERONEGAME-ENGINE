@@ -81,6 +81,14 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			creatingGreaterThan();
 			break;
 
+		case State::LESS_THAN:
+			lessThan();
+			break;
+
+		case State::CREATING_LESS_THAN:
+			creatingLessThan();
+			break;
+
 		case State::VARIABLE:
 			variable();
 			break;
@@ -914,6 +922,8 @@ void HLSLConverter::bracketsUnaryOperatorClose()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
+	if (word == std::string("<"))
+		currentState = State::LESS_THAN;
 }
 
 void HLSLConverter::finishExpression()
@@ -974,6 +984,12 @@ void HLSLConverter::finishExpression()
 		currentState = State::GREATER_THAN;
 		return;
 	}
+	if (op && word == std::string("<"))
+	{
+		statesStack.pop();
+		currentState = State::LESS_THAN;
+		return;
+	}
 
 	State lastState = State::UNKNOWN;
 	if (!statesStack.empty())
@@ -1006,6 +1022,7 @@ bool HLSLConverter::isOperationState(State state) const
 		state == State::UNARY_PLUS ||
 		state == State::CAST ||
 		state == State::GREATER_THAN ||
+		state == State::LESS_THAN ||
 		state == State::ASSIGNMENT ||
 		state == State::ADDITION_ASSIGN ||
 		state == State::DIVIDES_ASSIGN ||
@@ -1205,6 +1222,16 @@ void HLSLConverter::creatingGreaterThan()
 	currentState = State::UNKNOWN;
 }
 
+void HLSLConverter::lessThan()
+{
+
+}
+
+void HLSLConverter::creatingLessThan()
+{
+
+}
+
 void HLSLConverter::variable()
 {
 	// It is hack
@@ -1279,6 +1306,8 @@ void HLSLConverter::variable()
 		currentState = State::MULTIPLIES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
+	if (word == std::string("<"))
+		currentState = State::LESS_THAN;
 }
 
 void HLSLConverter::number()
@@ -1312,6 +1341,8 @@ void HLSLConverter::number()
 		currentState = State::MULTIPLIES_ASSIGN;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
+	if (word == std::string("<"))
+		currentState = State::LESS_THAN;
 }
 
 void HLSLConverter::comment()
@@ -1447,6 +1478,8 @@ void HLSLConverter::argumentsListCloseBracket()
 		currentState = State::BINARY_DIVIDE;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
+	if (word == std::string("<"))
+		currentState = State::LESS_THAN;
 }
 
 void HLSLConverter::assignment()
