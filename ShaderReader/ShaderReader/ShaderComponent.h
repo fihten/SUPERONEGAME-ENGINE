@@ -347,6 +347,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class INCREMENT : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class ASSIGNMENT : public ShaderComposite
 	{
 	public:

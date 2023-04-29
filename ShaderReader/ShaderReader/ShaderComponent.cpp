@@ -320,6 +320,14 @@ void ShaderUnits::UNARY_PLUS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::INCREMENT::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::ASSIGNMENT::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

@@ -46,6 +46,7 @@ public:
 	virtual void startVisit(const ShaderUnits::GREATER_THAN* pGREATER_THAN) {};
 	virtual void startVisit(const ShaderUnits::UNARY_MINUS* pUNARY_MINUS) {};
 	virtual void startVisit(const ShaderUnits::UNARY_PLUS* pUNARY_PLUS) {};
+	virtual void startVisit(const ShaderUnits::INCREMENT* pINCREMENT) {};
 	virtual void startVisit(const ShaderUnits::ASSIGNMENT* pASSIGNMENT) {};
 	virtual void startVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11) {};
 	virtual void startVisit(const ShaderUnits::PASS* pPASS) {};
@@ -110,6 +111,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::GREATER_THAN* pGREATER_THAN) {};
 	virtual void finishVisit(const ShaderUnits::UNARY_MINUS* pUNARY_MINUS) {};
 	virtual void finishVisit(const ShaderUnits::UNARY_PLUS* pUNARY_PLUS) {};
+	virtual void finishVisit(const ShaderUnits::INCREMENT* pINCREMENT) {};
 	virtual void finishVisit(const ShaderUnits::ASSIGNMENT* pASSIGNMENT) {};
 	virtual void finishVisit(const ShaderUnits::TECHNIQUE11* pTECHNIQUE11) {};
 	virtual void finishVisit(const ShaderUnits::PASS* pPASS) {};

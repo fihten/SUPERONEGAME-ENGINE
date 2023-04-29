@@ -238,6 +238,12 @@ public:
 		std::cout << "+" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::INCREMENT* pINCREMENT)
+	{
+		printSpaces();
+		std::cout << "++" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::ASSIGNMENT* pASSIGNMENT)
 	{
 		printSpaces();
@@ -464,6 +470,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::UNARY_PLUS* pUNARY_PLUS)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::INCREMENT* pINCREMENT)
 	{
 		numberOfSpaces -= 4;
 	};
