@@ -58,10 +58,11 @@ bool readWord(
 	bool isAdditionAssign = str[from] == '+' && str[from + 1] == '=';
 	bool isDividesAssign = str[from] == '/' && str[from + 1] == '=';
 	bool isMultipliesAssign = str[from] == '*' && str[from + 1] == '=';
+	bool isIncrement = str[from] == '+' && str[from + 1] == '+';
 	size_t to = 0;
 	if (isComment)
 		to = nextStopSymbol(str.c_str(), "\n", from);
-	else if (isDividesAssign || isMultipliesAssign || isAdditionAssign)
+	else if (isDividesAssign || isMultipliesAssign || isAdditionAssign || isIncrement)
 		to = from + 2;
 	else
 		to = nextStopSymbol(str.c_str(), stopSymbols.c_str(), from);

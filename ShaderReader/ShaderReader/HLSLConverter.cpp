@@ -109,6 +109,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			unaryPlus();
 			break;
 
+		case State::INCREMENT:
+			increment();
+			break;
+
 		case State::FUNCTION_CALL:
 			functionCall();
 			break;
@@ -546,6 +550,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::UNARY_PLUS;
+
+		return;
+	}
+	if (word == std::string("++"))
+	{
+		words.pop();
+		currentState = State::INCREMENT;
 
 		return;
 	}
@@ -1020,6 +1031,7 @@ bool HLSLConverter::isOperationState(State state) const
 		state == State::BINARY_PLUS ||
 		state == State::UNARY_MINUS ||
 		state == State::UNARY_PLUS ||
+		state == State::INCREMENT ||
 		state == State::CAST ||
 		state == State::GREATER_THAN ||
 		state == State::LESS_THAN ||
@@ -1077,7 +1089,8 @@ void HLSLConverter::binaryMinus()
 	if (lastState == State::BINARY_DIVIDE ||
 		lastState == State::BINARY_MULTIPLY ||
 		lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MINUS;
@@ -1108,7 +1121,8 @@ void HLSLConverter::binaryPlus()
 	if (lastState == State::BINARY_DIVIDE ||
 		lastState == State::BINARY_MULTIPLY ||
 		lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_PLUS;
@@ -1137,7 +1151,8 @@ void HLSLConverter::binaryDivide()
 		lastState = statesStack.top();
 
 	if (lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = CREATING_BINARY_DIVIDE;
@@ -1167,7 +1182,8 @@ void HLSLConverter::binaryMultiply()
 
 	if (lastState == State::BINARY_DIVIDE ||
 		lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_BINARY_MULTIPLY;
@@ -1200,7 +1216,8 @@ void HLSLConverter::greaterThan()
 		lastState == State::BINARY_MINUS ||
 		lastState == State::BINARY_PLUS ||
 		lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_GREATER_THAN;
@@ -1233,7 +1250,8 @@ void HLSLConverter::lessThan()
 		lastState == State::BINARY_MINUS ||
 		lastState == State::BINARY_PLUS ||
 		lastState == State::UNARY_MINUS ||
-		lastState == State::UNARY_PLUS)
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
 		currentState = State::FINISH_EXPRESSION;
 	else
 		currentState = State::CREATING_LESS_THAN;
@@ -1394,6 +1412,15 @@ void HLSLConverter::unaryPlus()
 
 	ShaderUnits::ShaderComponent* unaryPlusOp = new ShaderUnits::UNARY_PLUS();
 	componentStack.push(unaryPlusOp);
+}
+
+void HLSLConverter::increment()
+{
+	statesStack.push(State::INCREMENT);
+	currentState = State::UNKNOWN;
+
+	ShaderUnits::ShaderComponent* incrementOp = new ShaderUnits::INCREMENT();
+	componentStack.push(incrementOp);
 }
 
 void HLSLConverter::functionCall()

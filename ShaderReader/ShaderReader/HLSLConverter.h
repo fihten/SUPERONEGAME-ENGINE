@@ -34,6 +34,7 @@ class HLSLConverter :public ShaderConverter
 		COMMENT,
 		UNARY_MINUS,
 		UNARY_PLUS,
+		INCREMENT,
 		FUNCTION_CALL,
 		ARGUMENTS_LIST_OPEN_BRACKET,
 		ARGUMENTS_LIST_CLOSE_BRACKET,
@@ -162,6 +163,7 @@ class HLSLConverter :public ShaderConverter
 
 	void unaryMinus();
 	void unaryPlus();
+	void increment();
 
 	void functionCall();
 	void argumentsListOpenBracket();
