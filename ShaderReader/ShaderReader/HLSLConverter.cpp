@@ -1063,19 +1063,30 @@ bool HLSLConverter::isType(const std::string& str) const
 {
 	if (userTypes.count(str))
 		return true;
-	if (std::strcmp(str.c_str(), "int"))
+	if (std::strcmp(str.c_str(), "int") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float"))
+	if (std::strcmp(str.c_str(), "float") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float2"))
+	if (std::strcmp(str.c_str(), "float2") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float3"))
+	if (std::strcmp(str.c_str(), "float3") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float4"))
+	if (std::strcmp(str.c_str(), "float4") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float3x3"))
+	if (std::strcmp(str.c_str(), "float3x3") == 0)
 		return true;
-	if (std::strcmp(str.c_str(), "float4x4"))
+	if (std::strcmp(str.c_str(), "float4x4") == 0)
+		return true;
+	return false;
+}
+
+bool HLSLConverter::isModifier(const std::string& str) const
+{
+	if (std::strcmp(str.c_str(), "in") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "out") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "inout") == 0)
 		return true;
 	return false;
 }
@@ -2101,9 +2112,24 @@ void HLSLConverter::insertVariableDeclaration()
 	if (decls.top().value)
 		pVariableDeclaration->add(decls.top().value);
 
-	decls.pop();
-
 	componentStack.top()->add(pVariableDeclaration);
+
+	std::string word = words.front();
+	if (word == std::string(","))
+	{
+		words.pop();
+		if (!isType(words.front()) && !isModifier(words.front()))
+		{
+			decls.top().name = words.front();
+			words.pop();
+
+			currentState = State::VARIABLE_DECLARATION;
+
+			return;
+		}
+	}
+
+	decls.pop();
 
 	currentState = State::UNKNOWN;
 

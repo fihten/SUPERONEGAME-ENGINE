@@ -332,6 +332,7 @@ private:
 	bool isOperationState(State state) const;
 	bool isCast(const std::queue<std::string>& words) const;
 	bool isType(const std::string& str) const;
+	bool isModifier(const std::string& str) const;
 
 public:
 	HLSLConverter();
