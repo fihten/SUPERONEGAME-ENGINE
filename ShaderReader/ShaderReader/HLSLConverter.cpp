@@ -472,6 +472,14 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 		case State::INSERT_FOR:
 			insertFor();
 			break;
+
+		case State::INDEX_OF_VARIABLE:
+			indexOfVariable();
+			break;
+
+		case State::INSERT_INDEX_OF_VARIABLE:
+			insertIndexOfVariable();
+			break;
 		}
 	}
 
@@ -1300,6 +1308,7 @@ void HLSLConverter::variable()
 		return;
 	}
 
+	std::string word = words.front();
 	if (!userName.empty())
 	{
 		ShaderUnits::ShaderComponent* var = new ShaderUnits::VARIABLE();
@@ -1324,6 +1333,13 @@ void HLSLConverter::variable()
 		}
 
 		userName = std::string("");
+		if (word == std::string("["))
+		{
+			words.pop();
+			currentState = State::INDEX_OF_VARIABLE;
+
+			return;
+		}
 	}
 	else
 	{
@@ -1333,7 +1349,6 @@ void HLSLConverter::variable()
 		selectedFM_tail.pop();
 	}
 
-	std::string word = words.front();
 	if (word == std::string(",") || word == std::string(";") ||
 		word == std::string(")") || word == std::string(":") ||
 		word == std::string("}") || word == std::string("]"))
@@ -3203,4 +3218,19 @@ void HLSLConverter::insertFor()
 	pParent->add(pFor);
 
 	currentState = State::UNKNOWN;
+}
+
+void HLSLConverter::indexOfVariable()
+{
+	ShaderUnits::ShaderComponent* pIndex = new ShaderUnits::SQUARE_BRACKETS();
+	componentStack.push(pIndex);
+
+	statesStack.push(State::INDEX_OF_VARIABLE);
+
+	currentState = State::UNKNOWN;
+}
+
+void HLSLConverter::insertIndexOfVariable()
+{
+
 }
