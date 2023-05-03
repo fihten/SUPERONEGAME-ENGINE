@@ -31,6 +31,18 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
+	[unroll]
+	for (int i = 0; i < gLightCount; ++i)
+	{
+		float4 A, D, S;
+		ComputeDirectionalLight(gMaterial, gDirLights[i].a, pin.NormalW, toEye,
+			A, D, S);
+
+		ambient += A;
+		diffuse += D;
+		spec += S;
+	}
+
 	VertexOut vout;
 
 	// Transform to world space.

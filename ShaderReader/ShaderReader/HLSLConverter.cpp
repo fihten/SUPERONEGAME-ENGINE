@@ -882,6 +882,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("]") && !statesStack.empty() && statesStack.top() == State::INDEX_OF_VARIABLE)
+	{
+		words.pop();
+		currentState = State::INSERT_INDEX_OF_VARIABLE;
+
+		return;
+	}
 	if (word == std::string(";") || word == std::string(",") || word == std::string(")") || word == std::string("}"))
 	{
 		words.pop();
@@ -3232,5 +3239,47 @@ void HLSLConverter::indexOfVariable()
 
 void HLSLConverter::insertIndexOfVariable()
 {
+	statesStack.pop();
+	
+	ShaderUnits::ShaderComponent* pIndex = componentStack.top();
+	componentStack.pop();
 
+	ShaderUnits::ShaderComponent* pVariable = componentStack.top();
+	pVariable->add(pIndex);
+
+	std::string word = words.front();
+	if (word[0] == '.')
+	{
+		selectedFM_head.push(nullptr);
+		selectedFM_tail.push(nullptr);
+
+		currentState = State::UNKNOWN;
+		return;
+	}
+	if (word == std::string(",") || word == std::string(";") ||
+		word == std::string(")") || word == std::string(":") ||
+		word == std::string("}") || word == std::string("]"))
+	{
+		currentState = State::FINISH_EXPRESSION;
+	}
+	if (word == std::string("-"))
+		currentState = State::BINARY_MINUS;
+	if (word == std::string("+"))
+		currentState = State::BINARY_PLUS;
+	if (word == std::string("*"))
+		currentState = State::BINARY_MULTIPLY;
+	if (word == std::string("/"))
+		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("="))
+		currentState = State::ASSIGNMENT;
+	if (word == std::string("+="))
+		currentState = State::ADDITION_ASSIGN;
+	if (word == std::string("/="))
+		currentState = State::DIVIDES_ASSIGN;
+	if (word == std::string("*="))
+		currentState = State::MULTIPLIES_ASSIGN;
+	if (word == std::string(">"))
+		currentState = State::GREATER_THAN;
+	if (word == std::string("<"))
+		currentState = State::LESS_THAN;
 }
