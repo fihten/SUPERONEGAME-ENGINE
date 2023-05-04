@@ -221,6 +221,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class SET_GEOMETRY_SHADER : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class SET_PIXEL_SHADER : public ShaderComposite
 	{
 	public:

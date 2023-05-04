@@ -126,6 +126,12 @@ public:
 		std::cout << "set_vertex_shader" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSET_GEOMETRY_SHADER)
+	{
+		printSpaces();
+		std::cout << "set_geometry_shader" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::SET_PIXEL_SHADER* pSET_PIXEL_SHADER)
 	{
 		printSpaces();
@@ -414,6 +420,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::SET_VERTEX_SHADER* pSET_VERTEX_SHADER)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSET_GEOMETRY_SHADER)
 	{
 		numberOfSpaces -= 4;
 	};

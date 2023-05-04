@@ -26,6 +26,7 @@ public:
 	virtual void startVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR) {};
 	virtual void startVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	virtual void startVisit(const ShaderUnits::SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
+	virtual void startVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSET_GEOMETRY_SHADER) {};
 	virtual void startVisit(const ShaderUnits::SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
 	virtual void startVisit(const ShaderUnits::COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void startVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
@@ -91,6 +92,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	virtual void finishVisit(const ShaderUnits::SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
+	virtual void finishVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSET_GEOMETRY_SHADER) {};
 	virtual void finishVisit(const ShaderUnits::SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
 	virtual void finishVisit(const ShaderUnits::COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void finishVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};

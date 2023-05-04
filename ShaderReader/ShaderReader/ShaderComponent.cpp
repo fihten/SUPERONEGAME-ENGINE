@@ -170,6 +170,14 @@ void ShaderUnits::SET_VERTEX_SHADER::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::SET_GEOMETRY_SHADER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::SET_PIXEL_SHADER::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
