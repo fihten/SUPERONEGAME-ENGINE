@@ -1114,6 +1114,8 @@ bool HLSLConverter::isModifier(const std::string& str) const
 		return true;
 	if (std::strcmp(str.c_str(), "inout") == 0)
 		return true;
+	if (std::strcmp(str.c_str(), "uniform") == 0)
+		return true;
 	return false;
 }
 
