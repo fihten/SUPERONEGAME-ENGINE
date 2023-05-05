@@ -78,6 +78,7 @@ class HLSLConverter :public ShaderConverter
 		PASS,
 		INSERT_PASS,
 		SET_VERTEX_SHADER,
+		SET_GEOMETRY_SHADER,
 		SET_PIXEL_SHADER,
 		COMPILE_SHADER,
 		VS_5_0,
@@ -247,6 +248,7 @@ class HLSLConverter :public ShaderConverter
 	void insertPass();
 
 	void setVertexShaderState();
+	void setGeometryShaderState();
 	void setPixelShaderState();
 	void compileShader();
 

@@ -301,6 +301,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			setVertexShaderState();
 			break;
 
+		case State::SET_GEOMETRY_SHADER:
+			setGeometryShaderState();
+			break;
+
 		case State::SET_PIXEL_SHADER:
 			setPixelShaderState();
 			break;
@@ -749,6 +753,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::SET_VERTEX_SHADER;
+
+		return;
+	}
+	if (word == std::string("SetGeometryShader"))
+	{
+		words.pop();
+		currentState = State::SET_GEOMETRY_SHADER;
 
 		return;
 	}
@@ -2387,6 +2398,22 @@ void HLSLConverter::setVertexShaderState()
 	componentStack.push(pSetVertexShader);
 
 	statesStack.push(State::SET_VERTEX_SHADER);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	words.pop();
+
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
+	return;
+}
+
+void HLSLConverter::setGeometryShaderState()
+{
+	ShaderUnits::ShaderComponent* pSetGeometryShader = new ShaderUnits::SET_GEOMETRY_SHADER();
+	componentStack.push(pSetGeometryShader);
+
+	statesStack.push(State::SET_GEOMETRY_SHADER);
 	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
 
 	words.pop();
