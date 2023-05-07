@@ -154,9 +154,9 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 		for (int i = 0; i < countOfCbufferElements; ++i)
 		{
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
-				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix());
+				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix(), elementsOfCbuffers[i].elementsCount);
 			if (elementsOfCbuffers[i].type == std::string("float3"))
-				ResourceManager::instance()->registerFloat3(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v);
+				ResourceManager::instance()->registerFloat3(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
 			if (variableLocations.count(elementsOfCbuffers[i].name) == 1)
 			{
 				ResourceManager::instance()->registerVariableLocation(
@@ -174,6 +174,7 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 
 				auto structInfo = structVisitor.structInfo;
 				structInfo.ptr = elementsOfCbuffers[i].v;
+				structInfo.elementsCount = elementsOfCbuffers[i].elementsCount;
 				ResourceManager::instance()->registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
 			}
 		}

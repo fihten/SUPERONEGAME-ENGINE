@@ -61,7 +61,7 @@ ResourceManager::RegisterMessage ResourceManager::registerStreamsInfo(const std:
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4)
+ResourceManager::RegisterMessage ResourceManager::registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4, unsigned int elementsCount)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -71,11 +71,12 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat4x4(const std::st
 		return RegisterMessage::FLOAT4X4_ALREADY_EXISTS;
 
 	techniqueRes.float4x4s[flt4x4Name].ptr = flt4x4;
+	techniqueRes.float4x4s[flt4x4Name].elementsCount = elementsCount;
 
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3)
+ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -85,6 +86,7 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::stri
 		return RegisterMessage::FLOAT3_ALREADY_EXISTS;
 
 	techniqueRes.float3s[flt3Name].ptr = flt3;
+	techniqueRes.float3s[flt3Name].elementsCount = elementsCount;
 
 	return RegisterMessage::OK;
 }

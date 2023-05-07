@@ -234,6 +234,7 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVAR
 		++elementsCount;
 		withinVariableDeclaration = true;
 		elements[elementsCount - 1].name = pVARIABLE_DECL->getName();
+		elements[elementsCount - 1].elementsCount = 1;
 	}
 }
 
