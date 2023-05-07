@@ -571,7 +571,7 @@ public:
 int main()
 {
 	ShaderReader reader;
-	reader.openShader(L"C:\\3dEngine\\Shaders\\LightingDemo.fx");
+	reader.openShader(L"C:\\3dEngine\\Shaders\\Basic.fx");
 
 	HLSLConverter converter;
 	reader.parseShader(converter);

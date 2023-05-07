@@ -82,7 +82,8 @@ bool fetchLine(const std::string& code, int start, int& end, std::string& line)
 	if (end == std::string::npos)
 	{
 		end = code.length() - 1;
-		return false;
+		if (end <= start)
+			return false;
 	}
 	line = code.substr(start, end - start);
 	return true;
