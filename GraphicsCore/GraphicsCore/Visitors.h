@@ -85,6 +85,7 @@ struct ElementOfCbuffer
 {
 	std::string type = "";
 	std::string name = "";
+	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* v = nullptr;
 };
 
@@ -93,6 +94,7 @@ class ElementsOfCbufferVisitor : public ShaderVisitor
 	bool withinCbuffer = false;
 	bool withinVariableDeclaration = false;
 	bool withinStruct = false;
+	bool withinSquareBrackets = false;
 public:
 	void startVisit(const ShaderUnits::SHADER* pSHADER);
 
@@ -107,6 +109,11 @@ public:
 
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
 	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
+
+	void startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS);
+	void finishVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS);
+
+	void startVisit(const ShaderUnits::NUMBER* pNUMBER);
 
 	void getElements(ElementOfCbuffer*& pElements, int& count);
 

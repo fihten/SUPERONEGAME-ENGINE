@@ -267,6 +267,22 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
 		elements[elementsCount - 1].type = "float3";
 }
 
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS)
+{
+	withinSquareBrackets = true;
+}
+
+void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS)
+{
+	withinSquareBrackets = false;
+}
+
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::NUMBER* pNUMBER)
+{
+	if (withinCbuffer && withinVariableDeclaration && withinSquareBrackets && !withinStruct)
+		elements[elementsCount - 1].elementsCount = std::atoi(pNUMBER->getName().c_str());
+}
+
 void ElementsOfCbufferVisitor::getElements(ElementOfCbuffer*& pElements, int& count)
 {
 	pElements = elements;
