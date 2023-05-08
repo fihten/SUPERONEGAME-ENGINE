@@ -4,6 +4,7 @@
 #include "Cameras.h"
 #include "auto_ptr.h"
 #include <algorithm>
+#include <sstream>
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -460,38 +461,49 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 
 	StructResource& sr = structs[var];
 
-	char* structData = (char*)std::malloc(sr.bytes);
-	for (int f = 0; f < sr.fieldsCount; ++f)
+	char* structData = (char*)std::malloc(sr.bytes * sr.elementsCount);
+	for (int e = 0; e < sr.elementsCount; ++e)
 	{
-		auto& fr = sr.fields[f];
+		char* elementData = structData + e * sr.bytes;
+		for (int f = 0; f < sr.fieldsCount; ++f)
+		{
+			auto& fr = sr.fields[f];
 
-		std::string fieldName = var + "." + fr.name;
-		std::string sValue = mesh.getParam(fieldName);
+			std::string fieldName = var + "." + fr.name;
+			if (sr.elementsCount > 1)
+			{
+				std::ostringstream ss;
+				ss << var << '[' << e << ']' << '.' << fr.name;
+				fieldName = ss.str();
+			}
 
-		char* fieldPtr = structData + fr.offset;
-		if (fr.type == std::string("float"))
-		{
-			float& floatVariable = *((float*)(fieldPtr));
-			floatVariable = std::atof(sValue.c_str());
-		}
-		if (fr.type == std::string("float2"))
-		{
-			flt2& float2Variable = *((flt2*)(fieldPtr));
-			float2Variable = sValue;
-		}
-		if (fr.type == std::string("float3"))
-		{
-			flt3& float3Variable = *((flt3*)(fieldPtr));
-			float3Variable = sValue;
-		}
-		if (fr.type == std::string("float4"))
-		{
-			flt4& float4Variable = *((flt4*)(fieldPtr));
-			float4Variable = sValue;
+			std::string sValue = mesh.getParam(fieldName);
+
+			char* fieldPtr = elementData + fr.offset;
+			if (fr.type == std::string("float"))
+			{
+				float& floatVariable = *((float*)(fieldPtr));
+				floatVariable = std::atof(sValue.c_str());
+			}
+			if (fr.type == std::string("float2"))
+			{
+				flt2& float2Variable = *((flt2*)(fieldPtr));
+				float2Variable = sValue;
+			}
+			if (fr.type == std::string("float3"))
+			{
+				flt3& float3Variable = *((flt3*)(fieldPtr));
+				float3Variable = sValue;
+			}
+			if (fr.type == std::string("float4"))
+			{
+				flt4& float4Variable = *((flt4*)(fieldPtr));
+				float4Variable = sValue;
+			}
 		}
 	}
 	if (bytes)
-		*bytes = sr.bytes;
+		*bytes = sr.bytes * sr.elementsCount;
 
 	return structData;
 }
