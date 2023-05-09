@@ -56,68 +56,56 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	scene.setNodeParam(mesh, "gMaterial.Specular", "{0.8f, 0.8f, 0.8f, 96.0f}");
 	scene.setNodeParam(mesh, "gMaterial.Reflect", "{0,0,0,0}");
 
-	NodeID dirLight = scene.addTransformNode(flt4x4(
+	NodeID dirLight0 = scene.addTransformNode(flt4x4(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
 		0, 0, 1, 0,
-		0, 0, -1, 1
+		0, 0, 0, 1
 	));
 	
-	scene.setNodeParam(dirLight, "gDirLight.Ambient", "{0.2f, 0.2f, 0.2f, 1.0f}");
-	scene.setNodeParam(dirLight, "gDirLight.Diffuse", "{0.5f, 0.5f, 0.5f, 1.0f}");
-	scene.setNodeParam(dirLight, "gDirLight.Specular", "{0.5f, 0.5f, 0.5f, 1.0f}");
-	scene.setNodeParam(dirLight, "gDirLight.Direction", "node_axis_z");
+	scene.setNodeParam(dirLight0, "gDirLights[0].Ambient", "{0.2f, 0.2f, 0.2f, 1.0f}");
+	scene.setNodeParam(dirLight0, "gDirLights[0].Diffuse", "{0.5f, 0.5f, 0.5f, 1.0f}");
+	scene.setNodeParam(dirLight0, "gDirLights[0].Specular", "{0.5f, 0.5f, 0.5f, 1.0f}");
+	scene.setNodeParam(dirLight0, "gDirLights[0].Direction", "node_axis_z");
 	
-	scene.createNodeParamReference(mesh, dirLight, "gDirLight.Ambient");
-	scene.createNodeParamReference(mesh, dirLight, "gDirLight.Diffuse");
-	scene.createNodeParamReference(mesh, dirLight, "gDirLight.Specular");
-	scene.createNodeParamReference(mesh, dirLight, "gDirLight.Direction");
+	scene.createNodeParamReference(mesh, dirLight0, "gDirLights[0].Ambient");
+	scene.createNodeParamReference(mesh, dirLight0, "gDirLights[0].Diffuse");
+	scene.createNodeParamReference(mesh, dirLight0, "gDirLights[0].Specular");
+	scene.createNodeParamReference(mesh, dirLight0, "gDirLights[0].Direction");
 
-	NodeID pointLight = scene.addTransformNode(flt4x4(
+	NodeID dirLight1 = scene.addTransformNode(flt4x4(
 		1, 0, 0, 0,
 		0, 1, 0, 0,
-		0, 0, 1, 0,
-		-1, 0, -1, 1
+		0, 0, -1, 0,
+		0, 0, 0, 1
 	));
 
-	scene.setNodeParam(pointLight, "gPointLight.Ambient", "{0.3f, 0.3f, 0.3f, 1.0f}");
-	scene.setNodeParam(pointLight, "gPointLight.Diffuse", "{0.7f, 0.7f, 0.7f, 1.0f}");
-	scene.setNodeParam(pointLight, "gPointLight.Specular", "{0.7f, 0.7f, 0.7f, 1.0f}");
-	scene.setNodeParam(pointLight, "gPointLight.Position", "node_position");
-	scene.setNodeParam(pointLight, "gPointLight.Range", "100");
-	scene.setNodeParam(pointLight, "gPointLight.Att", "{0.0f, 0.1f, 0.0f}");
+	scene.setNodeParam(dirLight1, "gDirLights[1].Ambient", "{0.2f, 0.1f, 0.1f, 1.0f}");
+	scene.setNodeParam(dirLight1, "gDirLights[1].Diffuse", "{0.5f, 0.25f, 0.25f, 1.0f}");
+	scene.setNodeParam(dirLight1, "gDirLights[1].Specular", "{0.5f, 0.25f, 0.25f, 1.0f}");
+	scene.setNodeParam(dirLight1, "gDirLights[1].Direction", "node_axis_z");
 
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Ambient");
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Diffuse");
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Specular");
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Position");
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Range");
-	scene.createNodeParamReference(mesh, pointLight, "gPointLight.Att");
+	scene.createNodeParamReference(mesh, dirLight1, "gDirLights[1].Ambient");
+	scene.createNodeParamReference(mesh, dirLight1, "gDirLights[1].Diffuse");
+	scene.createNodeParamReference(mesh, dirLight1, "gDirLights[1].Specular");
+	scene.createNodeParamReference(mesh, dirLight1, "gDirLights[1].Direction");
 
-	NodeID spotLight = scene.addTransformNode(flt4x4(
-		0, 0, 1, 0,
-		0, 1, 0, 0,
+	NodeID dirLight2 = scene.addTransformNode(flt4x4(
 		1, 0, 0, 0,
-		-1, 0, 0, 1
+		0, 0, 1, 0,
+		0, -1, 0, 0,
+		0, 0, 0, 1
 	));
 
-	scene.setNodeParam(spotLight, "gSpotLight.Ambient", "{0.0f, 0.0f, 0.0f, 1.0f}");
-	scene.setNodeParam(spotLight, "gSpotLight.Diffuse", "{1.0f, 1.0f, 0.0f, 1.0f}");
-	scene.setNodeParam(spotLight, "gSpotLight.Specular", "{1.0f, 1.0f, 1.0f, 1.0f}");
-	scene.setNodeParam(spotLight, "gSpotLight.Position", "node_position");
-	scene.setNodeParam(spotLight, "gSpotLight.Range", "100");
-	scene.setNodeParam(spotLight, "gSpotLight.Direction", "node_axis_z");
-	scene.setNodeParam(spotLight, "gSpotLight.Spot", "10");
-	scene.setNodeParam(spotLight, "gSpotLight.Att", "{1.0f, 0.0f, 0.0f}");
+	scene.setNodeParam(dirLight2, "gDirLights[2].Ambient", "{0.1f, 0.2f, 0.1f, 1.0f}");
+	scene.setNodeParam(dirLight2, "gDirLights[2].Diffuse", "{0.25f, 0.5f, 0.25f, 1.0f}");
+	scene.setNodeParam(dirLight2, "gDirLights[2].Specular", "{0.25f, 0.5f, 0.25f, 1.0f}");
+	scene.setNodeParam(dirLight2, "gDirLights[2].Direction", "node_axis_z");
 
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Ambient");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Diffuse");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Specular");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Position");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Range");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Direction");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Spot");
-	scene.createNodeParamReference(mesh, spotLight, "gSpotLight.Att");
+	scene.createNodeParamReference(mesh, dirLight2, "gDirLights[2].Ambient");
+	scene.createNodeParamReference(mesh, dirLight2, "gDirLights[2].Diffuse");
+	scene.createNodeParamReference(mesh, dirLight2, "gDirLights[2].Specular");
+	scene.createNodeParamReference(mesh, dirLight2, "gDirLights[2].Direction");
 
 	drawVisitor.graphicsCore = &graphicsCore;
 

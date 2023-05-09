@@ -240,7 +240,7 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVAR
 
 void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
-	if (withinCbuffer)
+	if (withinCbuffer && !withinStruct)
 		withinVariableDeclaration = false;
 }
 

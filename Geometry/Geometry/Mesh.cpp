@@ -189,7 +189,7 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	m.params["technique"] = "LightTech";
+	m.params["technique"] = "Light3";
 	m.params["pass"] = "P0";
 
 	return m;
