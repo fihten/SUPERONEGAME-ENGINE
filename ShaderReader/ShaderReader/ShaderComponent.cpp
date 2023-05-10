@@ -58,6 +58,12 @@ void ShaderUnits::VOID_::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::BOOL1::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::INT1::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

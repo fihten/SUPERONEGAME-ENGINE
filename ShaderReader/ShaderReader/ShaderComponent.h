@@ -120,6 +120,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class BOOL1 : public TYPE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class INT1 : public TYPE
 	{
 	public:
