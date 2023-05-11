@@ -133,6 +133,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			voidState();
 			break;
 
+		case State::BOOL1:
+			boolState();
+			break;
+
 		case State::INT1:
 			intState();
 			break;
@@ -576,6 +580,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::VOID_;
+
+		return;
+	}
+	if (word == std::string("bool"))
+	{
+		words.pop();
+		currentState = State::BOOL1;
 
 		return;
 	}
@@ -1088,6 +1099,8 @@ bool HLSLConverter::isCast(const std::queue<std::string>& words) const
 bool HLSLConverter::isType(const std::string& str) const
 {
 	if (userTypes.count(str))
+		return true;
+	if (std::strcmp(str.c_str(), "bool") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "int") == 0)
 		return true;
@@ -1603,6 +1616,36 @@ void HLSLConverter::voidState()
 		HLSLConverter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ShaderUnits::VOID_();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
+}
+
+void HLSLConverter::boolState()
+{
+	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::BOOL1* type = new ShaderUnits::BOOL1();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ShaderUnits::BOOL1();
 		decl.name = word;
 
 		decls.push(decl);
@@ -2924,6 +2967,13 @@ void HLSLConverter::cast()
 	statesStack.push(State::CAST);
 
 	std::string word = words.front();
+	if (word == std::string("bool"))
+	{
+		words.pop();
+		currentState = State::BOOL1;
+
+		return;
+	}
 	if (word == std::string("int"))
 	{
 		words.pop();
