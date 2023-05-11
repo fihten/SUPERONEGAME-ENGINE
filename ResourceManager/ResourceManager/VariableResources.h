@@ -35,3 +35,8 @@ struct StructResource
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
+
+struct Texture2dResource
+{
+	std::string name = "";
+};

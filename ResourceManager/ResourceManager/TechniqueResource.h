@@ -14,4 +14,6 @@ struct TechniqueResource
 	std::map<std::string, Float3Resource> float3s;
 	// structures
 	std::map<std::string, StructResource> structures;
+	// textures
+	std::map<std::string, Texture2dResource> textures;
 };
