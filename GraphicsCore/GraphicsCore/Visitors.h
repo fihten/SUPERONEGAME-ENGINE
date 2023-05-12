@@ -156,3 +156,24 @@ public:
 	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
 	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
 };
+
+class GlobalVariablesVisitor :public ShaderVisitor
+{
+	bool withinCbuffer = false;
+	bool withinFunctionDeclaration = false;
+	int withinStruct = 0;
+
+	bool withinVariableDeclaration = false;
+public:
+	void startVisit(const ShaderUnits::CBUFFER* pCBUFFER);
+	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER);
+
+	void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
+	void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL);
+
+	void startVisit(const ShaderUnits::STRUCT* pSTRUCT);
+	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT);
+
+	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+};

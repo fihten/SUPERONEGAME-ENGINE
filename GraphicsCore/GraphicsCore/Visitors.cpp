@@ -393,3 +393,45 @@ void StructVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
 		structInfo.fieldsCount += 1;
 	}
 }
+
+/*________________________________GlobalVariablesVisitor________________________________*/
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::CBUFFER* pCBUFFER)
+{
+	withinCbuffer = true;
+}
+
+void GlobalVariablesVisitor::finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
+{
+	withinCbuffer = false;
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
+{
+	withinFunctionDeclaration = true;
+}
+
+void GlobalVariablesVisitor::finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
+{
+	withinFunctionDeclaration = false;
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	++withinStruct;
+}
+
+void GlobalVariablesVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
+{
+	--withinStruct;
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
+{
+
+}
+
+void GlobalVariablesVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
+{
+	
+}
