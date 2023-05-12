@@ -38,5 +38,5 @@ struct StructResource
 
 struct Texture2dResource
 {
-	std::string name = "";
+	ID3DX11EffectShaderResourceVariable* tex = nullptr;
 };

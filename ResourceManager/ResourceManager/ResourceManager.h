@@ -23,7 +23,8 @@ public:
 		FLOAT4X4_ALREADY_EXISTS,
 		FLOAT3_ALREADY_EXISTS,
 		VARIABLE_DOESNT_EXIST,
-		STRUCT_ALREADY_EXISTS
+		STRUCT_ALREADY_EXISTS,
+		TEXTURE_ALREADY_EXISTS
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
@@ -33,6 +34,7 @@ public:
 	RegisterMessage registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4, unsigned int elementsCount);
 	RegisterMessage registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount);
 	RegisterMessage registerStruct(const std::string& techniqueName, const std::string& structName, const StructResource& structRes);
+	RegisterMessage registerTexture(const std::string& techniqueName, const std::string& textureName, const Texture2dResource& texRes);
 	RegisterMessage registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation);
 	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
 	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);
@@ -44,6 +46,7 @@ public:
 	void getFloat4x4s(const std::string& techniqueName, std::map<std::string, Float4x4Resource>& flt4x4s);
 	void getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s);
 	void getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs);
+	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
 	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 
