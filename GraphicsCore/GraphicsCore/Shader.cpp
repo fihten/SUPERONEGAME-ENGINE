@@ -122,6 +122,9 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 	for (int i = 0; i < countOfCbufferElements; ++i)
 		elementsOfCbuffers[i].v = mShader->GetVariableByName(elementsOfCbuffers[i].name.c_str());
 
+	GlobalVariablesVisitor globalVariablesVisitor;
+	shader.query(&globalVariablesVisitor);
+
 	std::map<std::string, std::string> variableLocations;
 	loadVariableLocationsFromFile(config_path, variableLocations);
 
@@ -176,6 +179,17 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 				structInfo.ptr = elementsOfCbuffers[i].v;
 				structInfo.elementsCount = elementsOfCbuffers[i].elementsCount;
 				ResourceManager::instance()->registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
+			}
+		}
+
+		for (int i = 0; i < globalVariablesVisitor.globalVariablesCount; ++i)
+		{
+			auto& gv = globalVariablesVisitor.globalVariables[i];
+			if (gv.type == std::string("Texture2D"))
+			{
+				Texture2dResource t2dres;
+				t2dres.tex = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
+				ResourceManager::instance()->registerTexture(sn.technique, gv.name, t2dres);
 			}
 		}
 	}
