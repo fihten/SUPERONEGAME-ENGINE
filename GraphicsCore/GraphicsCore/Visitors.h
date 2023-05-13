@@ -157,6 +157,14 @@ public:
 	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
 };
 
+#define GLOBAL_VARIABLES_MAX_COUNT 64
+
+struct GLOBAL_VARIABLE
+{
+	std::string name = "";
+	std::string type = "";
+};
+
 class GlobalVariablesVisitor :public ShaderVisitor
 {
 	bool withinCbuffer = false;
@@ -164,6 +172,7 @@ class GlobalVariablesVisitor :public ShaderVisitor
 	int withinStruct = 0;
 
 	bool withinVariableDeclaration = false;
+
 public:
 	void startVisit(const ShaderUnits::CBUFFER* pCBUFFER);
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER);
@@ -176,4 +185,12 @@ public:
 
 	void startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
 	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL);
+
+	void startVisit(const ShaderUnits::SHADER* pSHADER);
+
+	void startVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D);
+
+public:
+	GLOBAL_VARIABLE globalVariables[GLOBAL_VARIABLES_MAX_COUNT];
+	int globalVariablesCount = 0;
 };

@@ -428,10 +428,44 @@ void GlobalVariablesVisitor::finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
 
 void GlobalVariablesVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	withinVariableDeclaration = true;
 
+	globalVariables[globalVariablesCount].name = pVARIABLE_DECL->getName();
 }
 
 void GlobalVariablesVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
-	
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	withinVariableDeclaration = false;
+	++globalVariablesCount;
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::SHADER* pSHADER)
+{
+	globalVariablesCount = 0;
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D)
+{
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	if (!withinVariableDeclaration)
+		return;
+
+	globalVariables[globalVariablesCount].type = "Texture2D";
 }
