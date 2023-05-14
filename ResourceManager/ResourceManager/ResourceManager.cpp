@@ -173,6 +173,16 @@ ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(const std:
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerImage(const std::string& name, ID3D11ShaderResourceView* image)
+{
+	if (imgs.count(name))
+		return RegisterMessage::IMAGE_ALREADY_EXISTS;
+
+	imgs[name] = image;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
 {
 	if (techniques.count(techniqueName) == 0)
@@ -294,6 +304,13 @@ ID3D11Buffer* ResourceManager::getIndexBuffer(const std::string& techniqueName, 
 		return nullptr;
 
 	return pass.indexBuffers[meshId];
+}
+
+ID3D11ShaderResourceView* ResourceManager::getImage(const std::string& name)
+{
+	if (!imgs.count(name))
+		return nullptr;
+	return imgs[name];
 }
 
 ResourceManager* ResourceManager::instance()

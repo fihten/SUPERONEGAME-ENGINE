@@ -11,6 +11,7 @@ class ResourceManager
 
 private:
 	std::map<std::string, TechniqueResource> techniques;
+	std::map<std::string, ID3D11ShaderResourceView*> imgs;
 
 public:
 	enum RegisterMessage
@@ -24,7 +25,8 @@ public:
 		FLOAT3_ALREADY_EXISTS,
 		VARIABLE_DOESNT_EXIST,
 		STRUCT_ALREADY_EXISTS,
-		TEXTURE_ALREADY_EXISTS
+		TEXTURE_ALREADY_EXISTS,
+		IMAGE_ALREADY_EXISTS
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
@@ -38,6 +40,7 @@ public:
 	RegisterMessage registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation);
 	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
 	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);
+	RegisterMessage registerImage(const std::string& name, ID3D11ShaderResourceView* image);
 
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
 	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
@@ -49,6 +52,7 @@ public:
 	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
 	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
+	ID3D11ShaderResourceView* getImage(const std::string& name);
 
 public:
 	static ResourceManager* instance();
