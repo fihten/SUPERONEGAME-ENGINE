@@ -5,6 +5,7 @@
 #include "auto_ptr.h"
 #include <algorithm>
 #include <sstream>
+#include <D3DX11tex.h>
 
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
@@ -630,6 +631,28 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 		ResourceManager::instance()->registerIndexBuffer(sTechnique, sPass, mesh.id, mIB);
 	}
 	return mIB;
+}
+
+ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, const std::string& var) const
+{
+	std::string name = mesh.getParam(var);
+	ID3D11ShaderResourceView* img = ResourceManager::instance()->getImage(name);
+	if (img)
+		return img;
+
+	char texturesFolder[200];
+	int sz = sizeof texturesFolder / sizeof * texturesFolder;
+	GetEnvironmentVariableA("TEXTURES", texturesFolder, sz);
+
+	std::string texturePath = std::string(texturesFolder) + '\\' + name;
+
+	D3DX11CreateShaderResourceViewFromFileA(
+		device, texturePath.c_str(), 0, 0, &img, 0
+	);
+
+	ResourceManager::instance()->registerImage(name, img);
+
+	return img;
 }
 
 void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
