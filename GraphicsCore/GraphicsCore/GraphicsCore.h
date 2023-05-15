@@ -45,6 +45,7 @@ private:
 	void setFloat4x4sOnGPU(const Mesh& mesh);
 	void setFloat3sOnGPU(const Mesh& mesh);
 	void setStructsOnGPU(const Mesh& mesh);
+	void setTexturesOnGPU(const Mesh& mesh);
 
 	void setVariablesOnGPU(const Mesh& mesh);
 
