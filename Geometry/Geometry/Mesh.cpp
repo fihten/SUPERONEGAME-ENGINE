@@ -132,6 +132,14 @@ Mesh createCube()
 	clrs.push_back(flt4(1, 1, 0, 0));
 	clrs.push_back(flt4(1, 1, 0, 0));
 
+	// uv-coordinates
+	m.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+
+	auto& uvs = m.flt2_streams.back().second;
+
+	// bottom
+
+
 	// indices
 	auto& inds = m.indicies;
 	
