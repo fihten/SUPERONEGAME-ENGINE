@@ -138,7 +138,22 @@ Mesh createCube()
 	auto& uvs = m.flt2_streams.back().second;
 
 	// bottom
+	uvs.push_back(flt2(1.0f / 4.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 2.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 4.0f, 2.0f / 3.0f));
 
+	// top
+	uvs.push_back(flt2(1.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(3.0f / 4.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(3.0f / 4.0f, 2.0f / 3.0f));
+	uvs.push_back(flt2(1.0f, 2.0f / 3.0f));
+
+	// left
+	uvs.push_back(flt2(1.0f / 4.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(0.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(0.0f, 2.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 4.0f, 2.0f / 3.0f));
 
 	// indices
 	auto& inds = m.indicies;
