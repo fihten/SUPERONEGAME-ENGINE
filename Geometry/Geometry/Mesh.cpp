@@ -155,6 +155,24 @@ Mesh createCube()
 	uvs.push_back(flt2(0.0f, 2.0f / 3.0f));
 	uvs.push_back(flt2(1.0f / 4.0f, 2.0f / 3.0f));
 
+	// right
+	uvs.push_back(flt2(1.0f / 2.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(3.0f / 4.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(3.0f / 4.0f, 2.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 2.0f / 3.0f));
+
+	// back
+	uvs.push_back(flt2(1.0f / 4.0f, 1.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 4.0f, 0.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 0.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 1.0f / 3.0f));
+
+	// front
+	uvs.push_back(flt2(1.0f / 4.0f, 2.0f / 3.0f));
+	uvs.push_back(flt2(1.0f / 4.0f, 1.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 1.0f));
+	uvs.push_back(flt2(1.0f / 2.0f, 2.0f / 3.0f));
+
 	// indices
 	auto& inds = m.indicies;
 	
@@ -212,7 +230,7 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	m.params["technique"] = "Light3";
+	m.params["technique"] = "Light0Tex";
 	m.params["pass"] = "P0";
 
 	return m;
