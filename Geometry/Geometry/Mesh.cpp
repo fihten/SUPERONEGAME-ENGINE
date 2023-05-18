@@ -232,6 +232,7 @@ Mesh createCube()
 
 	m.params["technique"] = "Light0Tex";
 	m.params["pass"] = "P0";
+	m.params["gDiffuseMap"] = "test.dds";
 
 	return m;
 }
