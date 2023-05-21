@@ -102,4 +102,72 @@ void GS(point VertexOut gin[1],
 	v[1] = float4(gin[0].CenterW + halfWidth * right + halfHeight * up, 1.0f);
 	v[2] = float4(gin[0].CenterW - halfWidth * right - halfHeight * up, 1.0f);
 	v[3] = float4(gin[0].CenterW - halfWidth * right + halfHeight * up, 1.0f);
+
+	//
+	// Transform quad vertices to world space and output
+	// them as a triangle strip.
+	//
+	GeoOut gout;
+	[unroll]
+	for (int i = 0; i < 4; ++i)
+	{
+		gout.PosH = mul(v[i], gViewProj);
+		gout.PosW = v[i].xyz;
+		gout.NormalW = look;
+		gout.Tex = gTexC[i];
+		gout.PrimID = primID;
+		triStream.Append(gout);
+	}
+}
+
+float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexture, uniform bool gAlphaClip,
+	uniform bool gFogEnabled) : SV_Target
+{
+	// Interpolating can unnormalize it, so normalize it.
+	pin.NormalW = normalize(pin.NormalW);
+	
+	// The toEye vector is used in lighting.
+	float3 toEye = gEyePosW - pin.PosW;
+
+	// Cache the distance to the eye from this surface point.
+	float distToEye = length(toEye);
+
+	// Normalize.
+	toEye /= distToEye;
+
+	// Default to multiplicative identity.
+	float4 texColor = float4(1, 1, 1, 1);
+	if (gUseTexture)
+	{
+		// Sample texture.
+		float3 uvw = float3(pin.Tex, pin.PrimID % 4);
+		texColor = gTreeMapArray.Sample(samLinear, uvw);
+		if (gAlphaClip)
+		{
+			// Discard pixel if texture alpha < 0.05. Note that
+			// we do this test as soon as possible so that we can
+			// potentially exit the shader early, thereby skipping 
+			// the rest of the shader code.
+			clip(texColor.a - 0.05f);
+		}
+	}
+
+	//
+	// Lighting.
+	//
+
+	float4 litColor = texColor;
+	if (gLightCount > 0)
+	{
+		// Start with a sum of zero.
+		float4 ambient = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 diffuse = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		float4 spec = float4(0.0f, 0.0f, 0.0f, 0.0f);
+		// Sum the light contribution from each light source.
+		[unroll]
+		for (int i = 0; i < gLightCount; ++i)
+		{
+
+		}
+	}
 }
