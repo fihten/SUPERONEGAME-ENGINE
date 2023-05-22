@@ -189,4 +189,43 @@ float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexture, uniform
 		// Blend the fog color and the lit color.
 		litColor = lerp(litColor, gFogColor, fogLerp);
 	}
+
+	// Common to take alpha from diffuse material and texture.
+	litColor.a = gMaterial.Diffuse.a * texColor.a;
+	return litColor;
 }
+
+//----------------------------------------------------------------------------------------
+// Techniques -- just define the ones our demo needs; you can define the other
+// variations as needed.
+//----------------------------------------------------------------------------------------
+
+technique11 Light3
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetGeometryShader(CompileShader(gs_5_0, GS()));
+		SetPixelShader(CompileShader(ps_5_0, PS(3, false, false, false)));
+	};
+};
+
+technique11 Light3TexAlphaClip
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetGeometryShader(CompileShader(gs_5_0, GS()));
+		SetPixelShader(CompileShader(ps_5_0, PS(3, true, true, false)));
+	};
+};
+
+technique11 Light3TexAlphaClipFog
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetGeometryShader(CompileShader(gs_5_0, GS()));
+		SetPixelShader(CompileShader(ps_5_0, PS(3, true, true, true)));
+	};
+};
