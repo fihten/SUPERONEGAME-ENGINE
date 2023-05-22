@@ -167,7 +167,26 @@ float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexture, uniform
 		[unroll]
 		for (int i = 0; i < gLightCount; ++i)
 		{
-
+			float4 A, D, S;
+			ComputeDirectionalLight(gMaterial, gDirLights[i],
+				pin.NormalW, toEye,
+				A, D, S);
+			ambient += A;
+			diffuse += D;
+			spec += S;
 		}
+		// Modulate with late add.
+		litColor = texColor * (ambient + diffuse) + spec;
+	}
+
+	//
+	// Fogging
+	//
+
+	if (gFogEnabled)
+	{
+		float fogLerp = saturate((distToEye - gFogStart) / gFogRange);
+		// Blend the fog color and the lit color.
+		litColor = lerp(litColor, gFogColor, fogLerp);
 	}
 }
