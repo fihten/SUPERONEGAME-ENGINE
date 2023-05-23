@@ -488,6 +488,14 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 		case State::INSERT_INDEX_OF_VARIABLE:
 			insertIndexOfVariable();
 			break;
+
+		case State::INITIALIZER_LIST:
+			initializerList();
+			break;
+
+		case State::INSERT_INITIALIZER_LIST:
+			insertInitializerList();
+			break;
 		}
 	}
 
@@ -3361,4 +3369,14 @@ void HLSLConverter::insertIndexOfVariable()
 		currentState = State::GREATER_THAN;
 	if (word == std::string("<"))
 		currentState = State::LESS_THAN;
+}
+
+void HLSLConverter::initializerList()
+{
+
+}
+
+void HLSLConverter::insertInitializerList()
+{
+
 }

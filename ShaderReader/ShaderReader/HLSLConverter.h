@@ -128,7 +128,9 @@ class HLSLConverter :public ShaderConverter
 		INSERT_FOR_LOOP_EXPRESSION,
 		INSERT_FOR,
 		INDEX_OF_VARIABLE,
-		INSERT_INDEX_OF_VARIABLE
+		INSERT_INDEX_OF_VARIABLE,
+		INITIALIZER_LIST,
+		INSERT_INITIALIZER_LIST
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -336,6 +338,9 @@ class HLSLConverter :public ShaderConverter
 
 	void indexOfVariable();
 	void insertIndexOfVariable();
+
+	void initializerList();
+	void insertInitializerList();
 
 private:
 	bool isOperationState(State state) const;
