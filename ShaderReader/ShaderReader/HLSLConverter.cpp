@@ -529,6 +529,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("{") && !statesStack.empty() && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		words.pop();
+		currentState = State::INITIALIZER_LIST;
+
+		return;
+	}
 	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
