@@ -113,6 +113,12 @@ public:
 		std::cout << "mul" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::FLOAT2_CONSTRUCTOR* pFLOAT2_CONSTRUCTOR)
+	{
+		printSpaces();
+		std::cout << "constructor of float2" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR)
 	{
 		printSpaces();
@@ -414,6 +420,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::MUL* pMUL)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::FLOAT2_CONSTRUCTOR* pFLOAT2_CONSTRUCTOR)
 	{
 		numberOfSpaces -= 4;
 	};

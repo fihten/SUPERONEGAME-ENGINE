@@ -24,6 +24,7 @@ public:
 	virtual void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL) {};
 	virtual void startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL) {};
 	virtual void startVisit(const ShaderUnits::MUL* pMUL) {};
+	virtual void startVisit(const ShaderUnits::FLOAT2_CONSTRUCTOR* pFLOAT2_CONSTRUCTOR) {};
 	virtual void startVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR) {};
 	virtual void startVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	virtual void startVisit(const ShaderUnits::SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};
@@ -91,6 +92,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL) {};
 	virtual void finishVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL) {};
 	virtual void finishVisit(const ShaderUnits::MUL* pMUL) {};
+	virtual void finishVisit(const ShaderUnits::FLOAT2_CONSTRUCTOR* pFLOAT2_CONSTRUCTOR) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT3_CONSTRUCTOR* pFLOAT3_CONSTRUCTOR) {};
 	virtual void finishVisit(const ShaderUnits::FLOAT4_CONSTRUCTOR* pFLOAT4_CONSTRUCTOR) {};
 	virtual void finishVisit(const ShaderUnits::SET_VERTEX_SHADER* pSET_VERTEX_SHADER) {};

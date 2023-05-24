@@ -68,6 +68,7 @@ class HLSLConverter :public ShaderConverter
 		INOUT_,
 		UNIFORM_,
 		MUL,
+		FLOAT2_CONSTRUCTOR,
 		FLOAT3_CONSTRUCTOR,
 		FLOAT4_CONSTRUCTOR,
 		CBUFFER,
@@ -210,6 +211,7 @@ class HLSLConverter :public ShaderConverter
 	ShaderUnits::ShaderComponent* modifier = nullptr;
 
 	void mulState();
+	void float2constructor();
 	void float3constructor();
 	void float4constructor();
 

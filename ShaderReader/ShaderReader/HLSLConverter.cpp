@@ -245,6 +245,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			mulState();
 			break;
 
+		case State::FLOAT2_CONSTRUCTOR:
+			float2constructor();
+			break;
+
 		case State::FLOAT3_CONSTRUCTOR:
 			float3constructor();
 			break;
@@ -2286,6 +2290,11 @@ void HLSLConverter::mulState()
 
 		return;
 	}
+}
+
+void HLSLConverter::float2constructor()
+{
+
 }
 
 void HLSLConverter::float3constructor()
