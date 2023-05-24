@@ -536,6 +536,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("}") && !statesStack.empty() && statesStack.top() == State::INITIALIZER_LIST)
+	{
+		words.pop();
+		currentState = State::INSERT_INITIALIZER_LIST;
+
+		return;
+	}
 	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::BRACKETS_UNARY_OPERATOR_OPEN)
 	{
 		words.pop();
@@ -1590,7 +1597,7 @@ void HLSLConverter::argumentsListCloseBracket()
 	selectedFM_head.pop();
 	selectedFM_tail.pop();
 
-	if (word == std::string(",") || word == std::string(";") || word == std::string(")"))
+	if (word == std::string(",") || word == std::string(";") || word == std::string(")") || word == std::string("}"))
 		currentState = State::FINISH_EXPRESSION;
 	if (word == std::string("+"))
 		currentState = State::BINARY_PLUS;
@@ -3380,10 +3387,26 @@ void HLSLConverter::insertIndexOfVariable()
 
 void HLSLConverter::initializerList()
 {
+	ShaderUnits::CURLY_BRACKETS* pInitializerList = new ShaderUnits::CURLY_BRACKETS();
+	pInitializerList->setName("initializer list");
+	componentStack.push(pInitializerList);
 
+	statesStack.push(State::INITIALIZER_LIST);
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void HLSLConverter::insertInitializerList()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pInitializerList = componentStack.top();
+	componentStack.pop();
+
+	decls.top().value = pInitializerList;
+
+	currentState = State::UNKNOWN;
+
+	return;
 }
