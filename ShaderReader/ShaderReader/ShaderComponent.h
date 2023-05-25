@@ -168,6 +168,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class TEXTURE2DARRAY : public TYPE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class SEMANTIC : public Leaf
 	{
 	public:

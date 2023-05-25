@@ -80,6 +80,11 @@ public:
 		printSpaces();
 		std::cout << "Texture2D" << std::endl;
 	}
+	void startVisit(const ShaderUnits::TEXTURE2DARRAY* pTexture2DArray)
+	{
+		printSpaces();
+		std::cout << "Texture2DArray" << std::endl;
+	}
 	void startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC)
 	{
 		printSpaces();
@@ -404,6 +409,7 @@ public:
 	void finishVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};
 	void finishVisit(const ShaderUnits::FLOAT4* pFLOAT4) {};
 	void finishVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D) {};
+	void finishVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY) {};
 	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
 	{
 		numberOfSpaces -= 4;

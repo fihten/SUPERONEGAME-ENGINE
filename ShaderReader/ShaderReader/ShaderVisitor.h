@@ -18,6 +18,7 @@ public:
 	virtual void startVisit(const ShaderUnits::FLOAT4* pFLOAT4) {};
 	virtual void startVisit(const ShaderUnits::STRUCT* pSTRUCT) {};
 	virtual void startVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D) {};
+	virtual void startVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY) {};
 	virtual void startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC) {};
 	virtual void startVisit(const ShaderUnits::SV_POSITION* pSV_POSITION) {};
 	virtual void startVisit(const ShaderUnits::SV_TARGET* pSV_TARGET) {};
@@ -86,6 +87,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::FLOAT4* pFLOAT4) {};
 	virtual void finishVisit(const ShaderUnits::STRUCT* pSTRUCT) {};
 	virtual void finishVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D) {};
+	virtual void finishVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY) {};
 	virtual void finishVisit(const ShaderUnits::SEMANTIC* pSEMANTIC) {};
 	virtual void finishVisit(const ShaderUnits::SV_POSITION* pSV_POSITION) {};
 	virtual void finishVisit(const ShaderUnits::SV_TARGET* pSV_TARGET) {};

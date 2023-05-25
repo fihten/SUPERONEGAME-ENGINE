@@ -110,6 +110,14 @@ void ShaderUnits::TEXTURE2D::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::TEXTURE2DARRAY::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::SEMANTIC::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
