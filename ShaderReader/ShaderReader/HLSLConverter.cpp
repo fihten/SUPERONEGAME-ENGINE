@@ -1769,6 +1769,13 @@ void HLSLConverter::float2State()
 		currentState = State::CUSTOM_NAME;
 		return;
 	}
+	if (word == std::string("("))
+	{
+		words.pop();
+		currentState = State::FLOAT2_CONSTRUCTOR;
+
+		return;
+	}
 }
 
 void HLSLConverter::float3State()
@@ -2294,7 +2301,16 @@ void HLSLConverter::mulState()
 
 void HLSLConverter::float2constructor()
 {
+	ShaderUnits::ShaderComponent* pFloat2Constructor = new ShaderUnits::FLOAT2_CONSTRUCTOR();
+	componentStack.push(pFloat2Constructor);
 
+	statesStack.push(State::FLOAT2_CONSTRUCTOR);
+	currentState = State::ARGUMENTS_LIST_OPEN_BRACKET;
+
+	selectedFM_head.push(nullptr);
+	selectedFM_tail.push(nullptr);
+
+	return;
 }
 
 void HLSLConverter::float3constructor()
