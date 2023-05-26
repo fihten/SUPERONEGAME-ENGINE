@@ -132,6 +132,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class UINT1 : public TYPE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class FLOAT1 : public TYPE
 	{
 	public:

@@ -70,6 +70,12 @@ void ShaderUnits::INT1::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::UINT1::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::FLOAT1::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
