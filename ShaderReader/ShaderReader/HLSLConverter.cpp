@@ -169,6 +169,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			texture2dState();
 			break;
 
+		case State::TEXTURE2DARRAY:
+			texture2darrayState();
+			break;
+
 		case State::USER_TYPE:
 			userTypeState();
 			break;
@@ -672,6 +676,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("Texture2DArray"))
+	{
+		words.pop();
+		currentState = State::TEXTURE2DARRAY;
+
+		return;
+	}
 	if (userTypes.count(word))
 	{
 		words.pop();
@@ -1141,6 +1152,10 @@ bool HLSLConverter::isType(const std::string& str) const
 	if (std::strcmp(str.c_str(), "float3x3") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "float4x4") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "Texture2D") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "Texture2DArray") == 0)
 		return true;
 	return false;
 }
@@ -3124,6 +3139,21 @@ void HLSLConverter::texture2dState()
 	HLSLConverter::DeclarationFunctionOrVariable decl;
 
 	decl.type = new ShaderUnits::TEXTURE2D();
+	decl.name = word;
+
+	decls.push(decl);
+
+	currentState = State::CUSTOM_NAME;
+}
+
+void HLSLConverter::texture2darrayState()
+{
+	std::string word = words.front();
+	words.pop();
+
+	HLSLConverter::DeclarationFunctionOrVariable decl;
+
+	decl.type = new ShaderUnits::TEXTURE2DARRAY();
 	decl.name = word;
 
 	decls.push(decl);

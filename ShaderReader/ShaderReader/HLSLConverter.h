@@ -49,6 +49,7 @@ class HLSLConverter :public ShaderConverter
 		FLOAT3X3,
 		FLOAT4X4,
 		TEXTURE2D,
+		TEXTURE2DARRAY,
 		USER_TYPE,
 		CUSTOM_NAME,
 		FUNCTION_DECLARATION,
@@ -311,6 +312,7 @@ class HLSLConverter :public ShaderConverter
 	void insertCountOfElements();
 
 	void texture2dState();
+	void texture2darrayState();
 
 	void samplerStateState();
 	void samplerStateName();
