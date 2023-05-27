@@ -23,6 +23,7 @@ public:
 	virtual void startVisit(const ShaderUnits::SEMANTIC* pSEMANTIC) {};
 	virtual void startVisit(const ShaderUnits::SV_POSITION* pSV_POSITION) {};
 	virtual void startVisit(const ShaderUnits::SV_TARGET* pSV_TARGET) {};
+	virtual void startVisit(const ShaderUnits::SV_PRIMITIVE_ID* pSV_PRIMITIVE_ID) {};
 	virtual void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL) {};
 	virtual void startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL) {};
 	virtual void startVisit(const ShaderUnits::MUL* pMUL) {};
@@ -93,6 +94,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::SEMANTIC* pSEMANTIC) {};
 	virtual void finishVisit(const ShaderUnits::SV_POSITION* pSV_POSITION) {};
 	virtual void finishVisit(const ShaderUnits::SV_TARGET* pSV_TARGET) {};
+	virtual void finishVisit(const ShaderUnits::SV_PRIMITIVE_ID* pSV_PRIMITIVE_ID) {};
 	virtual void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL) {};
 	virtual void finishVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION_CALL) {};
 	virtual void finishVisit(const ShaderUnits::MUL* pMUL) {};

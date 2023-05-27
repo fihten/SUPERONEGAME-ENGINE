@@ -198,6 +198,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class SV_PRIMITIVE_ID : public SEMANTIC
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class FUNCTION_DECL : public ShaderComposite
 	{
 	public:

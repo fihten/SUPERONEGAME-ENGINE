@@ -59,6 +59,7 @@ class HLSLConverter :public ShaderConverter
 		SEMANTIC,
 		SV_POSITION_,
 		SV_TARGET_,
+		SV_PRIMITIVE_ID_,
 		CUSTOM_SEMANTIC,
 		FUNCTION_BODY_OPEN_BRACKET,
 		FUNCTION_BODY_CLOSE_BRACKET,
@@ -199,6 +200,7 @@ class HLSLConverter :public ShaderConverter
 	void semantic();
 	void svPosition();
 	void svTarget();
+	void svPrimitiveId();
 	void customSemantic();
 	void functionBodyOpenBracket();
 	void functionBodyCloseBracket();

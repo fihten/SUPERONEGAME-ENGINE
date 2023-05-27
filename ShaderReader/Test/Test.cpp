@@ -105,6 +105,11 @@ public:
 		printSpaces();
 		std::cout << "SV_TARGET" << std::endl;
 	};
+	void startVisit(const ShaderUnits::SV_PRIMITIVE_ID* pSV_PRIMITIVE_ID)
+	{
+		printSpaces();
+		std::cout << "SV_PRIMITIVE_ID" << std::endl;
+	};
 	void startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 	{
 		printSpaces();
@@ -423,6 +428,7 @@ public:
 	void finishVisit(const ShaderUnits::SEMANTIC* pSEMANTIC) {};
 	void finishVisit(const ShaderUnits::SV_POSITION* pSV_POSITION) {};
 	void finishVisit(const ShaderUnits::SV_TARGET* pSV_TARGET) {};
+	void finishVisit(const ShaderUnits::SV_PRIMITIVE_ID* pSV_PRIMITIVE_ID) {};
 	void finishVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
 	{
 		numberOfSpaces -= 4;

@@ -209,6 +209,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			svTarget();
 			break;
 
+		case State::SV_PRIMITIVE_ID_:
+			svPrimitiveId();
+			break;
+
 		case State::CUSTOM_SEMANTIC:
 			customSemantic();
 			break;
@@ -2086,6 +2090,12 @@ void HLSLConverter::semantic()
 		currentState = State::SV_TARGET_;
 		return;
 	}
+	if (word == std::string("SV_PrimitiveID"))
+	{
+		words.pop();
+		currentState = State::SV_PRIMITIVE_ID_;
+		return;
+	}
 	// CUSTOM_SEMANTIC
 	{
 		words.pop();
@@ -2125,6 +2135,31 @@ void HLSLConverter::svTarget()
 	std::string word = words.front();
 
 	ShaderUnits::ShaderComponent* semanticElement = new ShaderUnits::SV_TARGET();
+	decls.top().semantic = semanticElement;
+
+	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)
+	{
+		currentState = State::INSERT_FUNCTION_DECLARATION;
+		return;
+	}
+	if (word == std::string("{") && statesStack.top() == State::FUNCTION_DECLARATION)
+	{
+		words.pop();
+		currentState = State::FUNCTION_BODY_OPEN_BRACKET;
+		return;
+	}
+	if ((word == std::string(";") || word == std::string(",") || word == std::string(")")) && statesStack.top() == State::VARIABLE_DECLARATION)
+	{
+		currentState = State::INSERT_VARIABLE_DECLARATION;
+		return;
+	}
+}
+
+void HLSLConverter::svPrimitiveId()
+{
+	std::string word = words.front();
+
+	ShaderUnits::ShaderComponent* semanticElement = new ShaderUnits::SV_PRIMITIVE_ID();
 	decls.top().semantic = semanticElement;
 
 	if (word == std::string(";") && statesStack.top() == State::FUNCTION_DECLARATION)

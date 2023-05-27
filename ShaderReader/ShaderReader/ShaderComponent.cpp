@@ -142,6 +142,12 @@ void ShaderUnits::SV_TARGET::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::SV_PRIMITIVE_ID::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::FUNCTION_DECL::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
