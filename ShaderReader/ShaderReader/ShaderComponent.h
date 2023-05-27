@@ -514,4 +514,10 @@ namespace ShaderUnits
 	public:
 		void query(ShaderVisitor* visitor);
 	};
+
+	class MAXVERTEXCOUNT : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
 }

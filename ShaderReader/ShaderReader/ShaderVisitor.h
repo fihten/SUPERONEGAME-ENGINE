@@ -75,6 +75,7 @@ public:
 	virtual void startVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};
 	virtual void startVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD) {};
 	virtual void startVisit(const ShaderUnits::CAST* pCAST) {};
+	virtual void startVisit(const ShaderUnits::MAXVERTEXCOUNT* pMAXVERTEXCOUNT) {};
 
 	virtual void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER) {};
 	virtual void finishVisit(const ShaderUnits::SAMPLER_STATE* pSAMPLER_STATE) {};
@@ -146,4 +147,5 @@ public:
 	virtual void finishVisit(const ShaderUnits::SELECTED_FIELD* pSELECTED_FIELD) {};
 	virtual void finishVisit(const ShaderUnits::SELECTED_METHOD* pSELECTED_METHOD) {};
 	virtual void finishVisit(const ShaderUnits::CAST* pCAST) {};
+	virtual void finishVisit(const ShaderUnits::MAXVERTEXCOUNT* pMAXVERTEXCOUNT) {};
 };

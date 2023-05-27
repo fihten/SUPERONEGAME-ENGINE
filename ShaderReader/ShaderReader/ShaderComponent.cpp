@@ -531,3 +531,11 @@ void ShaderUnits::CAST::query(ShaderVisitor* visitor)
 		ch->query(visitor);
 	visitor->finishVisit(this);
 }
+
+void ShaderUnits::MAXVERTEXCOUNT::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}

@@ -401,6 +401,12 @@ public:
 		std::cout << "CASTING" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::MAXVERTEXCOUNT* pMAXVERTEXCOUNT)
+	{
+		printSpaces();
+		std::cout << "maxvertexcount" << std::endl;
+		numberOfSpaces += 4;
+	};
 
 	void finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 	{
@@ -597,6 +603,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::CAST* pCAST)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::MAXVERTEXCOUNT* pMAXVERTEXCOUNT)
 	{
 		numberOfSpaces -= 4;
 	};
