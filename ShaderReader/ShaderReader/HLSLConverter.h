@@ -134,7 +134,11 @@ class HLSLConverter :public ShaderConverter
 		INDEX_OF_VARIABLE,
 		INSERT_INDEX_OF_VARIABLE,
 		INITIALIZER_LIST,
-		INSERT_INITIALIZER_LIST
+		INSERT_INITIALIZER_LIST,
+		MAXVERTEXCOUNT,
+		MAXVERTEXCOUNT_PARAMETER,
+		INSERT_MAXVERTEXCOUNT_PARAMETER,
+		INSERT_MAXVERTEXCOUNT
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -298,6 +302,7 @@ class HLSLConverter :public ShaderConverter
 
 	struct DeclarationFunctionOrVariable
 	{
+		ShaderUnits::ShaderComponent* maxvertexcount = nullptr;
 		ShaderUnits::ShaderComponent* modifier = nullptr;
 		ShaderUnits::ShaderComponent* type = nullptr;
 		std::string name = "";
@@ -350,9 +355,16 @@ class HLSLConverter :public ShaderConverter
 	void initializerList();
 	void insertInitializerList();
 
+	void maxVertexCount();
+	void maxVertexCountParameter();
+	void insertMaxVertexCountParameter();
+	void insertMaxVertexCount();
+	ShaderUnits::MAXVERTEXCOUNT* pMaxvertexcount = nullptr;
+
 private:
 	bool isOperationState(State state) const;
 	bool isCast(const std::queue<std::string>& words) const;
+	bool isMaxVertexCount(const std::queue<std::string>& words) const;
 	bool isType(const std::string& str) const;
 	bool isModifier(const std::string& str) const;
 

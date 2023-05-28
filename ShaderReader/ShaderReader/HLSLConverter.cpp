@@ -512,6 +512,22 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 		case State::INSERT_INITIALIZER_LIST:
 			insertInitializerList();
 			break;
+
+		case State::MAXVERTEXCOUNT:
+			maxVertexCount();
+			break;
+
+		case State::MAXVERTEXCOUNT_PARAMETER:
+			maxVertexCountParameter();
+			break;
+
+		case State::INSERT_MAXVERTEXCOUNT_PARAMETER:
+			insertMaxVertexCountParameter();
+			break;
+
+		case State::INSERT_MAXVERTEXCOUNT:
+			insertMaxVertexCount();
+			break;
 		}
 	}
 
@@ -526,6 +542,15 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::CAST;
+
+		return;
+	}
+
+	if (isMaxVertexCount(words))
+	{
+		words.pop();
+		words.pop();
+		currentState = State::MAXVERTEXCOUNT;
 
 		return;
 	}
@@ -556,6 +581,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::INSERT_INITIALIZER_LIST;
+
+		return;
+	}
+	if (word == std::string(")") && !statesStack.empty() && statesStack.top() == State::MAXVERTEXCOUNT_PARAMETER)
+	{
+		words.pop();
+		currentState = State::INSERT_MAXVERTEXCOUNT_PARAMETER;
 
 		return;
 	}
@@ -1144,6 +1176,18 @@ bool HLSLConverter::isCast(const std::queue<std::string>& words) const
 	if (!isType(*(it + 1)))
 		return false;
 	if (std::strcmp((it + 2)->c_str(), ")") != 0)
+		return false;
+	return true;
+}
+
+bool HLSLConverter::isMaxVertexCount(const std::queue<std::string>& words) const
+{
+	if (words.size() < 2)
+		return false;
+	auto it = words._Get_container().begin();
+	if (std::strcmp(it->c_str(), "[") != 0)
+		return false;
+	if (std::strcmp((it + 1)->c_str(), "maxvertexcount") != 0)
 		return false;
 	return true;
 }
@@ -3545,6 +3589,58 @@ void HLSLConverter::insertInitializerList()
 	componentStack.pop();
 
 	decls.top().value = pInitializerList;
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::maxVertexCount()
+{
+	ShaderUnits::ShaderComponent* pMAXVERTEXCOUNT = new ShaderUnits::MAXVERTEXCOUNT();
+	componentStack.push(pMAXVERTEXCOUNT);
+	statesStack.push(State::MAXVERTEXCOUNT);
+
+	currentState = State::MAXVERTEXCOUNT_PARAMETER;
+	
+	return;
+}
+
+void HLSLConverter::maxVertexCountParameter()
+{
+	words.pop();
+
+	ShaderUnits::ShaderComponent* pMAXVERTEXCOUNT_PARAMETER = new ShaderUnits::ROUND_BRACKETS();
+	componentStack.push(pMAXVERTEXCOUNT_PARAMETER);
+	statesStack.push(State::MAXVERTEXCOUNT_PARAMETER);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::insertMaxVertexCountParameter()
+{
+	statesStack.pop();
+
+	ShaderUnits::ShaderComponent* pMAXVERTEXCOUNT_PARAMETER = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pMAXVERTEXCOUNT = componentStack.top();
+	pMAXVERTEXCOUNT->add(pMAXVERTEXCOUNT_PARAMETER);
+
+	words.pop();
+	currentState = State::INSERT_MAXVERTEXCOUNT;
+
+	return;
+}
+
+void HLSLConverter::insertMaxVertexCount()
+{
+	statesStack.pop();
+
+	pMaxvertexcount = dynamic_cast<ShaderUnits::MAXVERTEXCOUNT*>(componentStack.top());
+	componentStack.pop();
 
 	currentState = State::UNKNOWN;
 
