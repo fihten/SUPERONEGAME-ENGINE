@@ -200,6 +200,11 @@ public:
 		printSpaces();
 		std::cout << "uniform" << std::endl;
 	};
+	void startVisit(const ShaderUnits::POINT* pPOINT)
+	{
+		printSpaces();
+		std::cout << "point" << std::endl;
+	};
 	void startVisit(const ShaderUnits::VARIABLE* pVARIABLE)
 	{
 		printSpaces();
@@ -481,6 +486,7 @@ public:
 	void finishVisit(const ShaderUnits::OUT_MODIFIER* pOUT) {};
 	void finishVisit(const ShaderUnits::INOUT_MODIFIER* pINOUT) {};
 	void finishVisit(const ShaderUnits::UNIFORM* pUNIFORM) {};
+	void finishVisit(const ShaderUnits::POINT* pPOINT) {};
 	void finishVisit(const ShaderUnits::VARIABLE* pVARIABLE)
 	{
 		numberOfSpaces -= 4;

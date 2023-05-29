@@ -120,7 +120,7 @@ float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexture) : SV
 }
 
 [maxvertexcount(4)]
-void GS()
+void GS(point VertexOut gin[1])
 {
 
 }

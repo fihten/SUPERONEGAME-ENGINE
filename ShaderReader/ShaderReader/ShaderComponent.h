@@ -311,6 +311,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class POINT : public MODIFIER
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class VARIABLE : public ShaderComposite
 	{
 	public:

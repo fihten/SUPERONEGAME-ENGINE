@@ -253,6 +253,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			uniformState();
 			break;
 
+		case State::POINT_:
+			pointState();
+			break;
+
 		case State::MUL:
 			mulState();
 			break;
@@ -767,6 +771,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("point"))
+	{
+		words.pop();
+		currentState = State::POINT_;
+
+		return;
+	}
 	if (word == std::string("mul"))
 	{
 		words.pop();
@@ -1230,6 +1241,8 @@ bool HLSLConverter::isModifier(const std::string& str) const
 	if (std::strcmp(str.c_str(), "inout") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "uniform") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "point") == 0)
 		return true;
 	return false;
 }
@@ -2417,6 +2430,14 @@ void HLSLConverter::inoutState()
 void HLSLConverter::uniformState()
 {
 	modifier = new ShaderUnits::UNIFORM();
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::pointState()
+{
+	modifier = new ShaderUnits::POINT();
 	currentState = State::UNKNOWN;
 
 	return;

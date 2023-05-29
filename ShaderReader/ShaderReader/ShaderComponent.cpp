@@ -270,6 +270,12 @@ void ShaderUnits::UNIFORM::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::POINT::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::VARIABLE::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
