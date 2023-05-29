@@ -119,6 +119,12 @@ float4 PS(VertexOut pin, uniform int gLightCount, uniform bool gUseTexture) : SV
 	return litColor;
 }
 
+[maxvertexcount(4)]
+void GS()
+{
+
+}
+
 technique11 Light1
 {
 	pass P0

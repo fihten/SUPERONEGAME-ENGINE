@@ -2271,6 +2271,8 @@ void HLSLConverter::functionBodyCloseBracket()
 	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
 
 	ShaderUnits::FUNCTION_DECL* funcDecl = new ShaderUnits::FUNCTION_DECL();
+	if (pMaxvertexcount)
+		funcDecl->add(pMaxvertexcount);
 	funcDecl->add(funcDeclStruct.type);
 	funcDecl->setName(funcDeclStruct.name);
 	funcDecl->add(funcDeclStruct.signature);
@@ -2280,6 +2282,7 @@ void HLSLConverter::functionBodyCloseBracket()
 		funcDecl->add(funcDeclStruct.body);
 
 	decls.pop();
+	pMaxvertexcount = nullptr;
 	componentStack.top()->add(funcDecl);
 	currentState = State::UNKNOWN;
 
@@ -2293,6 +2296,8 @@ void HLSLConverter::insertFunctionDeclaration()
 	DeclarationFunctionOrVariable& funcDeclStruct = decls.top();
 
 	ShaderUnits::FUNCTION_DECL* funcDecl = new ShaderUnits::FUNCTION_DECL();
+	if (pMaxvertexcount)
+		funcDecl->add(pMaxvertexcount);
 	funcDecl->add(funcDeclStruct.type);
 	funcDecl->setName(funcDeclStruct.name);
 	funcDecl->add(funcDeclStruct.signature);
@@ -2302,6 +2307,7 @@ void HLSLConverter::insertFunctionDeclaration()
 		funcDecl->add(funcDeclStruct.body);
 
 	decls.pop();
+	pMaxvertexcount = nullptr;
 	componentStack.top()->add(funcDecl);
 	currentState = State::UNKNOWN;
 

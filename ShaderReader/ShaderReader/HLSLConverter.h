@@ -302,7 +302,6 @@ class HLSLConverter :public ShaderConverter
 
 	struct DeclarationFunctionOrVariable
 	{
-		ShaderUnits::ShaderComponent* maxvertexcount = nullptr;
 		ShaderUnits::ShaderComponent* modifier = nullptr;
 		ShaderUnits::ShaderComponent* type = nullptr;
 		std::string name = "";
