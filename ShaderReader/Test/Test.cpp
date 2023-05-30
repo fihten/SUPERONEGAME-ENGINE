@@ -341,6 +341,12 @@ public:
 		std::cout << "{" << pCURLY_BRACKETS->getName() << "}" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::TEMPLATE_PARAMETER* pTEMPLATE_PARAMETER)
+	{
+		printSpaces();
+		std::cout << "<TEMPLATE PARAMETER>" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::RETURN* pRETURN)
 	{
 		printSpaces();
@@ -576,6 +582,10 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::CURLY_BRACKETS* pCURLY_BRACKETS)
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::TEMPLATE_PARAMETER* pTEMPLATE_PARAMETER)
 	{
 		numberOfSpaces -= 4;
 	};

@@ -61,6 +61,7 @@ public:
 	virtual void startVisit(const ShaderUnits::ROUND_BRACKETS* pROUND_BRACKETS) {};
 	virtual void startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	virtual void startVisit(const ShaderUnits::CURLY_BRACKETS* pCURLY_BRACKETS) {};
+	virtual void startVisit(const ShaderUnits::TEMPLATE_PARAMETER* pTEMPLATE_PARAMETER) {};
 	virtual void startVisit(const ShaderUnits::RETURN* pRETURN) {};
 	virtual void startVisit(const ShaderUnits::SHADER* pSHADER) {};
 	virtual void startVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};
@@ -135,6 +136,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::ROUND_BRACKETS* pROUND_BRACKETS) {};
 	virtual void finishVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS) {};
 	virtual void finishVisit(const ShaderUnits::CURLY_BRACKETS* pCURLY_BRACKETS) {};
+	virtual void finishVisit(const ShaderUnits::TEMPLATE_PARAMETER* pTEMPLATE_PARAMETER) {};
 	virtual void finishVisit(const ShaderUnits::RETURN* pRETURN) {};
 	virtual void finishVisit(const ShaderUnits::SHADER* pSHADER) {};
 	virtual void finishVisit(const ShaderUnits::ShaderComponent* pShaderComponent) {};

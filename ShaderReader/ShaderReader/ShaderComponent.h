@@ -455,6 +455,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class TEMPLATE_PARAMETER :public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class RETURN : public ShaderComposite
 	{
 	public:

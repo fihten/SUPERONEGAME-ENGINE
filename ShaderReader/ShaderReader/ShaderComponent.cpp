@@ -456,6 +456,14 @@ void ShaderUnits::CURLY_BRACKETS::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::TEMPLATE_PARAMETER::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::RETURN::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
