@@ -162,6 +162,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class TRIANGLE_STREAM : public TYPE
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class STRUCT : public TYPE
 	{
 	public:

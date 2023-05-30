@@ -100,6 +100,14 @@ void ShaderUnits::FLOAT4::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::TRIANGLE_STREAM::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::STRUCT::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

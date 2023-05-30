@@ -74,6 +74,12 @@ public:
 		printSpaces();
 		std::cout << "float4" << std::endl;
 	};
+	void startVisit(const ShaderUnits::TRIANGLE_STREAM* pTRIANGLE_STREAM)
+	{
+		printSpaces();
+		std::cout << "TriangleStream<>" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::STRUCT* pSTRUCT)
 	{
 		printSpaces();
@@ -430,6 +436,10 @@ public:
 	void finishVisit(const ShaderUnits::FLOAT2* pFLOAT2) {};
 	void finishVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};
 	void finishVisit(const ShaderUnits::FLOAT4* pFLOAT4) {};
+	void finishVisit(const ShaderUnits::TRIANGLE_STREAM* pTRIANGLE_STREAM) 
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D) {};
 	void finishVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY) {};
 	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT)
