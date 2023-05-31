@@ -532,6 +532,22 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 		case State::INSERT_MAXVERTEXCOUNT:
 			insertMaxVertexCount();
 			break;
+
+		case State::TRIANGLE_STREAM:
+			triangleStream();
+			break;
+
+		case State::TEMPLATE_PARAMETER:
+			templateParameter();
+			break;
+
+		case State::INSERT_TEMPLATE_PARAMETER:
+			insertTemplateParameter();
+			break;
+
+		case State::UPDATE_TRIANGLE_STREAM:
+			updateTriangleStream();
+			break;
 		}
 	}
 
@@ -3672,4 +3688,24 @@ void HLSLConverter::insertMaxVertexCount()
 	currentState = State::UNKNOWN;
 
 	return;
+}
+
+void HLSLConverter::triangleStream()
+{
+
+}
+
+void HLSLConverter::templateParameter()
+{
+
+}
+
+void HLSLConverter::insertTemplateParameter()
+{
+
+}
+
+void HLSLConverter::updateTriangleStream()
+{
+
 }
