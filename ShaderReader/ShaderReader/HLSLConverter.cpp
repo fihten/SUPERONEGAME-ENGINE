@@ -2090,6 +2090,18 @@ void HLSLConverter::userTypeState()
 
 		return;
 	}
+	if (word == std::string(">") && !statesStack.empty() && statesStack.top() == State::TEMPLATE_PARAMETER)
+	{
+		words.pop();
+
+		ShaderUnits::ShaderComponent* pTemplateParameter = componentStack.top();
+		pTemplateParameter->add(userType);
+		userType = nullptr;
+
+		currentState = State::INSERT_TEMPLATE_PARAMETER;
+
+		return;
+	}
 }
 
 void HLSLConverter::customName()
@@ -3717,7 +3729,13 @@ void HLSLConverter::triangleStream()
 
 void HLSLConverter::templateParameter()
 {
+	ShaderUnits::TEMPLATE_PARAMETER* pTemplateParameter = new ShaderUnits::TEMPLATE_PARAMETER();
+	componentStack.push(pTemplateParameter);
+	statesStack.push(State::TEMPLATE_PARAMETER);
 
+	currentState = State::UNKNOWN;
+
+	return;
 }
 
 void HLSLConverter::insertTemplateParameter()
