@@ -750,6 +750,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("TriangleStream"))
+	{
+		words.pop();
+		currentState = State::TRIANGLE_STREAM;
+
+		return;
+	}
 	if (userTypes.count(word))
 	{
 		words.pop();
@@ -1244,6 +1251,8 @@ bool HLSLConverter::isType(const std::string& str) const
 	if (std::strcmp(str.c_str(), "Texture2D") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "Texture2DArray") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "TriangleStream") == 0)
 		return true;
 	return false;
 }
@@ -3692,7 +3701,18 @@ void HLSLConverter::insertMaxVertexCount()
 
 void HLSLConverter::triangleStream()
 {
+	ShaderUnits::ShaderComponent* pTriangleStream = new ShaderUnits::TRIANGLE_STREAM();
+	componentStack.push(pTriangleStream);
+	statesStack.push(State::TRIANGLE_STREAM);
 
+	std::string word = words.front();
+	if (word == std::string("<"))
+	{
+		words.pop();
+		currentState = State::TEMPLATE_PARAMETER;
+
+		return;
+	}
 }
 
 void HLSLConverter::templateParameter()
