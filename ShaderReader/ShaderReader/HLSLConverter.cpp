@@ -3740,10 +3740,41 @@ void HLSLConverter::templateParameter()
 
 void HLSLConverter::insertTemplateParameter()
 {
+	statesStack.pop();
 
+	ShaderUnits::ShaderComponent* pTemplateParameter = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* pTemplateClass = componentStack.top();
+	pTemplateClass->add(pTemplateParameter);
+
+	if (!statesStack.empty() && statesStack.top() == State::TRIANGLE_STREAM)
+	{
+		currentState = State::UPDATE_TRIANGLE_STREAM;
+		return;
+	}
 }
 
 void HLSLConverter::updateTriangleStream()
 {
+	statesStack.pop();
 
+	std::string word = words.front();
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = componentStack.top();
+		componentStack.pop();
+
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+
+		return;
+	}
 }
