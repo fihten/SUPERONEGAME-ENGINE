@@ -36,6 +36,7 @@ public:
 	virtual void startVisit(const ShaderUnits::SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
 	virtual void startVisit(const ShaderUnits::COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void startVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
+	virtual void startVisit(const ShaderUnits::GEOMETRY_SHADER_VERSION* pGEOMETRY_SHADER_VERSION) {};
 	virtual void startVisit(const ShaderUnits::PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
 	virtual void startVisit(const ShaderUnits::IN_MODIFIER* pIN) {};
 	virtual void startVisit(const ShaderUnits::OUT_MODIFIER* pOUT) {};
@@ -111,6 +112,7 @@ public:
 	virtual void finishVisit(const ShaderUnits::SET_PIXEL_SHADER* pSET_PIXEL_SHADER) {};
 	virtual void finishVisit(const ShaderUnits::COMPILE_SHADER* pCOMPILE_SHADER) {};
 	virtual void finishVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
+	virtual void finishVisit(const ShaderUnits::GEOMETRY_SHADER_VERSION* pGEOMETRY_SHADER_VERSION) {};
 	virtual void finishVisit(const ShaderUnits::PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
 	virtual void finishVisit(const ShaderUnits::IN_MODIFIER* pIN) {};
 	virtual void finishVisit(const ShaderUnits::OUT_MODIFIER* pOUT) {};

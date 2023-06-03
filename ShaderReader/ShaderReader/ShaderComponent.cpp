@@ -242,6 +242,12 @@ void ShaderUnits::VERTEX_SHADER_VERSION::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::GEOMETRY_SHADER_VERSION::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::PIXEL_SHADER_VERSION::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

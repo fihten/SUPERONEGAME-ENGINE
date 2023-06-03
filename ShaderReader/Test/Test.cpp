@@ -181,6 +181,11 @@ public:
 		printSpaces();
 		std::cout << pVERTEX_SHADER_VERSION->getName() << std::endl;
 	};
+	void startVisit(const ShaderUnits::GEOMETRY_SHADER_VERSION* pGEOMETRY_SHADER_VERSION)
+	{
+		printSpaces();
+		std::cout << pGEOMETRY_SHADER_VERSION->getName() << std::endl;
+	};
 	void startVisit(const ShaderUnits::PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION)
 	{
 		printSpaces();
@@ -497,6 +502,7 @@ public:
 		numberOfSpaces -= 4;
 	};
 	void finishVisit(const ShaderUnits::VERTEX_SHADER_VERSION* pVERTEX_SHADER_VERSION) {};
+	void finishVisit(const ShaderUnits::GEOMETRY_SHADER_VERSION* pGEOMETRY_SHADER_VERSION) {};
 	void finishVisit(const ShaderUnits::PIXEL_SHADER_VERSION* pPIXEL_SHADER_VERSION) {};
 	void finishVisit(const ShaderUnits::IN_MODIFIER* pIN) {};
 	void finishVisit(const ShaderUnits::OUT_MODIFIER* pOUT) {};

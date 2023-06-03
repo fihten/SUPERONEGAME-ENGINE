@@ -281,6 +281,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class GEOMETRY_SHADER_VERSION : public Leaf
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class PIXEL_SHADER_VERSION : public Leaf
 	{
 	public:
