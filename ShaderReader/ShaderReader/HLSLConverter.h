@@ -88,6 +88,7 @@ class HLSLConverter :public ShaderConverter
 		SET_PIXEL_SHADER,
 		COMPILE_SHADER,
 		VS_5_0,
+		GS_5_0,
 		PS_5_0,
 		RETURN,
 		INSERT_RETURN,
@@ -274,6 +275,7 @@ class HLSLConverter :public ShaderConverter
 	void compileShader();
 
 	void vs_5_0_state();
+	void gs_5_0_state();
 	void ps_5_0_state();
 
 	void returnState();

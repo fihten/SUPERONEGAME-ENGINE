@@ -341,6 +341,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			vs_5_0_state();
 			break;
 
+		case State::GS_5_0:
+			gs_5_0_state();
+			break;
+
 		case State::PS_5_0:
 			ps_5_0_state();
 			break;
@@ -910,6 +914,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::VS_5_0;
+
+		return;
+	}
+	if (word == std::string("gs_5_0"))
+	{
+		words.pop();
+		currentState = State::GS_5_0;
 
 		return;
 	}
@@ -2756,6 +2767,19 @@ void HLSLConverter::vs_5_0_state()
 
 	ShaderUnits::ShaderComponent* parent = componentStack.top();
 	parent->add(pVS_5_0);
+
+	currentState = State::UNKNOWN;
+
+	return;
+}
+
+void HLSLConverter::gs_5_0_state()
+{
+	ShaderUnits::ShaderComponent* pGS_5_0 = new ShaderUnits::GEOMETRY_SHADER_VERSION();
+	pGS_5_0->setName(std::string("gs_5_0"));
+
+	ShaderUnits::ShaderComponent* parent = componentStack.top();
+	parent->add(pGS_5_0);
 
 	currentState = State::UNKNOWN;
 
