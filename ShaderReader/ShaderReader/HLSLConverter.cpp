@@ -2073,6 +2073,18 @@ void HLSLConverter::userTypeState()
 
 		return;
 	}
+	if (word == std::string(">") && !statesStack.empty() && statesStack.top() == State::TEMPLATE_PARAMETER)
+	{
+		words.pop();
+
+		ShaderUnits::ShaderComponent* pTemplateParameter = componentStack.top();
+		pTemplateParameter->add(userType);
+		userType = nullptr;
+
+		currentState = State::INSERT_TEMPLATE_PARAMETER;
+
+		return;
+	}
 	if (word != std::string("("))
 	{
 		words.pop();
@@ -2087,18 +2099,6 @@ void HLSLConverter::userTypeState()
 		currentState = State::CUSTOM_NAME;
 
 		userType = nullptr;
-
-		return;
-	}
-	if (word == std::string(">") && !statesStack.empty() && statesStack.top() == State::TEMPLATE_PARAMETER)
-	{
-		words.pop();
-
-		ShaderUnits::ShaderComponent* pTemplateParameter = componentStack.top();
-		pTemplateParameter->add(userType);
-		userType = nullptr;
-
-		currentState = State::INSERT_TEMPLATE_PARAMETER;
 
 		return;
 	}
