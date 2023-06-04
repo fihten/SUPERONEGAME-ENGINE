@@ -377,6 +377,12 @@ namespace ShaderUnits
 		void query(ShaderVisitor* visitor);
 	};
 
+	class MOD : public ShaderComposite
+	{
+	public:
+		void query(ShaderVisitor* visitor);
+	};
+
 	class LESS_THAN : public ShaderComposite
 	{
 	public:

@@ -21,12 +21,14 @@ class HLSLConverter :public ShaderConverter
 		BINARY_PLUS,
 		BINARY_MULTIPLY,
 		BINARY_DIVIDE,
+		MOD,
 		GREATER_THAN,
 		LESS_THAN,
 		CREATING_BINARY_MINUS,
 		CREATING_BINARY_PLUS,
 		CREATING_BINARY_DIVIDE,
 		CREATING_BINARY_MULTIPLY,
+		CREATING_MOD,
 		CREATING_GREATER_THAN,
 		CREATING_LESS_THAN,
 		VARIABLE,
@@ -169,6 +171,9 @@ class HLSLConverter :public ShaderConverter
 
 	void binaryMultiply();
 	void creatingBinaryMultiply();
+
+	void mod();
+	void creatingMod();
 
 	void greaterThan();
 	void creatingGreaterThan();

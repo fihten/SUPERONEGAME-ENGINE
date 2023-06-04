@@ -262,6 +262,12 @@ public:
 		std::cout << "*" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::MOD* pMOD)
+	{
+		printSpaces();
+		std::cout << "%" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::LESS_THAN* pLESS_THAN)
 	{
 		printSpaces();
@@ -535,6 +541,10 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
+	void finishVisit(const ShaderUnits::MOD* pMOD)
+	{
+		numberOfSpaces -= 4;
+	};
 	void finishVisit(const ShaderUnits::LESS_THAN* pLESS_THAN)
 	{
 		numberOfSpaces -= 4;
@@ -647,7 +657,7 @@ public:
 int main()
 {
 	ShaderReader reader;
-	reader.openShader(L"C:\\3dEngine\\Shaders\\Basic.fx");
+	reader.openShader(L"C:\\3dEngine\\Shaders\\TreeSprite.fx");
 
 	HLSLConverter converter;
 	reader.parseShader(converter);

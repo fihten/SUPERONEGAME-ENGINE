@@ -73,6 +73,14 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			creatingBinaryMultiply();
 			break;
 
+		case State::MOD:
+			mod();
+			break;
+
+		case State::CREATING_MOD:
+			creatingMod();
+			break;
+
 		case State::GREATER_THAN:
 			greaterThan();
 			break;
@@ -1097,6 +1105,8 @@ void HLSLConverter::bracketsUnaryOperatorClose()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("%"))
+		currentState = State::MOD;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 	if (word == std::string("<"))
@@ -1155,6 +1165,12 @@ void HLSLConverter::finishExpression()
 		currentState = State::BINARY_DIVIDE;
 		return;
 	}
+	if (op && word == std::string("%"))
+	{
+		statesStack.pop();
+		currentState = State::MOD;
+		return;
+	}
 	if (op && word == std::string(">"))
 	{
 		statesStack.pop();
@@ -1195,6 +1211,7 @@ bool HLSLConverter::isOperationState(State state) const
 		state == State::BINARY_MINUS ||
 		state == State::BINARY_MULTIPLY ||
 		state == State::BINARY_PLUS ||
+		state == State::MOD ||
 		state == State::UNARY_MINUS ||
 		state == State::UNARY_PLUS ||
 		state == State::INCREMENT ||
@@ -1291,6 +1308,7 @@ void HLSLConverter::binaryMinus()
 
 	if (lastState == State::BINARY_DIVIDE ||
 		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::MOD ||
 		lastState == State::UNARY_MINUS ||
 		lastState == State::UNARY_PLUS ||
 		lastState == State::INCREMENT)
@@ -1323,6 +1341,7 @@ void HLSLConverter::binaryPlus()
 
 	if (lastState == State::BINARY_DIVIDE ||
 		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::MOD ||
 		lastState == State::UNARY_MINUS ||
 		lastState == State::UNARY_PLUS ||
 		lastState == State::INCREMENT)
@@ -1408,6 +1427,38 @@ void HLSLConverter::creatingBinaryMultiply()
 	currentState = State::UNKNOWN;
 }
 
+void HLSLConverter::mod()
+{
+	State lastState = State::UNKNOWN;
+	if (!statesStack.empty())
+		lastState = statesStack.top();
+
+	if (lastState == State::BINARY_DIVIDE ||
+		lastState == State::BINARY_MULTIPLY ||
+		lastState == State::UNARY_MINUS ||
+		lastState == State::UNARY_PLUS ||
+		lastState == State::INCREMENT)
+		currentState = State::FINISH_EXPRESSION;
+	else
+		currentState = State::CREATING_MOD;
+}
+
+void HLSLConverter::creatingMod()
+{
+	words.pop();
+
+	ShaderUnits::ShaderComponent* leftOperand = componentStack.top();
+	componentStack.pop();
+
+	ShaderUnits::ShaderComponent* modOp = new ShaderUnits::MOD();
+	modOp->add(leftOperand);
+
+	componentStack.push(modOp);
+
+	statesStack.push(State::MOD);
+	currentState = State::UNKNOWN;
+}
+
 void HLSLConverter::greaterThan()
 {
 	State lastState = State::UNKNOWN;
@@ -1418,6 +1469,7 @@ void HLSLConverter::greaterThan()
 		lastState == State::BINARY_MULTIPLY ||
 		lastState == State::BINARY_MINUS ||
 		lastState == State::BINARY_PLUS ||
+		lastState == State::MOD ||
 		lastState == State::UNARY_MINUS ||
 		lastState == State::UNARY_PLUS ||
 		lastState == State::INCREMENT)
@@ -1452,6 +1504,7 @@ void HLSLConverter::lessThan()
 		lastState == State::BINARY_MULTIPLY ||
 		lastState == State::BINARY_MINUS ||
 		lastState == State::BINARY_PLUS ||
+		lastState == State::MOD ||
 		lastState == State::UNARY_MINUS ||
 		lastState == State::UNARY_PLUS ||
 		lastState == State::INCREMENT)
@@ -1547,6 +1600,8 @@ void HLSLConverter::variable()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("%"))
+		currentState = State::MOD;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
 	if (word == std::string("+="))
@@ -1582,6 +1637,8 @@ void HLSLConverter::number()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("%"))
+		currentState = State::MOD;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
 	if (word == std::string("+="))
@@ -1736,6 +1793,8 @@ void HLSLConverter::argumentsListCloseBracket()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("%"))
+		currentState = State::MOD;
 	if (word == std::string(">"))
 		currentState = State::GREATER_THAN;
 	if (word == std::string("<"))
@@ -3643,6 +3702,8 @@ void HLSLConverter::insertIndexOfVariable()
 		currentState = State::BINARY_MULTIPLY;
 	if (word == std::string("/"))
 		currentState = State::BINARY_DIVIDE;
+	if (word == std::string("%"))
+		currentState = State::MOD;
 	if (word == std::string("="))
 		currentState = State::ASSIGNMENT;
 	if (word == std::string("+="))
