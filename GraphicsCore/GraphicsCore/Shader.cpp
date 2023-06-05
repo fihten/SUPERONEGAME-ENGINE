@@ -191,6 +191,12 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 				t2dres.tex = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
 				ResourceManager::instance()->registerTexture(sn.technique, gv.name, t2dres);
 			}
+			if (gv.type == std::string("Texture2DArray"))
+			{
+				Texture2dArrayResource t2dArrRes;
+				t2dArrRes.texArr = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
+				ResourceManager::instance()->registerTexturesArray(sn.technique, gv.name, t2dArrRes);
+			}
 		}
 	}
 }

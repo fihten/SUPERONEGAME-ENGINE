@@ -469,3 +469,17 @@ void GlobalVariablesVisitor::startVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D
 
 	globalVariables[globalVariablesCount].type = "Texture2D";
 }
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY)
+{
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	if (!withinVariableDeclaration)
+		return;
+
+	globalVariables[globalVariablesCount].type = "Texture2DArray";
+}
