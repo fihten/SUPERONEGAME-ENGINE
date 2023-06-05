@@ -40,3 +40,8 @@ struct Texture2dResource
 {
 	ID3DX11EffectShaderResourceVariable* tex = nullptr;
 };
+
+struct Texture2dArrayResource
+{
+	ID3DX11EffectShaderResourceVariable* texArr = nullptr;
+};

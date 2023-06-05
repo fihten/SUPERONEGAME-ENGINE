@@ -119,6 +119,20 @@ ResourceManager::RegisterMessage ResourceManager::registerTexture(const std::str
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerTexturesArray(const std::string& techniqueName, const std::string& textureArrName, const Texture2dArrayResource& texArrRes)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.texturesArrays.count(textureArrName) != 0)
+		return RegisterMessage::TEXTURES_ARRAY_ALREADY_EXISTS;
+
+	techniqueRes.texturesArrays[textureArrName] = texArrRes;
+
+	return RegisterMessage::OK;
+}
+
 ResourceManager::RegisterMessage ResourceManager::registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation)
 {
 	if (techniques.count(techniqueName) == 0)
@@ -272,6 +286,16 @@ void ResourceManager::getTextures(const std::string& techniqueName, std::map<std
 
 	TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	textures = techniqueRes.textures;
+}
+
+void ResourceManager::getTexturesArrays(const std::string& techniqueName, std::map<std::string, Texture2dArrayResource>& texturesArrays)
+{
+	texturesArrays.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	texturesArrays = techniqueRes.texturesArrays;
 }
 
 ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)

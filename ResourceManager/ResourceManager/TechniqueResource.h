@@ -16,4 +16,6 @@ struct TechniqueResource
 	std::map<std::string, StructResource> structures;
 	// textures
 	std::map<std::string, Texture2dResource> textures;
+	// textures arrays
+	std::map<std::string, Texture2dArrayResource> texturesArrays;
 };
