@@ -655,6 +655,44 @@ ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, const std::st
 	return img;
 }
 
+ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const std::string& var) const
+{
+	std::string name = mesh.getParam(var);
+	ID3D11ShaderResourceView* imgsArr = ResourceManager::instance()->getImagesArray(name);
+	if (imgsArr)
+		return imgsArr;
+
+	std::vector<std::string> texNames;
+	int start = 0;
+	int end = name.find_first_of(";\0", start);
+	while (end != std::string::npos)
+	{
+		std::string texName = name.substr(start, end - start + 1);
+		texNames.push_back(texName);
+
+		start = end + 1;
+		end = name.find_first_of(";\0", start);
+	}
+
+	int size = texNames.size();
+	std::vector<ID3D11Texture2D*> texes(size);
+	for (int i = 0; i < size; ++i)
+	{
+		D3DX11_IMAGE_LOAD_INFO loadInfo;
+		loadInfo.Width = D3DX11_FROM_FILE;
+		loadInfo.Height = D3DX11_FROM_FILE;
+		loadInfo.Depth = D3DX11_FROM_FILE;
+		loadInfo.FirstMipLevel = 0;
+		loadInfo.MipLevels = D3DX11_FROM_FILE;
+		loadInfo.Usage = D3D11_USAGE_STAGING;
+		loadInfo.BindFlags = 0;
+		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+		loadInfo.MiscFlags = 0;
+		loadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		loadInfo.Filter = D3DX11_FILTER_LINEAR;
+	}
+}
+
 void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();

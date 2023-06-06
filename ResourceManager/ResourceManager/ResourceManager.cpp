@@ -197,6 +197,16 @@ ResourceManager::RegisterMessage ResourceManager::registerImage(const std::strin
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerImagesArray(const std::string& name, ID3D11ShaderResourceView* imagesArray)
+{
+	if (imgsArrs.count(name))
+		return RegisterMessage::IMAGES_ARRAY_ALREADY_EXISTS;
+
+	imgsArrs[name] = imagesArray;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
 {
 	if (techniques.count(techniqueName) == 0)
@@ -335,6 +345,13 @@ ID3D11ShaderResourceView* ResourceManager::getImage(const std::string& name)
 	if (!imgs.count(name))
 		return nullptr;
 	return imgs[name];
+}
+
+ID3D11ShaderResourceView* ResourceManager::getImagesArray(const std::string& name)
+{
+	if (!imgsArrs.count(name))
+		return nullptr;
+	return imgsArrs[name];
 }
 
 ResourceManager* ResourceManager::instance()
