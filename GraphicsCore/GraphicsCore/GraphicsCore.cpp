@@ -674,10 +674,17 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const s
 		end = name.find_first_of(";\0", start);
 	}
 
+	char texturesFolder[200];
+	int sz = sizeof texturesFolder / sizeof * texturesFolder;
+	GetEnvironmentVariableA("TEXTURES", texturesFolder, sz);
+
 	int size = texNames.size();
 	std::vector<ID3D11Texture2D*> texes(size);
 	for (int i = 0; i < size; ++i)
 	{
+		std::string& name = texNames[i];
+		std::string texturePath = std::string(texturesFolder) + '\\' + name;
+
 		D3DX11_IMAGE_LOAD_INFO loadInfo;
 		loadInfo.Width = D3DX11_FROM_FILE;
 		loadInfo.Height = D3DX11_FROM_FILE;
@@ -690,6 +697,55 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const s
 		loadInfo.MiscFlags = 0;
 		loadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 		loadInfo.Filter = D3DX11_FILTER_LINEAR;
+		loadInfo.MipFilter = D3DX11_FILTER_LINEAR;
+		loadInfo.pSrcInfo = 0;
+		D3DX11CreateTextureFromFileA(
+			device,
+			texturePath.c_str(),
+			&loadInfo,
+			0,
+			(ID3D11Resource * *)& texes[i],
+			0
+		);
+	}
+
+	D3D11_TEXTURE2D_DESC texElementDesc;
+	texes[0]->GetDesc(&texElementDesc);
+	D3D11_TEXTURE2D_DESC texArrayDesc;
+	texArrayDesc.Width = texElementDesc.Width;
+	texArrayDesc.Height = texElementDesc.Height;
+	texArrayDesc.MipLevels = texElementDesc.MipLevels;
+	texArrayDesc.ArraySize = size;
+	texArrayDesc.Format = texElementDesc.Format;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	ID3D11Texture2D* texArray = 0;
+	device->CreateTexture2D(&texArrayDesc, 0, &texArray);
+
+	for (int texElement = 0; texElement < size; ++texElement)
+	{
+		for (int mipLevel = 0; mipLevel < texElementDesc.MipLevels; ++mipLevel)
+		{
+			D3D11_MAPPED_SUBRESOURCE mappedTex2D;
+			context->Map(texes[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D);
+			context->UpdateSubresource(
+				texArray,
+				D3D11CalcSubresource(
+					mipLevel,
+					texElement,
+					texElementDesc.MipLevels
+				),
+				0,
+				mappedTex2D.pData,
+				mappedTex2D.RowPitch,
+				mappedTex2D.DepthPitch
+			);
+			context->Unmap(texes[texElement], mipLevel);
+		}
 	}
 }
 
