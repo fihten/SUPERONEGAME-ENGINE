@@ -747,6 +747,25 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const s
 			context->Unmap(texes[texElement], mipLevel);
 		}
 	}
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC viewDesc;
+	viewDesc.Format = texArrayDesc.Format;
+	viewDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	viewDesc.Texture2DArray.MostDetailedMip = 0;
+	viewDesc.Texture2DArray.MipLevels = texArrayDesc.MipLevels;
+	viewDesc.Texture2DArray.FirstArraySlice = 0;
+	viewDesc.Texture2DArray.ArraySize = size;
+	
+	imgsArr = 0;
+	device->CreateShaderResourceView(texArray, &viewDesc, &imgsArr);
+
+	texArray->Release();
+	for (int i = 0; i < size; ++i)
+		texes[i]->Release();
+
+	ResourceManager::instance()->registerImagesArray(name, imgsArr);
+
+	return imgsArr;
 }
 
 void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
