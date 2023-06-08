@@ -207,6 +207,39 @@ ResourceManager::RegisterMessage ResourceManager::registerImagesArray(const std:
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerPresenceOfGeometryShader(const std::string& techniqueName, const std::string& passName)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	pass.isThereAGeometryShaderHere = true;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerPrimitiveType(const std::string& techniqueName, const std::string& passName, PassResource::PrimitiveType primType)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (!pass.isThereAGeometryShaderHere)
+		return RegisterMessage::THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS;
+
+	pass.primType = primType;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(const std::string& techniqueName, const std::string& passName) const
 {
 	if (techniques.count(techniqueName) == 0)
@@ -352,6 +385,34 @@ ID3D11ShaderResourceView* ResourceManager::getImagesArray(const std::string& nam
 	if (!imgsArrs.count(name))
 		return nullptr;
 	return imgsArrs[name];
+}
+
+bool ResourceManager::isThereAGeometryShaderInThePass(const std::string& techniqueName, const std::string& passName)
+{
+	if (techniques.count(techniqueName) == 0)
+		return false;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return false;
+
+	auto& pass = techniqueRes.passes[passName];
+
+	return pass.isThereAGeometryShaderHere;
+}
+
+PassResource::PrimitiveType ResourceManager::getPrimitiveType(const std::string& techniqueName, const std::string& passName)
+{
+	if (techniques.count(techniqueName) == 0)
+		return PassResource::NONE;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return PassResource::NONE;
+
+	auto& pass = techniqueRes.passes[passName];
+
+	return pass.primType;
 }
 
 ResourceManager* ResourceManager::instance()

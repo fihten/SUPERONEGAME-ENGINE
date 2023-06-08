@@ -821,12 +821,26 @@ void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
 	}
 }
 
+void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Texture2dArrayResource> texArrs;
+	ResourceManager::instance()->getTexturesArrays(sTechnique, texArrs);
+	for (auto& ta : texArrs)
+	{
+		ID3D11ShaderResourceView* texArr = getImagesArray(mesh, ta.first);
+		ta.second.texArr->SetResource(texArr);
+	}
+}
+
 void GraphicsCore::setVariablesOnGPU(const Mesh& mesh)
 {
 	setFloat3sOnGPU(mesh);
 	setFloat4x4sOnGPU(mesh);
 	setStructsOnGPU(mesh);
 	setTexturesOnGPU(mesh);
+	setTexturesArraysOnGPU(mesh);
 }
 
 void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)

@@ -29,7 +29,8 @@ public:
 		TEXTURE_ALREADY_EXISTS,
 		TEXTURES_ARRAY_ALREADY_EXISTS,
 		IMAGE_ALREADY_EXISTS,
-		IMAGES_ARRAY_ALREADY_EXISTS
+		IMAGES_ARRAY_ALREADY_EXISTS,
+		THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS
 	};
 
 	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
@@ -46,6 +47,8 @@ public:
 	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);
 	RegisterMessage registerImage(const std::string& name, ID3D11ShaderResourceView* image);
 	RegisterMessage registerImagesArray(const std::string& name, ID3D11ShaderResourceView* imagesArray);
+	RegisterMessage registerPresenceOfGeometryShader(const std::string& techniqueName, const std::string& passName);
+	RegisterMessage registerPrimitiveType(const std::string& techniqueName, const std::string& passName, PassResource::PrimitiveType primType);
 
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
 	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
@@ -60,6 +63,8 @@ public:
 	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
 	ID3D11ShaderResourceView* getImage(const std::string& name);
 	ID3D11ShaderResourceView* getImagesArray(const std::string& name);
+	bool isThereAGeometryShaderInThePass(const std::string& techniqueName, const std::string& passName);
+	PassResource::PrimitiveType getPrimitiveType(const std::string& techniqueName, const std::string& passName);
 
 public:
 	static ResourceManager* instance();
