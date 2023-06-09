@@ -4,6 +4,7 @@
 #include "ShaderVisitor.h"
 #include "ResourceManager.h"
 #include <vector>
+#include <string>
 #include <D3D11.h>
 
 class ShadersNamesVisitor :public ShaderVisitor
@@ -28,6 +29,35 @@ public:
 
 public:
 	std::vector<ShadersNames>&& getShadersNames() { return std::move(shadersNames); };
+};
+
+class GeometryShaderInfoVisitor : public ShaderVisitor
+{
+	bool withinTechnique = false;
+	bool withinPass = false;
+	bool withinFunctionDeclaration = false;
+	bool withinArgumentsList = false;
+
+	struct FunctionInfo
+	{
+		std::string functionName = "";
+		PassResource::PrimitiveType primType;
+	};
+	std::vector<FunctionInfo> fns;
+
+public:
+	void startVisit(const ShaderUnits::SHADER* pShader);
+	void startVisit(const ShaderUnits::FUNCTION_DECL* pFuncDecl);
+
+	void startVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets);
+	void finishVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets);
+
+	void startVisit(const ShaderUnits::POINT* pPoint);
+
+public:
+	std::string technique = "";
+	std::string pass = "";
+
 };
 
 #define INPUT_ELEMENT_MAX_COUNT 32

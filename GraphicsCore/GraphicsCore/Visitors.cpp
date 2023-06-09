@@ -29,6 +29,42 @@ void ShadersNamesVisitor::startVisit(const ShaderUnits::FUNCTION_CALL* pFUNCTION
 	}
 }
 
+/*________________________________GeometryShaderInfoVisitor________________________________*/
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::SHADER* pShader)
+{
+	withinTechnique = false;
+	withinPass = false;
+	withinFunctionDeclaration = false;
+	withinArgumentsList = false;
+	fns.clear();
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFuncDecl)
+{
+	withinFunctionDeclaration = true;
+	fns.push_back(FunctionInfo());
+
+	fns.back().functionName = pFuncDecl->getName();
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets)
+{
+	if (withinFunctionDeclaration)
+		withinArgumentsList = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets)
+{
+	withinArgumentsList = false;
+	withinFunctionDeclaration = false;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::POINT* pPoint)
+{
+	fns.back().primType = PassResource::POINT;
+}
+
 /*________________________________InputLayoutVisitor________________________________*/
 
 void InputLayoutVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFUNCTION_DECL)
