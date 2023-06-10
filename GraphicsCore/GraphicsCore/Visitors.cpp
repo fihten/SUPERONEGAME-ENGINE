@@ -1,5 +1,6 @@
 #include "Visitors.h"
 #include <sstream>
+#include <algorithm>
 
 /*________________________________ShadersNamesVisitor________________________________*/
 
@@ -37,6 +38,10 @@ void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::SHADER* pShader)
 	withinPass = false;
 	withinFunctionDeclaration = false;
 	withinArgumentsList = false;
+	withinVariableDeclaration = false;
+	withinSetGeometryShader = false;
+	geometryShaderIsPresented = false;
+	primType = PassResource::NONE;
 	fns.clear();
 }
 
@@ -60,9 +65,75 @@ void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::ROUND_BRACKETS* p
 	withinFunctionDeclaration = false;
 }
 
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVariableDeclaration)
+{
+	if (withinArgumentsList)
+		withinVariableDeclaration = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::VARIABLE_DECL* pVariableDeclaration)
+{
+	withinVariableDeclaration = false;
+}
+
 void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::POINT* pPoint)
 {
+	if (!withinVariableDeclaration)
+		return;
 	fns.back().primType = PassResource::POINT;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::TECHNIQUE11* pTechnique11)
+{
+	if (pTechnique11->getName() == technique)
+		withinTechnique = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::TECHNIQUE11* pTechnique11)
+{
+	withinTechnique = false;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::PASS* pPass)
+{
+	if (!withinTechnique)
+		return;
+	if (pPass->getName() == pass)
+		withinPass = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::PASS* pPass)
+{
+	withinPass = false;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSetGeometryShader)
+{
+	if (!withinPass)
+		return;
+	withinSetGeometryShader = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSetGeometryShader)
+{
+	withinSetGeometryShader = false;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::FUNCTION_CALL* pFunctionCall)
+{
+	if (!withinSetGeometryShader)
+		return;
+
+	auto it = std::find_if(fns.begin(), fns.end(), [&](const FunctionInfo& fi)->bool
+	{
+		return fi.functionName == pFunctionCall->getName();
+	});
+
+	if (it == fns.end())
+		return;
+
+	geometryShaderIsPresented = true;
+	primType = it->primType;
 }
 
 /*________________________________InputLayoutVisitor________________________________*/

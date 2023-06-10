@@ -37,6 +37,8 @@ class GeometryShaderInfoVisitor : public ShaderVisitor
 	bool withinPass = false;
 	bool withinFunctionDeclaration = false;
 	bool withinArgumentsList = false;
+	bool withinVariableDeclaration = false;
+	bool withinSetGeometryShader = false;
 
 	struct FunctionInfo
 	{
@@ -48,16 +50,32 @@ class GeometryShaderInfoVisitor : public ShaderVisitor
 public:
 	void startVisit(const ShaderUnits::SHADER* pShader);
 	void startVisit(const ShaderUnits::FUNCTION_DECL* pFuncDecl);
-
+	
 	void startVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets);
 	void finishVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets);
-
+	
+	void startVisit(const ShaderUnits::VARIABLE_DECL* pVariableDeclaration);
+	void finishVisit(const ShaderUnits::VARIABLE_DECL* pVariableDeclaration);
+	
 	void startVisit(const ShaderUnits::POINT* pPoint);
+	
+	void startVisit(const ShaderUnits::TECHNIQUE11* pTechnique11);
+	void finishVisit(const ShaderUnits::TECHNIQUE11* pTechnique11);
+
+	void startVisit(const ShaderUnits::PASS* pPass);
+	void finishVisit(const ShaderUnits::PASS* pPass);
+	
+	void startVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSetGeometryShader);
+	void finishVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSetGeometryShader);
+	
+	void startVisit(const ShaderUnits::FUNCTION_CALL* pFunctionCall);
 
 public:
 	std::string technique = "";
 	std::string pass = "";
 
+	bool geometryShaderIsPresented = false;
+	PassResource::PrimitiveType primType = PassResource::NONE;
 };
 
 #define INPUT_ELEMENT_MAX_COUNT 32
