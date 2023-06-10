@@ -183,7 +183,10 @@ void GraphicsCore::draw(const Mesh& mesh)
 		return;
 
 	pass->Apply(0, context);
-	context->DrawIndexed(mesh.getIndicesCount(), 0, 0);
+	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+		context->Draw(mesh.getVerticesCount(), 0);
+	else
+		context->DrawIndexed(mesh.getIndicesCount(), 0, 0);
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)
@@ -862,9 +865,37 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 		return;
 
 	context->IASetInputLayout(inputLayout);
-	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+	D3D_PRIMITIVE_TOPOLOGY primTopology;
+	switch (ResourceManager::instance()->getPrimitiveType(sTechnique, sPass))
+	{
+	case PassResource::POINT:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
+		break;
+	
+	case PassResource::LINE:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST;
+		break;
+	
+	case PassResource::LINEADJ:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_LINELIST_ADJ;
+		break;
+
+	case PassResource::NONE:
+	case PassResource::TRIANGLE:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		break;
+
+	case PassResource::TRIANGLEADJ:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST_ADJ;
+
+	default:
+		primTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	}
+	context->IASetPrimitiveTopology(primTopology);
 
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
-	context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
+	if (!ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 }
