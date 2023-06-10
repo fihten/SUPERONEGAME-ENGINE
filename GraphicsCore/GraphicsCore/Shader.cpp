@@ -152,6 +152,17 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 			std::vector<InputLayoutResource::StreamInfo> streamsInfo;
 			inputLayoutVisitor.getStreamsInfo(streamsInfo);
 			ResourceManager::instance()->registerStreamsInfo(sn.technique, sn.passes[i], streamsInfo);
+
+			GeometryShaderInfoVisitor geometryShaderInfoVisitor;
+			geometryShaderInfoVisitor.technique = sn.technique;
+			geometryShaderInfoVisitor.pass = sn.passes[i];
+
+			shader.query(&geometryShaderInfoVisitor);
+			if (geometryShaderInfoVisitor.geometryShaderIsPresented)
+			{
+				ResourceManager::instance()->registerPresenceOfGeometryShader(sn.technique, sn.passes[i]);
+				ResourceManager::instance()->registerPrimitiveType(sn.technique, sn.passes[i], geometryShaderInfoVisitor.primType);
+			}
 		}
 
 		for (int i = 0; i < countOfCbufferElements; ++i)
