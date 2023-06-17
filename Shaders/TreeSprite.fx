@@ -200,32 +200,32 @@ float4 PS(GeoOut pin, uniform int gLightCount, uniform bool gUseTexture, uniform
 // variations as needed.
 //----------------------------------------------------------------------------------------
 
-technique11 Light3
+technique11 Light3g
 {
 	pass P0
 	{
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(CompileShader(gs_5_0, GS()));
 		SetPixelShader(CompileShader(ps_5_0, PS(3, false, false, false)));
-	};
+	}
 };
 
-technique11 Light3TexAlphaClip
+technique11 Light3gTexAlphaClip
 {
 	pass P0
 	{
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(CompileShader(gs_5_0, GS()));
 		SetPixelShader(CompileShader(ps_5_0, PS(3, true, true, false)));
-	};
+	}
 };
 
-technique11 Light3TexAlphaClipFog
+technique11 Light3gTexAlphaClipFog
 {
 	pass P0
 	{
 		SetVertexShader(CompileShader(vs_5_0, VS()));
 		SetGeometryShader(CompileShader(gs_5_0, GS()));
 		SetPixelShader(CompileShader(ps_5_0, PS(3, true, true, true)));
-	};
+	}
 };

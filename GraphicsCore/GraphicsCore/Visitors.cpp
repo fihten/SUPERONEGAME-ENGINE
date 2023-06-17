@@ -40,6 +40,7 @@ void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::SHADER* pShader)
 	withinArgumentsList = false;
 	withinVariableDeclaration = false;
 	withinSetGeometryShader = false;
+	withinMaxVertexCount = false;
 	geometryShaderIsPresented = false;
 	primType = PassResource::NONE;
 	fns.clear();
@@ -55,12 +56,14 @@ void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::FUNCTION_DECL* pFu
 
 void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets)
 {
-	if (withinFunctionDeclaration)
+	if (withinFunctionDeclaration && !withinMaxVertexCount)
 		withinArgumentsList = true;
 }
 
 void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::ROUND_BRACKETS* pRoundBrackets)
 {
+	if (withinMaxVertexCount)
+		return;
 	withinArgumentsList = false;
 	withinFunctionDeclaration = false;
 }
@@ -134,6 +137,16 @@ void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::FUNCTION_CALL* pFu
 
 	geometryShaderIsPresented = true;
 	primType = it->primType;
+}
+
+void GeometryShaderInfoVisitor::startVisit(const ShaderUnits::MAXVERTEXCOUNT* pMaxVertexCount)
+{
+	withinMaxVertexCount = true;
+}
+
+void GeometryShaderInfoVisitor::finishVisit(const ShaderUnits::MAXVERTEXCOUNT* pMaxVertexCount)
+{
+	withinMaxVertexCount = false;
 }
 
 /*________________________________InputLayoutVisitor________________________________*/

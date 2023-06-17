@@ -12,6 +12,7 @@
 
 class Mesh;
 Mesh createCube();
+Mesh createTrees();
 
 class Mesh
 {
@@ -120,7 +121,7 @@ public:
 	virtual flt4x4 getPosition() const { return flt4x4(); }
 
 	friend Mesh createCube();
-
+	friend Mesh createTrees();
 public:
 	const uint32_t id;
 	void* scene = nullptr;

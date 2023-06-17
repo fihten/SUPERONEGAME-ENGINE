@@ -8,6 +8,7 @@
 
 GraphicsCore graphicsCore;
 Mesh cube;
+Mesh trees;
 Scene scene;
 DrawVisitor drawVisitor;
 
@@ -47,10 +48,10 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
-	cube = createCube();
+	trees = createTrees();
 
-	NodeID mesh = scene.addMeshNode(&cube);
-	
+	NodeID mesh = scene.addMeshNode(&trees);
+
 	scene.setNodeParam(mesh, "gMaterial.Ambient", "{0.137f, 0.42f, 0.556f, 1.0f}");
 	scene.setNodeParam(mesh, "gMaterial.Diffuse", "{0.137f, 0.42f, 0.556f, 1.0f}");
 	scene.setNodeParam(mesh, "gMaterial.Specular", "{0.8f, 0.8f, 0.8f, 96.0f}");

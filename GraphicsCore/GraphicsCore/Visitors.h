@@ -39,6 +39,7 @@ class GeometryShaderInfoVisitor : public ShaderVisitor
 	bool withinArgumentsList = false;
 	bool withinVariableDeclaration = false;
 	bool withinSetGeometryShader = false;
+	bool withinMaxVertexCount = false;
 
 	struct FunctionInfo
 	{
@@ -69,6 +70,9 @@ public:
 	void finishVisit(const ShaderUnits::SET_GEOMETRY_SHADER* pSetGeometryShader);
 	
 	void startVisit(const ShaderUnits::FUNCTION_CALL* pFunctionCall);
+
+	void startVisit(const ShaderUnits::MAXVERTEXCOUNT* pMaxVertexCount);
+	void finishVisit(const ShaderUnits::MAXVERTEXCOUNT* pMaxVertexCount);
 
 public:
 	std::string technique = "";

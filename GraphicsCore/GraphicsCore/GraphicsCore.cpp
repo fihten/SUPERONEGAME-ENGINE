@@ -614,6 +614,9 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
+	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+		return nullptr;
+
 	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(sTechnique, sPass, mesh.id);
 	if (mIB == nullptr)
 	{
@@ -670,7 +673,7 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const s
 	int end = name.find_first_of(";\0", start);
 	while (end != std::string::npos)
 	{
-		std::string texName = name.substr(start, end - start + 1);
+		std::string texName = name.substr(start, end - start);
 		texNames.push_back(texName);
 
 		start = end + 1;
@@ -853,18 +856,12 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 	if (mVB == nullptr)
 		return;
 
-	ID3D11Buffer* mIB = getIndexBuffer(mesh);
-	if (mIB ==  nullptr)
-		return;
-
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
 
-	auto* inputLayout = ResourceManager::instance()->getInputLayout(sTechnique, sPass);
-	if (inputLayout == nullptr)
+	ID3D11Buffer* mIB = getIndexBuffer(mesh);
+	if (mIB ==  nullptr && !ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
 		return;
-
-	context->IASetInputLayout(inputLayout);
 
 	D3D_PRIMITIVE_TOPOLOGY primTopology;
 	switch (ResourceManager::instance()->getPrimitiveType(sTechnique, sPass))
@@ -893,6 +890,12 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 		primTopology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	}
 	context->IASetPrimitiveTopology(primTopology);
+
+	auto* inputLayout = ResourceManager::instance()->getInputLayout(sTechnique, sPass);
+	if (inputLayout == nullptr)
+		return;
+
+	context->IASetInputLayout(inputLayout);
 
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);

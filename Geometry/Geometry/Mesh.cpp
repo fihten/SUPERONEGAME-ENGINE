@@ -1,6 +1,7 @@
 #include "pch.h"
 
 #include <algorithm>
+#include <stdlib.h>
 #include "Mesh.h"
 
 uint32_t Mesh::instanceNumber = 0;
@@ -233,6 +234,50 @@ Mesh createCube()
 	m.params["technique"] = "Light0Tex";
 	m.params["pass"] = "P0";
 	m.params["gDiffuseMap"] = "test.dds";
+
+	return m;
+}
+
+Mesh createTrees()
+{
+	srand(0);
+	Mesh m;
+
+	// vertices positions
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	auto& pts = m.flt3_streams.back().second;
+	
+	// billboard sizes
+	m.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("SIZE"), std::vector<flt2>()));
+	auto& szs = m.flt2_streams.back().second;
+
+	int n = 2;
+	float side = 20;
+	float width = 10;
+	float height = 10;
+	for (int i = 0; i < n; ++i)
+	{
+		for (int j = 0; j < n; ++j)
+		{
+			float x = -0.5f * side + i * side / n;
+			float y = 0.0f;
+			float z = -0.5f * side + j * side / n;
+
+			pts.push_back(flt3(x, y, z));
+
+			float w = width * ((float)rand() / RAND_MAX);
+			float h = height * ((float)rand() / RAND_MAX);
+
+			szs.push_back(flt2(w, h));
+		}
+	}
+
+	m.params["technique"] = "Light3g";
+	m.params["pass"] = "P0";
+	m.params["gTreeMapArray"] = "tree0.dds;tree1.dds;tree2.dds;tree3.dds;";
+	m.params["gFogStart"] = "0";
+	m.params["gFogRange"] = "100";
+	m.params["gFogColor"] = "{1,0,0,1}";
 
 	return m;
 }
