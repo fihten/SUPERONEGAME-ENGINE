@@ -23,7 +23,10 @@ public:
 		PASS_ALREADY_EXISTS,
 		PASS_DOESNT_EXIST,
 		FLOAT4X4_ALREADY_EXISTS,
+		FLOAT4_ALREADY_EXISTS,
 		FLOAT3_ALREADY_EXISTS,
+		FLOAT2_ALREADY_EXISTS,
+		FLOAT1_ALREADY_EXISTS,
 		VARIABLE_DOESNT_EXIST,
 		STRUCT_ALREADY_EXISTS,
 		TEXTURE_ALREADY_EXISTS,
@@ -38,7 +41,10 @@ public:
 	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout);
 	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutResource::StreamInfo>& streamsInfo);
 	RegisterMessage registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4, unsigned int elementsCount);
+	RegisterMessage registerFloat4(const std::string& techniqueName, const std::string& flt4Name, ID3DX11EffectVariable* flt4, unsigned int elementsCount);
 	RegisterMessage registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount);
+	RegisterMessage registerFloat2(const std::string& techniqueName, const std::string& flt2Name, ID3DX11EffectVariable* flt2, unsigned int elementsCount);
+	RegisterMessage registerFloat1(const std::string& techniqueName, const std::string& flt1Name, ID3DX11EffectVariable* flt1, unsigned int elementsCount);
 	RegisterMessage registerStruct(const std::string& techniqueName, const std::string& structName, const StructResource& structRes);
 	RegisterMessage registerTexture(const std::string& techniqueName, const std::string& textureName, const Texture2dResource& texRes);
 	RegisterMessage registerTexturesArray(const std::string& techniqueName, const std::string& textureArrName, const Texture2dArrayResource& texArrRes);
@@ -55,7 +61,10 @@ public:
 	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
 	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
 	void getFloat4x4s(const std::string& techniqueName, std::map<std::string, Float4x4Resource>& flt4x4s);
+	void getFloat4s(const std::string& techniqueName, std::map<std::string, Float4Resource>& flt4s);
 	void getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s);
+	void getFloat2s(const std::string& techniqueName, std::map<std::string, Float2Resource>& flt2s);
+	void getFloat1s(const std::string& techniqueName, std::map<std::string, Float1Resource>& flt1s);
 	void getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs);
 	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
 	void getTexturesArrays(const std::string& techniqueName, std::map<std::string, Texture2dArrayResource>& texturesArrays);

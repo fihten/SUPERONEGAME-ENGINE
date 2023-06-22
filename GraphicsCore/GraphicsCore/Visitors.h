@@ -160,7 +160,10 @@ public:
 	void finishVisit(const ShaderUnits::STRUCT* pSTRUCT);
 
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4);
+	void startVisit(const ShaderUnits::FLOAT4* pFLOAT4);
 	void startVisit(const ShaderUnits::FLOAT3* pFLOAT3);
+	void startVisit(const ShaderUnits::FLOAT2* pFLOAT2);
+	void startVisit(const ShaderUnits::FLOAT1* pFLOAT1);
 
 	void startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS);
 	void finishVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS);

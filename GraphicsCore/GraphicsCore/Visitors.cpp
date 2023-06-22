@@ -382,10 +382,28 @@ void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4
 		elements[elementsCount - 1].type = "float4x4";
 }
 
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT4* pFLOAT4)
+{
+	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
+		elements[elementsCount - 1].type = "float4";
+}
+
 void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT3* pFLOAT3)
 {
 	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
 		elements[elementsCount - 1].type = "float3";
+}
+
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT2* pFLOAT2)
+{
+	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
+		elements[elementsCount - 1].type = "float2";
+}
+
+void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::FLOAT1* pFLOAT1)
+{
+	if (withinCbuffer && withinVariableDeclaration && !withinStruct)
+		elements[elementsCount - 1].type = "float";
 }
 
 void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::SQUARE_BRACKETS* pSQUARE_BRACKETS)

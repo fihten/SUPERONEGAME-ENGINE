@@ -76,6 +76,21 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat4x4(const std::st
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerFloat4(const std::string& techniqueName, const std::string& flt4Name, ID3DX11EffectVariable* flt4, unsigned int elementsCount)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.float4s.count(flt4Name) != 0)
+		return RegisterMessage::FLOAT4_ALREADY_EXISTS;
+
+	techniqueRes.float4s[flt4Name].ptr = flt4;
+	techniqueRes.float4s[flt4Name].elementsCount = elementsCount;
+
+	return RegisterMessage::OK;
+}
+
 ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount)
 {
 	if (techniques.count(techniqueName) == 0)
@@ -87,6 +102,36 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat3(const std::stri
 
 	techniqueRes.float3s[flt3Name].ptr = flt3;
 	techniqueRes.float3s[flt3Name].elementsCount = elementsCount;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerFloat2(const std::string& techniqueName, const std::string& flt2Name, ID3DX11EffectVariable* flt2, unsigned int elementsCount)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.float2s.count(flt2Name) != 0)
+		return RegisterMessage::FLOAT2_ALREADY_EXISTS;
+
+	techniqueRes.float2s[flt2Name].ptr = flt2;
+	techniqueRes.float2s[flt2Name].elementsCount = elementsCount;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerFloat1(const std::string& techniqueName, const std::string& flt1Name, ID3DX11EffectVariable* flt1, unsigned int elementsCount)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.float1s.count(flt1Name) != 0)
+		return RegisterMessage::FLOAT1_ALREADY_EXISTS;
+
+	techniqueRes.float1s[flt1Name].ptr = flt1;
+	techniqueRes.float1s[flt1Name].elementsCount = elementsCount;
 
 	return RegisterMessage::OK;
 }
@@ -301,6 +346,16 @@ void ResourceManager::getFloat4x4s(const std::string& techniqueName, std::map<st
 	flt4x4s = techniqueRes.float4x4s;
 }
 
+void ResourceManager::getFloat4s(const std::string& techniqueName, std::map<std::string, Float4Resource>& flt4s)
+{
+	flt4s.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	flt4s = techniqueRes.float4s;
+}
+
 void ResourceManager::getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s)
 {
 	flt3s.clear();
@@ -309,6 +364,26 @@ void ResourceManager::getFloat3s(const std::string& techniqueName, std::map<std:
 
 	TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	flt3s = techniqueRes.float3s;
+}
+
+void ResourceManager::getFloat2s(const std::string& techniqueName, std::map<std::string, Float2Resource>& flt2s)
+{
+	flt2s.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	flt2s = techniqueRes.float2s;
+}
+
+void ResourceManager::getFloat1s(const std::string& techniqueName, std::map<std::string, Float1Resource>& flt1s)
+{
+	flt1s.clear();
+	if (techniques.count(techniqueName) == 0)
+		return;
+
+	TechniqueResource& techniqueRes = techniques.at(techniqueName);
+	flt1s = techniqueRes.float1s;
 }
 
 void ResourceManager::getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs)

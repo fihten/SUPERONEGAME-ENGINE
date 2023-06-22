@@ -9,7 +9,28 @@ struct Float4x4Resource
 	ID3DX11EffectMatrixVariable* ptr = nullptr;
 };
 
+struct Float4Resource
+{
+	std::string location = "";
+	unsigned int elementsCount = 0;
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
 struct Float3Resource
+{
+	std::string location = "";
+	unsigned int elementsCount = 0;
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
+struct Float2Resource
+{
+	std::string location = "";
+	unsigned int elementsCount = 0;
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
+struct Float1Resource
 {
 	std::string location = "";
 	unsigned int elementsCount = 0;

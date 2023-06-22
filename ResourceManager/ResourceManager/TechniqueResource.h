@@ -10,8 +10,14 @@ struct TechniqueResource
 	std::map<std::string, PassResource> passes;
 	// float4x4
 	std::map<std::string, Float4x4Resource> float4x4s;
+	// float4
+	std::map<std::string, Float4Resource> float4s;
 	// float3
 	std::map<std::string, Float3Resource> float3s;
+	// float2
+	std::map<std::string, Float2Resource> float2s;
+	// float1
+	std::map<std::string, Float1Resource> float1s;
 	// structures
 	std::map<std::string, StructResource> structures;
 	// textures
