@@ -89,7 +89,7 @@ void GS(point VertexOut gin[1],
 	float3 look = gEyePosW - gin[0].CenterW;
 	look.y = 0.0f; // y-axis alligned, so project to xz-plane
 	look = normalize(look);
-	float3 right = cross(up, look);
+	float3 right = -cross(up, look);
 
 	//
 	// Compute triangle strip vertices (quad) in world space.

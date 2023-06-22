@@ -272,7 +272,7 @@ Mesh createTrees()
 		}
 	}
 
-	m.params["technique"] = "Light3g";
+	m.params["technique"] = "Light3gTexAlphaClip";
 	m.params["pass"] = "P0";
 	m.params["gTreeMapArray"] = "tree0.dds;tree1.dds;tree2.dds;tree3.dds;";
 	m.params["gFogStart"] = "0";
