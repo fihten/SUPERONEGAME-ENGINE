@@ -421,6 +421,43 @@ flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, const std::string& var) const
 	return res;
 }
 
+flt4 GraphicsCore::getFloat4(const Mesh& mesh, const std::string& var) const
+{
+	flt4 res;
+
+	std::string tech = mesh.getTechnique();
+	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+
+	size_t pos = place.find("cameras[");
+	if (pos == 0)
+	{
+		size_t beg = 7;
+		size_t end = place.find(']', beg);
+
+		int index = std::atoi(std::string(place, beg, end - beg).c_str());
+
+		beg = end + 2;
+		std::string what(place, beg, std::string::npos);
+		if (what == std::string("eye_pos"))
+		{
+			res.xyz() = cameras()[index].getEyePos();
+			res.w() = 1;
+		}
+		if (what == std::string("fwd"))
+		{
+			res.xyz() = cameras()[index].getFwd();
+			res.w() = 1;
+		}
+	}
+	if (place == std::string("position_in_scene"))
+	{
+		flt4x4 pos = mesh.getPosition();
+		res = flt4(pos.m30(), pos.m31(), pos.m32(), 1);
+	}
+
+	return res;
+}
+
 flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
 {
 	flt3 res;

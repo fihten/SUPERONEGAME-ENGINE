@@ -32,6 +32,7 @@ private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	flt4x4 getFloat4x4(const Mesh& mesh, const std::string& var) const;
+	flt4 getFloat4(const Mesh& mesh, const std::string& var) const;
 	flt3 getFloat3(const Mesh& mesh, const std::string& var) const;
 	void* getStruct(const Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
 	
