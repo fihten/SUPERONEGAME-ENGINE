@@ -35,4 +35,13 @@ You are a cop in the small city. One day a big rock falls from the sky, breakes 
 Mechanics
 
 What is a gameplay?
-Gameplay consists of reduced set of elements which might be combined one with each other. Elements represented by actions or mechanics. On my opinion gameplay consisted from one mechanic is not intresting. Because player has no any spacious for his creativity. On the other hand too many mechanics become to form almost independent subsets of mechanics. Many subsets of independent mechanics is like many games. This case is also not interesting. Take a look at already existing mechanics. For example TETRIS. What we have. We have right-angled geometric forms falling down from top to bottom of the screen. 
+Gameplay consists of reduced set of elements which might be combined one with each other. 
+Elements are represented by actions or mechanics. On my opinion gameplay consisting from one mechanic is not intresting. 
+Because player has no any space for his creativity. On the other hand too many mechanics become to form almost independent subsets of mechanics. 
+Many subsets of independent mechanics are like many games. This case is also not interesting. Take a look at already existing mechanics. 
+For example TETRIS. What we have. We have right-angled geometric forms falling down from top to bottom of the screen. 
+Player's goul is to form continuous horisontal lines across entire display which will disapear. If the player doesn't contrieve to form this lines then all screen will be filled 
+with the forms and game will be ended. To form continuous horisontal lines player can move geometric forms in horisontal direction and rotate them so that when they 
+will fall they packed tight. Ok, horisontal movements and rotations create posibility to form tight packed set of forms. So we hsve two mechanics. I have to
+notice that disapiaring of horisontal line is a reward for a player. I.e. mechanics must cause pleasure from game. 
+Consider another one game. I don't like this game now. But it doesn't matter. Super Mario Bros. 
