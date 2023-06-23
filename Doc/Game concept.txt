@@ -33,3 +33,6 @@ Old graveyard gates
 You are a cop in the small city. One day a big rock falls from the sky, breakes into small pieces and falls across the city, particularly into the graveyards and secret laboratories which stick around all the city. In these laboratories you may find secret weapons.
 
 Mechanics
+
+What is a gameplay?
+Gameplay consists of reduced set of elements which might be combined one with each other. Elements represented by actions or mechanics. On my opinion gameplay consisted from one mechanic is not intresting. Because player has no any spacious for his creativity. On the other hand too many mechanics become to form almost independent subsets of mechanics. Many subsets of independent mechanics is like many games. This case is also not interesting. Take a look at already existing mechanics. For example TETRIS. What we have. We have right-angled geometric forms falling down from top to bottom of the screen. 
