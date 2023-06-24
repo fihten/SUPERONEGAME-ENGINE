@@ -275,8 +275,8 @@ Mesh createTrees()
 	m.params["technique"] = "Light3gTexAlphaClipFog";
 	m.params["pass"] = "P0";
 	m.params["gTreeMapArray"] = "tree0.dds;tree1.dds;tree2.dds;tree3.dds;";
-	m.params["gFogStart"] = "0";
-	m.params["gFogRange"] = "100";
+	m.params["gFogStart"] = "{5}";
+	m.params["gFogRange"] = "{20}";
 	m.params["gFogColor"] = "{1,0,0,1}";
 
 	return m;
