@@ -89,6 +89,13 @@ void Camera::walk(float dt)
 	changed = true;
 }
 
+void Camera::walkBackward(float dt)
+{
+	float l = -walkVelocity * dt;
+	position = position + fwd * l;
+	changed = true;
+}
+
 void Camera::run(float dt)
 {
 	float l = runVelocity * dt;

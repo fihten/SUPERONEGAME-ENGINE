@@ -51,6 +51,7 @@ private:
 	void updateProj();
 
 	void walk(float dt);
+	void walkBackward(float dt);
 	void run(float dt);
 
 	void lookUp(float d);
@@ -69,6 +70,7 @@ private:
 	std::map<std::string, Camera::Operation> operations =
 	{
 		{"walk", &Camera::walk},
+		{"walkBackward", &Camera::walkBackward},
 		{"run", &Camera::run},
 		{"lookUp", &Camera::lookUp},
 		{"lookDown", &Camera::lookDown},
