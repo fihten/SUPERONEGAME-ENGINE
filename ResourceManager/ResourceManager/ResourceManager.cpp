@@ -324,16 +324,23 @@ ID3DX11EffectPass* ResourceManager::getPass(const std::string& techniqueName, co
 
 const std::string& ResourceManager::getVariableLocation(const std::string& techniqueName, const std::string& variable) const
 {
+	static std::string err = "";
 	if (techniques.count(techniqueName) == 0)
-		return "";
+		return err;
 
 	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	if (techniqueRes.float4x4s.count(variable) != 0)
 		return techniqueRes.float4x4s.at(variable).location;
+	if (techniqueRes.float4s.count(variable) != 0)
+		return techniqueRes.float4s.at(variable).location;
 	if (techniqueRes.float3s.count(variable) != 0)
 		return techniqueRes.float3s.at(variable).location;
+	if (techniqueRes.float2s.count(variable) != 0)
+		return techniqueRes.float2s.at(variable).location;
+	if (techniqueRes.float1s.count(variable) != 0)
+		return techniqueRes.float1s.at(variable).location;
 
-	return "";
+	return err;
 }
 
 void ResourceManager::getFloat4x4s(const std::string& techniqueName, std::map<std::string, Float4x4Resource>& flt4x4s)
