@@ -2484,7 +2484,10 @@ void HLSLConverter::insertVariableDeclaration()
 	if (decls.top().countOfElements)
 		pVariableDeclaration->add(decls.top().countOfElements);
 	if (decls.top().value)
+	{
 		pVariableDeclaration->add(decls.top().value);
+		pVariableDeclaration->setName(decls.top().name + " assigned");
+	}
 
 	componentStack.top()->add(pVariableDeclaration);
 

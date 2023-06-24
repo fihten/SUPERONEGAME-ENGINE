@@ -349,6 +349,10 @@ void ElementsOfCbufferVisitor::finishVisit(const ShaderUnits::CBUFFER* pCBUFFER)
 
 void ElementsOfCbufferVisitor::startVisit(const ShaderUnits::VARIABLE_DECL* pVARIABLE_DECL)
 {
+	std::string variableName = pVARIABLE_DECL->getName();
+	if (variableName.find(" assigned") != std::string::npos)
+		return;
+
 	if (withinCbuffer && !withinStruct)
 	{
 		++elementsCount;
