@@ -44,4 +44,7 @@ Player's goul is to form continuous horisontal lines across entire display which
 with the forms and game will be ended. To form continuous horisontal lines player can move geometric forms in horisontal direction and rotate them so that when they 
 will fall they packed tight. Ok, horisontal movements and rotations create posibility to form tight packed set of forms. So we hsve two mechanics. I have to
 notice that disapiaring of horisontal line is a reward for a player. I.e. mechanics must cause pleasure from game. 
-Consider another one game. I don't like this game now. But it doesn't matter. Super Mario Bros. 
+Consider another one game. I don't like this game now. But it doesn't matter. Super Mario Bros. Player can run in horisontal directions and jump. There are many enemies that can kill the player.
+To prevent it player must avoid enemies by using mentioned mechanics. Also, he can kill enemies by jumping on them, i.e. using mentioned mechanics. What i have to noticed here.
+At first, game creates situations that cause player to use available mechanics. Second, game has its own mechanics. Enemies can also move in horisontal directions and jump. They can kill you by touching you.
+Third, combination of mechanics can form complex mechanic. For example, moving in horisontal direction and jumping can cause death of your enemy.
