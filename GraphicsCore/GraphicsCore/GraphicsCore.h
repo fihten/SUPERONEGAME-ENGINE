@@ -34,6 +34,8 @@ private:
 	flt4x4 getFloat4x4(const Mesh& mesh, const std::string& var) const;
 	flt4 getFloat4(const Mesh& mesh, const std::string& var) const;
 	flt3 getFloat3(const Mesh& mesh, const std::string& var) const;
+	flt2 getFloat2(const Mesh& mesh, const std::string& var) const;
+	flt1 getFloat1(const Mesh& mesh, const std::string& var) const;
 	void* getStruct(const Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
 	
 	ID3D11Buffer* getVertexBuffer(const Mesh& mesh, uint32_t* elementSize) const;
@@ -45,7 +47,10 @@ private:
 	ID3D11ShaderResourceView* getImagesArray(const Mesh& mesh, const std::string& var) const;
 
 	void setFloat4x4sOnGPU(const Mesh& mesh);
+	void setFloat4sOnGPU(const Mesh& mesh);
 	void setFloat3sOnGPU(const Mesh& mesh);
+	void setFloat2sOnGPU(const Mesh& mesh);
+	void setFloat1sOnGPU(const Mesh& mesh);
 	void setStructsOnGPU(const Mesh& mesh);
 	void setTexturesOnGPU(const Mesh& mesh);
 	void setTexturesArraysOnGPU(const Mesh& mesh);

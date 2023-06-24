@@ -442,19 +442,23 @@ flt4 GraphicsCore::getFloat4(const Mesh& mesh, const std::string& var) const
 		{
 			res.xyz() = cameras()[index].getEyePos();
 			res.w() = 1;
+			return res;
 		}
 		if (what == std::string("fwd"))
 		{
 			res.xyz() = cameras()[index].getFwd();
 			res.w() = 1;
+			return res;
 		}
 	}
 	if (place == std::string("position_in_scene"))
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt4(pos.m30(), pos.m31(), pos.m32(), 1);
+		return res;
 	}
 
+	res = mesh.getParam(var);
 	return res;
 }
 
@@ -478,18 +482,36 @@ flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
 		if (what == std::string("eye_pos"))
 		{
 			res = cameras()[index].getEyePos();
+			return res;
 		}
 		if (what == std::string("fwd"))
 		{
 			res = cameras()[index].getFwd();
+			return res;
 		}
 	}
 	if (place == std::string("position_in_scene"))
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt3(pos.m30(), pos.m31(), pos.m32());
+		return res;
 	}
 
+	res = mesh.getParam(var);
+	return res;
+}
+
+flt2 GraphicsCore::getFloat2(const Mesh& mesh, const std::string& var) const
+{
+	flt2 res;
+	res = mesh.getParam(var);
+	return res;
+}
+
+flt1 GraphicsCore::getFloat1(const Mesh& mesh, const std::string& var) const
+{
+	flt1 res;
+	res = mesh.getParam(var);
 	return res;
 }
 
@@ -824,6 +846,19 @@ void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 	}
 }
 
+void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Float4Resource> flt4s;
+	ResourceManager::instance()->getFloat4s(sTechnique, flt4s);
+	for (auto& f4 : flt4s)
+	{
+		flt4 v = getFloat4(mesh, f4.first);
+		f4.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 4 * sizeof(float));
+	}
+}
+
 void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();
@@ -834,6 +869,32 @@ void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 	{
 		flt3 v = getFloat3(mesh, f3.first);
 		f3.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 3 * sizeof(float));
+	}
+}
+
+void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Float2Resource> flt2s;
+	ResourceManager::instance()->getFloat2s(sTechnique, flt2s);
+	for (auto& f2 : flt2s)
+	{
+		flt2 v = getFloat2(mesh, f2.first);
+		f2.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 2 * sizeof(float));
+	}
+}
+
+void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
+{
+	std::string sTechnique = mesh.getTechnique();
+
+	std::map<std::string, Float1Resource> flt1s;
+	ResourceManager::instance()->getFloat1s(sTechnique, flt1s);
+	for (auto& f1 : flt1s)
+	{
+		flt1 v = getFloat1(mesh, f1.first);
+		f1.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, sizeof(float));
 	}
 }
 
@@ -879,7 +940,10 @@ void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setVariablesOnGPU(const Mesh& mesh)
 {
+	setFloat4sOnGPU(mesh);
 	setFloat3sOnGPU(mesh);
+	setFloat2sOnGPU(mesh);
+	setFloat1sOnGPU(mesh);
 	setFloat4x4sOnGPU(mesh);
 	setStructsOnGPU(mesh);
 	setTexturesOnGPU(mesh);
