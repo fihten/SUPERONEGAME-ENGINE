@@ -253,8 +253,8 @@ Mesh createTrees()
 
 	int n = 2;
 	float side = 20;
-	float width = 10;
-	float height = 10;
+	float width = 7;
+	float height = 7;
 	for (int i = 0; i < n; ++i)
 	{
 		for (int j = 0; j < n; ++j)
@@ -265,8 +265,8 @@ Mesh createTrees()
 
 			pts.push_back(flt3(x, y, z));
 
-			float w = width * ((float)rand() / RAND_MAX);
-			float h = height * ((float)rand() / RAND_MAX);
+			float w = width * (0.5f + (float)rand() / RAND_MAX / 2);
+			float h = height * (0.5f + (float)rand() / RAND_MAX / 2);
 
 			szs.push_back(flt2(w, h));
 		}

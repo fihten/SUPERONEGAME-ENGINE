@@ -16,7 +16,9 @@ Mesh createTrees();
 
 class Mesh
 {
+protected:
 	static uint32_t instanceNumber;
+private:
 	std::string name = "";
 
 	std::vector<std::pair<std::string, std::vector<flt1>>> flt1_streams;
@@ -123,7 +125,7 @@ public:
 	friend Mesh createCube();
 	friend Mesh createTrees();
 public:
-	const uint32_t id;
+	uint32_t id;
 	void* scene = nullptr;
 	int nodeID = -1;
 };

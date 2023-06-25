@@ -10,7 +10,11 @@ class DrawVisitor :public Scene::Visitor
 	{
 		const Mesh* mesh = nullptr;
 	public:
-		MeshInScene(const Mesh* mesh) :mesh(mesh) {}
+		MeshInScene(const Mesh* mesh) :mesh(mesh) 
+		{
+			--instanceNumber;
+			id = mesh->id;
+		}
 
 		std::string getTechnique() const;
 		std::string getPass() const;
