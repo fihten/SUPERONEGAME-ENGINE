@@ -80,6 +80,12 @@ public:
 		std::cout << "TriangleStream<>" << std::endl;
 		numberOfSpaces += 4;
 	};
+	void startVisit(const ShaderUnits::LINE_STREAM* pLINE_STREAM)
+	{
+		printSpaces();
+		std::cout << "LineStream<>" << std::endl;
+		numberOfSpaces += 4;
+	};
 	void startVisit(const ShaderUnits::STRUCT* pSTRUCT)
 	{
 		printSpaces();
@@ -454,6 +460,10 @@ public:
 	void finishVisit(const ShaderUnits::FLOAT3* pFLOAT3) {};
 	void finishVisit(const ShaderUnits::FLOAT4* pFLOAT4) {};
 	void finishVisit(const ShaderUnits::TRIANGLE_STREAM* pTRIANGLE_STREAM) 
+	{
+		numberOfSpaces -= 4;
+	};
+	void finishVisit(const ShaderUnits::LINE_STREAM* pLINE_STREAM)
 	{
 		numberOfSpaces -= 4;
 	};

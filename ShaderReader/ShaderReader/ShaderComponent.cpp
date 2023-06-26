@@ -108,6 +108,14 @@ void ShaderUnits::TRIANGLE_STREAM::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::LINE_STREAM::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	for (auto ch : childs)
+		ch->query(visitor);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::STRUCT::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);
