@@ -87,3 +87,18 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 		}
 	}
 }
+
+float4 PS(GeometryOut pin) : SV_TARGET
+{
+	return float4(pin.color,1);
+}
+
+technique11 SelectedObjectsBox
+{
+	pass P0
+	{
+		SetVertexShader(CompileShader(vs_5_0, VS()));
+		SetGeometryShader(CompileShader(gs_5_0, GS()));
+		SetPixelShader(CompileShader(ps_5_0, PS()));
+	}
+};
