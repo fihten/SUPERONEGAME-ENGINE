@@ -144,9 +144,11 @@ class HLSLConverter :public ShaderConverter
 		INSERT_MAXVERTEXCOUNT_PARAMETER,
 		INSERT_MAXVERTEXCOUNT,
 		TRIANGLE_STREAM,
+		LINE_STREAM,
 		TEMPLATE_PARAMETER,
 		INSERT_TEMPLATE_PARAMETER,
-		UPDATE_TRIANGLE_STREAM
+		UPDATE_TRIANGLE_STREAM,
+		UPDATE_LINE_STREAM
 	};
 	State currentState = State::UNKNOWN;
 	std::stack<State> statesStack;
@@ -374,9 +376,11 @@ class HLSLConverter :public ShaderConverter
 	ShaderUnits::MAXVERTEXCOUNT* pMaxvertexcount = nullptr;
 
 	void triangleStream();
+	void lineStream();
 	void templateParameter();
 	void insertTemplateParameter();
 	void updateTriangleStream();
+	void updateLineStream();
 
 private:
 	bool isOperationState(State state) const;

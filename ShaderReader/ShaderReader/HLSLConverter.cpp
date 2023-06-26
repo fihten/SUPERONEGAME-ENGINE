@@ -549,6 +549,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			triangleStream();
 			break;
 
+		case State::LINE_STREAM:
+			lineStream();
+			break;
+
 		case State::TEMPLATE_PARAMETER:
 			templateParameter();
 			break;
@@ -559,6 +563,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 
 		case State::UPDATE_TRIANGLE_STREAM:
 			updateTriangleStream();
+			break;
+
+		case State::UPDATE_LINE_STREAM:
+			updateLineStream();
 			break;
 		}
 	}
@@ -766,6 +774,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::TRIANGLE_STREAM;
+
+		return;
+	}
+	if (word == std::string("LineStream"))
+	{
+		words.pop();
+		currentState = State::LINE_STREAM;
 
 		return;
 	}
@@ -1281,6 +1296,8 @@ bool HLSLConverter::isType(const std::string& str) const
 	if (std::strcmp(str.c_str(), "Texture2DArray") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "TriangleStream") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "LineStream") == 0)
 		return true;
 	return false;
 }
@@ -3815,6 +3832,11 @@ void HLSLConverter::triangleStream()
 	}
 }
 
+void HLSLConverter::lineStream()
+{
+
+}
+
 void HLSLConverter::templateParameter()
 {
 	ShaderUnits::TEMPLATE_PARAMETER* pTemplateParameter = new ShaderUnits::TEMPLATE_PARAMETER();
@@ -3865,4 +3887,9 @@ void HLSLConverter::updateTriangleStream()
 
 		return;
 	}
+}
+
+void HLSLConverter::updateLineStream()
+{
+
 }
