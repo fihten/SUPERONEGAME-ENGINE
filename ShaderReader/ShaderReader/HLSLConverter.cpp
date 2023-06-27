@@ -3834,7 +3834,18 @@ void HLSLConverter::triangleStream()
 
 void HLSLConverter::lineStream()
 {
+	ShaderUnits::ShaderComponent* pLineStream = new ShaderUnits::LINE_STREAM();
+	componentStack.push(pLineStream);
+	statesStack.push(State::LINE_STREAM);
 
+	std::string word = words.front();
+	if (word == std::string("<"))
+	{
+		words.pop();
+		currentState = State::TEMPLATE_PARAMETER;
+
+		return;
+	}
 }
 
 void HLSLConverter::templateParameter()
@@ -3861,6 +3872,11 @@ void HLSLConverter::insertTemplateParameter()
 	if (!statesStack.empty() && statesStack.top() == State::TRIANGLE_STREAM)
 	{
 		currentState = State::UPDATE_TRIANGLE_STREAM;
+		return;
+	}
+	if (!statesStack.empty() && statesStack.top() == State::LINE_STREAM)
+	{
+		currentState = State::UPDATE_LINE_STREAM;
 		return;
 	}
 }
@@ -3891,5 +3907,24 @@ void HLSLConverter::updateTriangleStream()
 
 void HLSLConverter::updateLineStream()
 {
+	statesStack.pop();
 
+	std::string word = words.front();
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = componentStack.top();
+		componentStack.pop();
+
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+
+		return;
+	}
 }

@@ -667,7 +667,7 @@ public:
 int main()
 {
 	ShaderReader reader;
-	reader.openShader(L"C:\\3dEngine\\Shaders\\TreeSprite.fx");
+	reader.openShader(L"C:\\3dEngine\\Shaders\\SelectedObjectsBox.fx");
 
 	HLSLConverter converter;
 	reader.parseShader(converter);
