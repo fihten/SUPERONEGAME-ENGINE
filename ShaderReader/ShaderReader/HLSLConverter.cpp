@@ -3708,6 +3708,13 @@ void HLSLConverter::insertIndexOfVariable()
 		currentState = State::UNKNOWN;
 		return;
 	}
+	if (word == std::string("["))
+	{
+		words.pop();
+		currentState = State::INDEX_OF_VARIABLE;
+
+		return;
+	}
 	if (word == std::string(",") || word == std::string(";") ||
 		word == std::string(")") || word == std::string(":") ||
 		word == std::string("}") || word == std::string("]"))
