@@ -282,6 +282,36 @@ Mesh createTrees()
 	return m;
 }
 
+Mesh createSelectionBoxes()
+{
+	srand(0);
+	Mesh m;
+
+	// vertices positions
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	auto& pts = m.flt3_streams.back().second;
+
+	// axis0
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS0"), std::vector<flt3>()));
+	auto& axis0 = m.flt3_streams.back().second;
+
+	// axis1
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS1"), std::vector<flt3>()));
+	auto& axis1 = m.flt3_streams.back().second;
+
+	// axis2
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS2"), std::vector<flt3>()));
+	auto& axis2 = m.flt3_streams.back().second;
+
+	// size
+	m.flt1_streams.push_back(std::pair<std::string, std::vector<flt1>>(std::string("SIZE"), std::vector<flt1>()));
+	auto& size = m.flt1_streams.back().second;
+
+	// color
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("COLOR"), std::vector<flt3>()));
+	auto& color = m.flt3_streams.back().second;
+}
+
 std::string Mesh::getTechnique() const
 {
 	std::string technique = "";

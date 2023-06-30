@@ -13,6 +13,7 @@
 class Mesh;
 Mesh createCube();
 Mesh createTrees();
+Mesh createSelectionBoxes();
 
 class Mesh
 {
@@ -124,6 +125,7 @@ public:
 
 	friend Mesh createCube();
 	friend Mesh createTrees();
+	friend Mesh createSelectionBoxes();
 public:
 	uint32_t id;
 	void* scene = nullptr;
