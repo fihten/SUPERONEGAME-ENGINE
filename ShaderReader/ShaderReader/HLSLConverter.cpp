@@ -3293,6 +3293,7 @@ void HLSLConverter::selectedField()
 void HLSLConverter::selectedMethod()
 {
 	std::string methodName = userName;
+	userName = "";
 	ShaderUnits::ShaderComponent* method = new ShaderUnits::SELECTED_METHOD();
 	method->setName(methodName);
 	if (selectedFM_tail.top())
