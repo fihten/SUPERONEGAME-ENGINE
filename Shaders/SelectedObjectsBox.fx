@@ -9,8 +9,8 @@ struct VertexIn
 	float3 axis0 : AXIS0;
 	float3 axis1 : AXIS1;
 	float3 axis2 : AXIS2;
-	float size : SIZE;
 	float3 color : COLOR;
+	float size : SIZE;
 };
 
 struct VertexOut
@@ -19,8 +19,8 @@ struct VertexOut
 	float3 axis0 : AXIS0;
 	float3 axis1 : AXIS1;
 	float3 axis2 : AXIS2;
-	float size : SIZE;
 	float3 color : COLOR;
+	float4 size : SIZE;
 };
 
 struct GeometryOut
@@ -74,7 +74,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 
 		for (int j = 0; j < 3; ++j)
 		{
-			float3 v1 = v0 - angleIndices[i][j] * gin[0].size * axis[j];
+			float3 v1 = v0 - angleIndices[i][j] * gin[0].size.x * axis[j];
 
 			GeometryOut gout1;
 			gout1.posH = mul(float4(v1, 1), gViewProj);

@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <stdlib.h>
 #include "Mesh.h"
+#include "Matrix4x4.h"
 
 uint32_t Mesh::instanceNumber = 0;
 
@@ -287,12 +288,14 @@ Mesh createSelectionBoxes()
 	srand(0);
 	Mesh m;
 
+	m.flt3_streams.reserve(5);
+
 	// vertices positions
 	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
 	auto& pts = m.flt3_streams.back().second;
 
 	// axis0
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS0"), std::vector<flt3>()));
+	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS"), std::vector<flt3>()));
 	auto& axis0 = m.flt3_streams.back().second;
 
 	// axis1
@@ -310,6 +313,51 @@ Mesh createSelectionBoxes()
 	// color
 	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("COLOR"), std::vector<flt3>()));
 	auto& color = m.flt3_streams.back().second;
+
+	int n = 2;
+	float sz = 10;
+	for (int i = 0; i < n; i++)
+	{
+		for (int j = 0; j < n; j++)
+		{
+			flt3 pos(3 * sz * i, 0, 3 * sz * j);
+
+			// fill positions
+			pts.push_back(pos);
+
+			float angleX = M_PI * std::rand() / RAND_MAX - 0.5 * M_PI;
+			flt4x4 rotX = makeRotate(flt3(1, 0, 0), angleX);
+
+			float angleY = 2 * M_PI * std::rand() / RAND_MAX;
+			flt4x4 rotY = makeRotate(flt3(0, 1, 0), angleY);
+
+			flt4x4 rot = rotX * rotY;
+
+			flt3 a0 = (0.5f + 0.5f * rand() / RAND_MAX) * sz * flt3(1, 0, 0);
+			flt3 a1 = (0.5f + 0.5f * rand() / RAND_MAX) * sz * flt3(0, 1, 0);
+			flt3 a2 = (0.5f + 0.5f * rand() / RAND_MAX) * sz * flt3(0, 0, 1);
+
+			a0 = a0 * rot;
+			a1 = a1 * rot;
+			a2 = a2 * rot;
+
+			// fill axises
+			axis0.push_back(a0);
+			axis1.push_back(a1);
+			axis2.push_back(a2);
+
+			// fill sizes
+			size.push_back(0.5);
+
+			// fill colors
+			color.push_back(flt3(1, 0, 0));
+		}
+	}
+
+	m.params["technique"] = "SelectedObjectsBox";
+	m.params["pass"] = "P0";
+
+	return m;
 }
 
 std::string Mesh::getTechnique() const
