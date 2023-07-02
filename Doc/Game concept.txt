@@ -48,3 +48,10 @@ Consider another one game. I don't like this game now. But it doesn't matter. Su
 To prevent it player must avoid enemies by using mentioned mechanics. Also, he can kill enemies by jumping on them, i.e. using mentioned mechanics. What i have to noticed here.
 At first, game creates situations that cause player to use available mechanics. Second, game has its own mechanics. Enemies can also move in horisontal directions and jump. They can kill you by touching you.
 Third, combination of mechanics can form complex mechanic. For example, moving in horisontal direction and jumping can cause death of your enemy.
+
+Let's think about mechanics of my newly created game; This game is a first person shoter. Movements must be constraint to give players an ability to show their ingenuity. 
+But abilities are not to be constrained too much. So, player can move in horisontal space + he can jump. Player cant look up or down.
+What about killing of enemies? Player can use its kinethic energy. For example, he can increase his running speed, and when speed is too large,
+player can jump. And if enemy isn't too far from the player and player's direction has specific value then game will help the player and push them on to the enemy. Then 
+enemy will be damaged.
+  
