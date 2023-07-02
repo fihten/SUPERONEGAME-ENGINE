@@ -32,6 +32,4 @@ class DrawVisitor :public Scene::Visitor
 	};
 public:
 	void startVisit(const Scene::MeshNode* node);
-
-	GraphicsCore* graphicsCore = nullptr;
 };

@@ -325,10 +325,10 @@ Mesh createSelectionBoxes()
 			// fill positions
 			pts.push_back(pos);
 
-			float angleX = M_PI * std::rand() / RAND_MAX - 0.5 * M_PI;
+			float angleX = 180.0 * std::rand() / RAND_MAX - 90.0;
 			flt4x4 rotX = makeRotate(flt3(1, 0, 0), angleX);
 
-			float angleY = 2 * M_PI * std::rand() / RAND_MAX;
+			float angleY = 360.0 * std::rand() / RAND_MAX;
 			flt4x4 rotY = makeRotate(flt3(0, 1, 0), angleY);
 
 			flt4x4 rot = rotX * rotY;

@@ -7,6 +7,15 @@
 #include <sstream>
 #include <D3DX11tex.h>
 
+GraphicsCore* GraphicsCore::pGraphicsCore = nullptr;
+
+GraphicsCore* GraphicsCore::instance()
+{
+	if (pGraphicsCore == nullptr)
+		pGraphicsCore = new GraphicsCore();
+	return pGraphicsCore;
+}
+
 void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
 	this->drawFunc = drawFunc;

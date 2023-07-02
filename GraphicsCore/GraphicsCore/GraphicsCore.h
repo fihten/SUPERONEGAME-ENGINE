@@ -17,7 +17,11 @@ class GraphicsCore
 	ID3D11Device* device = 0;
 	ID3D11DeviceContext* context = 0;
 
+	GraphicsCore() {}
+
 public:
+	static GraphicsCore* instance();
+
 	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
 	
 	void startFrame();
@@ -77,4 +81,7 @@ private:
 	ID3D11DepthStencilView* mDepthStencilView = 0;
 
 	DRAW_FUNC drawFunc = nullptr;
+
+private:
+	static GraphicsCore* pGraphicsCore;
 };

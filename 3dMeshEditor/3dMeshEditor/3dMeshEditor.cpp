@@ -6,7 +6,6 @@
 #include "DrawVisitor.h"
 #include <Windows.h>
 
-GraphicsCore graphicsCore;
 Mesh cube;
 Mesh trees;
 Mesh selectionBoxes;
@@ -22,7 +21,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		UINT width = LOWORD(lparam);
 		UINT height = HIWORD(lparam);
 
-		graphicsCore.resize(width, height);
+		GraphicsCore::instance()->resize(width, height);
 
 		return 0;
 	}
@@ -49,12 +48,10 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
+	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
+
 	selectionBoxes = createSelectionBoxes();
-
 	NodeID mesh = scene.addMeshNode(&selectionBoxes);
-	drawVisitor.graphicsCore = &graphicsCore;
 
-	graphicsCore.init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
-
-	return graphicsCore.run();
+	return GraphicsCore::instance()->run();
 }

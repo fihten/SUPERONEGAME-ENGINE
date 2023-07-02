@@ -2,10 +2,7 @@
 
 void DrawVisitor::startVisit(const Scene::MeshNode* node)
 {
-	if (graphicsCore == nullptr)
-		return;
-
-	graphicsCore->draw(MeshInScene(node->mesh));
+	GraphicsCore::instance()->draw(MeshInScene(node->mesh));
 }
 
 std::string DrawVisitor::MeshInScene::getTechnique() const
