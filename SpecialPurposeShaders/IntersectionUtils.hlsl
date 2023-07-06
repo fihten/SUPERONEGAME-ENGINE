@@ -4,6 +4,10 @@
 #include "Triangle.hlsl"
 #include "Segment.hlsl"
 
+#define SEGMENT_DOESNT_SHARE_ANY_POINT_WITH_PLANE 0
+#define SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE 1
+#define SEGMENT_LIES_IN_PLANE 2
+
 uint findIntersection(float4 plane, Segment seg, out float t)
 {
 	t = 0;
@@ -12,13 +16,53 @@ uint findIntersection(float4 plane, Segment seg, out float t)
 	float D = dot(plane.xyz, seg.v1 - seg.v0);
 
 	if (N == 0 && D == 0)
-		return 2;
+		return SEGMENT_LIES_IN_PLANE;
 
 	if (D == 0)
-		return 0;
+		return SEGMENT_DOESNT_SHARE_ANY_POINT_WITH_PLANE;
 
 	t = -N / D;
-	return 1;
+	return SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE;
+}
+
+bool checkSingleIntersection(Triangle tri, Segment seg)
+{
+	float3 t0 = tri.v1 - tri.v0;
+	float3 t1 = tri.v2 - tri.v0;
+
+	float3 n = cross(t0, t1);
+	n = normalize(n);
+
+	float4 plane = float4(n, -dot(n, tri.v0));
+	float t = 0;
+	uint intersectionInfo = findIntersection(plane, seg, t);
+	if (intersectionInfo != SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE)
+		return false;
+
+	return false;
+}
+
+bool isContain(float3 min, float3 max, float3 pt)
+{
+	if (min.x <= pt.x && pt.x <= max.x &&
+		min.y <= pt.y && pt.y <= max.y &&
+		min.z <= pt.z && pt.z <= max.z)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+bool isContain(float3 min, float3 max, Triangle tri)
+{
+	if (isContain(min, max, tri.v0) &&
+		isContain(min, max, tri.v1) &&
+		isContain(min, max, tri.v2))
+	{
+		return true;
+	}
+	return false;
 }
 
 #define FRONT_PLANE    0
@@ -32,6 +76,9 @@ uint findIntersection(float4 plane, Segment seg, out float t)
 
 bool checkIntersection(Envelope env, Triangle tri, float threshold)
 {
+	if (isContain(env.min - threshold, env.max + threshold, tri))
+		return true;
+
 	float3 n[PLANE_NUMBER];
 	n[FRONT_PLANE]  = float3( 0,  0, -1);
 	n[BACK_PLANE]   = float3( 0,  0, +1);
@@ -82,10 +129,13 @@ bool checkIntersection(Envelope env, Triangle tri, float threshold)
 		for (int si = 0; si < 3; ++si)
 		{
 			float t = 0;
-			if (findIntersection(plane, segments[si], t) == 0)
+			uint intersectionInfo = findIntersection(plane, segments[si], t);
+			if (intersectionInfo != SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE)
 				continue;
 
-
+			float3 intersection = t * (segments[si].v1 - segments[si].v0) + segments[si].v0;
+			if (isContain(min[pi], max[pi], intersection))
+				return true;
 		}
 	}
 }
