@@ -64,11 +64,11 @@ bool checkSingleIntersection(Triangle tri, Segment seg)
 		0.0f <= c && c <= 1.0f;
 }
 
-bool isContain(float3 min, float3 max, float3 pt)
+bool doesContain(Envelope envelope, float3 pt, float threshold)
 {
-	if (min.x <= pt.x && pt.x <= max.x &&
-		min.y <= pt.y && pt.y <= max.y &&
-		min.z <= pt.z && pt.z <= max.z)
+	if (envelope.min.x - threshold <= pt.x && pt.x <= envelope.max.x + threshold &&
+		envelope.min.y - threshold <= pt.y && pt.y <= envelope.max.y + threshold &&
+		envelope.min.z - threshold <= pt.z && pt.z <= envelope.max.z + threshold)
 	{
 		return true;
 	}
@@ -76,11 +76,11 @@ bool isContain(float3 min, float3 max, float3 pt)
 	return false;
 }
 
-bool isContain(float3 min, float3 max, Triangle tri)
+bool doesContain(Envelope envelope, Triangle tri, float threshold)
 {
-	if (isContain(min, max, tri.v0) &&
-		isContain(min, max, tri.v1) &&
-		isContain(min, max, tri.v2))
+	if (isContain(envelope, tri.v0, threshold) &&
+		isContain(envelope, tri.v1, threshold) &&
+		isContain(envelope, tri.v2, threshold))
 	{
 		return true;
 	}
@@ -96,45 +96,46 @@ bool isContain(float3 min, float3 max, Triangle tri)
 
 #define PLANE_NUMBER   6
 
-bool checkIntersection(Envelope env, Triangle tri, float threshold)
+bool checkIntersectionBySide(Envelope env, Triangle tri, float threshold)
 {
-	if (isContain(env.min - threshold, env.max + threshold, tri))
-		return true;
-
 	float3 n[PLANE_NUMBER];
-	n[FRONT_PLANE]  = float3( 0,  0, -1);
-	n[BACK_PLANE]   = float3( 0,  0, +1);
-	n[BOTTOM_PLANE] = float3( 0, -1,  0);
-	n[TOP_PLANE]    = float3( 0, +1,  0);
-	n[LEFT_PLANE]   = float3(-1,  0,  0);
-	n[RIGHT_PLANE]  = float3(+1,  0,  0);
+	n[FRONT_PLANE] = float3(0, 0, -1);
+	n[BACK_PLANE] = float3(0, 0, +1);
+	n[BOTTOM_PLANE] = float3(0, -1, 0);
+	n[TOP_PLANE] = float3(0, +1, 0);
+	n[LEFT_PLANE] = float3(-1, 0, 0);
+	n[RIGHT_PLANE] = float3(+1, 0, 0);
 
 	float3 r0[PLANE_NUMBER];
-	r0[FRONT_PLANE]  =  float3(0, 0, 0);
-	r0[BACK_PLANE]   =  float3(0, 0, 1);
-	r0[BOTTOM_PLANE] =  float3(0, env.min.y, 0);
-	r0[TOP_PLANE]    =  float3(0, env.max.y, 0);
-	r0[LEFT_PLANE]   =  float3(env.min.x, 0, 0);
-	r0[RIGHT_PLANE]  =  float3(env.max.x, 0, 0);
+	r0[FRONT_PLANE] = float3(0, 0, 0);
+	r0[BACK_PLANE] = float3(0, 0, 1);
+	r0[BOTTOM_PLANE] = float3(0, env.min.y, 0);
+	r0[TOP_PLANE] = float3(0, env.max.y, 0);
+	r0[LEFT_PLANE] = float3(env.min.x, 0, 0);
+	r0[RIGHT_PLANE] = float3(env.max.x, 0, 0);
 
-	float3 min[PLANE_NUMBER];
-	min[FRONT_PLANE]  = float3(env.min.xy - threshold, -threshold);
-	min[BACK_PLANE]   = float3(env.min.xy - threshold, 1.0f - threshold);
-	min[BOTTOM_PLANE] = float3(env.min.xy - threshold, -threshold);
-	min[TOP_PLANE]    = float3(env.min.x - threshold, env.max.y - threshold, -threshold);
-	min[LEFT_PLANE]   = float3(env.min.xy - threshold, -threshold);
-	min[RIGHT_PLANE]  = float3(env.max.x - threshold, end.min.y - threshold, -threshold);
+	Envelope envelopes[PLANE_NUMBER];
 
-	float3 max[PLANE_NUMBER];
-	max[FRONT_PLANE]  = float3(env.max.xy + threshold, threshold);
-	max[BACK_PLANE]   = float3(env.max.xy + threshold, 1.0f + threshold);
-	max[BOTTOM_PLANE] = float3(env.max.x + threshold, env.min.y + threshold, 1.0f + threshold);
-	max[TOP_PLANE]    = float3(env.max.xy + threshold, 1.0f + threshold);
-	max[LEFT_PLANE]   = float3(env.min.x + threshold, env.max.y + threshold, 1.0f + threshold);
-	max[RIGHT_PLANE]  = float3(env.max.xy + threshold, 1.0f + threshold);
+	envelopes[FRONT_PLANE].min = float3(env.min.xy, 0);
+	envelopes[FRONT_PLANE].max = float3(env.max.xy, 0);
+
+	envelopes[BACK_PLANE].min = float3(env.min.xy, 1.0f);
+	envelopes[BACK_PLANE].max = float3(env.max.xy, 1.0f);
+
+	envelopes[BOTTOM_PLANE].min = float3(env.min.xy, 0);
+	envelopes[BOTTOM_PLANE].max = float3(env.max.x, env.min.y, 1.0f);
+
+	envelopes[TOP_PLANE].min = float3(env.min.x, env.max.y, 0);
+	envelopes[TOP_PLANE].max = float3(env.max.xy, 1.0f);
+
+	envelopes[LEFT_PLANE].min = float3(env.min.xy, 0);
+	envelopes[LEFT_PLANE].max = float3(env.min.x, env.max.y, 1.0f);
+
+	envelopes[RIGHT_PLANE].min = float3(env.max.x, end.min.y, 0);
+	envelopes[RIGHT_PLANE].max = float3(env.max.xy, 1.0f);
 
 	Segment segments[3];
-	
+
 	segments[0].v0 = tri.v0;
 	segments[0].v1 = tri.v1;
 
@@ -156,10 +157,41 @@ bool checkIntersection(Envelope env, Triangle tri, float threshold)
 				continue;
 
 			float3 intersection = t * (segments[si].v1 - segments[si].v0) + segments[si].v0;
-			if (isContain(min[pi], max[pi], intersection))
+			if (doesContain(envelopes[pi], intersection, threshold))
 				return true;
 		}
 	}
+	return false;
+}
+
+bool checkIntersectionByDiagonal(Envelope env, Triangle tri, float threshold)
+{
+	Segment diagonals[4];
+
+	diagonals[0].v0 = env.min;
+	diagonals[0].v1 = env.max;
+
+	diagonals[1].v0 = float3(env.min.x, env.min.y, env.max.z);
+	diagonals[1].v1 = float3(env.max.x, env.max.y, env.min.z);
+
+	diagonals[2].v0 = float3(env.max.x, env.min.y, env.min.z);
+	diagonals[2].v1 = float3(env.min.x, env.max.y, env.max.z);
+
+	diagonals[3].v0 = float3(env.max.x, env.min.y, env.max.z);
+	diagonals[3].v1 = float3(env.min.x, env.max.y, env.min.z);
+
+	return false;
+}
+
+bool checkIntersection(Envelope env, Triangle tri, float threshold)
+{
+	if (doesContain(env, tri, threshold))
+		return true;
+	if (checkIntersectionBySide(env, tri, threshold))
+		return true;
+	if (checkIntersectionByDiagonal(env, tri, threshold))
+		return true;
+	return false;
 }
 
 #endif
