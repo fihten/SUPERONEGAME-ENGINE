@@ -39,7 +39,29 @@ bool checkSingleIntersection(Triangle tri, Segment seg)
 	if (intersectionInfo != SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE)
 		return false;
 
-	return false;
+	float3 intersection = t * (seg.v1 - seg.v0) + seg.v0;
+
+	float m00 = dot(tri.v0 - tri.v2, tri.v0 - tri.v2);
+	float m01 = dot(tri.v1 - tri.v2, tri.v0 - tri.v2);
+
+	float m10 = m01;
+	float m11 = dot(tri.v1 - tri.v2, tri.v1 - tri.v2);
+
+	float r0 = dot(intersection - tri.v2, tri.v0 - tri.v2);
+	float r1 = dot(intersection - tri.v2, tri.v1 - tri.v2);
+
+	float d = m00 * m11 - m01 * m10;
+	float d0 = r0 * m11 - r1 * m01;
+	float d1 = r1 * m00 - r0 * m10;
+
+	float a = d0 / d;
+	float b = d1 / d;
+	float c = 1.0f - a - b;
+
+	return 
+		0.0f <= a && a <= 1.0f &&
+		0.0f <= b && b <= 1.0f &&
+		0.0f <= c && c <= 1.0f;
 }
 
 bool isContain(float3 min, float3 max, float3 pt)
