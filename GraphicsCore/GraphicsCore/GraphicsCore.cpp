@@ -1037,6 +1037,8 @@ void GraphicsCore::initRoughObjectsSelection()
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mRoughObjectsSelectionFX);
 
+	mRoughObjectsSelectionTech = mRoughObjectsSelectionFX->GetTechniqueByName("RoughObjectsSelection");
+
 	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes");
 	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
 	mSelectorEnvelope = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
@@ -1048,6 +1050,7 @@ void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
 {
 	mEnvelopes->SetRawValue(envelopes, 0, envelopesCount * sizeof(Envelope));
 	mEnvelopesCount->SetRawValue(&envelopesCount, 0, sizeof uint32_t);
+	this->envelopesCount = envelopesCount;
 }
 
 void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
@@ -1063,4 +1066,12 @@ void GraphicsCore::setSelectedEnvelopes(ID3D11UnorderedAccessView* selectedEnvel
 void GraphicsCore::setVP(flt4x4& VP)
 {
 	mVP->SetMatrix((float*)(&VP));
+}
+
+void GraphicsCore::findRoughlySelectedObjects()
+{
+	mRoughObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t threads_x = std::ceil(float(envelopesCount) / 256.0f);
+	context->Dispatch(threads_x, 1, 1);
 }

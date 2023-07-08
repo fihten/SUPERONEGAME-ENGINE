@@ -38,16 +38,21 @@ public:
 private:
 	void initRoughObjectsSelection();
 	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
+	ID3DX11EffectTechnique* mRoughObjectsSelectionTech = nullptr;
 	ID3DX11EffectVariable* mEnvelopes = nullptr;
 	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
 	ID3DX11EffectVariable* mSelectorEnvelope = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedEnvelopes = nullptr;
 	ID3DX11EffectMatrixVariable* mVP = nullptr;
 
+	uint32_t envelopesCount = 0;
+
 	void setEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
 	void setSelectorEnvelope(Envelope& selectorEnvelope);
 	void setSelectedEnvelopes(ID3D11UnorderedAccessView* selectedEnvelopesUAV);
 	void setVP(flt4x4& VP);
+
+	void findRoughlySelectedObjects();
 
 	friend Selector;
 
