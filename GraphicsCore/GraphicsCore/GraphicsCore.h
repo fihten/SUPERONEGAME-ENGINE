@@ -6,11 +6,14 @@
 #include <dxgiformat.h>
 #include <dxgi.h>
 #include <memory>
+#include "Envelope.h"
 
 class GraphicsCore;
 
 typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
 typedef void (*DRAW_FUNC)(GraphicsCore*);
+
+class Selector;
 
 class GraphicsCore
 {
@@ -31,10 +34,22 @@ public:
 	
 	int run();
 	void resize(UINT width, UINT height);
-	
+
 private:
 	void initRoughObjectsSelection();
 	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
+	ID3DX11EffectVariable* mEnvelopes = nullptr;
+	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
+	ID3DX11EffectVariable* mSelectorEnvelope = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedEnvelopes = nullptr;
+	ID3DX11EffectMatrixVariable* mVP = nullptr;
+
+	void setEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
+	void setSelectorEnvelope(Envelope& selectorEnvelope);
+	void setSelectedEnvelopes(ID3D11UnorderedAccessView* selectedEnvelopesUAV);
+	void setVP(flt4x4& VP);
+
+	friend Selector;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

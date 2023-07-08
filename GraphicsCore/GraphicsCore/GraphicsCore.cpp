@@ -1037,4 +1037,30 @@ void GraphicsCore::initRoughObjectsSelection()
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mRoughObjectsSelectionFX);
 
+	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes");
+	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
+	mSelectorEnvelope = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
+	mSelectedEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("selectedEnvelopes")->AsUnorderedAccessView();
+	mVP = mRoughObjectsSelectionFX->GetVariableByName("VP")->AsMatrix();
+}
+
+void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
+{
+	mEnvelopes->SetRawValue(envelopes, 0, envelopesCount * sizeof(Envelope));
+	mEnvelopesCount->SetRawValue(&envelopesCount, 0, sizeof uint32_t);
+}
+
+void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
+{
+	mSelectorEnvelope->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
+}
+
+void GraphicsCore::setSelectedEnvelopes(ID3D11UnorderedAccessView* selectedEnvelopesUAV)
+{
+	mSelectedEnvelopes->SetUnorderedAccessView(selectedEnvelopesUAV);
+}
+
+void GraphicsCore::setVP(flt4x4& VP)
+{
+	mVP->SetMatrix((float*)(&VP));
 }
