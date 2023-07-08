@@ -22,6 +22,9 @@ uint findIntersection(float4 plane, Segment seg, out float t)
 		return SEGMENT_DOESNT_SHARE_ANY_POINT_WITH_PLANE;
 
 	t = -N / D;
+	if (t < 0 || 1 < t)
+		return SEGMENT_DOESNT_SHARE_ANY_POINT_WITH_PLANE;
+
 	return SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE;
 }
 
@@ -179,6 +182,13 @@ bool checkIntersectionByDiagonal(Envelope env, Triangle tri, float threshold)
 
 	diagonals[3].v0 = float3(env.max.x, env.min.y, env.max.z);
 	diagonals[3].v1 = float3(env.min.x, env.max.y, env.min.z);
+
+	[unroll]
+	for (int di = 0; di < 4; ++di)
+	{
+		if (checkSingleIntersection(tri, diagonals[di]))
+			return true;
+	}
 
 	return false;
 }
