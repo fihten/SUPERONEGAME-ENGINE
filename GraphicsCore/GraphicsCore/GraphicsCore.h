@@ -23,7 +23,7 @@ public:
 	static GraphicsCore* instance();
 
 	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
-	
+
 	void startFrame();
 	void endFrame();
 
@@ -32,6 +32,10 @@ public:
 	int run();
 	void resize(UINT width, UINT height);
 	
+private:
+	void initRoughObjectsSelection();
+	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
+
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
