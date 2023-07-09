@@ -1042,7 +1042,7 @@ void GraphicsCore::initRoughObjectsSelection()
 
 	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes");
 	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
-	mSelectorEnvelope = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
+	mSelectorEnvelopeRough = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
 	mSelectedObjects = mRoughObjectsSelectionFX->GetVariableByName("selectedObjects")->AsUnorderedAccessView();
 	mVP = mRoughObjectsSelectionFX->GetVariableByName("VP")->AsMatrix();
 
@@ -1086,7 +1086,7 @@ void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
 
 void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
 {
-	mSelectorEnvelope->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
+	mSelectorEnvelopeRough->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
 }
 
 void GraphicsCore::setVP(flt4x4& VP)
@@ -1112,4 +1112,32 @@ void GraphicsCore::getRoughlySelectedObjects(uint32_t* selectedObjects)
 	std::memcpy(selectedObjects, mappedData.pData, sizeof(uint32_t) * MaxEnvelopesCount);
 
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
+}
+
+void GraphicsCore::initFineObjectsSelection()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sFineObjectsSelection = std::string(shadersFolder) + "\\FineObjectsSelection.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sFineObjectsSelection.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mFineObjectsSelectionFX);
+
+	mFineObjectsSelectionTech = mFineObjectsSelectionFX->GetTechniqueByName("FineObjectsSelection");
+	mSelectorEnvelopeFine = mFineObjectsSelectionFX->GetVariableByName("selectorEnvelope");
 }

@@ -41,7 +41,7 @@ private:
 	ID3DX11EffectTechnique* mRoughObjectsSelectionTech = nullptr;
 	ID3DX11EffectVariable* mEnvelopes = nullptr;
 	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
-	ID3DX11EffectVariable* mSelectorEnvelope = nullptr;
+	ID3DX11EffectVariable* mSelectorEnvelopeRough = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
 	ID3DX11EffectMatrixVariable* mVP = nullptr;
 
@@ -59,6 +59,12 @@ private:
 	void findRoughlySelectedObjects();
 
 	void getRoughlySelectedObjects(uint32_t* selectedObjects);
+
+private:
+	void initFineObjectsSelection();
+	ID3DX11Effect* mFineObjectsSelectionFX = nullptr;
+	ID3DX11EffectTechnique* mFineObjectsSelectionTech = nullptr;
+	ID3DX11EffectVariable* mSelectorEnvelopeFine = nullptr;
 
 	friend Selector;
 
