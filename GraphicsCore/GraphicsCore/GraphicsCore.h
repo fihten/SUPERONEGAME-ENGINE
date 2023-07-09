@@ -42,20 +42,23 @@ private:
 	ID3DX11EffectVariable* mEnvelopes = nullptr;
 	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
 	ID3DX11EffectVariable* mSelectorEnvelope = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mSelectedEnvelopes = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
 	ID3DX11EffectMatrixVariable* mVP = nullptr;
 
 	uint32_t envelopesCount = 0;
-	ID3D11Buffer* mInputSelectedEnvelopesBuffer = nullptr;
+	
+	ID3D11Buffer* mInputSelectedObjectsBuffer = nullptr;
+	ID3D11UnorderedAccessView* selectedObjectsUAV = nullptr;
+
+	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
 
 	void setEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
 	void setSelectorEnvelope(Envelope& selectorEnvelope);
-	void setSelectedEnvelopes();
 	void setVP(flt4x4& VP);
 
-	void findRoughlySelectedEnvelopes();
+	void findRoughlySelectedObjects();
 
-	void getRoughlySelectedEnvelopes(uint32_t* selectedEnvelopes);
+	void getRoughlySelectedObjects(uint32_t* selectedObjects);
 
 	friend Selector;
 

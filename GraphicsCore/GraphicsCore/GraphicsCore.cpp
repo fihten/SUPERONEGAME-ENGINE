@@ -1043,8 +1043,38 @@ void GraphicsCore::initRoughObjectsSelection()
 	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes");
 	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
 	mSelectorEnvelope = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
-	mSelectedEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("selectedEnvelopes")->AsUnorderedAccessView();
+	mSelectedObjects = mRoughObjectsSelectionFX->GetVariableByName("selectedObjects")->AsUnorderedAccessView();
 	mVP = mRoughObjectsSelectionFX->GetVariableByName("VP")->AsMatrix();
+
+	D3D11_BUFFER_DESC inputDesc;
+	inputDesc.Usage = D3D11_USAGE_DEFAULT;
+	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
+	inputDesc.CPUAccessFlags = 0;
+	inputDesc.StructureByteStride = sizeof uint32_t;
+	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	device->CreateBuffer(&inputDesc, 0, &mInputSelectedObjectsBuffer);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_R32_UINT;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.Flags = 0;
+	uavDesc.Buffer.NumElements = MaxEnvelopesCount;
+
+	device->CreateUnorderedAccessView(mInputSelectedObjectsBuffer, &uavDesc, &selectedObjectsUAV);
+	mSelectedObjects->SetUnorderedAccessView(selectedObjectsUAV);
+
+	D3D11_BUFFER_DESC outputDesc;
+	outputDesc.Usage = D3D11_USAGE_STAGING;
+	outputDesc.BindFlags = 0;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
+	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	outputDesc.StructureByteStride = sizeof uint32_t;
+	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedObjectsBuffer);
 }
 
 void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
@@ -1059,19 +1089,12 @@ void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
 	mSelectorEnvelope->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
 }
 
-void GraphicsCore::setSelectedEnvelopes()
-{
-	ID3D11UnorderedAccessView* selectedEnvelopesUAV = nullptr;
-
-	mSelectedEnvelopes->SetUnorderedAccessView(selectedEnvelopesUAV);
-}
-
 void GraphicsCore::setVP(flt4x4& VP)
 {
 	mVP->SetMatrix((float*)(&VP));
 }
 
-void GraphicsCore::findRoughlySelectedEnvelopes()
+void GraphicsCore::findRoughlySelectedObjects()
 {
 	mRoughObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
 
@@ -1079,26 +1102,14 @@ void GraphicsCore::findRoughlySelectedEnvelopes()
 	context->Dispatch(threads_x, 1, 1);
 }
 
-void GraphicsCore::getRoughlySelectedEnvelopes(uint32_t* selectedEnvelopes)
+void GraphicsCore::getRoughlySelectedObjects(uint32_t* selectedObjects)
 {
-	ID3D11Buffer* mOutputSelectedEnvelopesBuffer = nullptr;
-
-	D3D11_BUFFER_DESC outputDesc;
-	outputDesc.Usage = D3D11_USAGE_STAGING;
-	outputDesc.BindFlags = 0;
-	outputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
-	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	outputDesc.StructureByteStride = sizeof uint32_t;
-	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-
-	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedEnvelopesBuffer);
-
-	context->CopyResource(mOutputSelectedEnvelopesBuffer, mInputSelectedEnvelopesBuffer);
+	context->CopyResource(mOutputSelectedObjectsBuffer, mInputSelectedObjectsBuffer);
 	
 	D3D11_MAPPED_SUBRESOURCE mappedData;
-	context->Map(mOutputSelectedEnvelopesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
+	context->Map(mOutputSelectedObjectsBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
-	std::memcpy(selectedEnvelopes, mappedData.pData, sizeof(uint32_t) * MaxEnvelopesCount);
+	std::memcpy(selectedObjects, mappedData.pData, sizeof(uint32_t) * MaxEnvelopesCount);
 
-	context->Unmap(mOutputSelectedEnvelopesBuffer, 0);
+	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }

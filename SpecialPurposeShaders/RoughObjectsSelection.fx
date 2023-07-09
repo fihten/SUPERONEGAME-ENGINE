@@ -7,7 +7,7 @@ uint envelopesCount;
 
 Envelope selectorEnvelope;
 
-RWStructuredBuffer<uint> selectedEnvelopes;
+RWStructuredBuffer<uint> selectedObjects;
 
 float4x4 VP;
 
@@ -18,11 +18,11 @@ void CS(int3 dispatchThreadID : SV_DispatchThreadID)
 	if (envelopeIndex >= envelopesCount)
 		return;
 
-	selectedEnvelopes[envelopeIndex] = 0;
+	selectedObjects[envelopeIndex] = 0;
 	Envelope envelope = envelopes[envelopeIndex];
 	envelope.transform = mul(envelope.transform, VP);
 	if(checkIntersection(selectorEnvelope, envelope))
-		selectedEnvelopes[envelopeIndex] = 1;
+		selectedObjects[envelopeIndex] = 1;
 }
 
 technique11 RoughObjectsSelection
