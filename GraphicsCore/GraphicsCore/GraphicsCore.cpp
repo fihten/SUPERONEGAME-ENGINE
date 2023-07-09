@@ -1013,6 +1013,7 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 }
 
+#define MaxEnvelopesCount 512
 void GraphicsCore::initRoughObjectsSelection()
 {
 	char shadersFolder[200];
@@ -1058,8 +1059,10 @@ void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
 	mSelectorEnvelope->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
 }
 
-void GraphicsCore::setSelectedEnvelopes(ID3D11UnorderedAccessView* selectedEnvelopesUAV)
+void GraphicsCore::setSelectedEnvelopes()
 {
+	ID3D11UnorderedAccessView* selectedEnvelopesUAV = nullptr;
+
 	mSelectedEnvelopes->SetUnorderedAccessView(selectedEnvelopesUAV);
 }
 
@@ -1068,10 +1071,34 @@ void GraphicsCore::setVP(flt4x4& VP)
 	mVP->SetMatrix((float*)(&VP));
 }
 
-void GraphicsCore::findRoughlySelectedObjects()
+void GraphicsCore::findRoughlySelectedEnvelopes()
 {
 	mRoughObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
 
 	uint32_t threads_x = std::ceil(float(envelopesCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
+}
+
+void GraphicsCore::getRoughlySelectedEnvelopes(uint32_t* selectedEnvelopes)
+{
+	ID3D11Buffer* mOutputSelectedEnvelopesBuffer = nullptr;
+
+	D3D11_BUFFER_DESC outputDesc;
+	outputDesc.Usage = D3D11_USAGE_STAGING;
+	outputDesc.BindFlags = 0;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
+	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	outputDesc.StructureByteStride = sizeof uint32_t;
+	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedEnvelopesBuffer);
+
+	context->CopyResource(mOutputSelectedEnvelopesBuffer, mInputSelectedEnvelopesBuffer);
+	
+	D3D11_MAPPED_SUBRESOURCE mappedData;
+	context->Map(mOutputSelectedEnvelopesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
+
+	std::memcpy(selectedEnvelopes, mappedData.pData, sizeof(uint32_t) * MaxEnvelopesCount);
+
+	context->Unmap(mOutputSelectedEnvelopesBuffer, 0);
 }
