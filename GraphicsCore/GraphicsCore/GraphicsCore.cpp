@@ -1140,4 +1140,10 @@ void GraphicsCore::initFineObjectsSelection()
 
 	mFineObjectsSelectionTech = mFineObjectsSelectionFX->GetTechniqueByName("FineObjectsSelection");
 	mSelectorEnvelopeFine = mFineObjectsSelectionFX->GetVariableByName("selectorEnvelope");
+	mWVP = mFineObjectsSelectionFX->GetVariableByName("WVP")->AsMatrix();
+	mThreshold = mFineObjectsSelectionFX->GetVariableByName("threshold");
+	mVertices = mFineObjectsSelectionFX->GetVariableByName("vertices")->AsShaderResource();
+	mIndicies = mFineObjectsSelectionFX->GetVariableByName("indicies")->AsShaderResource();
+	mTrianglesCount = mFineObjectsSelectionFX->GetVariableByName("trianglesCount");
+	mObjectIsSelected = mFineObjectsSelectionFX->GetVariableByName("objectIsSelected")->AsUnorderedAccessView();
 }

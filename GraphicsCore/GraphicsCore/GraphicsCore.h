@@ -65,6 +65,12 @@ private:
 	ID3DX11Effect* mFineObjectsSelectionFX = nullptr;
 	ID3DX11EffectTechnique* mFineObjectsSelectionTech = nullptr;
 	ID3DX11EffectVariable* mSelectorEnvelopeFine = nullptr;
+	ID3DX11EffectMatrixVariable* mWVP = nullptr;
+	ID3DX11EffectVariable* mThreshold = nullptr;
+	ID3DX11EffectShaderResourceVariable* mVertices = nullptr;
+	ID3DX11EffectShaderResourceVariable* mIndicies = nullptr;
+	ID3DX11EffectVariable* mTrianglesCount = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mObjectIsSelected = nullptr;
 
 	friend Selector;
 
