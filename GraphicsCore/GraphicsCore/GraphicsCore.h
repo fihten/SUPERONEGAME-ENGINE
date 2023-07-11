@@ -53,7 +53,7 @@ private:
 	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
 
 	void setEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
-	void setSelectorEnvelope(Envelope& selectorEnvelope);
+	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
 	void setVP(flt4x4& VP);
 
 	void findRoughlySelectedObjects();
@@ -70,7 +70,24 @@ private:
 	ID3DX11EffectShaderResourceVariable* mVertices = nullptr;
 	ID3DX11EffectShaderResourceVariable* mIndicies = nullptr;
 	ID3DX11EffectVariable* mTrianglesCount = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mObjectIsSelected = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
+
+	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
+	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
+
+	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
+
+	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
+	void setWVP(flt4x4& WVP);
+	void setThreshold(float threshold);
+	void setVertices(ID3D11ShaderResourceView* verticesSRV);
+	void setIndicies(ID3D11ShaderResourceView* indiciesSRV);
+	void setTrianglesCount(uint32_t trianglesCount);
+
+	uint32_t trianglesCount = 0;
+
+	void checkIntersection();
+	bool isObjectIntersected();
 
 	friend Selector;
 

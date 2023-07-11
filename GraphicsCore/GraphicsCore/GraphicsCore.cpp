@@ -1084,7 +1084,7 @@ void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
 	this->envelopesCount = envelopesCount;
 }
 
-void GraphicsCore::setSelectorEnvelope(Envelope& selectorEnvelope)
+void GraphicsCore::setSelectorEnvelopeRough(Envelope& selectorEnvelope)
 {
 	mSelectorEnvelopeRough->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
 }
@@ -1114,6 +1114,7 @@ void GraphicsCore::getRoughlySelectedObjects(uint32_t* selectedObjects)
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }
 
+#define MaxTrianglesCount 4096
 void GraphicsCore::initFineObjectsSelection()
 {
 	char shadersFolder[200];
@@ -1145,5 +1146,88 @@ void GraphicsCore::initFineObjectsSelection()
 	mVertices = mFineObjectsSelectionFX->GetVariableByName("vertices")->AsShaderResource();
 	mIndicies = mFineObjectsSelectionFX->GetVariableByName("indicies")->AsShaderResource();
 	mTrianglesCount = mFineObjectsSelectionFX->GetVariableByName("trianglesCount");
-	mObjectIsSelected = mFineObjectsSelectionFX->GetVariableByName("objectIsSelected")->AsUnorderedAccessView();
+	mSelectedTriangles = mFineObjectsSelectionFX->GetVariableByName("selectedTriangles")->AsUnorderedAccessView();
+
+	D3D11_BUFFER_DESC inputDesc;
+	inputDesc.Usage = D3D11_USAGE_DEFAULT;
+	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MaxTrianglesCount;
+	inputDesc.CPUAccessFlags = 0;
+	inputDesc.StructureByteStride = sizeof uint32_t;
+	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	device->CreateBuffer(&inputDesc, 0, &mInputSelectedTrianglesBuffer);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_R32_UINT;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.Flags = 0;
+	uavDesc.Buffer.NumElements = MaxTrianglesCount;
+
+	device->CreateUnorderedAccessView(mInputSelectedTrianglesBuffer, &uavDesc, &selectedTrianglesUAV);
+	mSelectedTriangles->SetUnorderedAccessView(selectedTrianglesUAV);
+
+	D3D11_BUFFER_DESC outputDesc;
+	outputDesc.Usage = D3D11_USAGE_STAGING;
+	outputDesc.BindFlags = 0;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MaxTrianglesCount;
+	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	outputDesc.StructureByteStride = sizeof uint32_t;
+	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+
+	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedTrianglesBuffer);
+}
+
+void GraphicsCore::setSelectorEnvelopeFine(Envelope& selectorEnvelope)
+{
+	mSelectorEnvelopeFine->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
+}
+
+void GraphicsCore::setWVP(flt4x4& WVP)
+{
+	mWVP->SetMatrix((float*)(&WVP));
+}
+
+void GraphicsCore::setThreshold(float threshold)
+{
+	mThreshold->SetRawValue(&threshold, 0, sizeof(float));
+}
+
+void GraphicsCore::setVertices(ID3D11ShaderResourceView* verticesSRV)
+{
+	mVertices->SetResource(verticesSRV);
+}
+
+void GraphicsCore::setIndicies(ID3D11ShaderResourceView* indiciesSRV)
+{
+	mIndicies->SetResource(indiciesSRV);
+}
+
+void GraphicsCore::setTrianglesCount(uint32_t trianglesCount)
+{
+	mTrianglesCount->SetRawValue(&trianglesCount, 0, sizeof(uint32_t));
+	this->trianglesCount = trianglesCount;
+}
+
+void GraphicsCore::checkIntersection()
+{
+	mFineObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t threads_x = std::ceil(float(trianglesCount) / 256.0f);
+	context->Dispatch(threads_x, 1, 1);
+}
+
+bool GraphicsCore::isObjectIntersected()
+{
+	context->CopyResource(mOutputSelectedTrianglesBuffer, mInputSelectedTrianglesBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mappedData;
+	context->Map(mOutputSelectedTrianglesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
+
+	bool intersected = false;
+	
+
+	context->Unmap(mOutputSelectedTrianglesBuffer, 0);
+	return intersected;
 }

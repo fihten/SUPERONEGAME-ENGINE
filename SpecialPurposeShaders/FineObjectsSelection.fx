@@ -9,7 +9,7 @@ StructuredBuffer<float3> vertices;
 StructuredBuffer<uint> indicies;
 uint trianglesCount;
 
-RWStructuredBuffer<uint> objectIsSelected;
+RWStructuredBuffer<uint> selectedTriangles;
 
 [numthreads(256, 1, 1)]
 void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -35,8 +35,9 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	tri.v1 = v1.xyz / v1.w;
 	tri.v2 = v2.xyz / v2.w;
 
+	selectedTriangles[triangleIndex] = 0;
 	if (checkIntersection(selectorEnvelope, tri, threshold))
-		objectIsSelected[0] = 1;
+		selectedTriangles[triangleIndex] = 1;
 }
 
 technique11 FineObjectsSelection
