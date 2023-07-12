@@ -1040,7 +1040,7 @@ void GraphicsCore::initRoughObjectsSelection()
 
 	mRoughObjectsSelectionTech = mRoughObjectsSelectionFX->GetTechniqueByName("RoughObjectsSelection");
 
-	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes");
+	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes")->AsShaderResource();
 	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
 	mSelectorEnvelopeRough = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
 	mSelectedObjects = mRoughObjectsSelectionFX->GetVariableByName("selectedObjects")->AsUnorderedAccessView();
@@ -1075,11 +1075,31 @@ void GraphicsCore::initRoughObjectsSelection()
 	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedObjectsBuffer);
+
+	inputDesc.Usage = D3D11_USAGE_DEFAULT;
+	inputDesc.ByteWidth = MaxEnvelopesCount * sizeof(Envelope);
+	inputDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	inputDesc.CPUAccessFlags = 0;
+	inputDesc.StructureByteStride = sizeof Envelope;
+	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	device->CreateBuffer(&inputDesc, nullptr, &mEnvelopesBuffer);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = MaxEnvelopesCount;
+	device->CreateShaderResourceView(mEnvelopesBuffer, &srvDesc, &envelopesBufferSRV);
 }
 
-void GraphicsCore::setEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
+void GraphicsCore::setEnvelopes(ID3D11ShaderResourceView* envelopesSRV)
 {
-	mEnvelopes->SetRawValue(envelopes, 0, envelopesCount * sizeof(Envelope));
+	mEnvelopes->SetResource(envelopesSRV);
+}
+
+void GraphicsCore::setEnvelopesCount(uint32_t envelopesCount)
+{
 	mEnvelopesCount->SetRawValue(&envelopesCount, 0, sizeof uint32_t);
 	this->envelopesCount = envelopesCount;
 }
@@ -1226,7 +1246,14 @@ bool GraphicsCore::isObjectIntersected()
 	context->Map(mOutputSelectedTrianglesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
 	bool intersected = false;
-	
+	for (int i = 0; i < trianglesCount; ++i)
+	{
+		if (((uint32_t*)mappedData.pData)[i] == 1)
+		{
+			intersected = true;
+			break;
+		}
+	}
 
 	context->Unmap(mOutputSelectedTrianglesBuffer, 0);
 	return intersected;

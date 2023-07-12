@@ -1,8 +1,6 @@
 #include "EnvelopeUtils.hlsl"
 
-#define MaxEnvelopesCount 512
-
-Envelope envelopes[MaxEnvelopesCount];
+StructuredBuffer<Envelope> envelopes;
 uint envelopesCount;
 
 Envelope selectorEnvelope;

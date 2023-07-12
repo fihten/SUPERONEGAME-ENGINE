@@ -39,7 +39,7 @@ private:
 	void initRoughObjectsSelection();
 	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
 	ID3DX11EffectTechnique* mRoughObjectsSelectionTech = nullptr;
-	ID3DX11EffectVariable* mEnvelopes = nullptr;
+	ID3DX11EffectShaderResourceVariable* mEnvelopes = nullptr;
 	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
 	ID3DX11EffectVariable* mSelectorEnvelopeRough = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
@@ -52,7 +52,11 @@ private:
 
 	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
 
-	void setEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
+	ID3D11Buffer* mEnvelopesBuffer = nullptr;
+	ID3D11ShaderResourceView* envelopesBufferSRV = nullptr;
+
+	void setEnvelopes(ID3D11ShaderResourceView* envelopesSRV);
+	void setEnvelopesCount(uint32_t envelopesCount);
 	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
 	void setVP(flt4x4& VP);
 
