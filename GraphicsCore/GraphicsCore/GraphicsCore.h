@@ -55,7 +55,7 @@ private:
 	ID3D11Buffer* mEnvelopesBuffer = nullptr;
 	ID3D11ShaderResourceView* envelopesBufferSRV = nullptr;
 
-	void setEnvelopes(ID3D11ShaderResourceView* envelopesSRV);
+	void updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
 	void setEnvelopesCount(uint32_t envelopesCount);
 	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
 	void setVP(flt4x4& VP);
@@ -84,8 +84,7 @@ private:
 	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
 	void setWVP(flt4x4& WVP);
 	void setThreshold(float threshold);
-	void setVertices(ID3D11ShaderResourceView* verticesSRV);
-	void setIndicies(ID3D11ShaderResourceView* indiciesSRV);
+	void setGeometryForFineSelection(const Mesh& mesh);
 	void setTrianglesCount(uint32_t trianglesCount);
 
 	uint32_t trianglesCount = 0;
@@ -105,8 +104,17 @@ private:
 	flt1 getFloat1(const Mesh& mesh, const std::string& var) const;
 	void* getStruct(const Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
 	
-	ID3D11Buffer* getVertexBuffer(const Mesh& mesh, uint32_t* elementSize) const;
-	void* fetchVerticesFromMesh(const Mesh& mesh) const;
+	ID3D11Buffer* getVertexBuffer(
+		const Mesh& mesh,
+		uint32_t* elementSize,
+		const char* technique = nullptr, 
+		const char* pass = nullptr
+		) const;
+	void* fetchVerticesFromMesh(
+		const Mesh& mesh,
+		const char* technique = nullptr,
+		const char* pass = nullptr
+		) const;
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh) const;
 

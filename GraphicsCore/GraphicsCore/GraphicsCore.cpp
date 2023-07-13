@@ -580,12 +580,17 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 	return structData;
 }
 
-ID3D11Buffer* GraphicsCore::getVertexBuffer(const Mesh& mesh, uint32_t* elementSize) const
+ID3D11Buffer* GraphicsCore::getVertexBuffer(
+	const Mesh& mesh,
+	uint32_t* elementSize,
+	const char* technique,
+	const char* pass
+) const
 {
 	(*elementSize) = 0;
 
-	std::string sTechnique = mesh.getTechnique();
-	std::string sPass = mesh.getPass();
+	std::string sTechnique = technique ? std::string(technique) : mesh.getTechnique();
+	std::string sPass = pass ? std::string(pass) : mesh.getPass();
 
 	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
@@ -621,10 +626,14 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(const Mesh& mesh, uint32_t* elementS
 	return mVB;
 }
 
-void* GraphicsCore::fetchVerticesFromMesh(const Mesh& mesh) const
+void* GraphicsCore::fetchVerticesFromMesh(
+	const Mesh& mesh,
+	const char* technique,
+	const char* pass
+) const
 {
-	std::string sTechnique = mesh.getTechnique();
-	std::string sPass = mesh.getPass();
+	std::string sTechnique = technique ? std::string(technique) : mesh.getTechnique();
+	std::string sPass = technique ? std::string(pass) : mesh.getPass();
 
 	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
 	if (streamsInfo == nullptr)
@@ -1093,9 +1102,11 @@ void GraphicsCore::initRoughObjectsSelection()
 	device->CreateShaderResourceView(mEnvelopesBuffer, &srvDesc, &envelopesBufferSRV);
 }
 
-void GraphicsCore::setEnvelopes(ID3D11ShaderResourceView* envelopesSRV)
+void GraphicsCore::updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
 {
-	mEnvelopes->SetResource(envelopesSRV);
+	uint32_t srcRowPitch = sizeof(Envelope) * envelopesCount;
+	uint32_t srcDepthPitch = srcRowPitch * 1;
+	context->UpdateSubresource(mEnvelopesBuffer, 0, 0, envelopes, srcRowPitch, srcDepthPitch);
 }
 
 void GraphicsCore::setEnvelopesCount(uint32_t envelopesCount)
@@ -1214,14 +1225,9 @@ void GraphicsCore::setThreshold(float threshold)
 	mThreshold->SetRawValue(&threshold, 0, sizeof(float));
 }
 
-void GraphicsCore::setVertices(ID3D11ShaderResourceView* verticesSRV)
+void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 {
-	mVertices->SetResource(verticesSRV);
-}
-
-void GraphicsCore::setIndicies(ID3D11ShaderResourceView* indiciesSRV)
-{
-	mIndicies->SetResource(indiciesSRV);
+	
 }
 
 void GraphicsCore::setTrianglesCount(uint32_t trianglesCount)
