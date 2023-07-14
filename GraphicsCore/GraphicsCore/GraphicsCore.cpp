@@ -1100,6 +1100,8 @@ void GraphicsCore::initRoughObjectsSelection()
 	srvDesc.BufferEx.Flags = 0;
 	srvDesc.BufferEx.NumElements = MaxEnvelopesCount;
 	device->CreateShaderResourceView(mEnvelopesBuffer, &srvDesc, &envelopesBufferSRV);
+
+	mEnvelopes->SetResource(envelopesBufferSRV);
 }
 
 void GraphicsCore::updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
@@ -1227,7 +1229,36 @@ void GraphicsCore::setThreshold(float threshold)
 
 void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 {
-	
+	uint32_t elementSize = 0;
+	ID3D11Buffer* mVerticesBuffer = this->getVertexBuffer(
+		mesh,
+		&elementSize,
+		"SelectedObject",
+		"P0"
+	);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = mesh.getVerticesCount();
+
+	ID3D11ShaderResourceView* mVerticesSRV = nullptr;
+	device->CreateShaderResourceView(mVerticesBuffer, &srvDesc, &mVerticesSRV);
+	mVertices->SetResource(mVerticesSRV);
+
+	ID3D11Buffer* mIndicesBuffer = this->getIndexBuffer(mesh);
+
+	srvDesc.Format = DXGI_FORMAT_R32_UINT;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = mesh.getIndicesCount();
+
+	ID3D11ShaderResourceView* mIndicesSRV = nullptr;
+	device->CreateShaderResourceView(mIndicesBuffer, &srvDesc, &mIndicesSRV);
+	mIndicies->SetResource(mIndicesSRV);
 }
 
 void GraphicsCore::setTrianglesCount(uint32_t trianglesCount)
