@@ -478,3 +478,55 @@ std::string Mesh::getParam(const std::string& param) const
 		return "";
 	return params.at(param);
 }
+
+flt3 Mesh::getBottomBorder() const
+{
+	flt3 min(FLT_MAX, FLT_MAX, FLT_MAX);
+
+	const auto& it = std::find_if(
+		flt3_streams.begin(),
+		flt3_streams.end(),
+		[&](auto& el)->bool
+	{
+		return el.first == std::string("POSITION");
+	}
+	);
+	if (it == flt3_streams.end())
+		return min;
+	
+	auto& flt3s = it->second;
+	for (auto& pos : flt3s)
+	{
+		min.x() = std::min(min.x(), const_cast<flt3&>(pos).x());
+		min.y() = std::min(min.y(), const_cast<flt3&>(pos).y());
+		min.z() = std::min(min.z(), const_cast<flt3&>(pos).z());
+	}
+
+	return min;
+}
+
+flt3 Mesh::getTopBorder() const
+{
+	flt3 max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+
+	const auto& it = std::find_if(
+		flt3_streams.begin(),
+		flt3_streams.end(),
+		[&](auto& el)->bool
+	{
+		return el.first == std::string("POSITION");
+	}
+	);
+	if (it == flt3_streams.end())
+		return max;
+
+	auto& flt3s = it->second;
+	for (auto& pos : flt3s)
+	{
+		max.x() = std::max(max.x(), const_cast<flt3&>(pos).x());
+		max.y() = std::max(max.y(), const_cast<flt3&>(pos).y());
+		max.z() = std::max(max.z(), const_cast<flt3&>(pos).z());
+	}
+
+	return max;
+}

@@ -123,6 +123,9 @@ public:
 	virtual std::string getParam(const std::string& param) const;
 	virtual flt4x4 getPosition() const { return flt4x4(); }
 
+	virtual flt3 getBottomBorder() const;
+	virtual flt3 getTopBorder() const;
+
 	friend Mesh createCube();
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();
