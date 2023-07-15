@@ -14,6 +14,7 @@ typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
 typedef void (*DRAW_FUNC)(GraphicsCore*);
 
 class Selector;
+class MainScene;
 
 class GraphicsCore
 {
@@ -93,6 +94,7 @@ private:
 	bool isObjectIntersected();
 
 	friend Selector;
+	friend MainScene;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

@@ -164,6 +164,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 
 	// 10. load cameras cfgs
 	loadCamerasCFGs();
+
+	// 11. Init objects' selection 
+	initRoughObjectsSelection();
+	initFineObjectsSelection();
 }
 
 void GraphicsCore::startFrame()
