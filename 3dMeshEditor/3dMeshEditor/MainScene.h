@@ -1,13 +1,16 @@
 #pragma once
 
 #include "Scene.h"
+#include "Envelope.h"
 
 class MainScene
 {
 	MainScene() {}
 public:
-	static Scene* instance();
+	static MainScene* instance();
 
 private:
-	static Scene* pScene;
+	Scene scene;
+	static MainScene* pMainScene;
+	Envelope envelopes[MaxEnvelopesCount];
 };

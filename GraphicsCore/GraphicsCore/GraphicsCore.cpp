@@ -609,13 +609,13 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 		D3D11_BUFFER_DESC vbd;
 		vbd.Usage = D3D11_USAGE_IMMUTABLE;
 		vbd.ByteWidth = bytes;
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
 		vbd.CPUAccessFlags = 0;
-		vbd.MiscFlags = 0;
-		vbd.StructureByteStride = 0;
+		vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		vbd.StructureByteStride = *elementSize;
 
 		D3D11_SUBRESOURCE_DATA vinitData;
-		vinitData.pSysMem = fetchVerticesFromMesh(mesh);
+		vinitData.pSysMem = fetchVerticesFromMesh(mesh, technique, pass);
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
@@ -701,10 +701,10 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 		D3D11_BUFFER_DESC ibd;
 		ibd.Usage = D3D11_USAGE_IMMUTABLE;
 		ibd.ByteWidth = mesh.getIndicesCount() * sizeof(uint32_t);
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER;
+		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
 		ibd.CPUAccessFlags = 0;
-		ibd.MiscFlags = 0;
-		ibd.StructureByteStride = 0;
+		ibd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		ibd.StructureByteStride = sizeof(uint32_t);
 
 		D3D11_SUBRESOURCE_DATA iinitData;
 		iinitData.pSysMem = mesh.getIndicies()->data();
@@ -1022,7 +1022,6 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 }
 
-#define MaxEnvelopesCount 512
 void GraphicsCore::initRoughObjectsSelection()
 {
 	char shadersFolder[200];

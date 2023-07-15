@@ -1,10 +1,10 @@
 #include "MainScene.h"
 
-Scene* MainScene::pScene = nullptr;
+MainScene* MainScene::pMainScene = nullptr;
 
-Scene* MainScene::instance()
+MainScene* MainScene::instance()
 {
-	if (pScene == nullptr)
-		pScene = new Scene();
-	return pScene;
+	if (pMainScene == nullptr)
+		pMainScene = new MainScene();
+	return pMainScene;
 }
