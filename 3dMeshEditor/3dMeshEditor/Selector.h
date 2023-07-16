@@ -1,4 +1,5 @@
 #pragma once
+#include "Envelope.h"
 
 class Selector
 {
@@ -6,12 +7,13 @@ class Selector
 public:
 	static Selector* instance();
 	void selectObjects(
-		int mousePosX0, int mousePosY0,
-		int mousePosX1, int mousePosY1
+		float mousePosX0, float mousePosY0,
+		float mousePosX1, float mousePosY1
 	);
 	void draw();
 	void turnOn();
 	void turnOff();
 private:
 	static Selector* pSelector;
+	uint32_t selectedObjects[MaxEnvelopesCount];
 };
