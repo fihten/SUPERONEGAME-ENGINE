@@ -35,7 +35,19 @@ void Selector::selectObjects(
 	GraphicsCore::instance()->setVP(vp);
 
 	GraphicsCore::instance()->findRoughlySelectedObjects();
-	GraphicsCore::instance()->getRoughlySelectedObjects(selectedObjects);
+
+	class VisitSelectedObjects :GraphicsCore::RoughlySelectedObjectVisitor
+	{
+		Selector* selector = nullptr;
+	public:
+		VisitSelectedObjects(Selector* selector) : selector(selector) {}
+		void operator()(uint32_t objectID)
+		{
+
+		}
+	};
+	VisitSelectedObjects visitor(this);
+	GraphicsCore::instance()->traverseRoughlySelectedObjects(&visitor);
 }
 
 void Selector::draw()
@@ -49,6 +61,11 @@ void Selector::turnOn()
 }
 
 void Selector::turnOff()
+{
+
+}
+
+void Selector::processRoughlySelectedObject(uint32_t objectId)
 {
 
 }

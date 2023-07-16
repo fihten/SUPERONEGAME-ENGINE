@@ -1138,14 +1138,20 @@ void GraphicsCore::findRoughlySelectedObjects()
 	context->Dispatch(threads_x, 1, 1);
 }
 
-void GraphicsCore::getRoughlySelectedObjects(uint32_t* selectedObjects)
+void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor)
 {
 	context->CopyResource(mOutputSelectedObjectsBuffer, mInputSelectedObjectsBuffer);
 	
 	D3D11_MAPPED_SUBRESOURCE mappedData;
 	context->Map(mOutputSelectedObjectsBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
-	std::memcpy(selectedObjects, mappedData.pData, sizeof(uint32_t) * MaxEnvelopesCount);
+	uint32_t* selectedObjects = (uint32_t*)mappedData.pData;
+	for (uint32_t i = 0; i < envelopesCount; ++i)
+	{
+		if (selectedObjects[i] == 0)
+			continue;
+		(*visitor)(i);
+	}
 
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }

@@ -63,7 +63,12 @@ private:
 
 	void findRoughlySelectedObjects();
 
-	void getRoughlySelectedObjects(uint32_t* selectedObjects);
+	class RoughlySelectedObjectVisitor
+	{
+	public:
+		virtual void operator()(uint32_t objectID) = 0;
+	};
+	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
 
 private:
 	void initFineObjectsSelection();
