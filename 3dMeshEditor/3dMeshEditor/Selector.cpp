@@ -1,6 +1,7 @@
 #include "Selector.h"
 #include "GraphicsCore.h"
 #include "Cameras.h"
+#include "MainScene.h"
 #include <algorithm>
 
 Selector* Selector::pSelector = nullptr;
@@ -36,14 +37,42 @@ void Selector::selectObjects(
 
 	GraphicsCore::instance()->findRoughlySelectedObjects();
 
-	class VisitSelectedObjects :GraphicsCore::RoughlySelectedObjectVisitor
+	GraphicsCore::instance()->setSelectorEnvelopeFine(selectorEnvelope);
+	GraphicsCore::instance()->setThreshold(0.001);
+
+	class VisitSelectedObjects : public RoughlySelectedObjectVisitor
 	{
 		Selector* selector = nullptr;
 	public:
 		VisitSelectedObjects(Selector* selector) : selector(selector) {}
 		void operator()(uint32_t objectID)
 		{
+			NodeID meshID = MainScene::instance()->envelopeToNode[objectID];
+			class MeshVisitor : protected Scene::Visitor
+			{
+				NodeID meshID = -1;
+			public:
+				void startVisit(const Scene::MeshNode* node)
+				{
+					if (node->ID != meshID)
+						return;
+					
+					flt4x4 world = MainScene::instance()->getNodePosition(meshID);
+					flt4x4 view = cameras()[MAIN_CAMERA].getView();
+					flt4x4 proj = cameras()[MAIN_CAMERA].getProj();
 
+					flt4x4 wvp = world * view * proj;
+					GraphicsCore::instance()->setWVP(wvp);
+					GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
+					GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
+
+					GraphicsCore::instance()->checkIntersection();
+					if (GraphicsCore::instance()->isObjectIntersected())
+					{
+
+					}
+				}
+			};
 		}
 	};
 	VisitSelectedObjects visitor(this);

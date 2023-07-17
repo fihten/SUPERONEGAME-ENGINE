@@ -12,7 +12,6 @@ public:
 	class Visitor;
 	class Node
 	{
-		NodeID ID = -1;
 		std::list<Node*> childs;
 		friend Scene;
 	protected:
@@ -29,6 +28,9 @@ public:
 		virtual std::string getParam(const std::string& paramName) const;
 		virtual void setParam(const std::string& paramName, const std::string& paramVal);
 		virtual void accept(Visitor* visitor) const;
+
+	public:
+		NodeID ID = -1;
 	};
 
 	class RootNode : public Node

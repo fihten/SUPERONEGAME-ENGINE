@@ -16,6 +16,12 @@ typedef void (*DRAW_FUNC)(GraphicsCore*);
 class Selector;
 class MainScene;
 
+class RoughlySelectedObjectVisitor
+{
+public:
+	virtual void operator()(uint32_t objectID) = 0;
+};
+
 class GraphicsCore
 {
 	ID3D11Device* device = 0;
@@ -62,12 +68,6 @@ private:
 	void setVP(flt4x4& VP);
 
 	void findRoughlySelectedObjects();
-
-	class RoughlySelectedObjectVisitor
-	{
-	public:
-		virtual void operator()(uint32_t objectID) = 0;
-	};
 	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
 
 private:
