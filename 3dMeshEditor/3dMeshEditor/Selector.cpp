@@ -48,10 +48,13 @@ void Selector::selectObjects(
 		void operator()(uint32_t objectID)
 		{
 			NodeID meshID = MainScene::instance()->envelopeToNode[objectID];
-			class MeshVisitor : protected Scene::Visitor
+			
+			class MeshVisitor : public Scene::Visitor
 			{
 				NodeID meshID = -1;
 			public:
+				MeshVisitor(NodeID meshID) :meshID(meshID) {}
+
 				void startVisit(const Scene::MeshNode* node)
 				{
 					if (node->ID != meshID)
@@ -73,6 +76,9 @@ void Selector::selectObjects(
 					}
 				}
 			};
+
+			MeshVisitor visitor(meshID);
+			MainScene::instance()->accept(&visitor);
 		}
 	};
 	VisitSelectedObjects visitor(this);
