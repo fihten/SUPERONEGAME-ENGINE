@@ -40,23 +40,21 @@ void Selector::selectObjects(
 	GraphicsCore::instance()->setSelectorEnvelopeFine(selectorEnvelope);
 	GraphicsCore::instance()->setThreshold(0.001);
 
+	selectedObjectsCount = 0;
 	class VisitSelectedObjects : public RoughlySelectedObjectVisitor
 	{
-		Selector* selector = nullptr;
 	public:
-		VisitSelectedObjects(Selector* selector) : selector(selector) {}
 		void operator()(uint32_t objectID)
 		{
-			NodeID meshID = MainScene::instance()->envelopeToNode[objectID];
-			
 			class MeshVisitor : public Scene::Visitor
 			{
-				NodeID meshID = -1;
+				uint32_t objectID = -1;
 			public:
-				MeshVisitor(NodeID meshID) :meshID(meshID) {}
+				MeshVisitor(uint32_t objectID) :objectID(objectID) {}
 
 				void startVisit(const Scene::MeshNode* node)
 				{
+					NodeID meshID = MainScene::instance()->envelopeToNode[objectID];
 					if (node->ID != meshID)
 						return;
 					
@@ -72,16 +70,37 @@ void Selector::selectObjects(
 					GraphicsCore::instance()->checkIntersection();
 					if (GraphicsCore::instance()->isObjectIntersected())
 					{
+						auto& boxes = Selector::instance()->selectedObjectsBoxes;
+						auto& count = Selector::instance()->selectedObjectsCount;
+						auto& selectedObjectBox = boxes[count++];
 
+						flt3& min = MainScene::instance()->envelopes[objectID].min;
+						flt3& max = MainScene::instance()->envelopes[objectID].max;
+						
+						flt4x4& w = MainScene::instance()->envelopes[objectID].transform;
+
+						selectedObjectBox.posW = 0.5f * (min + max);
+
+						selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
+						selectedObjectBox.axis0 = selectedObjectBox.axis0 * w;
+
+						selectedObjectBox.axis1 = 0.5f * (max.y() - min.y()) * flt3(0, 1.1f, 0);
+						selectedObjectBox.axis1 = selectedObjectBox.axis1 * w;
+
+						selectedObjectBox.axis2 = 0.5f * (max.z() - min.z()) * flt3(0, 0, 1.1f);
+						selectedObjectBox.axis2 = selectedObjectBox.axis2 * w;
+
+						selectedObjectBox.color = flt3(1, 0, 0);
+						selectedObjectBox.size = 0.5f;
 					}
 				}
 			};
 
-			MeshVisitor visitor(meshID);
+			MeshVisitor visitor(objectID);
 			MainScene::instance()->accept(&visitor);
 		}
 	};
-	VisitSelectedObjects visitor(this);
+	VisitSelectedObjects visitor;
 	GraphicsCore::instance()->traverseRoughlySelectedObjects(&visitor);
 }
 

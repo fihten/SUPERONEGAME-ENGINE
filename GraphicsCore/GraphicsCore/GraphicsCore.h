@@ -13,9 +13,6 @@ class GraphicsCore;
 typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
 typedef void (*DRAW_FUNC)(GraphicsCore*);
 
-class Selector;
-class MainScene;
-
 class RoughlySelectedObjectVisitor
 {
 public:
@@ -42,6 +39,23 @@ public:
 	int run();
 	void resize(UINT width, UINT height);
 
+public:
+	void updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
+	void setEnvelopesCount(uint32_t envelopesCount);
+	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
+	void setVP(flt4x4& VP);
+	void findRoughlySelectedObjects();
+	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
+
+public:
+	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
+	void setWVP(flt4x4& WVP);
+	void setThreshold(float threshold);
+	void setGeometryForFineSelection(const Mesh& mesh);
+	void setTrianglesCount(uint32_t trianglesCount);
+	void checkIntersection();
+	bool isObjectIntersected();
+
 private:
 	void initRoughObjectsSelection();
 	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
@@ -51,24 +65,12 @@ private:
 	ID3DX11EffectVariable* mSelectorEnvelopeRough = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
 	ID3DX11EffectMatrixVariable* mVP = nullptr;
-
 	uint32_t envelopesCount = 0;
-	
 	ID3D11Buffer* mInputSelectedObjectsBuffer = nullptr;
 	ID3D11UnorderedAccessView* selectedObjectsUAV = nullptr;
-
 	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
-
 	ID3D11Buffer* mEnvelopesBuffer = nullptr;
 	ID3D11ShaderResourceView* envelopesBufferSRV = nullptr;
-
-	void updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
-	void setEnvelopesCount(uint32_t envelopesCount);
-	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
-	void setVP(flt4x4& VP);
-
-	void findRoughlySelectedObjects();
-	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
 
 private:
 	void initFineObjectsSelection();
@@ -81,25 +83,10 @@ private:
 	ID3DX11EffectShaderResourceVariable* mIndicies = nullptr;
 	ID3DX11EffectVariable* mTrianglesCount = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
-
 	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
 	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
-
 	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
-
-	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
-	void setWVP(flt4x4& WVP);
-	void setThreshold(float threshold);
-	void setGeometryForFineSelection(const Mesh& mesh);
-	void setTrianglesCount(uint32_t trianglesCount);
-
 	uint32_t trianglesCount = 0;
-
-	void checkIntersection();
-	bool isObjectIntersected();
-
-	friend Selector;
-	friend MainScene;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

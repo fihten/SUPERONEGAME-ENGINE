@@ -24,9 +24,10 @@ public:
 	void draw();
 	void turnOn();
 	void turnOff();
-private:
-	static Selector* pSelector;
-	uint32_t selectedObjects[MaxEnvelopesCount];
 
 	SelectedObjectBox selectedObjectsBoxes[MaxEnvelopesCount];
+	uint32_t selectedObjectsCount = 0;
+
+private:
+	static Selector* pSelector;
 };
