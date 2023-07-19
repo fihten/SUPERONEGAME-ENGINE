@@ -1,5 +1,6 @@
 #pragma once
 #include "Envelope.h"
+#include "Mesh.h"
 
 struct SelectedObjectBox
 {
@@ -13,7 +14,7 @@ struct SelectedObjectBox
 
 class Selector
 {
-	Selector() {}
+	Selector();
 public:
 	static Selector* instance();
 	void selectObjects(
@@ -30,4 +31,5 @@ public:
 
 private:
 	static Selector* pSelector;
+	Mesh selectedObjectsBoxesMesh;
 };

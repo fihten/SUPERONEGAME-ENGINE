@@ -479,6 +479,11 @@ std::string Mesh::getParam(const std::string& param) const
 	return params.at(param);
 }
 
+void Mesh::setParam(const std::string& param, const std::string& value)
+{
+	params[param] = value;
+}
+
 flt3 Mesh::getBottomBorder() const
 {
 	flt3 min(FLT_MAX, FLT_MAX, FLT_MAX);

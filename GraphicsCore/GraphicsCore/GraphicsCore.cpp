@@ -602,11 +602,20 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 
 	for (const auto& si : *streamsInfo)
 		(*elementSize) += si.size;
+	
+	if (mesh.gpuReadyData)
+		(*elementSize) = mesh.elementSize;
 
 	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(sTechnique, sPass, mesh.id);
+	if (mesh.gpuReadyData)
+		mVB = nullptr;
+
 	if (mVB == nullptr)
 	{
 		uint32_t verticesCount = mesh.getVerticesCount();
+		if (mesh.gpuReadyData)
+			verticesCount = mesh.verticesCount;
+
 		uint32_t bytes = verticesCount * (*elementSize);
 
 		// Create vertex buffer
@@ -619,13 +628,15 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 		vbd.StructureByteStride = *elementSize;
 
 		D3D11_SUBRESOURCE_DATA vinitData;
-		vinitData.pSysMem = fetchVerticesFromMesh(mesh, technique, pass);
+		vinitData.pSysMem = mesh.gpuReadyData;
+		if (vinitData.pSysMem == nullptr)
+			vinitData.pSysMem = fetchVerticesFromMesh(mesh, technique, pass);
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
 		ResourceManager::instance()->registerVertexBuffer(sTechnique, sPass, mesh.id, mVB);
-
-		free((void*)vinitData.pSysMem);
+		if (mesh.gpuReadyData == nullptr)
+			free((void*)vinitData.pSysMem);
 	}
 	return mVB;
 }

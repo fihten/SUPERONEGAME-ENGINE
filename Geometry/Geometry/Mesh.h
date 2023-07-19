@@ -121,6 +121,8 @@ public:
 	virtual uint32_t getIndicesCount() const;
 
 	virtual std::string getParam(const std::string& param) const;
+	virtual void setParam(const std::string& param, const std::string& value);
+
 	virtual flt4x4 getPosition() const { return flt4x4(); }
 
 	virtual flt3 getBottomBorder() const;
@@ -133,4 +135,8 @@ public:
 	uint32_t id;
 	void* scene = nullptr;
 	int nodeID = -1;
+
+	void* gpuReadyData = nullptr;
+	uint32_t verticesCount = 0;
+	uint32_t elementSize = 0;
 };

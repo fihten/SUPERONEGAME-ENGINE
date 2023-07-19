@@ -6,6 +6,14 @@
 
 Selector* Selector::pSelector = nullptr;
 
+Selector::Selector()
+{
+	selectedObjectsBoxesMesh.setParam("technique", "SelectedObjectsBox");
+	selectedObjectsBoxesMesh.setParam("pass", "P0");
+	selectedObjectsBoxesMesh.gpuReadyData = selectedObjectsBoxes;
+	selectedObjectsBoxesMesh.elementSize = sizeof SelectedObjectBox;
+}
+
 Selector* Selector::instance()
 {
 	if (pSelector == nullptr)
@@ -102,11 +110,14 @@ void Selector::selectObjects(
 	};
 	VisitSelectedObjects visitor;
 	GraphicsCore::instance()->traverseRoughlySelectedObjects(&visitor);
+	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
 }
 
 void Selector::draw()
 {
-
+	if (selectedObjectsCount == 0)
+		return;
+	GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
 }
 
 void Selector::turnOn()

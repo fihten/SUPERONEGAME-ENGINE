@@ -4,7 +4,9 @@
 #include "Mesh.h"
 #include "Scene.h"
 #include "DrawVisitor.h"
+#include "Selector.h"
 #include <Windows.h>
+#include <windef.h>
 
 Mesh cube;
 Mesh trees;
@@ -14,8 +16,36 @@ DrawVisitor drawVisitor;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
+	static float mousePosX0 = 0;
+	static float mousePosY0 = 0;
+
+	static float mousePosX1 = 0;
+	static float mousePosY1 = 0;
+
 	switch (msg)
 	{
+	case WM_LBUTTONDOWN:
+	{
+		mousePosX0 = LOWORD(lparam);
+		mousePosY0 = HIWORD(lparam);
+
+		RECT rect;
+		GetWindowRect(hwnd, &rect);
+
+		float width = rect.right - rect.left;
+		float height = rect.bottom - rect.top;
+
+		mousePosX0 /= width;
+		mousePosY0 /= height;
+
+		mousePosX0 = 2 * (mousePosX0 - 0.5);
+		mousePosY0 = 2 * (0.5 - mousePosY0);
+
+		mousePosX1 = mousePosX0;
+		mousePosY1 = mousePosY0;
+
+		return 0;
+	}
 	case WM_SIZE:
 	{
 		UINT width = LOWORD(lparam);
@@ -43,6 +73,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
 	scene.accept(&drawVisitor);
+	Selector::instance()->draw();
 	graphicsCore->endFrame();
 }
 
