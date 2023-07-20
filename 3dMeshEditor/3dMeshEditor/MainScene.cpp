@@ -10,12 +10,12 @@ MainScene* MainScene::instance()
 	return pMainScene;
 }
 
-NodeID MainScene::addTransformNode(const flt4x4& pos, NodeID id = 0)
+NodeID MainScene::addTransformNode(const flt4x4& pos, NodeID id)
 {
 	return scene.addTransformNode(pos, id);
 }
 
-NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id = 0)
+NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 {
 	NodeID meshNode = scene.addMeshNode(mesh, id);
 

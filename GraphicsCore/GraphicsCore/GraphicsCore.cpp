@@ -1080,7 +1080,7 @@ void GraphicsCore::initRoughObjectsSelection()
 	device->CreateBuffer(&inputDesc, 0, &mInputSelectedObjectsBuffer);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
-	uavDesc.Format = DXGI_FORMAT_R32_UINT;
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
@@ -1212,7 +1212,7 @@ void GraphicsCore::initFineObjectsSelection()
 	device->CreateBuffer(&inputDesc, 0, &mInputSelectedTrianglesBuffer);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
-	uavDesc.Format = DXGI_FORMAT_R32_UINT;
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;

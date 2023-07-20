@@ -81,9 +81,9 @@ bool doesContain(Envelope envelope, float3 pt, float threshold)
 
 bool doesContain(Envelope envelope, Triangle tri, float threshold)
 {
-	if (isContain(envelope, tri.v0, threshold) &&
-		isContain(envelope, tri.v1, threshold) &&
-		isContain(envelope, tri.v2, threshold))
+	if (doesContain(envelope, tri.v0, threshold) &&
+		doesContain(envelope, tri.v1, threshold) &&
+		doesContain(envelope, tri.v2, threshold))
 	{
 		return true;
 	}
@@ -134,7 +134,7 @@ bool checkIntersectionBySide(Envelope env, Triangle tri, float threshold)
 	envelopes[LEFT_PLANE].min = float3(env.min.xy, 0);
 	envelopes[LEFT_PLANE].max = float3(env.min.x, env.max.y, 1.0f);
 
-	envelopes[RIGHT_PLANE].min = float3(env.max.x, end.min.y, 0);
+	envelopes[RIGHT_PLANE].min = float3(env.max.x, env.min.y, 0);
 	envelopes[RIGHT_PLANE].max = float3(env.max.xy, 1.0f);
 
 	Segment segments[3];

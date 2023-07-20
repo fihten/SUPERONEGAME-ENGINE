@@ -5,6 +5,7 @@
 #include "Scene.h"
 #include "DrawVisitor.h"
 #include "Selector.h"
+#include "MainScene.h"
 #include <Windows.h>
 #include <windef.h>
 
@@ -22,15 +23,19 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	static float mousePosX1 = 0;
 	static float mousePosY1 = 0;
 
+	static bool bMarginSelection = false;
+
 	switch (msg)
 	{
 	case WM_LBUTTONDOWN:
 	{
+		bMarginSelection = true;
+
 		mousePosX0 = LOWORD(lparam);
 		mousePosY0 = HIWORD(lparam);
 
 		RECT rect;
-		GetWindowRect(hwnd, &rect);
+		GetClientRect(hwnd, &rect);
 
 		float width = rect.right - rect.left;
 		float height = rect.bottom - rect.top;
@@ -43,6 +48,38 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		mousePosX1 = mousePosX0;
 		mousePosY1 = mousePosY0;
+
+		Selector::instance()->selectObjects(
+			mousePosX0, mousePosY0,
+			mousePosX1, mousePosY1
+		);
+
+		return 0;
+	}
+	case WM_MOUSEHOVER:
+	case WM_LBUTTONUP:
+	{
+		if (!bMarginSelection)
+			return 0;
+
+		mousePosX1 = LOWORD(lparam);
+		mousePosY1 = HIWORD(lparam);
+
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+
+		float width = rect.right - rect.left;
+		float height = rect.bottom - rect.top;
+
+		mousePosX1 /= width;
+		mousePosY1 /= height;
+
+		Selector::instance()->selectObjects(
+			mousePosX0, mousePosY0,
+			mousePosX1, mousePosY1
+		);
+		
+		bMarginSelection = false;
 
 		return 0;
 	}
@@ -72,7 +109,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
-	scene.accept(&drawVisitor);
+	MainScene::instance()->accept(&drawVisitor);
 	Selector::instance()->draw();
 	graphicsCore->endFrame();
 }
@@ -81,8 +118,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 {
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
-	selectionBoxes = createSelectionBoxes();
-	NodeID mesh = scene.addMeshNode(&selectionBoxes);
+	cube = createCube();
+	MainScene::instance()->addMeshNode(&cube);
 
 	return GraphicsCore::instance()->run();
 }

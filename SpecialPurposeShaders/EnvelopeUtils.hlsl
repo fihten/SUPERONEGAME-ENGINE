@@ -55,10 +55,12 @@ bool checkIntersection(Envelope envelope0, Envelope envelope1)
 	float3 max1;
 	evaluate(envelope1, min1, max1);
 
-	float3 min = max(min0, min1);
-	float3 max = min(max0, max1);
+	float3 minCorner = max(min0, min1);
+	float3 maxCorner = min(max0, max1);
 
-	return min.x <= max.x && min.y <= max.y && min.z <= max.z;
+	return minCorner.x <= maxCorner.x &&
+		minCorner.y <= maxCorner.y &&
+		minCorner.z <= maxCorner.z;
 }
 
 #endif
