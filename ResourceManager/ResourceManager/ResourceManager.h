@@ -49,8 +49,8 @@ public:
 	RegisterMessage registerTexture(const std::string& techniqueName, const std::string& textureName, const Texture2dResource& texRes);
 	RegisterMessage registerTexturesArray(const std::string& techniqueName, const std::string& textureArrName, const Texture2dArrayResource& texArrRes);
 	RegisterMessage registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation);
-	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer);
-	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer);
+	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer, bool structured);
+	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer, bool structured);
 	RegisterMessage registerImage(const std::string& name, ID3D11ShaderResourceView* image);
 	RegisterMessage registerImagesArray(const std::string& name, ID3D11ShaderResourceView* imagesArray);
 	RegisterMessage registerPresenceOfGeometryShader(const std::string& techniqueName, const std::string& passName);
@@ -68,8 +68,8 @@ public:
 	void getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs);
 	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
 	void getTexturesArrays(const std::string& techniqueName, std::map<std::string, Texture2dArrayResource>& texturesArrays);
-	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
-	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId);
+	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured);
+	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured);
 	ID3D11ShaderResourceView* getImage(const std::string& name);
 	ID3D11ShaderResourceView* getImagesArray(const std::string& name);
 	bool isThereAGeometryShaderInThePass(const std::string& techniqueName, const std::string& passName);

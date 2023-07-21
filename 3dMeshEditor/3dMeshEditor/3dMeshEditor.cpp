@@ -56,7 +56,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		return 0;
 	}
-	case WM_MOUSEHOVER:
+/*	case WM_MOUSEMOVE:
 	case WM_LBUTTONUP:
 	{
 		if (!bMarginSelection)
@@ -74,6 +74,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		mousePosX1 /= width;
 		mousePosY1 /= height;
 
+		mousePosX1 = 2 * (mousePosX1 - 0.5);
+		mousePosY1 = 2 * (0.5 - mousePosY1);
+
 		Selector::instance()->selectObjects(
 			mousePosX0, mousePosY0,
 			mousePosX1, mousePosY1
@@ -82,7 +85,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		bMarginSelection = false;
 
 		return 0;
-	}
+	}*/
 	case WM_SIZE:
 	{
 		UINT width = LOWORD(lparam);

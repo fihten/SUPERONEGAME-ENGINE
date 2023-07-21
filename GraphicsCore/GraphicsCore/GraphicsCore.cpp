@@ -588,7 +588,8 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	const Mesh& mesh,
 	uint32_t* elementSize,
 	const char* technique,
-	const char* pass
+	const char* pass,
+	bool structured
 ) const
 {
 	(*elementSize) = 0;
@@ -606,7 +607,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	if (mesh.gpuReadyData)
 		(*elementSize) = mesh.elementSize;
 
-	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(sTechnique, sPass, mesh.id);
+	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(sTechnique, sPass, mesh.id, structured);
 	if (mesh.gpuReadyData)
 		mVB = nullptr;
 
@@ -622,9 +623,9 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 		D3D11_BUFFER_DESC vbd;
 		vbd.Usage = D3D11_USAGE_IMMUTABLE;
 		vbd.ByteWidth = bytes;
-		vbd.BindFlags = D3D11_BIND_VERTEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
+		vbd.BindFlags = structured ? D3D11_BIND_SHADER_RESOURCE : D3D11_BIND_VERTEX_BUFFER;
 		vbd.CPUAccessFlags = 0;
-		vbd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		vbd.MiscFlags = structured ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : 0;
 		vbd.StructureByteStride = *elementSize;
 
 		D3D11_SUBRESOURCE_DATA vinitData;
@@ -634,7 +635,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
-		ResourceManager::instance()->registerVertexBuffer(sTechnique, sPass, mesh.id, mVB);
+		ResourceManager::instance()->registerVertexBuffer(sTechnique, sPass, mesh.id, mVB, structured);
 		if (mesh.gpuReadyData == nullptr)
 			free((void*)vinitData.pSysMem);
 	}
@@ -701,7 +702,7 @@ void* GraphicsCore::fetchVerticesFromMesh(
 	return (void*)data;
 }
 
-ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
+ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) const
 {
 	std::string sTechnique = mesh.getTechnique();
 	std::string sPass = mesh.getPass();
@@ -709,16 +710,16 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
 		return nullptr;
 
-	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(sTechnique, sPass, mesh.id);
+	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(sTechnique, sPass, mesh.id, structured);
 	if (mIB == nullptr)
 	{
 		// Create index buffer
 		D3D11_BUFFER_DESC ibd;
 		ibd.Usage = D3D11_USAGE_IMMUTABLE;
 		ibd.ByteWidth = mesh.getIndicesCount() * sizeof(uint32_t);
-		ibd.BindFlags = D3D11_BIND_INDEX_BUFFER | D3D11_BIND_SHADER_RESOURCE;
+		ibd.BindFlags = structured ? D3D11_BIND_SHADER_RESOURCE : D3D11_BIND_INDEX_BUFFER;
 		ibd.CPUAccessFlags = 0;
-		ibd.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		ibd.MiscFlags = structured ? D3D11_RESOURCE_MISC_BUFFER_STRUCTURED : 0;
 		ibd.StructureByteStride = sizeof(uint32_t);
 
 		D3D11_SUBRESOURCE_DATA iinitData;
@@ -726,7 +727,7 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh) const
 
 		device->CreateBuffer(&ibd, &iinitData, &mIB);
 
-		ResourceManager::instance()->registerIndexBuffer(sTechnique, sPass, mesh.id, mIB);
+		ResourceManager::instance()->registerIndexBuffer(sTechnique, sPass, mesh.id, mIB, structured);
 	}
 	return mIB;
 }
@@ -1120,9 +1121,7 @@ void GraphicsCore::initRoughObjectsSelection()
 
 void GraphicsCore::updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
 {
-	uint32_t srcRowPitch = sizeof(Envelope) * envelopesCount;
-	uint32_t srcDepthPitch = srcRowPitch * 1;
-	context->UpdateSubresource(mEnvelopesBuffer, 0, 0, envelopes, srcRowPitch, srcDepthPitch);
+	context->UpdateSubresource(mEnvelopesBuffer, 0, 0, envelopes, 0, 0);
 }
 
 void GraphicsCore::setEnvelopesCount(uint32_t envelopesCount)
@@ -1147,6 +1146,7 @@ void GraphicsCore::findRoughlySelectedObjects()
 
 	uint32_t threads_x = std::ceil(float(envelopesCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
+	context->CSSetShader(0, 0, 0);
 }
 
 void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor)
@@ -1254,11 +1254,12 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 		mesh,
 		&elementSize,
 		"SelectedObject",
-		"P0"
+		"P0",
+		true
 	);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	srvDesc.BufferEx.FirstElement = 0;
 	srvDesc.BufferEx.Flags = 0;
@@ -1268,9 +1269,9 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 	device->CreateShaderResourceView(mVerticesBuffer, &srvDesc, &mVerticesSRV);
 	mVertices->SetResource(mVerticesSRV);
 
-	ID3D11Buffer* mIndicesBuffer = this->getIndexBuffer(mesh);
+	ID3D11Buffer* mIndicesBuffer = this->getIndexBuffer(mesh, true);
 
-	srvDesc.Format = DXGI_FORMAT_R32_UINT;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	srvDesc.BufferEx.FirstElement = 0;
 	srvDesc.BufferEx.Flags = 0;
@@ -1293,6 +1294,7 @@ void GraphicsCore::checkIntersection()
 
 	uint32_t threads_x = std::ceil(float(trianglesCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
+	context->CSSetShader(0, 0, 0);
 }
 
 bool GraphicsCore::isObjectIntersected()

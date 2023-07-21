@@ -198,7 +198,7 @@ ResourceManager::RegisterMessage ResourceManager::registerVariableLocation(const
 	return RegisterMessage::VARIABLE_DOESNT_EXIST;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer)
+ResourceManager::RegisterMessage ResourceManager::registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer, bool structured)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -208,14 +208,17 @@ ResourceManager::RegisterMessage ResourceManager::registerVertexBuffer(const std
 		return RegisterMessage::PASS_DOESNT_EXIST;
 
 	auto& pass = techniqueRes.passes[passName];
-	if (pass.vertexBuffers.count(meshId))
-		pass.vertexBuffers[meshId]->Release();
-	pass.vertexBuffers[meshId] = vertexBuffer;
+	auto* vertexBuffers = &pass.vertexBuffers;
+	if (structured)
+		vertexBuffers = &pass.vertexBuffersStructured;
+	if ((*vertexBuffers).count(meshId))
+		(*vertexBuffers)[meshId]->Release();
+	(*vertexBuffers)[meshId] = vertexBuffer;
 
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer)
+ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer, bool structured)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -225,9 +228,12 @@ ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(const std:
 		return RegisterMessage::PASS_DOESNT_EXIST;
 
 	auto& pass = techniqueRes.passes[passName];
-	if (pass.indexBuffers.count(meshId))
-		pass.indexBuffers[meshId]->Release();
-	pass.indexBuffers[meshId] = indexBuffer;
+	auto* indexBuffers = &pass.indexBuffers;
+	if(structured)
+		indexBuffers = &pass.indexBuffersStructured;
+	if ((*indexBuffers).count(meshId))
+		(*indexBuffers)[meshId]->Release();
+	(*indexBuffers)[meshId] = indexBuffer;
 
 	return RegisterMessage::OK;
 }
@@ -423,7 +429,7 @@ void ResourceManager::getTexturesArrays(const std::string& techniqueName, std::m
 	texturesArrays = techniqueRes.texturesArrays;
 }
 
-ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)
+ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured)
 {
 	if (techniques.count(techniqueName) == 0)
 		return nullptr;
@@ -433,13 +439,16 @@ ID3D11Buffer* ResourceManager::getVertexBuffer(const std::string& techniqueName,
 		return nullptr;
 
 	auto& pass = techniqueRes.passes[passName];
-	if (pass.vertexBuffers.count(meshId) == 0)
+	auto* vertexBuffers = &pass.vertexBuffers;
+	if (structured)
+		vertexBuffers = &pass.vertexBuffersStructured;
+	if ((*vertexBuffers).count(meshId) == 0)
 		return nullptr;
 
-	return pass.vertexBuffers[meshId];
+	return (*vertexBuffers)[meshId];
 }
 
-ID3D11Buffer* ResourceManager::getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId)
+ID3D11Buffer* ResourceManager::getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured)
 {
 	if (techniques.count(techniqueName) == 0)
 		return nullptr;
@@ -449,10 +458,13 @@ ID3D11Buffer* ResourceManager::getIndexBuffer(const std::string& techniqueName, 
 		return nullptr;
 
 	auto& pass = techniqueRes.passes[passName];
-	if (pass.indexBuffers.count(meshId) == 0)
+	auto* indexBuffers = &pass.indexBuffers;
+	if(structured)
+		indexBuffers = &pass.indexBuffersStructured;
+	if ((*indexBuffers).count(meshId) == 0)
 		return nullptr;
 
-	return pass.indexBuffers[meshId];
+	return (*indexBuffers)[meshId];
 }
 
 ID3D11ShaderResourceView* ResourceManager::getImage(const std::string& name)

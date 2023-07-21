@@ -101,8 +101,9 @@ private:
 	ID3D11Buffer* getVertexBuffer(
 		const Mesh& mesh,
 		uint32_t* elementSize,
-		const char* technique = nullptr, 
-		const char* pass = nullptr
+		const char* technique = nullptr,
+		const char* pass = nullptr,
+		bool structured = false
 		) const;
 	void* fetchVerticesFromMesh(
 		const Mesh& mesh,
@@ -110,7 +111,7 @@ private:
 		const char* pass = nullptr
 		) const;
 
-	ID3D11Buffer* getIndexBuffer(const Mesh& mesh) const;
+	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;
 
 	ID3D11ShaderResourceView* getImage(const Mesh& mesh, const std::string& var) const;
 	ID3D11ShaderResourceView* getImagesArray(const Mesh& mesh, const std::string& var) const;

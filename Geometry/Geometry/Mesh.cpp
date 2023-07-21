@@ -455,6 +455,9 @@ void Mesh::setName(const std::string& name)
 
 uint32_t Mesh::getVerticesCount() const
 {
+	if (gpuReadyData)
+		return verticesCount;
+
 	uint32_t count = 0;
 	for (const auto& flt1_stream : flt1_streams)
 		count = std::max<uint32_t>(count, flt1_stream.second.size());
