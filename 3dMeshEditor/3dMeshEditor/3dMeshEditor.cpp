@@ -56,7 +56,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		return 0;
 	}
-/*	case WM_MOUSEMOVE:
+	case WM_MOUSEMOVE:
 	case WM_LBUTTONUP:
 	{
 		if (!bMarginSelection)
@@ -82,10 +82,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			mousePosX1, mousePosY1
 		);
 		
-		bMarginSelection = false;
+		if (msg == WM_LBUTTONUP)
+			bMarginSelection = false;
 
 		return 0;
-	}*/
+	}
 	case WM_SIZE:
 	{
 		UINT width = LOWORD(lparam);
