@@ -11,6 +11,13 @@ class Vec4d
 public:
 	Vec4d() { v[0] = value_type(0); v[1] = value_type(0); v[2] = value_type(0); v[3] = value_type(0); };
 	Vec4d(const value_type& x, const value_type& y, const value_type& z, const value_type& w) { v[0] = x; v[1] = y; v[2] = z; v[3] = w; };
+	Vec4d(const Vec3d<value_type>& xyz, const value_type& w)
+	{
+		v[0] = (const_cast<Vec3d<value_type>&>(xyz)).x();
+		v[1] = (const_cast<Vec3d<value_type>&>(xyz)).y();
+		v[2] = (const_cast<Vec3d<value_type>&>(xyz)).z();
+		v[3] = w;
+	};
 	Vec4d(const std::string& str) {
 		stringToNumbers(str, (float*)(v), sizeof v / sizeof * v);
 	};

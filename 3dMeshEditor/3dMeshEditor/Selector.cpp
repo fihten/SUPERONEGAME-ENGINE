@@ -87,7 +87,8 @@ void Selector::selectObjects(
 						
 						flt4x4& w = MainScene::instance()->envelopes[objectID].transform;
 
-						selectedObjectBox.posW = 0.5f * (min + max);
+						flt4 posL(0.5f * (min + max), 1.0f);
+						selectedObjectBox.posW = (posL * w).xyz();
 
 						selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
 						selectedObjectBox.axis0 = selectedObjectBox.axis0 * w;

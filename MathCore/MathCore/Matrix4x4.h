@@ -75,7 +75,7 @@ public:
 		return ret;
 	}
 
-	friend Vec4d<value_type> operator*(const Vec4d<value_type>& v, const Matrix4x4<value_type>& m)
+	friend Vec4d<value_type> operator*(Vec4d<value_type>& v, Matrix4x4<value_type>& m)
 	{
 		Vec4d<value_type> r;
 
