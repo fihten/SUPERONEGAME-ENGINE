@@ -360,6 +360,70 @@ Mesh createSelectionBoxes()
 	return m;
 }
 
+Mesh createSphere(int latitudes, int longitudes)
+{
+	int vertices = latitudes * (longitudes + 1) - 2;
+	int triangles = 2 * (latitudes - 2) * longitudes;
+	int indices = 3 * triangles;
+
+	Mesh sphere;
+
+	sphere.flt3_streams.reserve(2);
+
+	// vertices positions
+	sphere.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	auto& pts = sphere.flt3_streams.back().second;
+	pts.reserve(vertices);
+
+	// vertices normals
+	sphere.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	auto& nms = sphere.flt3_streams.back().second;
+	nms.reserve(vertices);
+
+	// vertices colors
+	sphere.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	auto& clrs = sphere.flt4_streams.back().second;
+	clrs.reserve(vertices);
+
+	// uv-coordinates
+	sphere.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	auto& uvs = sphere.flt2_streams.back().second;
+	uvs.reserve(vertices);
+
+	sphere.indicies.reserve(indices);
+
+	float radius = 1;
+
+	double dh = 2 * M_PI / longitudes;
+	double dv = M_PI / (latitudes - 1);
+
+	// top ribbon
+	for (int hi = 0; hi < longitudes; ++hi)
+	{
+		flt3 n0(0, 1, 0);
+		flt3 n1(sin(dv) * cos(hi * dh), cos(dv), sin(dv) * sin(hi * dh));
+
+		pts.push_back(radius * n0);
+		pts.push_back(radius * n1);
+
+		nms.push_back(n0);
+		nms.push_back(n1);
+
+		flt4 c(0, 1, 0, 0);
+		clrs.push_back(c);
+		clrs.push_back(c);
+
+		uvs.push_back(flt2(hi * dh / 2 / M_PI, 0));
+		uvs.push_back(flt2(hi * dh / 2 / M_PI, dv / M_PI));
+	}
+
+	sphere.params["technique"] = "Light0Tex";
+	sphere.params["pass"] = "P0";
+	sphere.params["gDiffuseMap"] = "test.dds";
+
+	return sphere;
+}
+
 std::string Mesh::getTechnique() const
 {
 	std::string technique = "";

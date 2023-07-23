@@ -14,6 +14,7 @@ class Mesh;
 Mesh createCube();
 Mesh createTrees();
 Mesh createSelectionBoxes();
+Mesh createSphere(int latitudes, int longitudes);
 
 class Mesh
 {
@@ -131,6 +132,7 @@ public:
 	friend Mesh createCube();
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();
+	friend Mesh createSphere(int latitudes, int longitudes);
 public:
 	uint32_t id;
 	void* scene = nullptr;
