@@ -15,6 +15,7 @@ Mesh createCube();
 Mesh createTrees();
 Mesh createSelectionBoxes();
 Mesh createSphere(int latitudes, int longitudes);
+Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 
 class Mesh
 {
@@ -133,6 +134,7 @@ public:
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();
 	friend Mesh createSphere(int latitudes, int longitudes);
+	friend Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 public:
 	uint32_t id;
 	void* scene = nullptr;

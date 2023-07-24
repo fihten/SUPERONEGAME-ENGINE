@@ -467,6 +467,56 @@ Mesh createSphere(int latitudes, int longitudes)
 	return sphere;
 }
 
+Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers)
+{
+	int vertices = 2 * (edgesNumbers + 2);
+	int triangles = 4 * edgesNumbers;
+	int indices = 3 * triangles;
+
+	Mesh cone;
+
+	cone.flt3_streams.reserve(2);
+
+	// vertices positions
+	cone.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	auto& pts = cone.flt3_streams.back().second;
+	pts.reserve(vertices);
+
+	// vertices normals
+	cone.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	auto& nms = cone.flt3_streams.back().second;
+	nms.reserve(vertices);
+
+	// vertices colors
+	cone.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	auto& clrs = cone.flt4_streams.back().second;
+	clrs.reserve(vertices);
+
+	// uv-coordinates
+	cone.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	auto& uvs = cone.flt2_streams.back().second;
+	uvs.reserve(vertices);
+
+	auto& inds = cone.indicies;
+	inds.reserve(indices);
+
+	float dv = 2 * M_PI / edgesNumbers;
+
+	for (int vi = 0; vi < edgesNumbers; ++vi)
+	{
+		pts.push_back(flt3(0, height / 2, 0));
+		nms.push_back(flt3(0, 1, 0));
+		clrs.push_back(flt4(0, 0, 1, 0));
+		uvs.push_back(flt2((float)vi / (float)edgesNumbers, 0));
+	}
+
+	cone.params["technique"] = "Light0Tex";
+	cone.params["pass"] = "P0";
+	cone.params["gDiffuseMap"] = "earth.jpg";
+
+	return cone;
+}
+
 std::string Mesh::getTechnique() const
 {
 	std::string technique = "";
