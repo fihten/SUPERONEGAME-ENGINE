@@ -390,36 +390,79 @@ Mesh createSphere(int latitudes, int longitudes)
 	auto& uvs = sphere.flt2_streams.back().second;
 	uvs.reserve(vertices);
 
-	sphere.indicies.reserve(indices);
+	auto& inds = sphere.indicies;
+	inds.reserve(indices);
 
 	float radius = 1;
 
 	double dh = 2 * M_PI / longitudes;
 	double dv = M_PI / (latitudes - 1);
 
-	// top ribbon
 	for (int hi = 0; hi < longitudes; ++hi)
 	{
-		flt3 n0(0, 1, 0);
-		flt3 n1(sin(dv) * cos(hi * dh), cos(dv), sin(dv) * sin(hi * dh));
-
-		pts.push_back(radius * n0);
-		pts.push_back(radius * n1);
-
-		nms.push_back(n0);
-		nms.push_back(n1);
-
+		flt3 n(0, 1, 0);
+		pts.push_back(radius * n);
+		nms.push_back(n);
 		flt4 c(0, 1, 0, 0);
 		clrs.push_back(c);
-		clrs.push_back(c);
-
 		uvs.push_back(flt2(hi * dh / 2 / M_PI, 0));
+	}
+	for (int hi = 0; hi < longitudes + 1; ++hi)
+	{
+		flt3 n(sin(dv) * cos(hi * dh), cos(dv), sin(dv) * sin(hi * dh));
+		pts.push_back(radius * n);
+		nms.push_back(n);
+		flt4 c(0, 1, 0, 0);
+		clrs.push_back(c);
 		uvs.push_back(flt2(hi * dh / 2 / M_PI, dv / M_PI));
+
+		if (hi < longitudes)
+		{
+			inds.push_back(hi);
+			inds.push_back(longitudes + hi);
+			inds.push_back(longitudes + hi + 1);
+		}
+	}
+	for (int vi = 2; vi < latitudes - 1; ++vi)
+	{
+		for (int hi = 0; hi < longitudes + 1; ++hi)
+		{
+			flt3 n(sin(vi * dv) * cos(hi * dh), cos(vi * dv), sin(vi * dv) * sin(hi * dh));
+			pts.push_back(radius * n);
+			nms.push_back(n);
+			flt4 c(0, 1, 0, 0);
+			clrs.push_back(c);
+			uvs.push_back(flt2(hi * dh / 2 / M_PI, vi * dv / M_PI));
+
+			if (hi < longitudes)
+			{
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 2) + hi);
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 1) + hi);
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 1) + hi + 1);
+
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 2) + hi);
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 1) + hi + 1);
+				inds.push_back(longitudes + (longitudes + 1) * (vi - 2) + hi + 1);
+			}
+		}
+	}
+	for (int hi = 0; hi < longitudes; ++hi)
+	{
+		flt3 n(0, -1, 0);
+		pts.push_back(radius * n);
+		nms.push_back(n);
+		flt4 c(0, 1, 0, 0);
+		clrs.push_back(c);
+		uvs.push_back(flt2(hi * dh / 2 / M_PI, 1));
+
+		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi);
+		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 2) + hi);
+		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi + 1);
 	}
 
 	sphere.params["technique"] = "Light0Tex";
 	sphere.params["pass"] = "P0";
-	sphere.params["gDiffuseMap"] = "test.dds";
+	sphere.params["gDiffuseMap"] = "earth.jpg";
 
 	return sphere;
 }

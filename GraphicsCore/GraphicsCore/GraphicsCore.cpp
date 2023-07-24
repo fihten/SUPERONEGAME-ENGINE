@@ -74,7 +74,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	if (enable4xMsaa)
 	{
 		sd.SampleDesc.Count = 4;
-		sd.SampleDesc.Quality = m4xMsaaQuality;
+		sd.SampleDesc.Quality = m4xMsaaQuality - 1;
 	}
 	else
 	{
@@ -126,7 +126,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	if (enable4xMsaa)
 	{
 		dsDesc.SampleDesc.Count = 4;
-		dsDesc.SampleDesc.Quality = m4xMsaaQuality;
+		dsDesc.SampleDesc.Quality = m4xMsaaQuality - 1;
 	}
 	else
 	{
@@ -1167,7 +1167,7 @@ void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* 
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }
 
-#define MaxTrianglesCount 4096
+#define MaxTrianglesCount 20000
 void GraphicsCore::initFineObjectsSelection()
 {
 	char shadersFolder[200];

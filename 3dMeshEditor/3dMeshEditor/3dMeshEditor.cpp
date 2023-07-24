@@ -10,6 +10,7 @@
 #include <windef.h>
 
 Mesh cube;
+Mesh sphere;
 Mesh trees;
 Mesh selectionBoxes;
 Scene scene;
@@ -120,10 +121,10 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
-	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
+	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, true);
 
-	cube = createCube();
-	MainScene::instance()->addMeshNode(&cube);
+	sphere = createSphere(100, 100);
+	MainScene::instance()->addMeshNode(&sphere);
 
 	return GraphicsCore::instance()->run();
 }
