@@ -11,6 +11,7 @@
 
 Mesh cube;
 Mesh sphere;
+Mesh cone;
 Mesh trees;
 Mesh selectionBoxes;
 Scene scene;
@@ -123,8 +124,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 {
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, true);
 
-	sphere = createSphere(100, 100);
-	MainScene::instance()->addMeshNode(&sphere);
+	cone = createCone(5, 10, 20, 100);
+	MainScene::instance()->addMeshNode(&cone);
 
 	return GraphicsCore::instance()->run();
 }

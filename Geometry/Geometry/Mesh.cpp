@@ -469,7 +469,7 @@ Mesh createSphere(int latitudes, int longitudes)
 
 Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers)
 {
-	int vertices = 2 * (edgesNumbers + 2);
+	int vertices = 2 * (2 * edgesNumbers + 1);
 	int triangles = 4 * edgesNumbers;
 	int indices = 3 * triangles;
 
@@ -536,6 +536,8 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		}
 	}
 
+	v = 0.5 - std::atan(- height / 2 / bottomRadius) / M_PI;
+
 	side = sqrt(pow(height, 2) + pow(topRadius - bottomRadius, 2));
 
 	nX = height / side;
@@ -554,15 +556,31 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 
 		if (vi < edgesNumbers)
 		{
-			inds.push_back(vi);
+			inds.push_back(2 * edgesNumbers + 1 + vi);
+			inds.push_back(edgesNumbers + vi + 1);
 			inds.push_back(edgesNumbers + vi);
+
+			inds.push_back(2 * edgesNumbers + 1 + vi);
+			inds.push_back(2 * edgesNumbers + 2 + vi);
 			inds.push_back(edgesNumbers + vi + 1);
 		}
 	}
 
+	for (int vi = 0; vi < edgesNumbers; ++vi)
+	{
+		pts.push_back(flt3(0, -height / 2, 0));
+		nms.push_back(flt3(0, -1, 0));
+		clrs.push_back(flt4(0, 0, 1, 0));
+		uvs.push_back(flt2((float)vi / (float)edgesNumbers, 1));
+
+		inds.push_back(3 * edgesNumbers + 2 + vi);
+		inds.push_back(2 * edgesNumbers + 2 + vi);
+		inds.push_back(2 * edgesNumbers + 1 + vi);
+	}
+
 	cone.params["technique"] = "Light0Tex";
 	cone.params["pass"] = "P0";
-	cone.params["gDiffuseMap"] = "earth.jpg";
+	cone.params["gDiffuseMap"] = "vase.jpg";
 
 	return cone;
 }
