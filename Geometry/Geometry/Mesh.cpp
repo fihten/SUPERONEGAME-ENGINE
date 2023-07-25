@@ -510,6 +510,56 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		uvs.push_back(flt2((float)vi / (float)edgesNumbers, 0));
 	}
 
+	float v = 0.5 - std::atan(height / 2 / topRadius) / M_PI;
+	
+	float side = sqrt(pow(height, 2) + pow(topRadius - bottomRadius, 2));
+	
+	float nX = height / side;
+	float nY = abs(topRadius - bottomRadius) / side + 1;
+
+	side = sqrt(nX * nX + nY * nY);
+	nX /= side;
+	nY /= side;
+
+	for (int vi = 0; vi < edgesNumbers + 1; ++vi)
+	{
+		pts.push_back(flt3(topRadius * cos(vi * dv), height / 2, topRadius * sin(vi * dv)));
+		nms.push_back(flt3(nX * cos(vi * dv), nY, nX * sin(vi * dv)));
+		clrs.push_back(flt4(0, 0, 1, 0));
+		uvs.push_back(flt2((float)vi / (float)edgesNumbers, v));
+
+		if (vi < edgesNumbers)
+		{
+			inds.push_back(vi);
+			inds.push_back(edgesNumbers + vi);
+			inds.push_back(edgesNumbers + vi + 1);
+		}
+	}
+
+	side = sqrt(pow(height, 2) + pow(topRadius - bottomRadius, 2));
+
+	nX = height / side;
+	nY = abs(topRadius - bottomRadius) / side - 1;
+
+	side = sqrt(nX * nX + nY * nY);
+	nX /= side;
+	nY /= side;
+
+	for (int vi = 0; vi < edgesNumbers + 1; ++vi)
+	{
+		pts.push_back(flt3(bottomRadius * cos(vi * dv), - height / 2, bottomRadius * sin(vi * dv)));
+		nms.push_back(flt3(nX * cos(vi * dv), nY, nX * sin(vi * dv)));
+		clrs.push_back(flt4(0, 0, 1, 0));
+		uvs.push_back(flt2((float)vi / (float)edgesNumbers, v));
+
+		if (vi < edgesNumbers)
+		{
+			inds.push_back(vi);
+			inds.push_back(edgesNumbers + vi);
+			inds.push_back(edgesNumbers + vi + 1);
+		}
+	}
+
 	cone.params["technique"] = "Light0Tex";
 	cone.params["pass"] = "P0";
 	cone.params["gDiffuseMap"] = "earth.jpg";
