@@ -12,6 +12,7 @@
 Mesh cube;
 Mesh sphere;
 Mesh cone;
+Mesh plane;
 Mesh trees;
 Mesh selectionBoxes;
 Scene scene;
@@ -33,8 +34,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 		bMarginSelection = true;
 
-		mousePosX0 = LOWORD(lparam);
-		mousePosY0 = HIWORD(lparam);
+		mousePosX0 = LOWORD(lparam) + 0.5f;
+		mousePosY0 = HIWORD(lparam) + 0.5f;
 
 		RECT rect;
 		GetClientRect(hwnd, &rect);
@@ -64,8 +65,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		if (!bMarginSelection)
 			return 0;
 
-		mousePosX1 = LOWORD(lparam);
-		mousePosY1 = HIWORD(lparam);
+		mousePosX1 = LOWORD(lparam) + 0.5f;
+		mousePosY1 = HIWORD(lparam) + 0.5f;
 
 		RECT rect;
 		GetClientRect(hwnd, &rect);
@@ -122,10 +123,10 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
-	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, true);
+	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
-	cone = createCone(5, 10, 20, 100);
-	MainScene::instance()->addMeshNode(&cone);
+	plane = createPlane(10, 10, 100, 100);
+	MainScene::instance()->addMeshNode(&plane);
 
 	return GraphicsCore::instance()->run();
 }

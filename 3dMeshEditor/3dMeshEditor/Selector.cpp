@@ -46,7 +46,7 @@ void Selector::selectObjects(
 	GraphicsCore::instance()->findRoughlySelectedObjects();
 
 	GraphicsCore::instance()->setSelectorEnvelopeFine(selectorEnvelope);
-	GraphicsCore::instance()->setThreshold(0.001);
+	GraphicsCore::instance()->setThreshold(0.0);
 
 	selectedObjectsCount = 0;
 	class VisitSelectedObjects : public RoughlySelectedObjectVisitor

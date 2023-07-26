@@ -585,6 +585,77 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 	return cone;
 }
 
+Mesh createPlane(float width, float height, float m, float n)
+{
+	int vertices = (m + 1) * (n + 1);
+	int triangles = 2 * m * n;
+	int indices = 3 * triangles;
+
+	Mesh plane;
+
+	plane.flt3_streams.reserve(2);
+
+	// vertices positions
+	plane.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	auto& pts = plane.flt3_streams.back().second;
+	pts.reserve(vertices);
+
+	// vertices normals
+	plane.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	auto& nms = plane.flt3_streams.back().second;
+	nms.reserve(vertices);
+
+	// vertices colors
+	plane.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	auto& clrs = plane.flt4_streams.back().second;
+	clrs.reserve(vertices);
+
+	// uv-coordinates
+	plane.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	auto& uvs = plane.flt2_streams.back().second;
+	uvs.reserve(vertices);
+
+	auto& inds = plane.indicies;
+	inds.reserve(indices);
+
+	float du = 1.0f / m;
+	float dv = 1.0f / n;
+
+	float x0 = -width / 2;
+	float z0 = -height / 2;
+
+	float dx = width / m;
+	float dz = height / n;
+
+	for (int i = 0; i < m + 1; ++i)
+	{
+		for (int j = 0; j < n + 1; ++j)
+		{
+			pts.push_back(flt3(x0 + i * dx, 0, z0 + j * dz));
+			nms.push_back(flt3(0, 1, 0));
+			clrs.push_back(flt4(0, 0, 1, 0));
+			uvs.push_back(flt2(i * du, j * dv));
+
+			if (i < m && j < n)
+			{
+				inds.push_back(j * (m + 1) + i);
+				inds.push_back(j * (m + 1) + i + 1);
+				inds.push_back((j + 1) * (m + 1) + i + 1);
+
+				inds.push_back(j * (m + 1) + i);
+				inds.push_back((j + 1) * (m + 1) + i + 1);
+				inds.push_back((j + 1) * (m + 1) + i);
+			}
+		}
+	}
+
+	plane.params["technique"] = "Light0Tex";
+	plane.params["pass"] = "P0";
+	plane.params["gDiffuseMap"] = "bosh.jpg";
+
+	return plane;
+}
+
 std::string Mesh::getTechnique() const
 {
 	std::string technique = "";
