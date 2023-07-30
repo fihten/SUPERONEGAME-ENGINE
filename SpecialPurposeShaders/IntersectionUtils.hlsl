@@ -3,6 +3,7 @@
 
 #include "Triangle.hlsl"
 #include "Segment.hlsl"
+#include "Frustum.hlsl"
 
 #define SEGMENT_DOESNT_SHARE_ANY_POINT_WITH_PLANE 0
 #define SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE 1
@@ -28,7 +29,7 @@ uint findIntersection(float4 plane, Segment seg, out float t)
 	return SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE;
 }
 
-bool checkSingleIntersection(Triangle tri, Segment seg)
+bool checkIntersection(Triangle tri, Segment seg)
 {
 	float3 t0 = tri.v1 - tri.v0;
 	float3 t1 = tri.v2 - tri.v0;
@@ -67,75 +68,72 @@ bool checkSingleIntersection(Triangle tri, Segment seg)
 		0.0f <= c && c <= 1.0f;
 }
 
-bool doesContain(Envelope envelope, float3 pt, float threshold)
+bool checkIntersection(Frustum frustum, float4 sphere)
 {
-	if (envelope.min.x - threshold <= pt.x && pt.x <= envelope.max.x + threshold &&
-		envelope.min.y - threshold <= pt.y && pt.y <= envelope.max.y + threshold &&
-		envelope.min.z - threshold <= pt.z && pt.z <= envelope.max.z + threshold)
-	{
-		return true;
-	}
+	bool bIntersect = true;
 
-	return false;
+	float4 center = float4(sphere.xyz, 1);
+	float radius = sphere.w;
+
+	[unroll]
+	for (int pi = 0; pi < PLANE_NUMBER; ++pi)
+		bIntersect = bIntersect && (dot(frustum.plane[pi], center) < radius);
+
+	return bIntersect;
 }
 
-bool doesContain(Envelope envelope, Triangle tri, float threshold)
+bool doesContain(Frustum frustum, int plane_number, float3 pt)
 {
-	if (doesContain(envelope, tri.v0, threshold) &&
-		doesContain(envelope, tri.v1, threshold) &&
-		doesContain(envelope, tri.v2, threshold))
-	{
-		return true;
-	}
-	return false;
+	bool bContain = true;
+	[unroll]
+	for (int pi = 0; pi < plane_number; ++pi)
+		bContain = bContain && (dot(frustum[pi], float4(pt, 1)) < 0);
+	return bContain;
 }
 
-#define FRONT_PLANE    0
-#define BACK_PLANE     1
-#define BOTTOM_PLANE   2
-#define TOP_PLANE      3
-#define LEFT_PLANE     4
-#define RIGHT_PLANE    5
-
-#define PLANE_NUMBER   6
-
-bool checkIntersectionBySide(Envelope env, Triangle tri, float threshold)
+bool doesContain(Frustum frustum, int plane_number, Triangle tri)
 {
-	float3 n[PLANE_NUMBER];
-	n[FRONT_PLANE] = float3(0, 0, -1);
-	n[BACK_PLANE] = float3(0, 0, +1);
-	n[BOTTOM_PLANE] = float3(0, -1, 0);
-	n[TOP_PLANE] = float3(0, +1, 0);
-	n[LEFT_PLANE] = float3(-1, 0, 0);
-	n[RIGHT_PLANE] = float3(+1, 0, 0);
+	return
+		doesContain(frustum, plane_number, tri.v0) &&
+		doesContain(frustum, plane_number, tri.v1) &&
+		doesContain(frustum, plane_number, tri.v2);
+}
 
-	float3 r0[PLANE_NUMBER];
-	r0[FRONT_PLANE] = float3(0, 0, 0);
-	r0[BACK_PLANE] = float3(0, 0, 1);
-	r0[BOTTOM_PLANE] = float3(0, env.min.y, 0);
-	r0[TOP_PLANE] = float3(0, env.max.y, 0);
-	r0[LEFT_PLANE] = float3(env.min.x, 0, 0);
-	r0[RIGHT_PLANE] = float3(env.max.x, 0, 0);
+bool checkIntersectionBySide(Frustum frustum, Triangle tri, float threshold)
+{
+	Frustum frustums[PLANE_NUMBER];
 
-	Envelope envelopes[PLANE_NUMBER];
+	frustums[FRONT_PLANE].plane[0] = frustum.plane[LEFT_PLANE];
+	frustums[FRONT_PLANE].plane[1] = frustum.plane[RIGHT_PLANE];
+	frustums[FRONT_PLANE].plane[2] = frustum.plane[TOP_PLANE];
+	frustums[FRONT_PLANE].plane[3] = frustum.plane[BOTTOM_PLANE];
 
-	envelopes[FRONT_PLANE].min = float3(env.min.xy, 0);
-	envelopes[FRONT_PLANE].max = float3(env.max.xy, 0);
+	frustums[BACK_PLANE].plane[0] = frustum.plane[LEFT_PLANE];
+	frustums[BACK_PLANE].plane[1] = frustum.plane[RIGHT_PLANE];
+	frustums[BACK_PLANE].plane[2] = frustum.plane[TOP_PLANE];
+	frustums[BACK_PLANE].plane[3] = frustum.plane[BOTTOM_PLANE];
 
-	envelopes[BACK_PLANE].min = float3(env.min.xy, 1.0f);
-	envelopes[BACK_PLANE].max = float3(env.max.xy, 1.0f);
+	frustums[LEFT_PLANE].plane[0] = frustum.plane[FRONT_PLANE];
+	frustums[LEFT_PLANE].plane[1] = frustum.plane[BACK_PLANE];
+	frustums[LEFT_PLANE].plane[2] = frustum.plane[TOP_PLANE];
+	frustums[LEFT_PLANE].plane[3] = frustum.plane[BOTTOM_PLANE];
 
-	envelopes[BOTTOM_PLANE].min = float3(env.min.xy, 0);
-	envelopes[BOTTOM_PLANE].max = float3(env.max.x, env.min.y, 1.0f);
+	frustums[RIGHT_PLANE].plane[0] = frustum.plane[FRONT_PLANE];
+	frustums[RIGHT_PLANE].plane[1] = frustum.plane[BACK_PLANE];
+	frustums[RIGHT_PLANE].plane[2] = frustum.plane[TOP_PLANE];
+	frustums[RIGHT_PLANE].plane[3] = frustum.plane[BOTTOM_PLANE];
 
-	envelopes[TOP_PLANE].min = float3(env.min.x, env.max.y, 0);
-	envelopes[TOP_PLANE].max = float3(env.max.xy, 1.0f);
+	frustums[TOP_PLANE].plane[0] = frustum.plane[FRONT_PLANE];
+	frustums[TOP_PLANE].plane[1] = frustum.plane[BACK_PLANE];
+	frustums[TOP_PLANE].plane[2] = frustum.plane[LEFT_PLANE];
+	frustums[TOP_PLANE].plane[3] = frustum.plane[RIGHT_PLANE];
 
-	envelopes[LEFT_PLANE].min = float3(env.min.xy, 0);
-	envelopes[LEFT_PLANE].max = float3(env.min.x, env.max.y, 1.0f);
+	frustums[BOTTOM_PLANE].plane[0] = frustum.plane[FRONT_PLANE];
+	frustums[BOTTOM_PLANE].plane[1] = frustum.plane[BACK_PLANE];
+	frustums[BOTTOM_PLANE].plane[2] = frustum.plane[LEFT_PLANE];
+	frustums[BOTTOM_PLANE].plane[3] = frustum.plane[RIGHT_PLANE];
 
-	envelopes[RIGHT_PLANE].min = float3(env.max.x, env.min.y, 0);
-	envelopes[RIGHT_PLANE].max = float3(env.max.xy, 1.0f);
+	int plane_number = 4;
 
 	Segment segments[3];
 
@@ -152,6 +150,7 @@ bool checkIntersectionBySide(Envelope env, Triangle tri, float threshold)
 	for (int pi = 0; pi < PLANE_NUMBER; ++pi)
 	{
 		float4 plane = float4(n[pi], -dot(n[pi], r0[pi]));
+		[unroll]
 		for (int si = 0; si < 3; ++si)
 		{
 			float t = 0;
@@ -160,48 +159,29 @@ bool checkIntersectionBySide(Envelope env, Triangle tri, float threshold)
 				continue;
 
 			float3 intersection = t * (segments[si].v1 - segments[si].v0) + segments[si].v0;
-			if (doesContain(envelopes[pi], intersection, threshold))
+			if (doesContain(frustums[pi], plane_number, intersection))
 				return true;
 		}
 	}
 	return false;
 }
 
-bool checkIntersectionByDiagonal(Envelope env, Triangle tri, float threshold)
+bool checkIntersection(Frustum frustum, StructuredBuffer<Segment> diagonals, Triangle tri, float threshold)
 {
-	Segment diagonals[4];
-
-	diagonals[0].v0 = env.min;
-	diagonals[0].v1 = env.max;
-
-	diagonals[1].v0 = float3(env.min.x, env.min.y, env.max.z);
-	diagonals[1].v1 = float3(env.max.x, env.max.y, env.min.z);
-
-	diagonals[2].v0 = float3(env.max.x, env.min.y, env.min.z);
-	diagonals[2].v1 = float3(env.min.x, env.max.y, env.max.z);
-
-	diagonals[3].v0 = float3(env.max.x, env.min.y, env.max.z);
-	diagonals[3].v1 = float3(env.min.x, env.max.y, env.min.z);
-
+	if (doesContain(frustum, PLANE_NUMBER, tri))
+		return true;
+	if (checkIntersectionBySide(frustum, tri, threshold))
+		return true;
+	
 	[unroll]
-	for (int di = 0; di < 4; ++di)
+	for (int di = 0; di < 4; di++)
 	{
-		if (checkSingleIntersection(tri, diagonals[di]))
+		if (checkIntersection(tri, diagonals[di]))
 			return true;
 	}
 
 	return false;
 }
 
-bool checkIntersection(Envelope env, Triangle tri, float threshold)
-{
-	if (doesContain(env, tri, threshold))
-		return true;
-	if (checkIntersectionBySide(env, tri, threshold))
-		return true;
-	if (checkIntersectionByDiagonal(env, tri, threshold))
-		return true;
-	return false;
-}
 
 #endif

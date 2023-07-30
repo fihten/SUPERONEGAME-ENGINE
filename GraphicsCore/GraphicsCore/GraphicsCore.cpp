@@ -1064,16 +1064,16 @@ void GraphicsCore::initRoughObjectsSelection()
 
 	mRoughObjectsSelectionTech = mRoughObjectsSelectionFX->GetTechniqueByName("RoughObjectsSelection");
 
-	mEnvelopes = mRoughObjectsSelectionFX->GetVariableByName("envelopes")->AsShaderResource();
-	mEnvelopesCount = mRoughObjectsSelectionFX->GetVariableByName("envelopesCount");
-	mSelectorEnvelopeRough = mRoughObjectsSelectionFX->GetVariableByName("selectorEnvelope");
+	mBoundingSpheres = mRoughObjectsSelectionFX->GetVariableByName("boundingSpheres")->AsShaderResource();
+	mSpheresCount = mRoughObjectsSelectionFX->GetVariableByName("spheresCount");
+	mSelectorFrustumRough = mRoughObjectsSelectionFX->GetVariableByName("selectorFrustum");
 	mSelectedObjects = mRoughObjectsSelectionFX->GetVariableByName("selectedObjects")->AsUnorderedAccessView();
-	mVP = mRoughObjectsSelectionFX->GetVariableByName("VP")->AsMatrix();
+	mV = mRoughObjectsSelectionFX->GetVariableByName("V")->AsMatrix();
 
 	D3D11_BUFFER_DESC inputDesc;
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	inputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_BOUNDING_SPHERES_COUNT;
 	inputDesc.CPUAccessFlags = 0;
 	inputDesc.StructureByteStride = sizeof uint32_t;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1085,15 +1085,15 @@ void GraphicsCore::initRoughObjectsSelection()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
-	uavDesc.Buffer.NumElements = MaxEnvelopesCount;
+	uavDesc.Buffer.NumElements = MAX_BOUNDING_SPHERES_COUNT;
 
-	device->CreateUnorderedAccessView(mInputSelectedObjectsBuffer, &uavDesc, &selectedObjectsUAV);
-	mSelectedObjects->SetUnorderedAccessView(selectedObjectsUAV);
+	device->CreateUnorderedAccessView(mInputSelectedObjectsBuffer, &uavDesc, &mSelectedObjectsUAV);
+	mSelectedObjects->SetUnorderedAccessView(mSelectedObjectsUAV);
 
 	D3D11_BUFFER_DESC outputDesc;
 	outputDesc.Usage = D3D11_USAGE_STAGING;
 	outputDesc.BindFlags = 0;
-	outputDesc.ByteWidth = sizeof(uint32_t) * MaxEnvelopesCount;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MAX_BOUNDING_SPHERES_COUNT;
 	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	outputDesc.StructureByteStride = sizeof uint32_t;
 	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1101,50 +1101,50 @@ void GraphicsCore::initRoughObjectsSelection()
 	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedObjectsBuffer);
 
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
-	inputDesc.ByteWidth = MaxEnvelopesCount * sizeof(Envelope);
+	inputDesc.ByteWidth = MAX_BOUNDING_SPHERES_COUNT * sizeof(flt4);
 	inputDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
 	inputDesc.CPUAccessFlags = 0;
-	inputDesc.StructureByteStride = sizeof Envelope;
+	inputDesc.StructureByteStride = sizeof flt4;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	device->CreateBuffer(&inputDesc, nullptr, &mEnvelopesBuffer);
+	device->CreateBuffer(&inputDesc, nullptr, &mBoundingSpheresBuffer);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	srvDesc.BufferEx.FirstElement = 0;
 	srvDesc.BufferEx.Flags = 0;
-	srvDesc.BufferEx.NumElements = MaxEnvelopesCount;
-	device->CreateShaderResourceView(mEnvelopesBuffer, &srvDesc, &envelopesBufferSRV);
+	srvDesc.BufferEx.NumElements = MAX_BOUNDING_SPHERES_COUNT;
+	device->CreateShaderResourceView(mBoundingSpheresBuffer, &srvDesc, &mBoundingSpheresBufferSRV);
 
-	mEnvelopes->SetResource(envelopesBufferSRV);
+	mBoundingSpheres->SetResource(mBoundingSpheresBufferSRV);
 }
 
-void GraphicsCore::updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount)
+void GraphicsCore::updateBoundingSpheres(flt4 spheres[])
 {
-	context->UpdateSubresource(mEnvelopesBuffer, 0, 0, envelopes, 0, 0);
+	context->UpdateSubresource(mBoundingSpheresBuffer, 0, 0, spheres, 0, 0);
 }
 
-void GraphicsCore::setEnvelopesCount(uint32_t envelopesCount)
+void GraphicsCore::setSpheresCount(uint32_t spheresCount)
 {
-	mEnvelopesCount->SetRawValue(&envelopesCount, 0, sizeof uint32_t);
-	this->envelopesCount = envelopesCount;
+	mSpheresCount->SetRawValue(&spheresCount, 0, sizeof uint32_t);
+	this->spheresCount = spheresCount;
 }
 
-void GraphicsCore::setSelectorEnvelopeRough(Envelope& selectorEnvelope)
+void GraphicsCore::setSelectorFrustumRough(Frustum& selectorFrustum)
 {
-	mSelectorEnvelopeRough->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
+	mSelectorFrustumRough->SetRawValue(&selectorFrustum, 0, sizeof Frustum);
 }
 
-void GraphicsCore::setVP(flt4x4& VP)
+void GraphicsCore::setV(flt4x4& V)
 {
-	mVP->SetMatrix((float*)(&VP));
+	mV->SetMatrix((float*)(&V));
 }
 
 void GraphicsCore::findRoughlySelectedObjects()
 {
 	mRoughObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t threads_x = std::ceil(float(envelopesCount) / 256.0f);
+	uint32_t threads_x = std::ceil(float(spheresCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
 	context->CSSetShader(0, 0, 0);
 }
@@ -1157,7 +1157,7 @@ void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* 
 	context->Map(mOutputSelectedObjectsBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
 	uint32_t* selectedObjects = (uint32_t*)mappedData.pData;
-	for (uint32_t i = 0; i < envelopesCount; ++i)
+	for (uint32_t i = 0; i < spheresCount; ++i)
 	{
 		if (selectedObjects[i] == 0)
 			continue;

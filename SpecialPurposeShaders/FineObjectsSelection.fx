@@ -1,8 +1,9 @@
-#include "Envelope.hlsl"
 #include "IntersectionUtils.hlsl"
 
-Envelope selectorEnvelope;
-float4x4 WVP;
+Frustum selectorFrustum;
+StructuredBuffer<Segment> selectorFrustumDiagonals;
+
+float4x4 WV;
 float threshold;
 
 StructuredBuffer<float3> vertices;
@@ -26,14 +27,14 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float4 v1 = float4(vertices[vi1], 1);
 	float4 v2 = float4(vertices[vi2], 1);
 
-	v0 = mul(v0, WVP);
-	v1 = mul(v1, WVP);
-	v2 = mul(v2, WVP);
+	v0 = mul(v0, WV);
+	v1 = mul(v1, WV);
+	v2 = mul(v2, WV);
 
 	Triangle tri;
-	tri.v0 = v0.xyz / v0.w;
-	tri.v1 = v1.xyz / v1.w;
-	tri.v2 = v2.xyz / v2.w;
+	tri.v0 = v0.xyz;
+	tri.v1 = v1.xyz;
+	tri.v2 = v2.xyz;
 
 	selectedTriangles[triangleIndex] = 0;
 	if (checkIntersection(selectorEnvelope, tri, threshold))

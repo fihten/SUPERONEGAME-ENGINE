@@ -1,26 +1,28 @@
-#include "EnvelopeUtils.hlsl"
+#include "IntersectionUtils.hlsl"
 
-StructuredBuffer<Envelope> envelopes;
-uint envelopesCount;
+StructuredBuffer<float4> boundingSpheres;
+uint spheresCount;
 
-Envelope selectorEnvelope;
-
+Frustum selectorFrustum;
 RWStructuredBuffer<uint> selectedObjects;
 
-float4x4 VP;
+float4x4 V;
 
 [numthreads(256,1,1)]
 void CS(int3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int envelopeIndex = dispatchThreadID.x;
-	if (envelopeIndex >= envelopesCount)
+	int sphereIndex = dispatchThreadID.x;
+	if (sphereIndex >= spheresCount)
 		return;
 
-	selectedObjects[envelopeIndex] = 0;
-	Envelope envelope = envelopes[envelopeIndex];
-	envelope.transform = mul(envelope.transform, VP);
-	if(checkIntersection(selectorEnvelope, envelope))
-		selectedObjects[envelopeIndex] = 1;
+	float4 sphere = boundingSpheres[sphereIndex];
+	sphere.w = 1;
+	sphere = mul(sphere, V);
+	sphere.w = boundingSpheres[sphereIndex].w;
+
+	selectedObjects[sphereIndex] = 0;
+	if(checkIntersection(selectorFrustum, sphere))
+		selectedObjects[sphereIndex] = 1;
 }
 
 technique11 RoughObjectsSelection

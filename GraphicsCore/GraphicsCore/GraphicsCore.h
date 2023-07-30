@@ -6,7 +6,9 @@
 #include <dxgiformat.h>
 #include <dxgi.h>
 #include <memory>
-#include "Envelope.h"
+#include "Frustum.h"
+
+#define MAX_BOUNDING_SPHERES_COUNT 65536
 
 class GraphicsCore;
 
@@ -40,12 +42,31 @@ public:
 	void resize(UINT width, UINT height);
 
 public:
-	void updateEnvelopes(Envelope envelopes[], uint32_t envelopesCount);
-	void setEnvelopesCount(uint32_t envelopesCount);
-	void setSelectorEnvelopeRough(Envelope& selectorEnvelope);
-	void setVP(flt4x4& VP);
+	void updateBoundingSpheres(flt4 spheres[]);
+	void setSpheresCount(uint32_t spheresCount);
+	void setSelectorFrustumRough(Frustum& selectorFrustum);
+	void setV(flt4x4& V);
 	void findRoughlySelectedObjects();
 	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
+
+private:
+	void initRoughObjectsSelection();
+	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
+	ID3DX11EffectTechnique* mRoughObjectsSelectionTech = nullptr;
+	ID3DX11EffectShaderResourceVariable* mBoundingSpheres = nullptr;
+	ID3DX11EffectVariable* mSpheresCount = nullptr;
+	ID3DX11EffectVariable* mSelectorFrustumRough = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
+	ID3DX11EffectMatrixVariable* mV = nullptr;
+
+	uint32_t spheresCount = 0;
+
+	ID3D11Buffer* mInputSelectedObjectsBuffer = nullptr;
+	ID3D11UnorderedAccessView* mSelectedObjectsUAV = nullptr;
+	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
+
+	ID3D11Buffer* mBoundingSpheresBuffer = nullptr;
+	ID3D11ShaderResourceView* mBoundingSpheresBufferSRV = nullptr;
 
 public:
 	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
@@ -55,22 +76,6 @@ public:
 	void setTrianglesCount(uint32_t trianglesCount);
 	void checkIntersection();
 	bool isObjectIntersected();
-
-private:
-	void initRoughObjectsSelection();
-	ID3DX11Effect* mRoughObjectsSelectionFX = nullptr;
-	ID3DX11EffectTechnique* mRoughObjectsSelectionTech = nullptr;
-	ID3DX11EffectShaderResourceVariable* mEnvelopes = nullptr;
-	ID3DX11EffectVariable* mEnvelopesCount = nullptr;
-	ID3DX11EffectVariable* mSelectorEnvelopeRough = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjects = nullptr;
-	ID3DX11EffectMatrixVariable* mVP = nullptr;
-	uint32_t envelopesCount = 0;
-	ID3D11Buffer* mInputSelectedObjectsBuffer = nullptr;
-	ID3D11UnorderedAccessView* selectedObjectsUAV = nullptr;
-	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
-	ID3D11Buffer* mEnvelopesBuffer = nullptr;
-	ID3D11ShaderResourceView* envelopesBufferSRV = nullptr;
 
 private:
 	void initFineObjectsSelection();
