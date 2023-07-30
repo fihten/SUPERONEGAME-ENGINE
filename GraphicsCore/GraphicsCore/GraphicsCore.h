@@ -7,6 +7,7 @@
 #include <dxgi.h>
 #include <memory>
 #include "Frustum.h"
+#include "Segment.h"
 
 #define MAX_BOUNDING_SPHERES_COUNT 65536
 
@@ -69,8 +70,9 @@ private:
 	ID3D11ShaderResourceView* mBoundingSpheresBufferSRV = nullptr;
 
 public:
-	void setSelectorEnvelopeFine(Envelope& selectorEnvelope);
-	void setWVP(flt4x4& WVP);
+	void setSelectorFrustumFine(Frustum& selectorFrustum);
+	void updateSelectorFrustumDiagonals(Segment diagonals[]);
+	void setWV(flt4x4& WV);
 	void setThreshold(float threshold);
 	void setGeometryForFineSelection(const Mesh& mesh);
 	void setTrianglesCount(uint32_t trianglesCount);
@@ -81,17 +83,24 @@ private:
 	void initFineObjectsSelection();
 	ID3DX11Effect* mFineObjectsSelectionFX = nullptr;
 	ID3DX11EffectTechnique* mFineObjectsSelectionTech = nullptr;
-	ID3DX11EffectVariable* mSelectorEnvelopeFine = nullptr;
-	ID3DX11EffectMatrixVariable* mWVP = nullptr;
+	ID3DX11EffectVariable* mSelectorFrustumFine = nullptr;
+	ID3DX11EffectShaderResourceVariable* mSelectorFrustumDiagonals = nullptr;
+	ID3DX11EffectMatrixVariable* mWV = nullptr;
 	ID3DX11EffectVariable* mThreshold = nullptr;
+	
 	ID3DX11EffectShaderResourceVariable* mVertices = nullptr;
 	ID3DX11EffectShaderResourceVariable* mIndicies = nullptr;
 	ID3DX11EffectVariable* mTrianglesCount = nullptr;
+	
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
 	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
 	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
 	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
+
 	uint32_t trianglesCount = 0;
+
+	ID3D11Buffer* mSelectorFrustumDiagonalsBuffer = nullptr;
+	ID3D11ShaderResourceView* mSelectorFrustumDiagonalsBufferSRV = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

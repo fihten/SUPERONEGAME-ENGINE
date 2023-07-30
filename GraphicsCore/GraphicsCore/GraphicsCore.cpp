@@ -1193,8 +1193,9 @@ void GraphicsCore::initFineObjectsSelection()
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mFineObjectsSelectionFX);
 
 	mFineObjectsSelectionTech = mFineObjectsSelectionFX->GetTechniqueByName("FineObjectsSelection");
-	mSelectorEnvelopeFine = mFineObjectsSelectionFX->GetVariableByName("selectorEnvelope");
-	mWVP = mFineObjectsSelectionFX->GetVariableByName("WVP")->AsMatrix();
+	mSelectorFrustumFine = mFineObjectsSelectionFX->GetVariableByName("selectorFrustum");
+	mSelectorFrustumDiagonals = mRoughObjectsSelectionFX->GetVariableByName("selectorFrustumDiagonals")->AsShaderResource();
+	mWV = mFineObjectsSelectionFX->GetVariableByName("WV")->AsMatrix();
 	mThreshold = mFineObjectsSelectionFX->GetVariableByName("threshold");
 	mVertices = mFineObjectsSelectionFX->GetVariableByName("vertices")->AsShaderResource();
 	mIndicies = mFineObjectsSelectionFX->GetVariableByName("indicies")->AsShaderResource();
@@ -1232,14 +1233,19 @@ void GraphicsCore::initFineObjectsSelection()
 	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedTrianglesBuffer);
 }
 
-void GraphicsCore::setSelectorEnvelopeFine(Envelope& selectorEnvelope)
+void GraphicsCore::setSelectorFrustumFine(Frustum& selectorFrustum)
 {
-	mSelectorEnvelopeFine->SetRawValue(&selectorEnvelope, 0, sizeof Envelope);
+	mSelectorFrustumFine->SetRawValue(&selectorFrustum, 0, sizeof Frustum);
 }
 
-void GraphicsCore::setWVP(flt4x4& WVP)
+void GraphicsCore::updateSelectorFrustumDiagonals(Segment diagonals[])
 {
-	mWVP->SetMatrix((float*)(&WVP));
+	context->UpdateSubresource(mSelectorFrustumDiagonalsBuffer, 0, 0, diagonals, 0, 0);
+}
+
+void GraphicsCore::setWV(flt4x4& WV)
+{
+	mWV->SetMatrix((float*)(&WV));
 }
 
 void GraphicsCore::setThreshold(float threshold)
