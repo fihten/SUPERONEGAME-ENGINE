@@ -35,6 +35,10 @@ public:
 	const flt3& getFwd();
 	const flt4x4& getView();
 	const flt4x4& getProj();
+	float getNear();
+	float getFar();
+	float getFov();
+	float getAspectRatio();
 
 	void setAspectRatio(float aspectRatio);
 

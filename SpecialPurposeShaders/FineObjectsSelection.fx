@@ -37,7 +37,7 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	tri.v2 = v2.xyz;
 
 	selectedTriangles[triangleIndex] = 0;
-	if (checkIntersection(selectorEnvelope, tri, threshold))
+	if (checkIntersection(selectorFrustum, selectorFrustumDiagonals, tri, threshold))
 		selectedTriangles[triangleIndex] = 1;
 }
 

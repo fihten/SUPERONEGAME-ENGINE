@@ -1,16 +1,9 @@
 #pragma once
-#include "Envelope.h"
 #include "Mesh.h"
-
-struct SelectedObjectBox
-{
-	flt3 posW;
-	flt3 axis0;
-	flt3 axis1;
-	flt3 axis2;
-	flt3 color;
-	float size;
-};
+#include "SelectedObjectBox.h"
+#include "GraphicsCore.h"
+#include "Frustum.h"
+#include "Segment.h"
 
 class Selector
 {
@@ -26,8 +19,11 @@ public:
 	void turnOn();
 	void turnOff();
 
-	SelectedObjectBox selectedObjectsBoxes[MaxEnvelopesCount];
+	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	uint32_t selectedObjectsCount = 0;
+
+	Frustum selectorFrustum;
+	Segment selectorFrustumDiagonals[4];
 
 private:
 	static Selector* pSelector;

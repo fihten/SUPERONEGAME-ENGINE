@@ -52,6 +52,26 @@ const flt4x4& Camera::getProj()
 	return proj;
 }
 
+float Camera::getNear()
+{
+	return nearZ;
+}
+
+float Camera::getFar()
+{
+	return farZ;
+}
+
+float Camera::getFov()
+{
+	return fovY;
+}
+
+float Camera::getAspectRatio()
+{
+	return aspectRatio;
+}
+
 void Camera::setAspectRatio(float aspectRatio)
 {
 	this->aspectRatio = aspectRatio;

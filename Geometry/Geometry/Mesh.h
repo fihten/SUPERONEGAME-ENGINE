@@ -131,6 +131,8 @@ public:
 	virtual flt3 getBottomBorder() const;
 	virtual flt3 getTopBorder() const;
 
+	virtual void getBoundingSphere(flt4& sphere, const flt4x4& transform) const;
+
 	friend Mesh createCube();
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();

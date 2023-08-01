@@ -1135,9 +1135,9 @@ void GraphicsCore::setSelectorFrustumRough(Frustum& selectorFrustum)
 	mSelectorFrustumRough->SetRawValue(&selectorFrustum, 0, sizeof Frustum);
 }
 
-void GraphicsCore::setV(flt4x4& V)
+void GraphicsCore::setV(const flt4x4& V)
 {
-	mV->SetMatrix((float*)(&V));
+	mV->SetMatrix((const float*)(&V));
 }
 
 void GraphicsCore::findRoughlySelectedObjects()
@@ -1167,7 +1167,7 @@ void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* 
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }
 
-#define MaxTrianglesCount 20000
+#define MAX_TRIANGLES_COUNT 65536
 void GraphicsCore::initFineObjectsSelection()
 {
 	char shadersFolder[200];
@@ -1194,7 +1194,7 @@ void GraphicsCore::initFineObjectsSelection()
 
 	mFineObjectsSelectionTech = mFineObjectsSelectionFX->GetTechniqueByName("FineObjectsSelection");
 	mSelectorFrustumFine = mFineObjectsSelectionFX->GetVariableByName("selectorFrustum");
-	mSelectorFrustumDiagonals = mRoughObjectsSelectionFX->GetVariableByName("selectorFrustumDiagonals")->AsShaderResource();
+	mSelectorFrustumDiagonals = mFineObjectsSelectionFX->GetVariableByName("selectorFrustumDiagonals")->AsShaderResource();
 	mWV = mFineObjectsSelectionFX->GetVariableByName("WV")->AsMatrix();
 	mThreshold = mFineObjectsSelectionFX->GetVariableByName("threshold");
 	mVertices = mFineObjectsSelectionFX->GetVariableByName("vertices")->AsShaderResource();
@@ -1205,7 +1205,7 @@ void GraphicsCore::initFineObjectsSelection()
 	D3D11_BUFFER_DESC inputDesc;
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	inputDesc.ByteWidth = sizeof(uint32_t) * MaxTrianglesCount;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_TRIANGLES_COUNT;
 	inputDesc.CPUAccessFlags = 0;
 	inputDesc.StructureByteStride = sizeof uint32_t;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1217,7 +1217,7 @@ void GraphicsCore::initFineObjectsSelection()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
-	uavDesc.Buffer.NumElements = MaxTrianglesCount;
+	uavDesc.Buffer.NumElements = MAX_TRIANGLES_COUNT;
 
 	device->CreateUnorderedAccessView(mInputSelectedTrianglesBuffer, &uavDesc, &selectedTrianglesUAV);
 	mSelectedTriangles->SetUnorderedAccessView(selectedTrianglesUAV);
@@ -1225,12 +1225,30 @@ void GraphicsCore::initFineObjectsSelection()
 	D3D11_BUFFER_DESC outputDesc;
 	outputDesc.Usage = D3D11_USAGE_STAGING;
 	outputDesc.BindFlags = 0;
-	outputDesc.ByteWidth = sizeof(uint32_t) * MaxTrianglesCount;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MAX_TRIANGLES_COUNT;
 	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	outputDesc.StructureByteStride = sizeof uint32_t;
 	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 
 	device->CreateBuffer(&outputDesc, 0, &mOutputSelectedTrianglesBuffer);
+
+	inputDesc.Usage = D3D11_USAGE_DEFAULT;
+	inputDesc.ByteWidth = 4 * sizeof(Segment);
+	inputDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	inputDesc.CPUAccessFlags = 0;
+	inputDesc.StructureByteStride = sizeof Segment;
+	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	device->CreateBuffer(&inputDesc, nullptr, &mSelectorFrustumDiagonalsBuffer);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = 4;
+	device->CreateShaderResourceView(mSelectorFrustumDiagonalsBuffer, &srvDesc, &mSelectorFrustumDiagonalsBufferSRV);
+
+	mSelectorFrustumDiagonals->SetResource(mSelectorFrustumDiagonalsBufferSRV);
 }
 
 void GraphicsCore::setSelectorFrustumFine(Frustum& selectorFrustum)

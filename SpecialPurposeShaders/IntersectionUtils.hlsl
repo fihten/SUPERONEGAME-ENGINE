@@ -87,7 +87,7 @@ bool doesContain(Frustum frustum, int plane_number, float3 pt)
 	bool bContain = true;
 	[unroll]
 	for (int pi = 0; pi < plane_number; ++pi)
-		bContain = bContain && (dot(frustum[pi], float4(pt, 1)) < 0);
+		bContain = bContain && (dot(frustum.plane[pi], float4(pt, 1)) < 0);
 	return bContain;
 }
 
@@ -149,12 +149,11 @@ bool checkIntersectionBySide(Frustum frustum, Triangle tri, float threshold)
 	[unroll]
 	for (int pi = 0; pi < PLANE_NUMBER; ++pi)
 	{
-		float4 plane = float4(n[pi], -dot(n[pi], r0[pi]));
 		[unroll]
 		for (int si = 0; si < 3; ++si)
 		{
 			float t = 0;
-			uint intersectionInfo = findIntersection(plane, segments[si], t);
+			uint intersectionInfo = findIntersection(frustum.plane[pi], segments[si], t);
 			if (intersectionInfo != SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE)
 				continue;
 

@@ -834,3 +834,38 @@ flt3 Mesh::getTopBorder() const
 
 	return max;
 }
+
+void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
+{
+	sphere.x() = 0;
+	sphere.y() = 0;
+	sphere.z() = 0;
+	sphere.w() = 0;
+
+	const auto& it = std::find_if(
+		flt3_streams.begin(),
+		flt3_streams.end(),
+		[&](auto& el)->bool
+	{
+		return el.first == std::string("POSITION");
+	}
+	);
+	if (it == flt3_streams.end())
+		return;
+
+	auto& flt3s = it->second;
+	for (auto& v : flt3s)
+	{
+		flt4 v4(v, 1);
+		sphere.xyz() += (v4 * const_cast<flt4x4&>(transform)).xyz();
+	}
+	sphere.xyz() /= flt3s.size();
+
+	for (auto& v : flt3s)
+	{
+		flt4 v4(v, 1);
+		float r = ((v4 * const_cast<flt4x4&>(transform)).xyz() - sphere.xyz()).length();
+		if (r > sphere.w())
+			sphere.w() = r;
+	}
+}

@@ -46,7 +46,7 @@ public:
 	void updateBoundingSpheres(flt4 spheres[]);
 	void setSpheresCount(uint32_t spheresCount);
 	void setSelectorFrustumRough(Frustum& selectorFrustum);
-	void setV(flt4x4& V);
+	void setV(const flt4x4& V);
 	void findRoughlySelectedObjects();
 	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
 

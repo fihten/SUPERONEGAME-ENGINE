@@ -26,26 +26,71 @@ void Selector::selectObjects(
 	float mousePosX1, float mousePosY1
 )
 {
-	Envelope selectorEnvelope;
-
-	selectorEnvelope.min.x() = std::min<float>(mousePosX0, mousePosX1);
-	selectorEnvelope.min.y() = std::min<float>(mousePosY0, mousePosY1);
-	selectorEnvelope.min.z() = 0;
-
-	selectorEnvelope.max.x() = std::max<float>(mousePosX0, mousePosX1);
-	selectorEnvelope.max.y() = std::max<float>(mousePosY0, mousePosY1);
-	selectorEnvelope.max.z() = 1;
-
-	GraphicsCore::instance()->setSelectorEnvelopeRough(selectorEnvelope);
+	auto& camera = cameras()[MAIN_CAMERA];
 	
-	flt4x4 view = cameras()[MAIN_CAMERA].getView();
-	flt4x4 proj = cameras()[MAIN_CAMERA].getProj();
-	flt4x4 vp = view * proj;
-	GraphicsCore::instance()->setVP(vp);
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+	
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	float minX = 0.5 * w * std::min<float>(mousePosX0, mousePosX1);
+	float maxX = 0.5 * w * std::max<float>(mousePosX0, mousePosX1);
+
+	float minY = 0.5 * h * std::min<float>(mousePosY0, mousePosY1);
+	float maxY = 0.5 * h * std::max<float>(mousePosY0, mousePosY1);
+
+	flt3 frontNormal(0, 0, -1);
+	flt3 frontPoint(0, 0, nearZ);
+	selectorFrustum.plane[FRONT_PLANE] = flt4(frontNormal, -dot(frontNormal, frontPoint));
+
+	flt3 backNormal(0, 0, 1);
+	float farZ = camera.getFar();
+	flt3 backPoint(0, 0, farZ);
+	selectorFrustum.plane[BACK_PLANE] = flt4(backNormal, -dot(backNormal, backPoint));
+
+	flt3 leftNormal(-nearZ, 0, minX);
+	leftNormal.normalize();
+	flt3 leftPoint(minX, minY, nearZ);
+	selectorFrustum.plane[LEFT_PLANE] = flt4(leftNormal, -dot(leftNormal, leftPoint));
+
+	flt3 rightNormal(nearZ, 0, -maxX);
+	rightNormal.normalize();
+	flt3 rightPoint(maxX, maxY, nearZ);
+	selectorFrustum.plane[RIGHT_PLANE] = flt4(rightNormal, -dot(rightNormal, rightPoint));
+
+	flt3 bottomNormal(0, -nearZ, minY);
+	bottomNormal.normalize();
+	flt3 bottomPoint(maxX, minY, nearZ);
+	selectorFrustum.plane[BOTTOM_PLANE] = flt4(bottomNormal, -dot(bottomNormal, bottomPoint));
+
+	flt3 topNormal(0, nearZ, -maxY);
+	topNormal.normalize();
+	flt3 topPoint(maxX, maxY, nearZ);
+	selectorFrustum.plane[TOP_PLANE] = flt4(topNormal, -dot(topNormal, topPoint));
+
+	GraphicsCore::instance()->setSelectorFrustumRough(selectorFrustum);
+
+	selectorFrustumDiagonals[0].v0 = flt3(minX, minY, nearZ);
+	selectorFrustumDiagonals[0].v1 = (farZ / nearZ) * flt3(maxX, maxY, nearZ);
+
+	selectorFrustumDiagonals[1].v0 = flt3(minX, maxY, nearZ);
+	selectorFrustumDiagonals[1].v1 = (farZ / nearZ) * flt3(maxX, minY, nearZ);
+
+	selectorFrustumDiagonals[2].v0 = flt3(maxX, minY, nearZ);
+	selectorFrustumDiagonals[2].v1 = (farZ / nearZ) * flt3(minX, maxY, nearZ);
+
+	selectorFrustumDiagonals[3].v0 = flt3(maxX, maxY, nearZ);
+	selectorFrustumDiagonals[3].v1 = (farZ / nearZ) * flt3(minX, minY, nearZ);
+
+	GraphicsCore::instance()->updateSelectorFrustumDiagonals(selectorFrustumDiagonals);
+
+	GraphicsCore::instance()->setV(camera.getView());
 
 	GraphicsCore::instance()->findRoughlySelectedObjects();
 
-	GraphicsCore::instance()->setSelectorEnvelopeFine(selectorEnvelope);
+	GraphicsCore::instance()->setSelectorFrustumFine(selectorFrustum);
 	GraphicsCore::instance()->setThreshold(0.0);
 
 	selectedObjectsCount = 0;
@@ -62,16 +107,15 @@ void Selector::selectObjects(
 
 				void startVisit(const Scene::MeshNode* node)
 				{
-					NodeID meshID = MainScene::instance()->envelopeToNode[objectID];
+					NodeID meshID = MainScene::instance()->boundingSphereToNode[objectID];
 					if (node->ID != meshID)
 						return;
 					
 					flt4x4 world = MainScene::instance()->getNodePosition(meshID);
 					flt4x4 view = cameras()[MAIN_CAMERA].getView();
-					flt4x4 proj = cameras()[MAIN_CAMERA].getProj();
 
-					flt4x4 wvp = world * view * proj;
-					GraphicsCore::instance()->setWVP(wvp);
+					flt4x4 wv = world * view;
+					GraphicsCore::instance()->setWV(wv);
 					GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
 					GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
 
@@ -80,27 +124,7 @@ void Selector::selectObjects(
 					{
 						auto& boxes = Selector::instance()->selectedObjectsBoxes;
 						auto& count = Selector::instance()->selectedObjectsCount;
-						auto& selectedObjectBox = boxes[count++];
-
-						flt3& min = MainScene::instance()->envelopes[objectID].min;
-						flt3& max = MainScene::instance()->envelopes[objectID].max;
-						
-						flt4x4& w = MainScene::instance()->envelopes[objectID].transform;
-
-						flt4 posL(0.5f * (min + max), 1.0f);
-						selectedObjectBox.posW = (posL * w).xyz();
-
-						selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
-						selectedObjectBox.axis0 = selectedObjectBox.axis0 * w;
-
-						selectedObjectBox.axis1 = 0.5f * (max.y() - min.y()) * flt3(0, 1.1f, 0);
-						selectedObjectBox.axis1 = selectedObjectBox.axis1 * w;
-
-						selectedObjectBox.axis2 = 0.5f * (max.z() - min.z()) * flt3(0, 0, 1.1f);
-						selectedObjectBox.axis2 = selectedObjectBox.axis2 * w;
-
-						selectedObjectBox.color = flt3(1, 0, 0);
-						selectedObjectBox.size = 0.5f;
+						boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
 					}
 				}
 			};

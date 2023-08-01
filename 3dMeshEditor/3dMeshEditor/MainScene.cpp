@@ -19,15 +19,34 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 {
 	NodeID meshNode = scene.addMeshNode(mesh, id);
 
-	
-	envelopes[envelopesCount].min = mesh->getBottomBorder();
-	envelopes[envelopesCount].max = mesh->getTopBorder();
-	envelopes[envelopesCount].transform = scene.getNodePosition(meshNode);
-	envelopeToNode[envelopesCount] = meshNode;
-	++envelopesCount;
+	auto& selectedObjectBox = selectedObjectsBoxes[spheresCount];
 
-	GraphicsCore::instance()->updateEnvelopes(envelopes, envelopesCount);
-	GraphicsCore::instance()->setEnvelopesCount(envelopesCount);
+	flt3 min = mesh->getBottomBorder();
+	flt3 max = mesh->getTopBorder();
+
+	flt4 posL(0.5f * (min + max), 1.0f);
+	
+	flt4x4 pos = scene.getNodePosition(id);
+	selectedObjectBox.posW = (posL * pos).xyz();
+
+	selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
+	selectedObjectBox.axis0 = selectedObjectBox.axis0 * pos;
+
+	selectedObjectBox.axis1 = 0.5f * (max.y() - min.y()) * flt3(0, 1.1f, 0);
+	selectedObjectBox.axis1 = selectedObjectBox.axis1 * pos;
+
+	selectedObjectBox.axis2 = 0.5f * (max.z() - min.z()) * flt3(0, 0, 1.1f);
+	selectedObjectBox.axis2 = selectedObjectBox.axis2 * pos;
+
+	selectedObjectBox.color = flt3(1, 0, 0);
+	selectedObjectBox.size = 0.5f;
+
+	mesh->getBoundingSphere(boundingSpheres[spheresCount], pos);
+	boundingSphereToNode[spheresCount] = meshNode;
+	++spheresCount;
+
+	GraphicsCore::instance()->updateBoundingSpheres(boundingSpheres);
+	GraphicsCore::instance()->setSpheresCount(spheresCount);
 
 	return meshNode;
 }

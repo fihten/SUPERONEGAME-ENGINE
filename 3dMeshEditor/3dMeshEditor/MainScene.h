@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Scene.h"
-#include "Envelope.h"
+#include "SelectedObjectBox.h"
+#include "GraphicsCore.h"
 
 class MainScene
 {
@@ -16,9 +17,10 @@ public:
 	flt4x4 getNodePosition(NodeID id) const;
 	void accept(Scene::Visitor* visitor) const;
 
-	Envelope envelopes[MaxEnvelopesCount];
-	NodeID envelopeToNode[MaxEnvelopesCount];
-	uint32_t envelopesCount = 0;
+	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
+	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];
+	NodeID boundingSphereToNode[MAX_BOUNDING_SPHERES_COUNT];
+	uint32_t spheresCount = 0;
 
 private:
 	Scene scene;
