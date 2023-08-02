@@ -399,14 +399,14 @@ void ResourceManager::getFloat1s(const std::string& techniqueName, std::map<std:
 	flt1s = techniqueRes.float1s;
 }
 
-void ResourceManager::getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs)
+std::map<std::string, StructResource>& ResourceManager::getStructures(const std::string& techniqueName)
 {
-	structs.clear();
+	static std::map<std::string, StructResource> empty;
 	if (techniques.count(techniqueName) == 0)
-		return;
+		return empty;
 
 	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	structs = techniqueRes.structures;
+	return techniqueRes.structures;
 }
 
 void ResourceManager::getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures)

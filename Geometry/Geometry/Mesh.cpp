@@ -792,7 +792,7 @@ flt3 Mesh::getBottomBorder() const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return el.first == std::string("POSITION");
+		return std::strcmp(el.first.c_str(), "POSITION") == 0;
 	}
 	);
 	if (it == flt3_streams.end())
@@ -818,7 +818,7 @@ flt3 Mesh::getTopBorder() const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return el.first == std::string("POSITION");
+		return std::strcmp(el.first.c_str(), "POSITION") == 0;
 	}
 	);
 	if (it == flt3_streams.end())
@@ -847,7 +847,7 @@ void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return el.first == std::string("POSITION");
+		return std::strcmp(el.first.c_str(), "POSITION") == 0;
 	}
 	);
 	if (it == flt3_streams.end())

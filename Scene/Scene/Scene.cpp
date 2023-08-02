@@ -26,6 +26,10 @@ Scene::Scene()
 {
 	root = new Scene::RootNode(nextId++);
 	root->scene = this;
+
+	nodes.reserve(100);
+	nodes.resize(1);
+	nodes[0] = root;
 }
 
 Scene::~Scene()
@@ -78,7 +82,7 @@ void Scene::MeshNode::accept(Visitor* visitor) const
 
 NodeID Scene::addTransformNode(const flt4x4& pos, NodeID id)
 {
-	Scene::Node* node = root->findNodeByID(id);
+	Scene::Node* node = nodes[id];
 	if (node == nullptr)
 		return NodeID(-1);
 
@@ -87,12 +91,16 @@ NodeID Scene::addTransformNode(const flt4x4& pos, NodeID id)
 	addedNode->scene = this;
 	node->addChild(addedNode);
 
+	if (nodes.size() <= id)
+		nodes.resize(id + 1, nullptr);
+	nodes[id] = addedNode;
+
 	return id;
 }
 
 NodeID Scene::addMeshNode(Mesh* mesh, NodeID id)
 {
-	Scene::Node* node = root->findNodeByID(id);
+	Scene::Node* node = nodes[id];
 	if (node == nullptr)
 		return NodeID(-1);
 
@@ -103,6 +111,10 @@ NodeID Scene::addMeshNode(Mesh* mesh, NodeID id)
 
 	mesh->scene = (void*)this;
 	mesh->nodeID = (int)id;
+
+	if (nodes.size() <= id)
+		nodes.resize(id + 1, nullptr);
+	nodes[id] = addedNode;
 
 	return id;
 }
@@ -145,7 +157,7 @@ void Scene::RootNode::accept(Visitor* visitor) const
 
 void Scene::setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal)
 {
-	Node* node = root->findNodeByID(id);
+	Node* node = nodes[id];
 	if (node == nullptr)
 		return;
 	node->setParam(paramName, paramVal);
@@ -165,17 +177,17 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 			id = location.at(paramName);
 	}
 
-	Node* node = root->findNodeByID(id);
+	Node* node = nodes[id];
 	std::string paramValue = "";
 	if (node->params.count(paramName) == 1)
 		paramValue = node->params.at(paramName);
 
-	if (paramValue == std::string("node_position"))
+	if (std::strcmp(paramValue.c_str(), "node_position") == 0)
 	{
 		flt4x4 pos = node->getPos();
 		return flt3(pos.m30(), pos.m31(), pos.m32());
 	}
-	if (paramValue == std::string("node_axis_z"))
+	if (std::strcmp(paramValue.c_str(), "node_axis_z") == 0)
 	{
 		flt4x4 pos = node->getPos();
 		return flt3(pos.m20(), pos.m21(), pos.m22());
@@ -186,7 +198,7 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 
 flt4x4 Scene::getNodePosition(NodeID id) const
 {
-	Node* node = root->findNodeByID(id);
+	Node* node = nodes[id];
 	if (node == nullptr)
 		return flt4x4();
 	return node->getPos();

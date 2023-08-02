@@ -382,7 +382,7 @@ flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, const std::string& var) const
 		std::string multiplier = place.substr(startOfMultiplier, endOfMultiplier - startOfMultiplier);
 		startOfMultiplier = endOfMultiplier + 1;
 
-		if (multiplier == std::string(""))
+		if (std::strcmp(multiplier.c_str(), "") == 0)
 			continue;
 
 		size_t pos = multiplier.find("cameras[");
@@ -395,36 +395,36 @@ flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, const std::string& var) const
 
 			beg = end + 2;
 			std::string what(multiplier, beg, std::string::npos);
-			if (what == std::string("WVP"))
+			if (std::strcmp(what.c_str(), "WVP") == 0)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * v * p;
 			}
-			if (what == std::string("VP"))
+			if (std::strcmp(what.c_str(), "VP") == 0)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * v * p;
 			}
-			if (what == std::string("V"))
+			if (std::strcmp(what.c_str(), "V") == 0)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				res = res * v;
 			}
-			if (what == std::string("P"))
+			if (std::strcmp(what.c_str(), "P") == 0)
 			{
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * p;
 			}
 			continue;
 		}
-		if (multiplier == std::string("position_in_scene"))
+		if (std::strcmp(multiplier.c_str(), "position_in_scene") == 0)
 		{
 			res = res * mesh.getPosition();
 			continue;
 		}
-		if (multiplier == std::string("inverse_transpose_of_position_in_scene"))
+		if (std::strcmp(multiplier.c_str(), "inverse_transpose_of_position_in_scene") == 0)
 		{
 			res = res * mesh.getPosition().inverse().transpose();
 			continue;
@@ -451,20 +451,20 @@ flt4 GraphicsCore::getFloat4(const Mesh& mesh, const std::string& var) const
 
 		beg = end + 2;
 		std::string what(place, beg, std::string::npos);
-		if (what == std::string("eye_pos"))
+		if (std::strcmp(what.c_str(), "eye_pos") == 0)
 		{
 			res.xyz() = cameras()[index].getEyePos();
 			res.w() = 1;
 			return res;
 		}
-		if (what == std::string("fwd"))
+		if (std::strcmp(what.c_str(), "fwd") == 0)
 		{
 			res.xyz() = cameras()[index].getFwd();
 			res.w() = 1;
 			return res;
 		}
 	}
-	if (place == std::string("position_in_scene"))
+	if (std::strcmp(place.c_str(), "position_in_scene") == 0)
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt4(pos.m30(), pos.m31(), pos.m32(), 1);
@@ -492,18 +492,18 @@ flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
 
 		beg = end + 2;
 		std::string what(place, beg, std::string::npos);
-		if (what == std::string("eye_pos"))
+		if (std::strcmp(what.c_str(), "eye_pos") == 0)
 		{
 			res = cameras()[index].getEyePos();
 			return res;
 		}
-		if (what == std::string("fwd"))
+		if (std::strcmp(what.c_str(), "fwd") == 0)
 		{
 			res = cameras()[index].getFwd();
 			return res;
 		}
 	}
-	if (place == std::string("position_in_scene"))
+	if (std::strcmp(place.c_str(), "position_in_scene") == 0)
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt3(pos.m30(), pos.m31(), pos.m32());
@@ -532,8 +532,8 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 {
 	std::string tech = mesh.getTechnique();
 
-	std::map<std::string, StructResource> structs;
-	ResourceManager::instance()->getStructures(tech, structs);
+	std::map<std::string, StructResource>& structs =
+		ResourceManager::instance()->getStructures(tech);
 
 	StructResource& sr = structs[var];
 
@@ -556,22 +556,22 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 			std::string sValue = mesh.getParam(fieldName);
 
 			char* fieldPtr = elementData + fr.offset;
-			if (fr.type == std::string("float"))
+			if (std::strcmp(fr.type.c_str(), "float") == 0)
 			{
 				float& floatVariable = *((float*)(fieldPtr));
 				floatVariable = std::atof(sValue.c_str());
 			}
-			if (fr.type == std::string("float2"))
+			if (std::strcmp(fr.type.c_str(), "float2") == 0)
 			{
 				flt2& float2Variable = *((flt2*)(fieldPtr));
 				float2Variable = sValue;
 			}
-			if (fr.type == std::string("float3"))
+			if (std::strcmp(fr.type.c_str(), "float3") == 0)
 			{
 				flt3& float3Variable = *((flt3*)(fieldPtr));
 				float3Variable = sValue;
 			}
-			if (fr.type == std::string("float4"))
+			if (std::strcmp(fr.type.c_str(), "float4") == 0)
 			{
 				flt4& float4Variable = *((flt4*)(fieldPtr));
 				float4Variable = sValue;
@@ -936,8 +936,8 @@ void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
 {
 	std::string sTechnique = mesh.getTechnique();
 
-	std::map<std::string, StructResource> structs;
-	ResourceManager::instance()->getStructures(sTechnique, structs);
+	std::map<std::string, StructResource>& structs =
+		ResourceManager::instance()->getStructures(sTechnique);
 	for (auto& s : structs)
 	{
 		int bytes = 0;

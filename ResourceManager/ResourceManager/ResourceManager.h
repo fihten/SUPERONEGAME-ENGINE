@@ -65,7 +65,7 @@ public:
 	void getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s);
 	void getFloat2s(const std::string& techniqueName, std::map<std::string, Float2Resource>& flt2s);
 	void getFloat1s(const std::string& techniqueName, std::map<std::string, Float1Resource>& flt1s);
-	void getStructures(const std::string& techniqueName, std::map<std::string, StructResource>& structs);
+	std::map<std::string, StructResource>& getStructures(const std::string& techniqueName);
 	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
 	void getTexturesArrays(const std::string& techniqueName, std::map<std::string, Texture2dArrayResource>& texturesArrays);
 	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured);

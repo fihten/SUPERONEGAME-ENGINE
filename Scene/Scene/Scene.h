@@ -12,7 +12,7 @@ public:
 	class Visitor;
 	class Node
 	{
-		std::list<Node*> childs;
+		std::vector<Node*> childs;
 		friend Scene;
 	protected:
 		Node* parent = nullptr;
@@ -82,6 +82,9 @@ private:
 		std::map<std::string, NodeID> location;
 	};
 	std::map<NodeID, ParamsLocations> paramsLocations;
+
+private:
+	std::vector<Node*> nodes;
 
 public:
 	Scene();
