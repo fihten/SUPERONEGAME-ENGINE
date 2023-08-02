@@ -2,7 +2,7 @@
 
 void DrawVisitor::startVisit(const Scene::MeshNode* node)
 {
-	GraphicsCore::instance()->draw(MeshInScene(node->mesh));
+	GraphicsCore::instance()->draw(MeshInScene(node->mesh, node->ID));
 }
 
 std::string DrawVisitor::MeshInScene::getTechnique() const
@@ -70,7 +70,7 @@ std::string DrawVisitor::MeshInScene::getParam(const std::string& param) const
 	if (!val.empty())
 		return val;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(mesh->nodeID, param);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param);
 }
 
 flt4x4 DrawVisitor::MeshInScene::getPosition() const
@@ -78,5 +78,5 @@ flt4x4 DrawVisitor::MeshInScene::getPosition() const
 	if (mesh == nullptr)
 		return flt4x4();
 
-	return static_cast<Scene*>(mesh->scene)->getNodePosition(mesh->nodeID);
+	return static_cast<Scene*>(mesh->scene)->getNodePosition(nodeID);
 }

@@ -6,16 +6,10 @@
 #include "DrawVisitor.h"
 #include "Selector.h"
 #include "MainScene.h"
+#include "SelectionObjectsTesting.h"
 #include <Windows.h>
 #include <windef.h>
 
-Mesh cube;
-Mesh sphere;
-Mesh cone;
-Mesh plane;
-Mesh trees;
-Mesh selectionBoxes;
-Scene scene;
 DrawVisitor drawVisitor;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -125,8 +119,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 {
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
-	plane = createPlane(10, 10, 100, 100);
-	MainScene::instance()->addMeshNode(&plane);
+	fillSceneForObjectsSelectionTesting();
 
 	return GraphicsCore::instance()->run();
 }

@@ -1167,7 +1167,7 @@ void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* 
 	context->Unmap(mOutputSelectedObjectsBuffer, 0);
 }
 
-#define MAX_TRIANGLES_COUNT 65536
+#define MAX_TRIANGLES_COUNT 131072
 void GraphicsCore::initFineObjectsSelection()
 {
 	char shadersFolder[200];
