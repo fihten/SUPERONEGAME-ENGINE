@@ -1,13 +1,13 @@
 #pragma once
-#include <string>
 #include <d3d11.h>
 #include "Mesh.h"
+#include "StringManager.h"
 
 struct InputLayoutResource
 {
 	struct StreamInfo
 	{
-		std::string name;
+		string_id name;
 		Mesh::StreamType type;
 		uint32_t size;
 	};

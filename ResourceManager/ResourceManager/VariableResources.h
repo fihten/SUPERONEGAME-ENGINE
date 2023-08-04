@@ -1,38 +1,39 @@
 #pragma once
-#include <string>
+
 #include <D3dx11effect.h>
+#include "StringManager.h"
 
 struct Float4x4Resource
 {
-	std::string location = "";
+	string_id location = string_id(-1);
 	unsigned int elementsCount = 0;
 	ID3DX11EffectMatrixVariable* ptr = nullptr;
 };
 
 struct Float4Resource
 {
-	std::string location = "";
+	string_id location = string_id(-1);
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float3Resource
 {
-	std::string location = "";
+	string_id location = string_id(-1);
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float2Resource
 {
-	std::string location = "";
+	string_id location = string_id(-1);
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float1Resource
 {
-	std::string location = "";
+	string_id location = string_id(-1);
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
@@ -40,14 +41,14 @@ struct Float1Resource
 #define MAX_COUNT_OF_FIELDS 16
 struct StructResource
 {
-	std::string name = "";
+	string_id name = string_id(-1);
 
 	struct Field
 	{
 		unsigned int offset = 0;
 		unsigned int bytes = 0;
-		std::string type = "";
-		std::string name = "";
+		string_id type = string_id(-1);
+		string_id name = string_id(-1);
 	};
 	Field fields[MAX_COUNT_OF_FIELDS];
 	unsigned int fieldsCount;

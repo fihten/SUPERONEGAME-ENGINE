@@ -1,8 +1,8 @@
 #pragma once
 
 #include <map>
-#include <string>
 #include "TechniqueResource.h"
+#include "StringManager.h"
 
 class ResourceManager
 {
@@ -10,9 +10,9 @@ class ResourceManager
 	static ResourceManager* ptr;
 
 private:
-	std::map<std::string, TechniqueResource> techniques;
-	std::map<std::string, ID3D11ShaderResourceView*> imgs;
-	std::map<std::string, ID3D11ShaderResourceView*> imgsArrs;
+	std::map<string_id, TechniqueResource> techniques;
+	std::map<string_id, ID3D11ShaderResourceView*> imgs;
+	std::map<string_id, ID3D11ShaderResourceView*> imgsArrs;
 
 public:
 	enum RegisterMessage
@@ -36,44 +36,44 @@ public:
 		THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS
 	};
 
-	RegisterMessage registerTechnique(const std::string& techniqueName, const ID3DX11EffectTechnique* technique);
-	RegisterMessage registerPass(const std::string& techniqueName, const std::string& passName, ID3DX11EffectPass* pass);
-	RegisterMessage registerInputLayout(const std::string& techniqueName, const std::string& passName, ID3D11InputLayout* inputLayout);
-	RegisterMessage registerStreamsInfo(const std::string& techniqueName, const std::string& passName, const std::vector<InputLayoutResource::StreamInfo>& streamsInfo);
-	RegisterMessage registerFloat4x4(const std::string& techniqueName, const std::string& flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4, unsigned int elementsCount);
-	RegisterMessage registerFloat4(const std::string& techniqueName, const std::string& flt4Name, ID3DX11EffectVariable* flt4, unsigned int elementsCount);
-	RegisterMessage registerFloat3(const std::string& techniqueName, const std::string& flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount);
-	RegisterMessage registerFloat2(const std::string& techniqueName, const std::string& flt2Name, ID3DX11EffectVariable* flt2, unsigned int elementsCount);
-	RegisterMessage registerFloat1(const std::string& techniqueName, const std::string& flt1Name, ID3DX11EffectVariable* flt1, unsigned int elementsCount);
-	RegisterMessage registerStruct(const std::string& techniqueName, const std::string& structName, const StructResource& structRes);
-	RegisterMessage registerTexture(const std::string& techniqueName, const std::string& textureName, const Texture2dResource& texRes);
-	RegisterMessage registerTexturesArray(const std::string& techniqueName, const std::string& textureArrName, const Texture2dArrayResource& texArrRes);
-	RegisterMessage registerVariableLocation(const std::string& techniqueName, const std::string& varName, const std::string& varLocation);
-	RegisterMessage registerVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* vertexBuffer, bool structured);
-	RegisterMessage registerIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, ID3D11Buffer* indexBuffer, bool structured);
-	RegisterMessage registerImage(const std::string& name, ID3D11ShaderResourceView* image);
-	RegisterMessage registerImagesArray(const std::string& name, ID3D11ShaderResourceView* imagesArray);
-	RegisterMessage registerPresenceOfGeometryShader(const std::string& techniqueName, const std::string& passName);
-	RegisterMessage registerPrimitiveType(const std::string& techniqueName, const std::string& passName, PassResource::PrimitiveType primType);
+	RegisterMessage registerTechnique(string_id techniqueName, const ID3DX11EffectTechnique* technique);
+	RegisterMessage registerPass(string_id techniqueName, string_id passName, ID3DX11EffectPass* pass);
+	RegisterMessage registerInputLayout(string_id techniqueName, string_id passName, ID3D11InputLayout* inputLayout);
+	RegisterMessage registerStreamsInfo(string_id techniqueName, string_id passName, const std::vector<InputLayoutResource::StreamInfo>& streamsInfo);
+	RegisterMessage registerFloat4x4(string_id techniqueName, string_id flt4x4Name, ID3DX11EffectMatrixVariable* flt4x4, unsigned int elementsCount);
+	RegisterMessage registerFloat4(string_id techniqueName, string_id flt4Name, ID3DX11EffectVariable* flt4, unsigned int elementsCount);
+	RegisterMessage registerFloat3(string_id techniqueName, string_id flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount);
+	RegisterMessage registerFloat2(string_id techniqueName, string_id flt2Name, ID3DX11EffectVariable* flt2, unsigned int elementsCount);
+	RegisterMessage registerFloat1(string_id techniqueName, string_id flt1Name, ID3DX11EffectVariable* flt1, unsigned int elementsCount);
+	RegisterMessage registerStruct(string_id techniqueName, string_id structName, const StructResource& structRes);
+	RegisterMessage registerTexture(string_id techniqueName, string_id textureName, const Texture2dResource& texRes);
+	RegisterMessage registerTexturesArray(string_id techniqueName, string_id textureArrName, const Texture2dArrayResource& texArrRes);
+	RegisterMessage registerVariableLocation(string_id techniqueName, string_id varName, string_id varLocation);
+	RegisterMessage registerVertexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11Buffer* vertexBuffer, bool structured);
+	RegisterMessage registerIndexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11Buffer* indexBuffer, bool structured);
+	RegisterMessage registerImage(string_id name, ID3D11ShaderResourceView* image);
+	RegisterMessage registerImagesArray(string_id name, ID3D11ShaderResourceView* imagesArray);
+	RegisterMessage registerPresenceOfGeometryShader(string_id techniqueName, string_id passName);
+	RegisterMessage registerPrimitiveType(string_id techniqueName, string_id passName, PassResource::PrimitiveType primType);
 
-	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(const std::string& techniqueName, const std::string& passName) const;
-	ID3D11InputLayout* getInputLayout(const std::string& techniqueName, const std::string& passName) const;
-	ID3DX11EffectPass* getPass(const std::string& techniqueName, const std::string& passName) const;
-	const std::string& getVariableLocation(const std::string& techniqueName, const std::string& variable) const;
-	void getFloat4x4s(const std::string& techniqueName, std::map<std::string, Float4x4Resource>& flt4x4s);
-	void getFloat4s(const std::string& techniqueName, std::map<std::string, Float4Resource>& flt4s);
-	void getFloat3s(const std::string& techniqueName, std::map<std::string, Float3Resource>& flt3s);
-	void getFloat2s(const std::string& techniqueName, std::map<std::string, Float2Resource>& flt2s);
-	void getFloat1s(const std::string& techniqueName, std::map<std::string, Float1Resource>& flt1s);
-	std::map<std::string, StructResource>& getStructures(const std::string& techniqueName);
-	void getTextures(const std::string& techniqueName, std::map<std::string, Texture2dResource>& textures);
-	void getTexturesArrays(const std::string& techniqueName, std::map<std::string, Texture2dArrayResource>& texturesArrays);
-	ID3D11Buffer* getVertexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured);
-	ID3D11Buffer* getIndexBuffer(const std::string& techniqueName, const std::string& passName, uint32_t meshId, bool structured);
-	ID3D11ShaderResourceView* getImage(const std::string& name);
-	ID3D11ShaderResourceView* getImagesArray(const std::string& name);
-	bool isThereAGeometryShaderInThePass(const std::string& techniqueName, const std::string& passName);
-	PassResource::PrimitiveType getPrimitiveType(const std::string& techniqueName, const std::string& passName);
+	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName) const;
+	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName) const;
+	ID3DX11EffectPass* getPass(string_id techniqueName, string_id passName) const;
+	string_id getVariableLocation(string_id techniqueName, string_id variable) const;
+	void getFloat4x4s(string_id techniqueName, std::map<string_id, Float4x4Resource>& flt4x4s);
+	void getFloat4s(string_id techniqueName, std::map<string_id, Float4Resource>& flt4s);
+	void getFloat3s(string_id techniqueName, std::map<string_id, Float3Resource>& flt3s);
+	void getFloat2s(string_id techniqueName, std::map<string_id, Float2Resource>& flt2s);
+	void getFloat1s(string_id techniqueName, std::map<string_id, Float1Resource>& flt1s);
+	std::map<string_id, StructResource>& getStructures(string_id techniqueName);
+	void getTextures(string_id techniqueName, std::map<string_id, Texture2dResource>& textures);
+	void getTexturesArrays(string_id techniqueName, std::map<string_id, Texture2dArrayResource>& texturesArrays);
+	ID3D11Buffer* getVertexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, bool structured);
+	ID3D11Buffer* getIndexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, bool structured);
+	ID3D11ShaderResourceView* getImage(string_id name);
+	ID3D11ShaderResourceView* getImagesArray(string_id name);
+	bool isThereAGeometryShaderInThePass(string_id techniqueName, string_id passName);
+	PassResource::PrimitiveType getPrimitiveType(string_id techniqueName, string_id passName);
 
 public:
 	static ResourceManager* instance();

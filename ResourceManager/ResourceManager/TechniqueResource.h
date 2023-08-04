@@ -1,27 +1,28 @@
 #pragma once
 #include "VariableResources.h"
 #include "PassResource.h"
+#include "StringManager.h"
 
 struct TechniqueResource
 {
 	const ID3DX11EffectTechnique* ptr = nullptr;
 
 	// passes
-	std::map<std::string, PassResource> passes;
+	std::map<string_id, PassResource> passes;
 	// float4x4
-	std::map<std::string, Float4x4Resource> float4x4s;
+	std::map<string_id, Float4x4Resource> float4x4s;
 	// float4
-	std::map<std::string, Float4Resource> float4s;
+	std::map<string_id, Float4Resource> float4s;
 	// float3
-	std::map<std::string, Float3Resource> float3s;
+	std::map<string_id, Float3Resource> float3s;
 	// float2
-	std::map<std::string, Float2Resource> float2s;
+	std::map<string_id, Float2Resource> float2s;
 	// float1
-	std::map<std::string, Float1Resource> float1s;
+	std::map<string_id, Float1Resource> float1s;
 	// structures
-	std::map<std::string, StructResource> structures;
+	std::map<string_id, StructResource> structures;
 	// textures
-	std::map<std::string, Texture2dResource> textures;
+	std::map<string_id, Texture2dResource> textures;
 	// textures arrays
-	std::map<std::string, Texture2dArrayResource> texturesArrays;
+	std::map<string_id, Texture2dArrayResource> texturesArrays;
 };
