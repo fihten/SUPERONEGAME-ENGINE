@@ -132,11 +132,15 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 	for (auto& sn : shadersNames)
 	{
 		ID3DX11EffectTechnique* technique = mShader->GetTechniqueByName(sn.technique.c_str());
-		ResourceManager::instance()->registerTechnique(sn.technique, technique);
+		
+		string_id technique_id = StringManager::toStringId(sn.technique);
+		ResourceManager::instance()->registerTechnique(technique_id, technique);
 		for (int i = 0; i < sn.passes.size(); ++i)
 		{
 			ID3DX11EffectPass* pass = technique->GetPassByName(sn.passes[i].c_str());
-			ResourceManager::instance()->registerPass(sn.technique, sn.passes[i], pass);
+
+			string_id pass_id = StringManager::toStringId(sn.passes[i]);
+			ResourceManager::instance()->registerPass(technique_id, pass_id, pass);
 
 			InputLayoutVisitor inputLayoutVisitor;
 			inputLayoutVisitor.setShaderName(sn.shaders[i]);
@@ -147,11 +151,11 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 			pass->GetDesc(&passDesc);
 
 			ID3D11InputLayout* inputLayout = inputLayoutVisitor.getInputLayout(device, passDesc.pIAInputSignature, passDesc.IAInputSignatureSize);
-			ResourceManager::instance()->registerInputLayout(sn.technique, sn.passes[i], inputLayout);
+			ResourceManager::instance()->registerInputLayout(technique_id, pass_id, inputLayout);
 
 			std::vector<InputLayoutResource::StreamInfo> streamsInfo;
 			inputLayoutVisitor.getStreamsInfo(streamsInfo);
-			ResourceManager::instance()->registerStreamsInfo(sn.technique, sn.passes[i], streamsInfo);
+			ResourceManager::instance()->registerStreamsInfo(technique_id, pass_id, streamsInfo);
 
 			GeometryShaderInfoVisitor geometryShaderInfoVisitor;
 			geometryShaderInfoVisitor.technique = sn.technique;
@@ -160,29 +164,31 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 			shader.query(&geometryShaderInfoVisitor);
 			if (geometryShaderInfoVisitor.geometryShaderIsPresented)
 			{
-				ResourceManager::instance()->registerPresenceOfGeometryShader(sn.technique, sn.passes[i]);
-				ResourceManager::instance()->registerPrimitiveType(sn.technique, sn.passes[i], geometryShaderInfoVisitor.primType);
+				ResourceManager::instance()->registerPresenceOfGeometryShader(technique_id, pass_id);
+				ResourceManager::instance()->registerPrimitiveType(technique_id, pass_id, geometryShaderInfoVisitor.primType);
 			}
 		}
 
 		for (int i = 0; i < countOfCbufferElements; ++i)
 		{
+			string_id name_id = StringManager::toStringId(elementsOfCbuffers[i].name);
 			if (elementsOfCbuffers[i].type == std::string("float4x4"))
-				ResourceManager::instance()->registerFloat4x4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v->AsMatrix(), elementsOfCbuffers[i].elementsCount);
+				ResourceManager::instance()->registerFloat4x4(technique_id, name_id, elementsOfCbuffers[i].v->AsMatrix(), elementsOfCbuffers[i].elementsCount);
 			if (elementsOfCbuffers[i].type == std::string("float4"))
-				ResourceManager::instance()->registerFloat4(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
+				ResourceManager::instance()->registerFloat4(technique_id, name_id, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
 			if (elementsOfCbuffers[i].type == std::string("float3"))
-				ResourceManager::instance()->registerFloat3(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
+				ResourceManager::instance()->registerFloat3(technique_id, name_id, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
 			if (elementsOfCbuffers[i].type == std::string("float2"))
-				ResourceManager::instance()->registerFloat2(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
+				ResourceManager::instance()->registerFloat2(technique_id, name_id, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
 			if (elementsOfCbuffers[i].type == std::string("float"))
-				ResourceManager::instance()->registerFloat1(sn.technique, elementsOfCbuffers[i].name, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
+				ResourceManager::instance()->registerFloat1(technique_id, name_id, elementsOfCbuffers[i].v, elementsOfCbuffers[i].elementsCount);
 			if (variableLocations.count(elementsOfCbuffers[i].name) == 1)
 			{
+				string_id location_id = StringManager::toStringId(variableLocations[elementsOfCbuffers[i].name]);
 				ResourceManager::instance()->registerVariableLocation(
-					sn.technique,
-					elementsOfCbuffers[i].name,
-					variableLocations[elementsOfCbuffers[i].name]
+					technique_id,
+					name_id,
+					location_id
 				);
 			}
 
@@ -195,24 +201,25 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 				auto structInfo = structVisitor.structInfo;
 				structInfo.ptr = elementsOfCbuffers[i].v;
 				structInfo.elementsCount = elementsOfCbuffers[i].elementsCount;
-				ResourceManager::instance()->registerStruct(sn.technique, elementsOfCbuffers[i].name, structInfo);
+				ResourceManager::instance()->registerStruct(technique_id, name_id, structInfo);
 			}
 		}
 
 		for (int i = 0; i < globalVariablesVisitor.globalVariablesCount; ++i)
 		{
 			auto& gv = globalVariablesVisitor.globalVariables[i];
+			string_id gv_name_id = StringManager::toStringId(gv.name);
 			if (gv.type == std::string("Texture2D"))
 			{
 				Texture2dResource t2dres;
 				t2dres.tex = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
-				ResourceManager::instance()->registerTexture(sn.technique, gv.name, t2dres);
+				ResourceManager::instance()->registerTexture(technique_id, gv_name_id, t2dres);
 			}
 			if (gv.type == std::string("Texture2DArray"))
 			{
 				Texture2dArrayResource t2dArrRes;
 				t2dArrRes.texArr = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
-				ResourceManager::instance()->registerTexturesArray(sn.technique, gv.name, t2dArrRes);
+				ResourceManager::instance()->registerTexturesArray(technique_id, gv_name_id, t2dArrRes);
 			}
 		}
 	}
