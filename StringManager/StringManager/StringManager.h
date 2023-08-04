@@ -3,6 +3,16 @@
 
 typedef unsigned int string_id;
 
+extern string_id float_id;
+extern string_id float2_id;
+extern string_id float3_id;
+extern string_id float4_id;
+
+extern string_id position_id;
+
+extern string_id technique_id;
+extern string_id pass_id;
+
 struct StringManager
 {
 	static void init();

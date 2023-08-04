@@ -9,6 +9,8 @@
 #include "Vec3d.h"
 #include "Vec4d.h"
 #include "Matrix4x4.h"
+#include "StringManager.h"
+#include "Param.h"
 
 class Mesh;
 Mesh createCube();
@@ -25,14 +27,14 @@ protected:
 private:
 	std::string name = "";
 
-	std::vector<std::pair<std::string, std::vector<flt1>>> flt1_streams;
-	std::vector<std::pair<std::string, std::vector<flt2>>> flt2_streams;
-	std::vector<std::pair<std::string, std::vector<flt3>>> flt3_streams;
-	std::vector<std::pair<std::string, std::vector<flt4>>> flt4_streams;
+	std::vector<std::pair<string_id, std::vector<flt1>>> flt1_streams;
+	std::vector<std::pair<string_id, std::vector<flt2>>> flt2_streams;
+	std::vector<std::pair<string_id, std::vector<flt3>>> flt3_streams;
+	std::vector<std::pair<string_id, std::vector<flt4>>> flt4_streams;
 
 	std::vector<uint32_t> indicies;
 
-	std::map<std::string, std::string> params;
+	std::map<ParamKey, ParamValue> params;
 
 public:
 	Mesh():id(instanceNumber)
@@ -104,8 +106,8 @@ public:
 		return *this;
 	}
 
-	virtual std::string getTechnique() const;
-	virtual std::string getPass() const;
+	virtual string_id getTechnique() const;
+	virtual string_id getPass() const;
 
 	enum StreamType
 	{
@@ -114,7 +116,7 @@ public:
 		FLT3,
 		FLT4
 	};
-	virtual const void* getStream(const std::string& name, StreamType type) const;
+	virtual const void* getStream(string_id name, StreamType type) const;
 	virtual const std::vector<uint32_t>* getIndicies() const;
 	
 	virtual std::string getName() const;
@@ -123,8 +125,19 @@ public:
 	virtual uint32_t getVerticesCount() const;
 	virtual uint32_t getIndicesCount() const;
 
-	virtual std::string getParam(const std::string& param) const;
-	virtual void setParam(const std::string& param, const std::string& value);
+	virtual bool getParam(const ParamKey& param, string_id& s) const;
+	virtual bool getParam(const ParamKey& param, float& f) const;
+	virtual bool getParam(const ParamKey& param, flt2& f2) const;
+	virtual bool getParam(const ParamKey& param, flt3& f3) const;
+	virtual bool getParam(const ParamKey& param, flt4& f4) const;
+	virtual bool getParam(const ParamKey& param, flt4x4& f4x4) const;
+
+	virtual void setParam(const ParamKey& param, const string_id& s);
+	virtual void setParam(const ParamKey& param, const float& f);
+	virtual void setParam(const ParamKey& param, const flt2& f2);
+	virtual void setParam(const ParamKey& param, const flt3& f3);
+	virtual void setParam(const ParamKey& param, const flt4& f4);
+	virtual void setParam(const ParamKey& param, const flt4x4& f4x4);
 
 	virtual flt4x4 getPosition() const { return flt4x4(); }
 

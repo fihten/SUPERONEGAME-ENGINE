@@ -6,11 +6,31 @@
 #include "StringManager.h"
 #include <cmath>
 
+string_id float_id;
+string_id float2_id;
+string_id float3_id;
+string_id float4_id;
+
+string_id position_id;
+
+string_id technique_id;
+string_id pass_id;
+
 StringManager* StringManager::stringManager = nullptr;
 
 StringManager::StringManager()
 {
 	hash = new char* [hashSize];
+
+	float_id = toStringId("float");
+	float2_id = toStringId("float2");
+	float3_id = toStringId("float3");
+	float4_id = toStringId("float4");
+
+	position_id = toStringId("POSITION");
+
+	technique_id = toStringId("technique");
+	pass_id = toStringId("pass");
 }
 
 void StringManager::init()

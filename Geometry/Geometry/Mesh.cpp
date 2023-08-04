@@ -12,7 +12,11 @@ Mesh createCube()
 	Mesh m;
 
 	// vertices positions
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"),
+			std::vector<flt3>())
+	);
 
 	auto& pts = m.flt3_streams.back().second;
 	
@@ -53,7 +57,11 @@ Mesh createCube()
 	pts.push_back(flt3(0.5, 0.5, -0.5));
 
 	// vertices normals
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("NORMAL"), 
+			std::vector<flt3>())
+	);
 
 	auto& nms = m.flt3_streams.back().second;
 
@@ -94,7 +102,11 @@ Mesh createCube()
 	nms.push_back(flt3(1.0, 0.0, 0.0));
 
 	// vertices colors
-	m.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	m.flt4_streams.push_back(
+		std::pair<string_id, std::vector<flt4>>(
+			StringManager::toStringId("COLOR"),
+			std::vector<flt4>())
+	);
 
 	auto& clrs = m.flt4_streams.back().second;
 	
@@ -135,7 +147,11 @@ Mesh createCube()
 	clrs.push_back(flt4(1, 1, 0, 0));
 
 	// uv-coordinates
-	m.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	m.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("TEXCOORD"), 
+			std::vector<flt2>())
+	);
 
 	auto& uvs = m.flt2_streams.back().second;
 
@@ -232,9 +248,17 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	m.params["technique"] = "Light0Tex";
-	m.params["pass"] = "P0";
-	m.params["gDiffuseMap"] = "test.dds";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
+	m.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	m.params[pass_key] = pass_value;
+
+	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
+	ParamValue diffuse_map_value{ StringManager::toStringId("test.dds") };
+	m.params[diffuse_map_key] = diffuse_map_value;
 
 	return m;
 }
@@ -245,11 +269,19 @@ Mesh createTrees()
 	Mesh m;
 
 	// vertices positions
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"),
+			std::vector<flt3>())
+	);
 	auto& pts = m.flt3_streams.back().second;
 	
 	// billboard sizes
-	m.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("SIZE"), std::vector<flt2>()));
+	m.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("SIZE"),
+			std::vector<flt2>())
+	);
 	auto& szs = m.flt2_streams.back().second;
 
 	int n = 2;
@@ -273,9 +305,18 @@ Mesh createTrees()
 		}
 	}
 
-	m.params["technique"] = "Light3gTexAlphaClipFog";
-	m.params["pass"] = "P0";
-	m.params["gTreeMapArray"] = "tree0.dds;tree1.dds;tree2.dds;tree3.dds;";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("Light3gTexAlphaClipFog") };
+	m.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	m.params[pass_key] = pass_value;
+
+	ParamKey tree_map_array_key{ StringManager::toStringId("gTreeMapArray"), -1, string_id(-1) };
+	ParamValue tree_map_array_value{ StringManager::toStringId("tree0.dds;tree1.dds;tree2.dds;tree3.dds;") };
+	m.params[tree_map_array_key] = tree_map_array_value;
+
 	m.params["gFogStart"] = "{5}";
 	m.params["gFogRange"] = "{20}";
 	m.params["gFogColor"] = "{1,0,0,1}";
@@ -291,27 +332,51 @@ Mesh createSelectionBoxes()
 	m.flt3_streams.reserve(5);
 
 	// vertices positions
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"),
+			std::vector<flt3>())
+	);
 	auto& pts = m.flt3_streams.back().second;
 
 	// axis0
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("AXIS"),
+			std::vector<flt3>())
+	);
 	auto& axis0 = m.flt3_streams.back().second;
 
 	// axis1
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS1"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("AXIS1"),
+			std::vector<flt3>())
+	);
 	auto& axis1 = m.flt3_streams.back().second;
 
 	// axis2
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("AXIS2"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("AXIS2"),
+			std::vector<flt3>())
+	);
 	auto& axis2 = m.flt3_streams.back().second;
 
 	// size
-	m.flt1_streams.push_back(std::pair<std::string, std::vector<flt1>>(std::string("SIZE"), std::vector<flt1>()));
+	m.flt1_streams.push_back(
+		std::pair<string_id, std::vector<flt1>>(
+			StringManager::toStringId("SIZE"), 
+			std::vector<flt1>())
+	);
 	auto& size = m.flt1_streams.back().second;
 
 	// color
-	m.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("COLOR"), std::vector<flt3>()));
+	m.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("COLOR"), 
+			std::vector<flt3>())
+	);
 	auto& color = m.flt3_streams.back().second;
 
 	int n = 2;
@@ -371,22 +436,38 @@ Mesh createSphere(int latitudes, int longitudes)
 	sphere.flt3_streams.reserve(2);
 
 	// vertices positions
-	sphere.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	sphere.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"), 
+			std::vector<flt3>())
+	);
 	auto& pts = sphere.flt3_streams.back().second;
 	pts.reserve(vertices);
 
 	// vertices normals
-	sphere.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	sphere.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("NORMAL"),
+			std::vector<flt3>())
+	);
 	auto& nms = sphere.flt3_streams.back().second;
 	nms.reserve(vertices);
 
 	// vertices colors
-	sphere.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	sphere.flt4_streams.push_back(
+		std::pair<string_id, std::vector<flt4>>(
+			StringManager::toStringId("COLOR"),
+			std::vector<flt4>())
+	);
 	auto& clrs = sphere.flt4_streams.back().second;
 	clrs.reserve(vertices);
 
 	// uv-coordinates
-	sphere.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	sphere.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("TEXCOORD"),
+			std::vector<flt2>())
+	);
 	auto& uvs = sphere.flt2_streams.back().second;
 	uvs.reserve(vertices);
 
@@ -478,22 +559,38 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 	cone.flt3_streams.reserve(2);
 
 	// vertices positions
-	cone.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	cone.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"),
+			std::vector<flt3>())
+	);
 	auto& pts = cone.flt3_streams.back().second;
 	pts.reserve(vertices);
 
 	// vertices normals
-	cone.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	cone.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("NORMAL"),
+			std::vector<flt3>())
+	);
 	auto& nms = cone.flt3_streams.back().second;
 	nms.reserve(vertices);
 
 	// vertices colors
-	cone.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	cone.flt4_streams.push_back(
+		std::pair<string_id, std::vector<flt4>>(
+			StringManager::toStringId("COLOR"),
+			std::vector<flt4>())
+	);
 	auto& clrs = cone.flt4_streams.back().second;
 	clrs.reserve(vertices);
 
 	// uv-coordinates
-	cone.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	cone.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("TEXCOORD"),
+			std::vector<flt2>())
+	);
 	auto& uvs = cone.flt2_streams.back().second;
 	uvs.reserve(vertices);
 
@@ -596,22 +693,38 @@ Mesh createPlane(float width, float height, float m, float n)
 	plane.flt3_streams.reserve(2);
 
 	// vertices positions
-	plane.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("POSITION"), std::vector<flt3>()));
+	plane.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("POSITION"),
+			std::vector<flt3>())
+	);
 	auto& pts = plane.flt3_streams.back().second;
 	pts.reserve(vertices);
 
 	// vertices normals
-	plane.flt3_streams.push_back(std::pair<std::string, std::vector<flt3>>(std::string("NORMAL"), std::vector<flt3>()));
+	plane.flt3_streams.push_back(
+		std::pair<string_id, std::vector<flt3>>(
+			StringManager::toStringId("NORMAL"),
+			std::vector<flt3>())
+	);
 	auto& nms = plane.flt3_streams.back().second;
 	nms.reserve(vertices);
 
 	// vertices colors
-	plane.flt4_streams.push_back(std::pair<std::string, std::vector<flt4>>(std::string("COLOR"), std::vector<flt4>()));
+	plane.flt4_streams.push_back(
+		std::pair<string_id, std::vector<flt4>>(
+			StringManager::toStringId("COLOR"),
+			std::vector<flt4>())
+	);
 	auto& clrs = plane.flt4_streams.back().second;
 	clrs.reserve(vertices);
 
 	// uv-coordinates
-	plane.flt2_streams.push_back(std::pair<std::string, std::vector<flt2>>(std::string("TEXCOORD"), std::vector<flt2>()));
+	plane.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("TEXCOORD"),
+			std::vector<flt2>())
+	);
 	auto& uvs = plane.flt2_streams.back().second;
 	uvs.reserve(vertices);
 
@@ -656,34 +769,36 @@ Mesh createPlane(float width, float height, float m, float n)
 	return plane;
 }
 
-std::string Mesh::getTechnique() const
+string_id Mesh::getTechnique() const
 {
-	std::string technique = "";
+	string_id technique = string_id(-1);
 	
-	if (params.count("technique"))
-		technique = params.at("technique");
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	if (params.count(technique_key))
+		technique = params.at(technique_key).s;
 	
 	return technique;
 }
 
-std::string Mesh::getPass() const
+string_id Mesh::getPass() const
 {
-	std::string pass = "";
+	string_id pass = string_id(-1);
 	
-	if (params.count("pass"))
-		pass = params.at("pass");
+	ParamKey pass_key{ pass_id, -1, string_id(-1) };
+	if (params.count(pass_key))
+		pass = params.at(pass_key).s;
 
 	return pass;
 }
 
-const void* Mesh::getStream(const std::string& name, StreamType type) const
+const void* Mesh::getStream(string_id name, StreamType type) const
 {
 	const void* rPtr = nullptr;
 	switch (type)
 	{
 	case FLT1:
 	{
-		const auto& it = std::find_if(flt1_streams.begin(), flt1_streams.end(), [&](const std::pair<std::string, std::vector<flt1>>& el) -> bool
+		const auto& it = std::find_if(flt1_streams.begin(), flt1_streams.end(), [&](const std::pair<string_id, std::vector<flt1>>& el) -> bool
 		{
 			return el.first == name;
 		});
@@ -695,7 +810,7 @@ const void* Mesh::getStream(const std::string& name, StreamType type) const
 	}
 	case FLT2:
 	{
-		const auto& it = std::find_if(flt2_streams.begin(), flt2_streams.end(), [&](const std::pair<std::string, std::vector<flt2>>& el) -> bool
+		const auto& it = std::find_if(flt2_streams.begin(), flt2_streams.end(), [&](const std::pair<string_id, std::vector<flt2>>& el) -> bool
 		{
 			return el.first == name;
 		});
@@ -707,7 +822,7 @@ const void* Mesh::getStream(const std::string& name, StreamType type) const
 	}
 	case FLT3:
 	{
-		const auto& it = std::find_if(flt3_streams.begin(), flt3_streams.end(), [&](const std::pair<std::string, std::vector<flt3>>& el) -> bool
+		const auto& it = std::find_if(flt3_streams.begin(), flt3_streams.end(), [&](const std::pair<string_id, std::vector<flt3>>& el) -> bool
 		{
 			return el.first == name;
 		});
@@ -719,7 +834,7 @@ const void* Mesh::getStream(const std::string& name, StreamType type) const
 	}
 	case FLT4:
 	{
-		const auto& it = std::find_if(flt4_streams.begin(), flt4_streams.end(), [&](const std::pair<std::string, std::vector<flt4>>& el) -> bool
+		const auto& it = std::find_if(flt4_streams.begin(), flt4_streams.end(), [&](const std::pair<string_id, std::vector<flt4>>& el) -> bool
 		{
 			return el.first == name;
 		});
@@ -771,16 +886,96 @@ uint32_t Mesh::getIndicesCount() const
 	return indicies.size();
 }
 
-std::string Mesh::getParam(const std::string& param) const
+bool Mesh::getParam(const ParamKey& param, string_id& s) const
 {
+	s = string_id(-1);
+
 	if (params.count(param) == 0)
-		return "";
-	return params.at(param);
+		return false;
+
+	s = params.at(param).s;
+	
+	return true;
 }
 
-void Mesh::setParam(const std::string& param, const std::string& value)
+bool Mesh::getParam(const ParamKey& param, float& f) const
 {
-	params[param] = value;
+	if (params.count(param) == 0)
+		return false;
+
+	f = params.at(param).f;
+
+	return true;
+}
+
+bool Mesh::getParam(const ParamKey& param, flt2& f2) const
+{
+	if (params.count(param) == 0)
+		return false;
+
+	f2 = params.at(param).f2;
+
+	return true;
+}
+
+bool Mesh::getParam(const ParamKey& param, flt3& f3) const
+{
+	if (params.count(param) == 0)
+		return false;
+
+	f3 = params.at(param).f3;
+
+	return true;
+}
+
+bool Mesh::getParam(const ParamKey& param, flt4& f4) const
+{
+	if (params.count(param) == 0)
+		return false;
+
+	f4 = params.at(param).f4;
+
+	return true;
+}
+
+bool Mesh::getParam(const ParamKey& param, flt4x4& f4x4) const
+{
+	if (params.count(param) == 0)
+		return false;
+
+	f4x4 = params.at(param).f4x4;
+
+	return true;
+}
+
+void Mesh::setParam(const ParamKey& param, const string_id& s)
+{
+	params[param].s = s;
+}
+
+void Mesh::setParam(const ParamKey& param, const float& f)
+{
+	params[param].f = f;
+}
+
+void Mesh::setParam(const ParamKey& param, const flt2& f2)
+{
+	params[param].f2 = f2;
+}
+
+void Mesh::setParam(const ParamKey& param, const flt3& f3)
+{
+	params[param].f3 = f3;
+}
+
+void Mesh::setParam(const ParamKey& param, const flt4& f4)
+{
+	params[param].f4 = f4;
+}
+
+void Mesh::setParam(const ParamKey& param, const flt4x4& f4x4)
+{
+	params[param].f4x4 = f4x4;
 }
 
 flt3 Mesh::getBottomBorder() const
