@@ -17,7 +17,7 @@ public:
 	protected:
 		Node* parent = nullptr;
 		Scene* scene = nullptr;
-		std::map<std::string, std::string> params;
+		std::map<ParamKey, ParamValue> params;
 	public:
 		Node(NodeID id);
 		virtual ~Node();
@@ -25,8 +25,21 @@ public:
 		virtual void addChild(Node* n);
 		virtual Node* findNodeByID(NodeID id);
 		virtual flt4x4 getPos() const;
-		virtual std::string getParam(const std::string& paramName) const;
-		virtual void setParam(const std::string& paramName, const std::string& paramVal);
+
+		virtual bool getParam(const ParamKey& paramName, string_id& s) const;
+		virtual bool getParam(const ParamKey& paramName, float& f) const;
+		virtual bool getParam(const ParamKey& paramName, flt2& f2) const;
+		virtual bool getParam(const ParamKey& paramName, flt3& f3) const;
+		virtual bool getParam(const ParamKey& paramName, flt4& f4) const;
+		virtual bool getParam(const ParamKey& paramName, flt4x4& f4x4) const;
+		
+		virtual void setParam(const ParamKey& paramName, const string_id& s);
+		virtual void setParam(const ParamKey& paramName, const float& f);
+		virtual void setParam(const ParamKey& paramName, const flt2& f2);
+		virtual void setParam(const ParamKey& paramName, const flt3& f3);
+		virtual void setParam(const ParamKey& paramName, const flt4& f4);
+		virtual void setParam(const ParamKey& paramName, const flt4x4& f4x4);
+		
 		virtual void accept(Visitor* visitor) const;
 
 	public:
@@ -93,7 +106,13 @@ public:
 	NodeID addTransformNode(const flt4x4& pos, NodeID id = 0);
 	NodeID addMeshNode(Mesh* mesh, NodeID id = 0);
 
-	void setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const float& f);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const flt2& f2);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const flt3& f3);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const flt4& f4);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const flt4x4& f4x4);
+
 	void createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param);
 
 	std::string getNodeParam(NodeID id, const std::string& paramName) const;

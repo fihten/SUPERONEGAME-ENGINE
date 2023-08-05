@@ -119,20 +119,112 @@ NodeID Scene::addMeshNode(Mesh* mesh, NodeID id)
 	return id;
 }
 
-std::string Scene::Node::getParam(const std::string& paramName) const
+bool Scene::Node::getParam(const ParamKey& paramName, string_id& s) const
 {
 	if (scene)
-		return scene->getNodeParam(ID, paramName);
+		return scene->getNodeParam(ID, paramName, s);
 
-	std::string paramValue = "";
-	if (params.count(paramName) == 1)
-		paramValue = params.at(paramName);
-	return paramValue;
+	if (params.count(paramName) == 0)
+		return false;
+
+	s = params.at(paramName).s;
+	
+	return true;
 }
 
-void Scene::Node::setParam(const std::string& paramName, const std::string& paramVal)
+bool Scene::Node::getParam(const ParamKey& paramName, float& f) const
 {
-	params[paramName] = paramVal;
+	if (scene)
+		return scene->getNodeParam(ID, paramName, f);
+
+	if (params.count(paramName) == 0)
+		return false;
+
+	f = params.at(paramName).f;
+
+	return true;
+}
+
+bool Scene::Node::getParam(const ParamKey& paramName, flt2& f2) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, f2);
+
+	if (params.count(paramName) == 0)
+		return false;
+
+	f2 = params.at(paramName).f2;
+
+	return true;
+}
+
+bool Scene::Node::getParam(const ParamKey& paramName, flt3& f3) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, f3);
+
+	if (params.count(paramName) == 0)
+		return false;
+
+	f3 = params.at(paramName).f3;
+
+	return true;
+}
+
+bool Scene::Node::getParam(const ParamKey& paramName, flt4& f4) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, f4);
+
+	if (params.count(paramName) == 0)
+		return false;
+
+	f4 = params.at(paramName).f4;
+
+	return true;
+}
+
+bool Scene::Node::getParam(const ParamKey& paramName, flt4x4& f4x4) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, f4x4);
+
+	if (params.count(paramName) == 0)
+		return false;
+
+	f4x4 = params.at(paramName).f4x4;
+
+	return true;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const string_id& s)
+{
+	params[paramName].s = s;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const float& f)
+{
+	params[paramName].f = f;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const flt2& f2)
+{
+	params[paramName].f2 = f2;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const flt3& f3)
+{
+	params[paramName].f3 = f3;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const flt4& f4)
+{
+	params[paramName].f4 = f4;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const flt4x4& f4x4)
+{
+	params[paramName].f4x4 = f4x4;
 }
 
 void Scene::Node::accept(Visitor* visitor) const
@@ -155,7 +247,7 @@ void Scene::RootNode::accept(Visitor* visitor) const
 	visitor->finishVisit(this);
 }
 
-void Scene::setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal)
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& paramVal)
 {
 	Node* node = nodes[id];
 	if (node == nullptr)
