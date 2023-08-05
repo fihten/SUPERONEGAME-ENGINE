@@ -317,9 +317,18 @@ Mesh createTrees()
 	ParamValue tree_map_array_value{ StringManager::toStringId("tree0.dds;tree1.dds;tree2.dds;tree3.dds;") };
 	m.params[tree_map_array_key] = tree_map_array_value;
 
-	m.params["gFogStart"] = "{5}";
-	m.params["gFogRange"] = "{20}";
-	m.params["gFogColor"] = "{1,0,0,1}";
+	ParamKey fog_start_key{ StringManager::toStringId("gFogStart"), -1, string_id(-1) };
+	ParamValue fog_start_value{ 5 };
+	m.params[fog_start_key] = fog_start_value;
+
+	ParamKey fog_range_key{ StringManager::toStringId("gFogRange"), -1, string_id(-1) };
+	ParamValue fog_range_value{ 20 };
+	m.params[fog_range_key] = fog_range_value;
+
+	ParamKey fog_color_key{ StringManager::toStringId("gFogColor"), -1, string_id(-1) };
+	ParamValue fog_color_value{ -1 };
+	fog_color_value.f4 = flt4(1, 0, 0, 1);
+	m.params[fog_color_key] = fog_color_value;
 
 	return m;
 }
@@ -419,8 +428,13 @@ Mesh createSelectionBoxes()
 		}
 	}
 
-	m.params["technique"] = "SelectedObjectsBox";
-	m.params["pass"] = "P0";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("SelectedObjectsBox") };
+	m.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	m.params[pass_key] = pass_value;
 
 	return m;
 }
@@ -541,9 +555,17 @@ Mesh createSphere(int latitudes, int longitudes)
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi + 1);
 	}
 
-	sphere.params["technique"] = "Light0Tex";
-	sphere.params["pass"] = "P0";
-	sphere.params["gDiffuseMap"] = "earth.jpg";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
+	sphere.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	sphere.params[pass_key] = pass_value;
+
+	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
+	ParamValue diffuse_map_value{ StringManager::toStringId("earth.jpg") };
+	sphere.params[diffuse_map_key] = diffuse_map_value;
 
 	return sphere;
 }
@@ -675,9 +697,17 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		inds.push_back(2 * edgesNumbers + 1 + vi);
 	}
 
-	cone.params["technique"] = "Light0Tex";
-	cone.params["pass"] = "P0";
-	cone.params["gDiffuseMap"] = "vase.jpg";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
+	cone.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	cone.params[pass_key] = pass_value;
+
+	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
+	ParamValue diffuse_map_value{ StringManager::toStringId("vase.jpg") };
+	cone.params[diffuse_map_key] = diffuse_map_value;
 
 	return cone;
 }
@@ -762,9 +792,17 @@ Mesh createPlane(float width, float height, float m, float n)
 		}
 	}
 
-	plane.params["technique"] = "Light0Tex";
-	plane.params["pass"] = "P0";
-	plane.params["gDiffuseMap"] = "bosh.jpg";
+	ParamKey technique_key{ technique_id,-1,string_id(-1) };
+	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
+	plane.params[technique_key] = technique_value;
+
+	ParamKey pass_key{ pass_id,-1,string_id(-1) };
+	ParamValue pass_value{ StringManager::toStringId("P0") };
+	plane.params[pass_key] = pass_value;
+
+	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
+	ParamValue diffuse_map_value{ StringManager::toStringId("bosh.jpg") };
+	plane.params[diffuse_map_key] = diffuse_map_value;
 
 	return plane;
 }
