@@ -20,7 +20,7 @@ class DrawVisitor :public Scene::Visitor
 		string_id getTechnique() const;
 		string_id getPass() const;
 		
-		const void* getStream(const std::string& name, StreamType type) const;
+		const void* getStream(string_id name, StreamType type) const;
 		const std::vector<uint32_t>* getIndicies() const;
 
 		std::string getName() const;
@@ -28,7 +28,14 @@ class DrawVisitor :public Scene::Visitor
 		uint32_t getVerticesCount() const;
 		uint32_t getIndicesCount() const;
 
-		std::string getParam(const std::string& param) const;
+		virtual bool getParam(const ParamKey& param, string_id& s) const;
+		virtual bool getParam(const ParamKey& param, float& f) const;
+		virtual bool getParam(const ParamKey& param, flt2& f2) const;
+		virtual bool getParam(const ParamKey& param, flt3& f3) const;
+		virtual bool getParam(const ParamKey& param, flt4& f4) const;
+		virtual bool getParam(const ParamKey& param, flt4x4& f4x4) const;
+
+
 		flt4x4 getPosition() const;
 	};
 public:

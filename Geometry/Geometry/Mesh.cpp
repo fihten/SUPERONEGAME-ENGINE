@@ -937,6 +937,8 @@ bool Mesh::getParam(const ParamKey& param, string_id& s) const
 
 bool Mesh::getParam(const ParamKey& param, float& f) const
 {
+	f = 0;
+
 	if (params.count(param) == 0)
 		return false;
 
@@ -947,6 +949,8 @@ bool Mesh::getParam(const ParamKey& param, float& f) const
 
 bool Mesh::getParam(const ParamKey& param, flt2& f2) const
 {
+	f2 = flt2();
+
 	if (params.count(param) == 0)
 		return false;
 
@@ -957,6 +961,8 @@ bool Mesh::getParam(const ParamKey& param, flt2& f2) const
 
 bool Mesh::getParam(const ParamKey& param, flt3& f3) const
 {
+	f3 = flt3();
+
 	if (params.count(param) == 0)
 		return false;
 
@@ -967,6 +973,8 @@ bool Mesh::getParam(const ParamKey& param, flt3& f3) const
 
 bool Mesh::getParam(const ParamKey& param, flt4& f4) const
 {
+	f4 = flt4();
+
 	if (params.count(param) == 0)
 		return false;
 
@@ -977,6 +985,8 @@ bool Mesh::getParam(const ParamKey& param, flt4& f4) const
 
 bool Mesh::getParam(const ParamKey& param, flt4x4& f4x4) const
 {
+	f4x4 = flt4x4();
+
 	if (params.count(param) == 0)
 		return false;
 
