@@ -107,22 +107,22 @@ private:
 
 	flt4x4 getFloat4x4(const Mesh& mesh, string_id var) const;
 	flt4 getFloat4(const Mesh& mesh, string_id var) const;
-	flt3 getFloat3(const Mesh& mesh, const std::string& var) const;
-	flt2 getFloat2(const Mesh& mesh, const std::string& var) const;
-	flt1 getFloat1(const Mesh& mesh, const std::string& var) const;
-	void* getStruct(const Mesh& mesh, const std::string& var, int* bytes = nullptr) const;
+	flt3 getFloat3(const Mesh& mesh, string_id var) const;
+	flt2 getFloat2(const Mesh& mesh, string_id var) const;
+	flt1 getFloat1(const Mesh& mesh, string_id var) const;
+	void* getStruct(const Mesh& mesh, string_id var, int* bytes = nullptr) const;
 	
 	ID3D11Buffer* getVertexBuffer(
 		const Mesh& mesh,
 		uint32_t* elementSize,
-		const char* technique = nullptr,
-		const char* pass = nullptr,
+		string_id* technique = nullptr,
+		string_id* pass = nullptr,
 		bool structured = false
 		) const;
 	void* fetchVerticesFromMesh(
 		const Mesh& mesh,
-		const char* technique = nullptr,
-		const char* pass = nullptr
+		string_id* technique = nullptr,
+		string_id* pass = nullptr
 		) const;
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;

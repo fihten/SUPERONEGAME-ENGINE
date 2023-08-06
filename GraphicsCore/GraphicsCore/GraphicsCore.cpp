@@ -418,106 +418,97 @@ flt4 GraphicsCore::getFloat4(const Mesh& mesh, string_id var) const
 	flt4 res;
 
 	string_id technique_name_id = mesh.getTechnique();
-	const VariableLocation location = ResourceManager::instance()->getVariableLocation(technique_name_id, var);
+	const VariableLocation& location = ResourceManager::instance()->getVariableLocation(technique_name_id, var);
 
 	if (location.name[0] == cameras_id)
 	{
-
-	}
-
-	size_t pos = place.find("cameras[");
-	if (pos == 0)
-	{
-		size_t beg = 7;
-		size_t end = place.find(']', beg);
-
-		int index = std::atoi(std::string(place, beg, end - beg).c_str());
-
-		beg = end + 2;
-		std::string what(place, beg, std::string::npos);
-		if (std::strcmp(what.c_str(), "eye_pos") == 0)
+		int index = location.index[0];
+		if (location.field[0] == eye_pos_id)
 		{
 			res.xyz() = cameras()[index].getEyePos();
 			res.w() = 1;
 			return res;
 		}
-		if (std::strcmp(what.c_str(), "fwd") == 0)
+		if (location.field[0] == fwd_id)
 		{
 			res.xyz() = cameras()[index].getFwd();
 			res.w() = 1;
 			return res;
 		}
 	}
-	if (std::strcmp(place.c_str(), "position_in_scene") == 0)
+	if (location.name[0] == position_in_scene_id)
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt4(pos.m30(), pos.m31(), pos.m32(), 1);
 		return res;
 	}
 
-	res = mesh.getParam(var);
+	ParamKey pk{ var,-1,string_id(-1) };
+	mesh.getParam(pk, res);
+
 	return res;
 }
 
-flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
+flt3 GraphicsCore::getFloat3(const Mesh& mesh, string_id var) const
 {
 	flt3 res;
 
-	string_id tech = mesh.getTechnique();
-	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+	string_id technique_name_id = mesh.getTechnique();
+	const VariableLocation& location = ResourceManager::instance()->getVariableLocation(technique_name_id, var);
 
-	size_t pos = place.find("cameras[");
-	if (pos == 0)
+	if (location.name[0] == cameras_id)
 	{
-		size_t beg = 7;
-		size_t end = place.find(']', beg);
-
-		int index = std::atoi(std::string(place, beg, end - beg).c_str());
-
-		beg = end + 2;
-		std::string what(place, beg, std::string::npos);
-		if (std::strcmp(what.c_str(), "eye_pos") == 0)
+		int index = location.index[0];
+		if (location.field[0] == eye_pos_id)
 		{
 			res = cameras()[index].getEyePos();
 			return res;
 		}
-		if (std::strcmp(what.c_str(), "fwd") == 0)
+		if (location.field[0] == fwd_id)
 		{
 			res = cameras()[index].getFwd();
 			return res;
 		}
 	}
-	if (std::strcmp(place.c_str(), "position_in_scene") == 0)
+	if (location.name[0] == position_in_scene_id)
 	{
 		flt4x4 pos = mesh.getPosition();
 		res = flt3(pos.m30(), pos.m31(), pos.m32());
 		return res;
 	}
 
-	res = mesh.getParam(var);
+	ParamKey pk{ var,-1,string_id(-1) };
+	mesh.getParam(pk, res);
+
 	return res;
 }
 
-flt2 GraphicsCore::getFloat2(const Mesh& mesh, const std::string& var) const
+flt2 GraphicsCore::getFloat2(const Mesh& mesh, string_id var) const
 {
 	flt2 res;
-	res = mesh.getParam(var);
+	
+	ParamKey pk{ var,-1,string_id(-1) };
+	mesh.getParam(pk, res);
+
 	return res;
 }
 
-flt1 GraphicsCore::getFloat1(const Mesh& mesh, const std::string& var) const
+flt1 GraphicsCore::getFloat1(const Mesh& mesh, string_id var) const
 {
-	flt1 res;
-	res = mesh.getParam(var);
+	float res;
+	
+	ParamKey pk{ var,-1,string_id(-1) };
+	mesh.getParam(pk, res);
+
 	return res;
 }
 
-void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* bytes) const
+void* GraphicsCore::getStruct(const Mesh& mesh, string_id var, int* bytes) const
 {
-	std::string tech = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, StructResource>& structs =
-		ResourceManager::instance()->getStructures(tech);
+	std::map<string_id, StructResource>& structs =
+		ResourceManager::instance()->getStructures(technique_name_id);
 
 	StructResource& sr = structs[var];
 
@@ -529,36 +520,28 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 		{
 			auto& fr = sr.fields[f];
 
-			std::string fieldName = var + "." + fr.name;
-			if (sr.elementsCount > 1)
-			{
-				std::ostringstream ss;
-				ss << var << '[' << e << ']' << '.' << fr.name;
-				fieldName = ss.str();
-			}
-
-			std::string sValue = mesh.getParam(fieldName);
+			ParamKey pk{ var,e,fr.name };
 
 			char* fieldPtr = elementData + fr.offset;
-			if (std::strcmp(fr.type.c_str(), "float") == 0)
+			if (fr.type == float_id)
 			{
 				float& floatVariable = *((float*)(fieldPtr));
-				floatVariable = std::atof(sValue.c_str());
+				mesh.getParam(pk, floatVariable);
 			}
-			if (std::strcmp(fr.type.c_str(), "float2") == 0)
+			if (fr.type == float2_id)
 			{
 				flt2& float2Variable = *((flt2*)(fieldPtr));
-				float2Variable = sValue;
+				mesh.getParam(pk, float2Variable);
 			}
-			if (std::strcmp(fr.type.c_str(), "float3") == 0)
+			if (fr.type == float3_id)
 			{
 				flt3& float3Variable = *((flt3*)(fieldPtr));
-				float3Variable = sValue;
+				mesh.getParam(pk, float3Variable);
 			}
-			if (std::strcmp(fr.type.c_str(), "float4") == 0)
+			if (fr.type == float4_id)
 			{
 				flt4& float4Variable = *((flt4*)(fieldPtr));
-				float4Variable = sValue;
+				mesh.getParam(pk, float4Variable);
 			}
 		}
 	}
@@ -571,17 +554,17 @@ void* GraphicsCore::getStruct(const Mesh& mesh, const std::string& var, int* byt
 ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	const Mesh& mesh,
 	uint32_t* elementSize,
-	const char* technique,
-	const char* pass,
+	string_id* technique,
+	string_id* pass,
 	bool structured
 ) const
 {
 	(*elementSize) = 0;
 
-	std::string sTechnique = technique ? std::string(technique) : mesh.getTechnique();
-	std::string sPass = pass ? std::string(pass) : mesh.getPass();
+	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
+	string_id pass_name_id = pass ? *pass : mesh.getPass();
 
-	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
+	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(technique_name_id, pass_name_id);
 	if (streamsInfo == nullptr)
 		return nullptr;
 
@@ -591,7 +574,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	if (mesh.gpuReadyData)
 		(*elementSize) = mesh.elementSize;
 
-	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(sTechnique, sPass, mesh.id, structured);
+	ID3D11Buffer* mVB = ResourceManager::instance()->getVertexBuffer(technique_name_id, pass_name_id, mesh.id, structured);
 	if (mesh.gpuReadyData)
 		mVB = nullptr;
 
@@ -619,7 +602,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 
 		device->CreateBuffer(&vbd, &vinitData, &mVB);
 
-		ResourceManager::instance()->registerVertexBuffer(sTechnique, sPass, mesh.id, mVB, structured);
+		ResourceManager::instance()->registerVertexBuffer(technique_name_id, pass_name_id, mesh.id, mVB, structured);
 		if (mesh.gpuReadyData == nullptr)
 			free((void*)vinitData.pSysMem);
 	}
@@ -628,14 +611,14 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 
 void* GraphicsCore::fetchVerticesFromMesh(
 	const Mesh& mesh,
-	const char* technique,
-	const char* pass
+	string_id* technique,
+	string_id* pass
 ) const
 {
-	std::string sTechnique = technique ? std::string(technique) : mesh.getTechnique();
-	std::string sPass = technique ? std::string(pass) : mesh.getPass();
+	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
+	string_id pass_name_id = technique ? *pass : mesh.getPass();
 
-	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(sTechnique, sPass);
+	const std::vector<InputLayoutResource::StreamInfo>* streamsInfo = ResourceManager::instance()->getStreamsInfo(technique_name_id, pass_name_id);
 	if (streamsInfo == nullptr)
 		return nullptr;
 
