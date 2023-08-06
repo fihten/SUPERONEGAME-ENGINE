@@ -31,11 +31,15 @@ string_id fwd_id;
 string_id position_in_scene_id;
 string_id inverse_transpose_of_position_in_scene_id;
 
+string_id selected_object_technique_id;
+string_id p0_pass_id;
+
 StringManager* StringManager::stringManager = nullptr;
 
 StringManager::StringManager()
 {
 	hash = new char* [hashSize];
+	std::memset(hash, 0, hashSize);
 
 	float_id = toStringId("float");
 	float2_id = toStringId("float2");
@@ -60,6 +64,9 @@ StringManager::StringManager()
 
 	position_in_scene_id = toStringId("position_in_scene");
 	inverse_transpose_of_position_in_scene_id = toStringId("inverse_transpose_of_position_in_scene");
+
+	selected_object_technique_id = toStringId("SelectedObject");
+	p0_pass_id = toStringId("P0");
 }
 
 void StringManager::init()
@@ -118,4 +125,9 @@ string_id StringManager::toStringId(const char* str)
 string_id StringManager::toStringId(const std::string& str)
 {
 	return toStringId(str.c_str());
+}
+
+const char* StringManager::toString(string_id str_id)
+{
+	return stringManager->hash[str_id];
 }

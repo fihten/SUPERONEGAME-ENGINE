@@ -671,13 +671,13 @@ void* GraphicsCore::fetchVerticesFromMesh(
 
 ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) const
 {
-	std::string sTechnique = mesh.getTechnique();
-	std::string sPass = mesh.getPass();
+	string_id technique_name_id = mesh.getTechnique();
+	string_id pass_name_id = mesh.getPass();
 
-	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		return nullptr;
 
-	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(sTechnique, sPass, mesh.id, structured);
+	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(technique_name_id, pass_name_id, mesh.id, structured);
 	if (mIB == nullptr)
 	{
 		// Create index buffer
@@ -694,15 +694,17 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) co
 
 		device->CreateBuffer(&ibd, &iinitData, &mIB);
 
-		ResourceManager::instance()->registerIndexBuffer(sTechnique, sPass, mesh.id, mIB, structured);
+		ResourceManager::instance()->registerIndexBuffer(technique_name_id, pass_name_id, mesh.id, mIB, structured);
 	}
 	return mIB;
 }
 
-ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, const std::string& var) const
+ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, string_id var) const
 {
-	std::string name = mesh.getParam(var);
-	ID3D11ShaderResourceView* img = ResourceManager::instance()->getImage(name);
+	ParamKey pk{ var,-1,string_id(-1) };
+	string_id name_id;
+	mesh.getParam(pk, name_id);
+	ID3D11ShaderResourceView* img = ResourceManager::instance()->getImage(name_id);
 	if (img)
 		return img;
 
@@ -710,23 +712,28 @@ ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, const std::st
 	int sz = sizeof texturesFolder / sizeof * texturesFolder;
 	GetEnvironmentVariableA("TEXTURES", texturesFolder, sz);
 
+	const char* name = StringManager::toString(name_id);
 	std::string texturePath = std::string(texturesFolder) + '\\' + name;
 
 	D3DX11CreateShaderResourceViewFromFileA(
 		device, texturePath.c_str(), 0, 0, &img, 0
 	);
 
-	ResourceManager::instance()->registerImage(name, img);
+	ResourceManager::instance()->registerImage(name_id, img);
 
 	return img;
 }
 
-ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const std::string& var) const
+ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, string_id var) const
 {
-	std::string name = mesh.getParam(var);
-	ID3D11ShaderResourceView* imgsArr = ResourceManager::instance()->getImagesArray(name);
+	ParamKey pk{ var,-1,string_id(-1) };
+	string_id name_id;
+	mesh.getParam(pk, name_id);
+	ID3D11ShaderResourceView* imgsArr = ResourceManager::instance()->getImagesArray(name_id);
 	if (imgsArr)
 		return imgsArr;
+
+	std::string name(StringManager::toString(name_id));
 
 	std::vector<std::string> texNames;
 	int start = 0;
@@ -829,17 +836,17 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, const s
 	for (int i = 0; i < size; ++i)
 		texes[i]->Release();
 
-	ResourceManager::instance()->registerImagesArray(name, imgsArr);
+	ResourceManager::instance()->registerImagesArray(name_id, imgsArr);
 
 	return imgsArr;
 }
 
 void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Float4x4Resource> flt4x4s;
-	ResourceManager::instance()->getFloat4x4s(sTechnique, flt4x4s);
+	std::map<string_id, Float4x4Resource> flt4x4s;
+	ResourceManager::instance()->getFloat4x4s(technique_name_id, flt4x4s);
 	for (auto& f4x4 : flt4x4s)
 	{
 		flt4x4 v = getFloat4x4(mesh, f4x4.first);
@@ -849,10 +856,10 @@ void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Float4Resource> flt4s;
-	ResourceManager::instance()->getFloat4s(sTechnique, flt4s);
+	std::map<string_id, Float4Resource> flt4s;
+	ResourceManager::instance()->getFloat4s(technique_name_id, flt4s);
 	for (auto& f4 : flt4s)
 	{
 		flt4 v = getFloat4(mesh, f4.first);
@@ -862,10 +869,10 @@ void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Float3Resource> flt3s;
-	ResourceManager::instance()->getFloat3s(sTechnique, flt3s);
+	std::map<string_id, Float3Resource> flt3s;
+	ResourceManager::instance()->getFloat3s(technique_name_id, flt3s);
 	for (auto& f3 : flt3s)
 	{
 		flt3 v = getFloat3(mesh, f3.first);
@@ -875,10 +882,10 @@ void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Float2Resource> flt2s;
-	ResourceManager::instance()->getFloat2s(sTechnique, flt2s);
+	std::map<string_id, Float2Resource> flt2s;
+	ResourceManager::instance()->getFloat2s(technique_name_id, flt2s);
 	for (auto& f2 : flt2s)
 	{
 		flt2 v = getFloat2(mesh, f2.first);
@@ -888,10 +895,10 @@ void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Float1Resource> flt1s;
-	ResourceManager::instance()->getFloat1s(sTechnique, flt1s);
+	std::map<string_id, Float1Resource> flt1s;
+	ResourceManager::instance()->getFloat1s(technique_name_id, flt1s);
 	for (auto& f1 : flt1s)
 	{
 		flt1 v = getFloat1(mesh, f1.first);
@@ -901,10 +908,10 @@ void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, StructResource>& structs =
-		ResourceManager::instance()->getStructures(sTechnique);
+	std::map<string_id, StructResource>& structs =
+		ResourceManager::instance()->getStructures(technique_name_id);
 	for (auto& s : structs)
 	{
 		int bytes = 0;
@@ -915,10 +922,10 @@ void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Texture2dResource> textures;
-	ResourceManager::instance()->getTextures(sTechnique, textures);
+	std::map<string_id, Texture2dResource> textures;
+	ResourceManager::instance()->getTextures(technique_name_id, textures);
 	for (auto& t : textures)
 	{
 		ID3D11ShaderResourceView* tex = getImage(mesh, t.first);
@@ -928,10 +935,10 @@ void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
 
 void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
 {
-	std::string sTechnique = mesh.getTechnique();
+	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<std::string, Texture2dArrayResource> texArrs;
-	ResourceManager::instance()->getTexturesArrays(sTechnique, texArrs);
+	std::map<string_id, Texture2dArrayResource> texArrs;
+	ResourceManager::instance()->getTexturesArrays(technique_name_id, texArrs);
 	for (auto& ta : texArrs)
 	{
 		ID3D11ShaderResourceView* texArr = getImagesArray(mesh, ta.first);
@@ -958,15 +965,15 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 	if (mVB == nullptr)
 		return;
 
-	std::string sTechnique = mesh.getTechnique();
-	std::string sPass = mesh.getPass();
+	string_id technique_name_id = mesh.getTechnique();
+	string_id pass_name_id = mesh.getPass();
 
 	ID3D11Buffer* mIB = getIndexBuffer(mesh);
-	if (mIB ==  nullptr && !ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+	if (mIB ==  nullptr && !ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		return;
 
 	D3D_PRIMITIVE_TOPOLOGY primTopology;
-	switch (ResourceManager::instance()->getPrimitiveType(sTechnique, sPass))
+	switch (ResourceManager::instance()->getPrimitiveType(technique_name_id, pass_name_id))
 	{
 	case PassResource::POINT:
 		primTopology = D3D11_PRIMITIVE_TOPOLOGY_POINTLIST;
@@ -993,7 +1000,7 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 	}
 	context->IASetPrimitiveTopology(primTopology);
 
-	auto* inputLayout = ResourceManager::instance()->getInputLayout(sTechnique, sPass);
+	auto* inputLayout = ResourceManager::instance()->getInputLayout(technique_name_id, pass_name_id);
 	if (inputLayout == nullptr)
 		return;
 
@@ -1001,7 +1008,7 @@ void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
 
 	uint32_t offset = 0;
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
-	if (!ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+	if (!ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
 }
 
@@ -1244,8 +1251,8 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 	ID3D11Buffer* mVerticesBuffer = this->getVertexBuffer(
 		mesh,
 		&elementSize,
-		"SelectedObject",
-		"P0",
+		&selected_object_technique_id,
+		&p0_pass_id,
 		true
 	);
 

@@ -5,18 +5,18 @@ void DrawVisitor::startVisit(const Scene::MeshNode* node)
 	GraphicsCore::instance()->draw(MeshInScene(node->mesh, node->ID));
 }
 
-std::string DrawVisitor::MeshInScene::getTechnique() const
+string_id DrawVisitor::MeshInScene::getTechnique() const
 {
 	if (mesh == nullptr)
-		return std::string("");
+		return string_id(-1);
 
 	return mesh->getTechnique();
 }
 
-std::string DrawVisitor::MeshInScene::getPass() const
+string_id DrawVisitor::MeshInScene::getPass() const
 {
 	if (mesh == nullptr)
-		return std::string("");
+		return string_id(-1);
 
 	return mesh->getPass();
 }

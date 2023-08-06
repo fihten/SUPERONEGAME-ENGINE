@@ -17,8 +17,8 @@ class DrawVisitor :public Scene::Visitor
 			nodeID = meshNode;
 		}
 
-		std::string getTechnique() const;
-		std::string getPass() const;
+		string_id getTechnique() const;
+		string_id getPass() const;
 		
 		const void* getStream(const std::string& name, StreamType type) const;
 		const std::vector<uint32_t>* getIndicies() const;

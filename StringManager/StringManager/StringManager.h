@@ -27,12 +27,18 @@ extern string_id fwd_id;
 extern string_id position_in_scene_id;
 extern string_id inverse_transpose_of_position_in_scene_id;
 
+extern string_id selected_object_technique_id;
+extern string_id p0_pass_id;
+
 struct StringManager
 {
 	static void init();
 
 	static string_id toStringId(const char* str);
 	static string_id toStringId(const std::string& str);
+
+	static const char* toString(string_id str_id);
+
 private:
 	StringManager();
 	

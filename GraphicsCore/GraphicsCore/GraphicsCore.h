@@ -127,8 +127,8 @@ private:
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;
 
-	ID3D11ShaderResourceView* getImage(const Mesh& mesh, const std::string& var) const;
-	ID3D11ShaderResourceView* getImagesArray(const Mesh& mesh, const std::string& var) const;
+	ID3D11ShaderResourceView* getImage(const Mesh& mesh, string_id var) const;
+	ID3D11ShaderResourceView* getImagesArray(const Mesh& mesh, string_id var) const;
 
 	void setFloat4x4sOnGPU(const Mesh& mesh);
 	void setFloat4sOnGPU(const Mesh& mesh);
