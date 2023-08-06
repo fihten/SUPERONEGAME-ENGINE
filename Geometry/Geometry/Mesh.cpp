@@ -318,16 +318,15 @@ Mesh createTrees()
 	m.params[tree_map_array_key] = tree_map_array_value;
 
 	ParamKey fog_start_key{ StringManager::toStringId("gFogStart"), -1, string_id(-1) };
-	ParamValue fog_start_value{ 5 };
+	ParamValue fog_start_value(5.0f);
 	m.params[fog_start_key] = fog_start_value;
 
 	ParamKey fog_range_key{ StringManager::toStringId("gFogRange"), -1, string_id(-1) };
-	ParamValue fog_range_value{ 20 };
+	ParamValue fog_range_value(20.0f);
 	m.params[fog_range_key] = fog_range_value;
 
 	ParamKey fog_color_key{ StringManager::toStringId("gFogColor"), -1, string_id(-1) };
-	ParamValue fog_color_value{ -1 };
-	fog_color_value.f4 = flt4(1, 0, 0, 1);
+	ParamValue fog_color_value(flt4(1, 0, 0, 1));
 	m.params[fog_color_key] = fog_color_value;
 
 	return m;
@@ -1025,7 +1024,7 @@ flt3 Mesh::getBottomBorder() const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return std::strcmp(el.first.c_str(), "POSITION") == 0;
+		return el.first == position_id;
 	}
 	);
 	if (it == flt3_streams.end())
@@ -1051,7 +1050,7 @@ flt3 Mesh::getTopBorder() const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return std::strcmp(el.first.c_str(), "POSITION") == 0;
+		return el.first == position_id;
 	}
 	);
 	if (it == flt3_streams.end())
@@ -1080,7 +1079,7 @@ void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
 		flt3_streams.end(),
 		[&](auto& el)->bool
 	{
-		return std::strcmp(el.first.c_str(), "POSITION") == 0;
+		return el.first == position_id;
 	}
 	);
 	if (it == flt3_streams.end())

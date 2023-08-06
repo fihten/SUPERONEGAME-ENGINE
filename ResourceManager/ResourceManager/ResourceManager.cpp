@@ -178,7 +178,7 @@ ResourceManager::RegisterMessage ResourceManager::registerTexturesArray(string_i
 	return RegisterMessage::OK;
 }
 
-ResourceManager::RegisterMessage ResourceManager::registerVariableLocation(string_id techniqueName, string_id varName, string_id varLocation)
+ResourceManager::RegisterMessage ResourceManager::registerVariableLocation(string_id techniqueName, string_id varName, const VariableLocation& varLocation)
 {
 	if (techniques.count(techniqueName) == 0)
 		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
@@ -328,10 +328,11 @@ ID3DX11EffectPass* ResourceManager::getPass(string_id techniqueName, string_id p
 	return techniqueRes.passes.at(passName).ptr;
 }
 
-string_id ResourceManager::getVariableLocation(string_id techniqueName, string_id variable) const
+const VariableLocation& ResourceManager::getVariableLocation(string_id techniqueName, string_id variable) const
 {
+	static VariableLocation fictionLocation;
 	if (techniques.count(techniqueName) == 0)
-		return string_id(-1);
+		return fictionLocation;
 
 	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
 	if (techniqueRes.float4x4s.count(variable) != 0)
@@ -345,7 +346,7 @@ string_id ResourceManager::getVariableLocation(string_id techniqueName, string_i
 	if (techniqueRes.float1s.count(variable) != 0)
 		return techniqueRes.float1s.at(variable).location;
 
-	return string_id(-1);
+	return fictionLocation;
 }
 
 void ResourceManager::getFloat4x4s(string_id techniqueName, std::map<string_id, Float4x4Resource>& flt4x4s)

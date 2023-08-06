@@ -247,20 +247,60 @@ void Scene::RootNode::accept(Visitor* visitor) const
 	visitor->finishVisit(this);
 }
 
-void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& paramVal)
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s)
 {
 	Node* node = nodes[id];
 	if (node == nullptr)
 		return;
-	node->setParam(paramName, paramVal);
+	node->setParam(paramName, s);
 }
 
-void Scene::createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param)
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const float& f)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, f);
+}
+
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const flt2& f2)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, f2);
+}
+
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const flt3& f3)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, f3);
+}
+
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const flt4& f4)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, f4);
+}
+
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const flt4x4& f4x4)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, f4x4);
+}
+
+void Scene::createNodeParamReference(NodeID reference, NodeID referenced, const ParamKey& param)
 {
 	paramsLocations[reference].location[param] = referenced;
 }
 
-std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, string_id& s) const
 {
 	if (paramsLocations.count(id) == 1)
 	{
@@ -270,22 +310,122 @@ std::string Scene::getNodeParam(NodeID id, const std::string& paramName) const
 	}
 
 	Node* node = nodes[id];
-	std::string paramValue = "";
-	if (node->params.count(paramName) == 1)
-		paramValue = node->params.at(paramName);
+	if (node->params.count(paramName) == 0)
+		return false;
 
-	if (std::strcmp(paramValue.c_str(), "node_position") == 0)
+	s = node->params.at(paramName).s;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, float& f) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = nodes[id];
+	if (node->params.count(paramName) == 0)
+		return false;
+
+	f = node->params.at(paramName).f;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt2& f2) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = nodes[id];
+	if (node->params.count(paramName) == 0)
+		return false;
+
+	f2 = node->params.at(paramName).f2;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt3& f3) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = nodes[id];
+	if (node->params.count(paramName) == 0)
+		return false;
+
+	auto& param = node->params.at(paramName);
+	string_id s = param.s;
+
+	if (s == node_position_id)
 	{
 		flt4x4 pos = node->getPos();
-		return flt3(pos.m30(), pos.m31(), pos.m32());
+		f3.x() = pos.m30();
+		f3.y() = pos.m31();
+		f3.z() = pos.m32();
+		return true;
 	}
-	if (std::strcmp(paramValue.c_str(), "node_axis_z") == 0)
+	if (s == node_axis_z_id)
 	{
 		flt4x4 pos = node->getPos();
-		return flt3(pos.m20(), pos.m21(), pos.m22());
+		f3.x() = pos.m20();
+		f3.y() = pos.m21();
+		f3.z() = pos.m22();
+		return true;
 	}
 
-	return paramValue;
+	f3 = param.f3;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt4& f4) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = nodes[id];
+	if (node->params.count(paramName) == 0)
+		return false;
+
+	f4 = node->params.at(paramName).f4;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) const
+{
+	if (paramsLocations.count(id) == 1)
+	{
+		auto& location = paramsLocations.at(id).location;
+		if (location.count(paramName) == 1)
+			id = location.at(paramName);
+	}
+
+	Node* node = nodes[id];
+	if (node->params.count(paramName) == 0)
+		return false;
+
+	f4x4 = node->params.at(paramName).f4x4;
+
+	return true;
 }
 
 flt4x4 Scene::getNodePosition(NodeID id) const

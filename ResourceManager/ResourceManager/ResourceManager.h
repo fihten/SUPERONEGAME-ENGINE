@@ -48,7 +48,7 @@ public:
 	RegisterMessage registerStruct(string_id techniqueName, string_id structName, const StructResource& structRes);
 	RegisterMessage registerTexture(string_id techniqueName, string_id textureName, const Texture2dResource& texRes);
 	RegisterMessage registerTexturesArray(string_id techniqueName, string_id textureArrName, const Texture2dArrayResource& texArrRes);
-	RegisterMessage registerVariableLocation(string_id techniqueName, string_id varName, string_id varLocation);
+	RegisterMessage registerVariableLocation(string_id techniqueName, string_id varName, const VariableLocation& varLocation);
 	RegisterMessage registerVertexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11Buffer* vertexBuffer, bool structured);
 	RegisterMessage registerIndexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11Buffer* indexBuffer, bool structured);
 	RegisterMessage registerImage(string_id name, ID3D11ShaderResourceView* image);
@@ -59,7 +59,7 @@ public:
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName) const;
 	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName) const;
 	ID3DX11EffectPass* getPass(string_id techniqueName, string_id passName) const;
-	string_id getVariableLocation(string_id techniqueName, string_id variable) const;
+	const VariableLocation& getVariableLocation(string_id techniqueName, string_id variable) const;
 	void getFloat4x4s(string_id techniqueName, std::map<string_id, Float4x4Resource>& flt4x4s);
 	void getFloat4s(string_id techniqueName, std::map<string_id, Float4Resource>& flt4s);
 	void getFloat3s(string_id techniqueName, std::map<string_id, Float3Resource>& flt3s);

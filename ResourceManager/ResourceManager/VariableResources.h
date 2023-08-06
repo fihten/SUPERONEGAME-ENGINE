@@ -2,38 +2,39 @@
 
 #include <D3dx11effect.h>
 #include "StringManager.h"
+#include "VariableLocation.h"
 
 struct Float4x4Resource
 {
-	string_id location = string_id(-1);
+	VariableLocation location;
 	unsigned int elementsCount = 0;
 	ID3DX11EffectMatrixVariable* ptr = nullptr;
 };
 
 struct Float4Resource
 {
-	string_id location = string_id(-1);
+	VariableLocation location;
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float3Resource
 {
-	string_id location = string_id(-1);
+	VariableLocation location;
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float2Resource
 {
-	string_id location = string_id(-1);
+	VariableLocation location;
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
 struct Float1Resource
 {
-	string_id location = string_id(-1);
+	VariableLocation location;
 	unsigned int elementsCount = 0;
 	ID3DX11EffectVariable* ptr = nullptr;
 };

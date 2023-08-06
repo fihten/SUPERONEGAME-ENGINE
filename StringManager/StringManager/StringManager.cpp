@@ -5,6 +5,7 @@
 #include "framework.h"
 #include "StringManager.h"
 #include <cmath>
+#include <Windows.h>
 
 string_id float_id;
 string_id float2_id;
@@ -15,6 +16,20 @@ string_id position_id;
 
 string_id technique_id;
 string_id pass_id;
+
+string_id node_position_id;
+string_id node_axis_z_id;
+
+string_id cameras_id;
+string_id wvp_id;
+string_id vp_id;
+string_id v_id;
+string_id p_id;
+string_id eye_pos_id;
+string_id fwd_id;
+
+string_id position_in_scene_id;
+string_id inverse_transpose_of_position_in_scene_id;
 
 StringManager* StringManager::stringManager = nullptr;
 
@@ -31,6 +46,20 @@ StringManager::StringManager()
 
 	technique_id = toStringId("technique");
 	pass_id = toStringId("pass");
+
+	node_position_id = toStringId("node_position");
+	node_axis_z_id = toStringId("node_axis_z");
+
+	cameras_id = toStringId("cameras");
+	wvp_id = toStringId("WVP");
+	vp_id = toStringId("VP");
+	v_id = toStringId("V");
+	p_id = toStringId("P");
+	eye_pos_id = toStringId("eye_pos");
+	fwd_id = toStringId("fwd");
+
+	position_in_scene_id = toStringId("position_in_scene");
+	inverse_transpose_of_position_in_scene_id = toStringId("inverse_transpose_of_position_in_scene");
 }
 
 void StringManager::init()
@@ -67,9 +96,16 @@ string_id StringManager::toStringId(const char* str)
 	if (stringManager->hash[strID] != nullptr)
 	{
 		if (std::strcmp(stringManager->hash[strID], str) == 0)
+		{
 			return strID;
+		}
 		else
+		{
+			char buff[256] = { 0 };
+			sprintf(buff, "Hashing of string \"%s\" is failed");
+			MessageBoxA(0, buff, 0, MB_OK);
 			return string_id(-1);
+		}
 	}
 
 	stringManager->hash[strID] = new char[n + 1];

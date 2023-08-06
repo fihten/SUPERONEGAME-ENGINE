@@ -105,8 +105,8 @@ private:
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
-	flt4x4 getFloat4x4(const Mesh& mesh, const std::string& var) const;
-	flt4 getFloat4(const Mesh& mesh, const std::string& var) const;
+	flt4x4 getFloat4x4(const Mesh& mesh, string_id var) const;
+	flt4 getFloat4(const Mesh& mesh, string_id var) const;
 	flt3 getFloat3(const Mesh& mesh, const std::string& var) const;
 	flt2 getFloat2(const Mesh& mesh, const std::string& var) const;
 	flt1 getFloat1(const Mesh& mesh, const std::string& var) const;

@@ -188,15 +188,15 @@ void GraphicsCore::draw(const Mesh& mesh)
 	setVariablesOnGPU(mesh);
 	setGeometryOnGPU(mesh);
 
-	std::string sTechnique = mesh.getTechnique();
-	std::string sPass = mesh.getPass();
+	string_id technique_name_id = mesh.getTechnique();
+	string_id pass_name_id = mesh.getPass();
 
-	auto* pass = ResourceManager::instance()->getPass(sTechnique, sPass);
+	auto* pass = ResourceManager::instance()->getPass(technique_name_id, pass_name_id);
 	if (pass == nullptr)
 		return;
 
 	pass->Apply(0, context);
-	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(sTechnique, sPass))
+	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		context->Draw(mesh.getVerticesCount(), 0);
 	else
 		context->DrawIndexed(mesh.getIndicesCount(), 0, 0);
@@ -362,84 +362,68 @@ void GraphicsCore::resize(UINT width, UINT height)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }
 
-flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, const std::string& var) const
+flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, string_id var) const
 {
 	flt4x4 res;
 
-	std::string tech = mesh.getTechnique();
-	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+	string_id technique_name_id = mesh.getTechnique();
+	const VariableLocation& location = ResourceManager::instance()->getVariableLocation(technique_name_id, var);
 
-	auto placeEnd = std::remove_if(place.begin(), place.end(), [&](char c)->bool {return c == ' '; });
-	place = place.substr(0, placeEnd - place.begin());
-
-	size_t startOfMultiplier = 0;
-	while (startOfMultiplier != place.length() + 1)
+	for (int mi = 0; mi < location.countOfMultipliers; mi++)
 	{
-		size_t endOfMultiplier = place.find_first_of('*', startOfMultiplier);
-		if (endOfMultiplier == std::string::npos)
-			endOfMultiplier = place.length();
-
-		std::string multiplier = place.substr(startOfMultiplier, endOfMultiplier - startOfMultiplier);
-		startOfMultiplier = endOfMultiplier + 1;
-
-		if (std::strcmp(multiplier.c_str(), "") == 0)
-			continue;
-
-		size_t pos = multiplier.find("cameras[");
-		if (pos == 0)
+		if (location.name[mi] == cameras_id)
 		{
-			size_t beg = 7;
-			size_t end = multiplier.find(']', beg);
-
-			int index = std::atoi(std::string(multiplier, beg, end - beg).c_str());
-
-			beg = end + 2;
-			std::string what(multiplier, beg, std::string::npos);
-			if (std::strcmp(what.c_str(), "WVP") == 0)
+			int index = location.index[mi];
+			if (location.field[mi] == wvp_id)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * v * p;
 			}
-			if (std::strcmp(what.c_str(), "VP") == 0)
+			if (location.field[mi] == vp_id)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * v * p;
 			}
-			if (std::strcmp(what.c_str(), "V") == 0)
+			if (location.field[mi] == v_id)
 			{
 				const flt4x4& v = cameras()[index].getView();
 				res = res * v;
 			}
-			if (std::strcmp(what.c_str(), "P") == 0)
+			if (location.field[mi] == p_id)
 			{
 				const flt4x4& p = cameras()[index].getProj();
 				res = res * p;
 			}
 			continue;
 		}
-		if (std::strcmp(multiplier.c_str(), "position_in_scene") == 0)
+		if (location.name[mi] == position_in_scene_id)
 		{
 			res = res * mesh.getPosition();
 			continue;
 		}
-		if (std::strcmp(multiplier.c_str(), "inverse_transpose_of_position_in_scene") == 0)
+		if (location.name[mi] == inverse_transpose_of_position_in_scene_id)
 		{
 			res = res * mesh.getPosition().inverse().transpose();
 			continue;
 		}
 	}
-
+	
 	return res;
 }
 
-flt4 GraphicsCore::getFloat4(const Mesh& mesh, const std::string& var) const
+flt4 GraphicsCore::getFloat4(const Mesh& mesh, string_id var) const
 {
 	flt4 res;
 
-	std::string tech = mesh.getTechnique();
-	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
+	string_id technique_name_id = mesh.getTechnique();
+	const VariableLocation location = ResourceManager::instance()->getVariableLocation(technique_name_id, var);
+
+	if (location.name[0] == cameras_id)
+	{
+
+	}
 
 	size_t pos = place.find("cameras[");
 	if (pos == 0)
@@ -479,7 +463,7 @@ flt3 GraphicsCore::getFloat3(const Mesh& mesh, const std::string& var) const
 {
 	flt3 res;
 
-	std::string tech = mesh.getTechnique();
+	string_id tech = mesh.getTechnique();
 	std::string place = ResourceManager::instance()->getVariableLocation(tech, var);
 
 	size_t pos = place.find("cameras[");
