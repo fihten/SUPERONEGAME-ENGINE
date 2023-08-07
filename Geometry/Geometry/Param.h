@@ -12,20 +12,7 @@ struct ParamKey
 	string_id field = string_id(-1);
 };
 
-bool operator<(const ParamKey& p0, const ParamKey& p1)
-{
-	if (p0.name > p1.name)
-		return false;
-	if (p0.name < p1.name)
-		return true;
-	if (p0.index > p1.index)
-		return false;
-	if (p0.index < p1.index)
-		return true;
-	if (p0.field < p1.field)
-		return true;
-	return false;
-}
+extern bool operator<(const ParamKey& p0, const ParamKey& p1);
 
 struct ParamValue
 {
@@ -37,8 +24,8 @@ struct ParamValue
 	ParamValue(flt4 f4) :f4(f4) {}
 	ParamValue(flt4x4 f4x4) :f4x4(f4x4) {}
 
-	string_id s;
-	float f;
+	string_id s = string_id(-1);
+	float f = 0;
 	flt2 f2;
 	flt3 f3;
 	flt4 f4;

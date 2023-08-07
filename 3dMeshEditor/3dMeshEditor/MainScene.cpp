@@ -51,19 +51,69 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 	return meshNode;
 }
 
-void MainScene::setNodeParam(NodeID id, const std::string& paramName, const std::string& paramVal)
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s)
 {
-	scene.setNodeParam(id, paramName, paramVal);
+	scene.setNodeParam(id, paramName, s);
 }
 
-void MainScene::createNodeParamReference(NodeID reference, NodeID referenced, const std::string& param)
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const float& f)
+{
+	scene.setNodeParam(id, paramName, f);
+}
+
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const flt2& f2)
+{
+	scene.setNodeParam(id, paramName, f2);
+}
+
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const flt3& f3)
+{
+	scene.setNodeParam(id, paramName, f3);
+}
+
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const flt4& f4)
+{
+	scene.setNodeParam(id, paramName, f4);
+}
+
+void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const flt4x4& f4x4)
+{
+	scene.setNodeParam(id, paramName, f4x4);
+}
+
+void MainScene::createNodeParamReference(NodeID reference, NodeID referenced, const ParamKey& param)
 {
 	scene.createNodeParamReference(reference, referenced, param);
 }
 
-std::string MainScene::getNodeParam(NodeID id, const std::string& paramName) const
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, string_id& s) const
 {
-	return scene.getNodeParam(id, paramName);
+	return scene.getNodeParam(id, paramName, s);
+}
+
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, float& f) const
+{
+	return scene.getNodeParam(id, paramName, f);
+}
+
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, flt2& f2) const
+{
+	return scene.getNodeParam(id, paramName, f2);
+}
+
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, flt3& f3) const
+{
+	return scene.getNodeParam(id, paramName, f3);
+}
+
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, flt4& f4) const
+{
+	return scene.getNodeParam(id, paramName, f4);
+}
+
+bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) const
+{
+	return scene.getNodeParam(id, paramName, f4x4);
 }
 
 flt4x4 MainScene::getNodePosition(NodeID id) const

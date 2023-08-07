@@ -34,12 +34,21 @@ string_id inverse_transpose_of_position_in_scene_id;
 string_id selected_object_technique_id;
 string_id p0_pass_id;
 
+string_id selected_objects_box_id;
+
 StringManager* StringManager::stringManager = nullptr;
 
 StringManager::StringManager()
 {
 	hash = new char* [hashSize];
-	std::memset(hash, 0, hashSize);
+	std::memset(hash, 0, hashSize * sizeof(char*));
+}
+
+void StringManager::init()
+{
+	if (stringManager != nullptr)
+		return;
+	stringManager = new StringManager();
 
 	float_id = toStringId("float");
 	float2_id = toStringId("float2");
@@ -67,13 +76,8 @@ StringManager::StringManager()
 
 	selected_object_technique_id = toStringId("SelectedObject");
 	p0_pass_id = toStringId("P0");
-}
 
-void StringManager::init()
-{
-	if (stringManager != nullptr)
-		return;
-	stringManager = new StringManager();
+	selected_objects_box_id = toStringId("SelectedObjectsBox");
 }
 
 string_id StringManager::toStringId(const char* str)
@@ -84,21 +88,25 @@ string_id StringManager::toStringId(const char* str)
 	int u = sizeof(string_id);
 	int n0 = n / u;
 	string_id* str0 = (string_id*)str;
-	for (int ci = 0; ci < n0; ci += u)
+	for (int ci = 0; ci < n0; ci++)
 	{
-		string_id strID0 = str0[ci];
-		strID = (strID & (~strID0)) | ((~strID) & strID0);
+		string_id strID0 = 0.5 * (cos(2 * str0[ci] + strID) + 1) * (stringManager->hashSize - 1);
+		strID = 0.5 * (cos(2 * strID0 + sqrt(23)) + 1) * (stringManager->hashSize - 1);
 	}
 
 	string_id strID0 = 0;
 	for (int ci = 0; ci < n % u; ci++)
 	{
-		char ch = *(str + n - u + ci);
-		strID0 |= ((string_id)(ch) << ci);
+		char ch = *(str + n - n % u + ci);
+		strID0 |= ((string_id)(ch) << ci * 8);
 	}
-	strID = (strID & (~strID0)) | ((~strID) & strID0);
+	if (n % u > 0)
+	{
+		strID0 = 0.5 * (cos(2 * strID0 + strID + sqrt(2)) + 1) * (stringManager->hashSize - 1);
+		strID = 0.5 * (cos(2 * strID0 + sqrt(237)) + 1) * (stringManager->hashSize - 1);
+	}
 
-	strID %= stringManager->hashSize;
+	strID = 0.5 * (cos(strID + sqrt(11)) + 1) * (stringManager->hashSize - 1);
 
 	if (stringManager->hash[strID] != nullptr)
 	{
@@ -109,7 +117,7 @@ string_id StringManager::toStringId(const char* str)
 		else
 		{
 			char buff[256] = { 0 };
-			sprintf(buff, "Hashing of string \"%s\" is failed");
+			sprintf(buff, "Hashing of string \"%s\" is failed", str);
 			MessageBoxA(0, buff, 0, MB_OK);
 			return string_id(-1);
 		}

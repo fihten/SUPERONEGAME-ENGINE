@@ -8,8 +8,12 @@ Selector* Selector::pSelector = nullptr;
 
 Selector::Selector()
 {
-	selectedObjectsBoxesMesh.setParam("technique", "SelectedObjectsBox");
-	selectedObjectsBoxesMesh.setParam("pass", "P0");
+	ParamKey technique_name_key{ technique_id,-1,string_id(-1) };
+	selectedObjectsBoxesMesh.setParam(technique_name_key, selected_objects_box_id);
+
+	ParamKey pass_name_key{ pass_id,-1,string_id(-1) };
+	selectedObjectsBoxesMesh.setParam(pass_name_key, p0_pass_id);
+
 	selectedObjectsBoxesMesh.gpuReadyData = selectedObjectsBoxes;
 	selectedObjectsBoxesMesh.elementSize = sizeof SelectedObjectBox;
 }

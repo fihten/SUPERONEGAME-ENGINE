@@ -30,6 +30,8 @@ extern string_id inverse_transpose_of_position_in_scene_id;
 extern string_id selected_object_technique_id;
 extern string_id p0_pass_id;
 
+extern string_id selected_objects_box_id;
+
 struct StringManager
 {
 	static void init();
