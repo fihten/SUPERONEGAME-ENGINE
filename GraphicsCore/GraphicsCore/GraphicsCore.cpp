@@ -845,8 +845,8 @@ void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Float4x4Resource> flt4x4s;
-	ResourceManager::instance()->getFloat4x4s(technique_name_id, flt4x4s);
+	std::map<string_id, Float4x4Resource>& flt4x4s =
+		ResourceManager::instance()->getFloat4x4s(technique_name_id);
 	for (auto& f4x4 : flt4x4s)
 	{
 		flt4x4 v = getFloat4x4(mesh, f4x4.first);
@@ -858,8 +858,8 @@ void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Float4Resource> flt4s;
-	ResourceManager::instance()->getFloat4s(technique_name_id, flt4s);
+	std::map<string_id, Float4Resource>& flt4s =
+		ResourceManager::instance()->getFloat4s(technique_name_id);
 	for (auto& f4 : flt4s)
 	{
 		flt4 v = getFloat4(mesh, f4.first);
@@ -871,8 +871,8 @@ void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Float3Resource> flt3s;
-	ResourceManager::instance()->getFloat3s(technique_name_id, flt3s);
+	std::map<string_id, Float3Resource>& flt3s =
+		ResourceManager::instance()->getFloat3s(technique_name_id);
 	for (auto& f3 : flt3s)
 	{
 		flt3 v = getFloat3(mesh, f3.first);
@@ -884,8 +884,8 @@ void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Float2Resource> flt2s;
-	ResourceManager::instance()->getFloat2s(technique_name_id, flt2s);
+	std::map<string_id, Float2Resource>& flt2s =
+		ResourceManager::instance()->getFloat2s(technique_name_id);
 	for (auto& f2 : flt2s)
 	{
 		flt2 v = getFloat2(mesh, f2.first);
@@ -897,8 +897,8 @@ void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Float1Resource> flt1s;
-	ResourceManager::instance()->getFloat1s(technique_name_id, flt1s);
+	std::map<string_id, Float1Resource>& flt1s =
+		ResourceManager::instance()->getFloat1s(technique_name_id);
 	for (auto& f1 : flt1s)
 	{
 		flt1 v = getFloat1(mesh, f1.first);
@@ -924,8 +924,8 @@ void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Texture2dResource> textures;
-	ResourceManager::instance()->getTextures(technique_name_id, textures);
+	std::map<string_id, Texture2dResource>& textures =
+		ResourceManager::instance()->getTextures(technique_name_id);
 	for (auto& t : textures)
 	{
 		ID3D11ShaderResourceView* tex = getImage(mesh, t.first);
@@ -937,8 +937,8 @@ void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
-	std::map<string_id, Texture2dArrayResource> texArrs;
-	ResourceManager::instance()->getTexturesArrays(technique_name_id, texArrs);
+	std::map<string_id, Texture2dArrayResource>& texArrs =
+		ResourceManager::instance()->getTexturesArrays(technique_name_id);
 	for (auto& ta : texArrs)
 	{
 		ID3D11ShaderResourceView* texArr = getImagesArray(mesh, ta.first);
