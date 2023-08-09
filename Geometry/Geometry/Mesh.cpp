@@ -248,13 +248,8 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
-	m.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	m.params[pass_key] = pass_value;
+	m.technique_name_id = StringManager::toStringId("Light0Tex");
+	m.pass_name_id = StringManager::toStringId("P0");
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	ParamValue diffuse_map_value{ StringManager::toStringId("test.dds") };
@@ -305,13 +300,8 @@ Mesh createTrees()
 		}
 	}
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("Light3gTexAlphaClipFog") };
-	m.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	m.params[pass_key] = pass_value;
+	m.technique_name_id = StringManager::toStringId("Light3gTexAlphaClipFog");
+	m.pass_name_id = StringManager::toStringId("P0");
 
 	ParamKey tree_map_array_key{ StringManager::toStringId("gTreeMapArray"), -1, string_id(-1) };
 	ParamValue tree_map_array_value{ StringManager::toStringId("tree0.dds;tree1.dds;tree2.dds;tree3.dds;") };
@@ -427,13 +417,8 @@ Mesh createSelectionBoxes()
 		}
 	}
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("SelectedObjectsBox") };
-	m.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	m.params[pass_key] = pass_value;
+	m.technique_name_id = StringManager::toStringId("SelectedObjectsBox");
+	m.pass_name_id = StringManager::toStringId("P0");
 
 	return m;
 }
@@ -554,13 +539,8 @@ Mesh createSphere(int latitudes, int longitudes)
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi + 1);
 	}
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
-	sphere.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	sphere.params[pass_key] = pass_value;
+	sphere.technique_name_id = StringManager::toStringId("Light0Tex");
+	sphere.pass_name_id = StringManager::toStringId("P0");
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	ParamValue diffuse_map_value{ StringManager::toStringId("earth.jpg") };
@@ -696,13 +676,8 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		inds.push_back(2 * edgesNumbers + 1 + vi);
 	}
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
-	cone.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	cone.params[pass_key] = pass_value;
+	cone.technique_name_id = StringManager::toStringId("Light0Tex");
+	cone.pass_name_id = StringManager::toStringId("P0");
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	ParamValue diffuse_map_value{ StringManager::toStringId("vase.jpg") };
@@ -791,13 +766,8 @@ Mesh createPlane(float width, float height, float m, float n)
 		}
 	}
 
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	ParamValue technique_value{ StringManager::toStringId("Light0Tex") };
-	plane.params[technique_key] = technique_value;
-
-	ParamKey pass_key{ pass_id,-1,string_id(-1) };
-	ParamValue pass_value{ StringManager::toStringId("P0") };
-	plane.params[pass_key] = pass_value;
+	plane.technique_name_id = StringManager::toStringId("Light0Tex");
+	plane.pass_name_id = StringManager::toStringId("P0");
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	ParamValue diffuse_map_value{ StringManager::toStringId("bosh.jpg") };
@@ -806,26 +776,24 @@ Mesh createPlane(float width, float height, float m, float n)
 	return plane;
 }
 
+void Mesh::setTechnique(string_id technique_name_id)
+{
+	this->technique_name_id = technique_name_id;
+}
+
+void Mesh::setPass(string_id pass_name_id)
+{
+	this->pass_name_id = pass_name_id;
+}
+
 string_id Mesh::getTechnique() const
 {
-	string_id technique = string_id(-1);
-	
-	ParamKey technique_key{ technique_id,-1,string_id(-1) };
-	if (params.count(technique_key))
-		technique = params.at(technique_key).s;
-	
-	return technique;
+	return technique_name_id;
 }
 
 string_id Mesh::getPass() const
 {
-	string_id pass = string_id(-1);
-	
-	ParamKey pass_key{ pass_id, -1, string_id(-1) };
-	if (params.count(pass_key))
-		pass = params.at(pass_key).s;
-
-	return pass;
+	return pass_name_id;
 }
 
 const void* Mesh::getStream(string_id name, StreamType type) const

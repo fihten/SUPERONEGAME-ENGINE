@@ -26,6 +26,9 @@ protected:
 	static uint32_t instanceNumber;
 private:
 	std::string name = "";
+	
+	string_id technique_name_id = string_id(-1);
+	string_id pass_name_id = string_id(-1);
 
 	std::vector<std::pair<string_id, std::vector<flt1>>> flt1_streams;
 	std::vector<std::pair<string_id, std::vector<flt2>>> flt2_streams;
@@ -47,6 +50,8 @@ public:
 		++instanceNumber;
 
 		this->name = m.name;
+		this->technique_name_id = m.technique_name_id;
+		this->pass_name_id = m.pass_name_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -63,6 +68,8 @@ public:
 		++instanceNumber;
 
 		this->name = std::move(m.name);
+		this->technique_name_id = std::move(m.technique_name_id);
+		this->pass_name_id = std::move(m.pass_name_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -77,6 +84,8 @@ public:
 	Mesh& operator=(Mesh&& m)
 	{
 		this->name = std::move(m.name);
+		this->technique_name_id = std::move(m.technique_name_id);
+		this->pass_name_id = std::move(m.pass_name_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -93,6 +102,8 @@ public:
 	Mesh& operator=(const Mesh& m)
 	{
 		this->name = m.name;
+		this->technique_name_id = m.technique_name_id;
+		this->pass_name_id = m.pass_name_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -105,6 +116,9 @@ public:
 
 		return *this;
 	}
+
+	virtual void setTechnique(string_id technique_name_id);
+	virtual void setPass(string_id pass_name_id);
 
 	virtual string_id getTechnique() const;
 	virtual string_id getPass() const;
