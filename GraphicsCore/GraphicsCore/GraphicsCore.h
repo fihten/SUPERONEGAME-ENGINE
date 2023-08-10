@@ -8,6 +8,9 @@
 #include <memory>
 #include "Frustum.h"
 #include "Segment.h"
+#include "VariableLocation.h"
+#include "InputLayoutResource.h"
+#include "VariableResources.h"
 
 #define MAX_BOUNDING_SPHERES_COUNT 65536
 
@@ -105,12 +108,12 @@ private:
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
-	flt4x4 getFloat4x4(const Mesh& mesh, string_id var) const;
-	flt4 getFloat4(const Mesh& mesh, string_id var) const;
-	flt3 getFloat3(const Mesh& mesh, string_id var) const;
-	flt2 getFloat2(const Mesh& mesh, string_id var) const;
-	flt1 getFloat1(const Mesh& mesh, string_id var) const;
-	void* getStruct(const Mesh& mesh, string_id var, int* bytes = nullptr) const;
+	flt4x4 getFloat4x4(const Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt4 getFloat4(const Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt3 getFloat3(const Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt2 getFloat2(const Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt1 getFloat1(const Mesh& mesh, string_id var, const VariableLocation& location) const;
+	void* getStruct(const Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr) const;
 	
 	ID3D11Buffer* getVertexBuffer(
 		const Mesh& mesh,
@@ -121,8 +124,7 @@ private:
 		) const;
 	void* fetchVerticesFromMesh(
 		const Mesh& mesh,
-		string_id* technique = nullptr,
-		string_id* pass = nullptr
+		const std::vector<InputLayoutResource::StreamInfo>* streamsInfo
 		) const;
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;
