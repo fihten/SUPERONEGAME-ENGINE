@@ -14,6 +14,14 @@ private:
 	std::map<string_id, ID3D11ShaderResourceView*> imgs;
 	std::map<string_id, ID3D11ShaderResourceView*> imgsArrs;
 
+private:
+	string_id cashed_technique_name_id = string_id(-1);
+	string_id cashed_pass_name_id = string_id(-1);
+	bool techniqueCasheWasUpdated = false;
+
+	TechniqueResource* cashed_technique_resource = nullptr;
+	PassResource* cashed_pass_resource = nullptr;
+
 public:
 	enum RegisterMessage
 	{
@@ -56,10 +64,10 @@ public:
 	RegisterMessage registerPresenceOfGeometryShader(string_id techniqueName, string_id passName);
 	RegisterMessage registerPrimitiveType(string_id techniqueName, string_id passName, PassResource::PrimitiveType primType);
 
-	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName) const;
-	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName) const;
-	ID3DX11EffectPass* getPass(string_id techniqueName, string_id passName) const;
-	const VariableLocation& getVariableLocation(string_id techniqueName, string_id variable) const;
+	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName);
+	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName);
+	ID3DX11EffectPass* getPass(string_id techniqueName, string_id passName);
+	const VariableLocation& getVariableLocation(string_id techniqueName, string_id variable);
 	std::map<string_id, Float4x4Resource>& getFloat4x4s(string_id techniqueName);
 	std::map<string_id, Float4Resource>& getFloat4s(string_id techniqueName);
 	std::map<string_id, Float3Resource>& getFloat3s(string_id techniqueName);

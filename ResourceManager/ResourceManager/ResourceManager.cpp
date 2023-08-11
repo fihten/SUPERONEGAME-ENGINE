@@ -291,60 +291,100 @@ ResourceManager::RegisterMessage ResourceManager::registerPrimitiveType(string_i
 	return RegisterMessage::OK;
 }
 
-const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(string_id techniqueName, string_id passName) const
+const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(string_id techniqueName, string_id passName) 
 {
-	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
 
-	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	if (techniqueRes.passes.count(passName) == 0)
-		return nullptr;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	const PassResource& passRes = techniqueRes.passes.at(passName);
-	return &passRes.inputLayout.streamsInfo;
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+	return &cashed_pass_resource->inputLayout.streamsInfo;
 }
 
-ID3D11InputLayout* ResourceManager::getInputLayout(string_id techniqueName, string_id passName) const
+ID3D11InputLayout* ResourceManager::getInputLayout(string_id techniqueName, string_id passName)
 {
-	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
 
-	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	if (techniqueRes.passes.count(passName) == 0)
-		return nullptr;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	return techniqueRes.passes.at(passName).inputLayout.ptr;
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	return cashed_pass_resource->inputLayout.ptr;
 }
 
-ID3DX11EffectPass* ResourceManager::getPass(string_id techniqueName, string_id passName) const
+ID3DX11EffectPass* ResourceManager::getPass(string_id techniqueName, string_id passName)
 {
-	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
 
-	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	if (techniqueRes.passes.count(passName) == 0)
-		return nullptr;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	return techniqueRes.passes.at(passName).ptr;
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	return cashed_pass_resource->ptr;
 }
 
-const VariableLocation& ResourceManager::getVariableLocation(string_id techniqueName, string_id variable) const
+const VariableLocation& ResourceManager::getVariableLocation(string_id techniqueName, string_id variable)
 {
 	static VariableLocation fictionLocation;
-	if (techniques.count(techniqueName) == 0)
-		return fictionLocation;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return fictionLocation;
 
-	const TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	if (techniqueRes.float4x4s.count(variable) != 0)
-		return techniqueRes.float4x4s.at(variable).location;
-	if (techniqueRes.float4s.count(variable) != 0)
-		return techniqueRes.float4s.at(variable).location;
-	if (techniqueRes.float3s.count(variable) != 0)
-		return techniqueRes.float3s.at(variable).location;
-	if (techniqueRes.float2s.count(variable) != 0)
-		return techniqueRes.float2s.at(variable).location;
-	if (techniqueRes.float1s.count(variable) != 0)
-		return techniqueRes.float1s.at(variable).location;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+		
+	if (cashed_technique_resource->float4x4s.count(variable) != 0)
+		return cashed_technique_resource->float4x4s.at(variable).location;
+	if (cashed_technique_resource->float4s.count(variable) != 0)
+		return cashed_technique_resource->float4s.at(variable).location;
+	if (cashed_technique_resource->float3s.count(variable) != 0)
+		return cashed_technique_resource->float3s.at(variable).location;
+	if (cashed_technique_resource->float2s.count(variable) != 0)
+		return cashed_technique_resource->float2s.at(variable).location;
+	if (cashed_technique_resource->float1s.count(variable) != 0)
+		return cashed_technique_resource->float1s.at(variable).location;
 
 	return fictionLocation;
 }
@@ -352,105 +392,155 @@ const VariableLocation& ResourceManager::getVariableLocation(string_id technique
 std::map<string_id, Float4x4Resource>& ResourceManager::getFloat4x4s(string_id techniqueName)
 {
 	std::map<string_id, Float4x4Resource> empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.float4x4s;
+	return cashed_technique_resource->float4x4s;
 }
 
 std::map<string_id, Float4Resource>& ResourceManager::getFloat4s(string_id techniqueName)
 {
 	static std::map<string_id, Float4Resource> empty;
-	
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.float4s;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->float4s;
 }
 
 std::map<string_id, Float3Resource>& ResourceManager::getFloat3s(string_id techniqueName)
 {
 	static std::map<string_id, Float3Resource> empty;
-	
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.float3s;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->float3s;
 }
 
 std::map<string_id, Float2Resource>& ResourceManager::getFloat2s(string_id techniqueName)
 {
 	static std::map<string_id, Float2Resource> empty;
-	
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.float2s;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->float2s;
 }
 
 std::map<string_id, Float1Resource>& ResourceManager::getFloat1s(string_id techniqueName)
 {
 	static std::map<string_id, Float1Resource> empty;
-	
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.float1s;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->float1s;
 }
 
 std::map<string_id, StructResource>& ResourceManager::getStructures(string_id techniqueName)
 {
 	static std::map<string_id, StructResource> empty;
-	
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.structures;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->structures;
 }
 
 std::map<string_id, Texture2dResource>& ResourceManager::getTextures(string_id techniqueName)
 {
 	static std::map<string_id, Texture2dResource> empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.textures;
+	return cashed_technique_resource->textures;
 }
 
 std::map<string_id, Texture2dArrayResource>& ResourceManager::getTexturesArrays(string_id techniqueName)
 {
 	static std::map<string_id, Texture2dArrayResource> empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
 
-	const auto& itTech = techniques.find(techniqueName);
-	if (techniques.count(techniqueName) == 0)
-		return empty;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	TechniqueResource& techniqueRes = techniques.at(techniqueName);
-	return techniqueRes.texturesArrays;
+	return cashed_technique_resource->texturesArrays;
 }
 
 ID3D11Buffer* ResourceManager::getVertexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, bool structured)
 {
-	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
 
-	TechniqueResource& techniqueRes = techniques[techniqueName];
-	if (techniqueRes.passes.count(passName) == 0)
-		return nullptr;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	auto& pass = techniqueRes.passes[passName];
-	auto* vertexBuffers = &pass.vertexBuffers;
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	auto* vertexBuffers = &cashed_pass_resource->vertexBuffers;
 	if (structured)
-		vertexBuffers = &pass.vertexBuffersStructured;
+		vertexBuffers = &cashed_pass_resource->vertexBuffersStructured;
 	if ((*vertexBuffers).count(meshId) == 0)
 		return nullptr;
 
@@ -459,17 +549,28 @@ ID3D11Buffer* ResourceManager::getVertexBuffer(string_id techniqueName, string_i
 
 ID3D11Buffer* ResourceManager::getIndexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, bool structured)
 {
-	if (techniques.count(techniqueName) == 0)
-		return nullptr;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
 
-	TechniqueResource& techniqueRes = techniques[techniqueName];
-	if (techniqueRes.passes.count(passName) == 0)
-		return nullptr;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	auto& pass = techniqueRes.passes[passName];
-	auto* indexBuffers = &pass.indexBuffers;
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	auto* indexBuffers = &cashed_pass_resource->indexBuffers;
 	if(structured)
-		indexBuffers = &pass.indexBuffersStructured;
+		indexBuffers = &cashed_pass_resource->indexBuffersStructured;
 	if ((*indexBuffers).count(meshId) == 0)
 		return nullptr;
 
@@ -492,30 +593,50 @@ ID3D11ShaderResourceView* ResourceManager::getImagesArray(string_id name)
 
 bool ResourceManager::isThereAGeometryShaderInThePass(string_id techniqueName, string_id passName)
 {
-	if (techniques.count(techniqueName) == 0)
-		return false;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return false;
 
-	TechniqueResource& techniqueRes = techniques[techniqueName];
-	if (techniqueRes.passes.count(passName) == 0)
-		return false;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	auto& pass = techniqueRes.passes[passName];
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return false;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
 
-	return pass.isThereAGeometryShaderHere;
+	return cashed_pass_resource->isThereAGeometryShaderHere;
 }
 
 PassResource::PrimitiveType ResourceManager::getPrimitiveType(string_id techniqueName, string_id passName)
 {
-	if (techniques.count(techniqueName) == 0)
-		return PassResource::NONE;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return PassResource::NONE;
 
-	TechniqueResource& techniqueRes = techniques[techniqueName];
-	if (techniqueRes.passes.count(passName) == 0)
-		return PassResource::NONE;
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
 
-	auto& pass = techniqueRes.passes[passName];
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return PassResource::NONE;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
 
-	return pass.primType;
+	return cashed_pass_resource->primType;
 }
 
 ResourceManager* ResourceManager::instance()
