@@ -15,3 +15,8 @@ bool operator<(const ParamKey& p0, const ParamKey& p1)
 		return true;
 	return false;
 }
+
+bool operator==(const ParamKey& p0, const ParamKey& p1)
+{
+	return p0.field == p1.field && p0.index == p1.index && p0.name == p1.name;
+}

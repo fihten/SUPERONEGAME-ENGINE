@@ -183,8 +183,9 @@ void GraphicsCore::endFrame()
 	mSwapChain->Present(0, 0);
 }
 
-void GraphicsCore::draw(const Mesh& mesh)
+void GraphicsCore::draw(Mesh& mesh)
 {
+	mesh.startParam();
 	setVariablesOnGPU(mesh);
 	setGeometryOnGPU(mesh);
 
@@ -362,7 +363,7 @@ void GraphicsCore::resize(UINT width, UINT height)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }
 
-flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, string_id var, const VariableLocation& location) const
+flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	flt4x4 res;
 
@@ -410,7 +411,7 @@ flt4x4 GraphicsCore::getFloat4x4(const Mesh& mesh, string_id var, const Variable
 	return res;
 }
 
-flt4 GraphicsCore::getFloat4(const Mesh& mesh, string_id var, const VariableLocation& location) const
+flt4 GraphicsCore::getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	flt4 res;
 
@@ -437,13 +438,12 @@ flt4 GraphicsCore::getFloat4(const Mesh& mesh, string_id var, const VariableLoca
 		return res;
 	}
 
-	ParamKey pk{ var,-1,string_id(-1) };
-	mesh.getParam(pk, res);
+	mesh.getCurrentParam(res);
 
 	return res;
 }
 
-flt3 GraphicsCore::getFloat3(const Mesh& mesh, string_id var, const VariableLocation& location) const
+flt3 GraphicsCore::getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	flt3 res;
 
@@ -468,33 +468,30 @@ flt3 GraphicsCore::getFloat3(const Mesh& mesh, string_id var, const VariableLoca
 		return res;
 	}
 
-	ParamKey pk{ var,-1,string_id(-1) };
-	mesh.getParam(pk, res);
+	mesh.getCurrentParam(res);
 
 	return res;
 }
 
-flt2 GraphicsCore::getFloat2(const Mesh& mesh, string_id var, const VariableLocation& location) const
+flt2 GraphicsCore::getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	flt2 res;
 	
-	ParamKey pk{ var,-1,string_id(-1) };
-	mesh.getParam(pk, res);
+	mesh.getCurrentParam(res);
 
 	return res;
 }
 
-flt1 GraphicsCore::getFloat1(const Mesh& mesh, string_id var, const VariableLocation& location) const
+flt1 GraphicsCore::getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	float res;
-	
-	ParamKey pk{ var,-1,string_id(-1) };
-	mesh.getParam(pk, res);
+
+	mesh.getCurrentParam(res);
 
 	return res;
 }
 
-void* GraphicsCore::getStruct(const Mesh& mesh, string_id var, const StructResource& sr, int* bytes) const
+void* GraphicsCore::getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes) const
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -512,23 +509,24 @@ void* GraphicsCore::getStruct(const Mesh& mesh, string_id var, const StructResou
 			if (fr.type == float_id)
 			{
 				float& floatVariable = *((float*)(fieldPtr));
-				mesh.getParam(pk, floatVariable);
+				mesh.getCurrentParam(floatVariable);
 			}
 			if (fr.type == float2_id)
 			{
 				flt2& float2Variable = *((flt2*)(fieldPtr));
-				mesh.getParam(pk, float2Variable);
+				mesh.getCurrentParam(float2Variable);
 			}
 			if (fr.type == float3_id)
 			{
 				flt3& float3Variable = *((flt3*)(fieldPtr));
-				mesh.getParam(pk, float3Variable);
+				mesh.getCurrentParam(float3Variable);
 			}
 			if (fr.type == float4_id)
 			{
 				flt4& float4Variable = *((flt4*)(fieldPtr));
-				mesh.getParam(pk, float4Variable);
+				mesh.getCurrentParam(float4Variable);
 			}
+			mesh.nextParam();
 		}
 	}
 	if (bytes)
@@ -616,25 +614,25 @@ void* GraphicsCore::fetchVerticesFromMesh(
 			const void* stream = mesh.getStream(si.name, si.type);
 			switch (si.type)
 			{
-			case Mesh::FLT1:
+			case FLT1:
 			{
 				const std::vector<flt1>& s = *(const std::vector<flt1>*)stream;
 				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
-			case Mesh::FLT2:
+			case FLT2:
 			{
 				const std::vector<flt2>& s = *(const std::vector<flt2>*)stream;
 				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
-			case Mesh::FLT3:
+			case FLT3:
 			{
 				const std::vector<flt3>& s = *(const std::vector<flt3>*)stream;
 				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
 				break;
 			}
-			case Mesh::FLT4:
+			case FLT4:
 			{
 				const std::vector<flt4>& s = *(const std::vector<flt4>*)stream;
 				std::copy((char*)(&s[i]), (char*)(&s[i]) + si.size, dataElement);
@@ -677,11 +675,11 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) co
 	return mIB;
 }
 
-ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, string_id var) const
+ID3D11ShaderResourceView* GraphicsCore::getImage(Mesh& mesh, string_id var) const
 {
-	ParamKey pk{ var,-1,string_id(-1) };
 	string_id name_id;
-	mesh.getParam(pk, name_id);
+	mesh.getCurrentParam(name_id);
+
 	ID3D11ShaderResourceView* img = ResourceManager::instance()->getImage(name_id);
 	if (img)
 		return img;
@@ -702,11 +700,12 @@ ID3D11ShaderResourceView* GraphicsCore::getImage(const Mesh& mesh, string_id var
 	return img;
 }
 
-ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, string_id var) const
+ID3D11ShaderResourceView* GraphicsCore::getImagesArray(Mesh& mesh, string_id var) const
 {
-	ParamKey pk{ var,-1,string_id(-1) };
 	string_id name_id;
-	mesh.getParam(pk, name_id);
+
+	mesh.getCurrentParam(name_id);
+
 	ID3D11ShaderResourceView* imgsArr = ResourceManager::instance()->getImagesArray(name_id);
 	if (imgsArr)
 		return imgsArr;
@@ -819,7 +818,7 @@ ID3D11ShaderResourceView* GraphicsCore::getImagesArray(const Mesh& mesh, string_
 	return imgsArr;
 }
 
-void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
+void GraphicsCore::setFloat4x4sOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -828,11 +827,12 @@ void GraphicsCore::setFloat4x4sOnGPU(const Mesh& mesh)
 	for (auto& f4x4 : flt4x4s)
 	{
 		flt4x4 v = getFloat4x4(mesh, f4x4.first, f4x4.second.location);
+		mesh.nextParam();
 		f4x4.second.ptr->SetMatrix(reinterpret_cast<float*>(&v));
 	}
 }
 
-void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
+void GraphicsCore::setFloat4sOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -841,11 +841,12 @@ void GraphicsCore::setFloat4sOnGPU(const Mesh& mesh)
 	for (auto& f4 : flt4s)
 	{
 		flt4 v = getFloat4(mesh, f4.first, f4.second.location);
+		mesh.nextParam();
 		f4.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 4 * sizeof(float));
 	}
 }
 
-void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
+void GraphicsCore::setFloat3sOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -854,11 +855,12 @@ void GraphicsCore::setFloat3sOnGPU(const Mesh& mesh)
 	for (auto& f3 : flt3s)
 	{
 		flt3 v = getFloat3(mesh, f3.first, f3.second.location);
+		mesh.nextParam();
 		f3.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 3 * sizeof(float));
 	}
 }
 
-void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
+void GraphicsCore::setFloat2sOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -867,11 +869,12 @@ void GraphicsCore::setFloat2sOnGPU(const Mesh& mesh)
 	for (auto& f2 : flt2s)
 	{
 		flt2 v = getFloat2(mesh, f2.first, f2.second.location);
+		mesh.nextParam();
 		f2.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 2 * sizeof(float));
 	}
 }
 
-void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
+void GraphicsCore::setFloat1sOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -880,11 +883,12 @@ void GraphicsCore::setFloat1sOnGPU(const Mesh& mesh)
 	for (auto& f1 : flt1s)
 	{
 		flt1 v = getFloat1(mesh, f1.first, f1.second.location);
+		mesh.nextParam();
 		f1.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, sizeof(float));
 	}
 }
 
-void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
+void GraphicsCore::setStructsOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -898,7 +902,7 @@ void GraphicsCore::setStructsOnGPU(const Mesh& mesh)
 	}
 }
 
-void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
+void GraphicsCore::setTexturesOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -907,11 +911,12 @@ void GraphicsCore::setTexturesOnGPU(const Mesh& mesh)
 	for (auto& t : textures)
 	{
 		ID3D11ShaderResourceView* tex = getImage(mesh, t.first);
+		mesh.nextParam();
 		t.second.tex->SetResource(tex);
 	}
 }
 
-void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
+void GraphicsCore::setTexturesArraysOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
 
@@ -920,11 +925,12 @@ void GraphicsCore::setTexturesArraysOnGPU(const Mesh& mesh)
 	for (auto& ta : texArrs)
 	{
 		ID3D11ShaderResourceView* texArr = getImagesArray(mesh, ta.first);
+		mesh.nextParam();
 		ta.second.texArr->SetResource(texArr);
 	}
 }
 
-void GraphicsCore::setVariablesOnGPU(const Mesh& mesh)
+void GraphicsCore::setVariablesOnGPU(Mesh& mesh)
 {
 	setFloat4sOnGPU(mesh);
 	setFloat3sOnGPU(mesh);
@@ -936,7 +942,7 @@ void GraphicsCore::setVariablesOnGPU(const Mesh& mesh)
 	setTexturesArraysOnGPU(mesh);
 }
 
-void GraphicsCore::setGeometryOnGPU(const Mesh& mesh)
+void GraphicsCore::setGeometryOnGPU(Mesh& mesh)
 {
 	uint32_t elementSize = 0;
 	ID3D11Buffer* mVB = getVertexBuffer(mesh, &elementSize);

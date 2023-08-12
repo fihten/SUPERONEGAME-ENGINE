@@ -40,7 +40,7 @@ public:
 	void startFrame();
 	void endFrame();
 
-	void draw(const Mesh& mesh);
+	void draw(Mesh& mesh);
 	
 	int run();
 	void resize(UINT width, UINT height);
@@ -108,12 +108,12 @@ private:
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
-	flt4x4 getFloat4x4(const Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt4 getFloat4(const Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt3 getFloat3(const Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt2 getFloat2(const Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt1 getFloat1(const Mesh& mesh, string_id var, const VariableLocation& location) const;
-	void* getStruct(const Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr) const;
+	flt4x4 getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt4 getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt3 getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt2 getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	flt1 getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	void* getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr) const;
 	
 	ID3D11Buffer* getVertexBuffer(
 		const Mesh& mesh,
@@ -129,21 +129,21 @@ private:
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;
 
-	ID3D11ShaderResourceView* getImage(const Mesh& mesh, string_id var) const;
-	ID3D11ShaderResourceView* getImagesArray(const Mesh& mesh, string_id var) const;
+	ID3D11ShaderResourceView* getImage(Mesh& mesh, string_id var) const;
+	ID3D11ShaderResourceView* getImagesArray(Mesh& mesh, string_id var) const;
 
-	void setFloat4x4sOnGPU(const Mesh& mesh);
-	void setFloat4sOnGPU(const Mesh& mesh);
-	void setFloat3sOnGPU(const Mesh& mesh);
-	void setFloat2sOnGPU(const Mesh& mesh);
-	void setFloat1sOnGPU(const Mesh& mesh);
-	void setStructsOnGPU(const Mesh& mesh);
-	void setTexturesOnGPU(const Mesh& mesh);
-	void setTexturesArraysOnGPU(const Mesh& mesh);
+	void setFloat4x4sOnGPU(Mesh& mesh);
+	void setFloat4sOnGPU(Mesh& mesh);
+	void setFloat3sOnGPU(Mesh& mesh);
+	void setFloat2sOnGPU(Mesh& mesh);
+	void setFloat1sOnGPU(Mesh& mesh);
+	void setStructsOnGPU(Mesh& mesh);
+	void setTexturesOnGPU(Mesh& mesh);
+	void setTexturesArraysOnGPU(Mesh& mesh);
 
-	void setVariablesOnGPU(const Mesh& mesh);
+	void setVariablesOnGPU(Mesh& mesh);
 
-	void setGeometryOnGPU(const Mesh& mesh);
+	void setGeometryOnGPU(Mesh& mesh);
 
 private:
 	UINT mWidth = 0;

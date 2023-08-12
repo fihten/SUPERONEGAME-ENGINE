@@ -8,9 +8,9 @@ class DrawVisitor :public Scene::Visitor
 {
 	class MeshInScene :public Mesh
 	{
-		const Mesh* mesh = nullptr;
+		Mesh* mesh = nullptr;
 	public:
-		MeshInScene(const Mesh* mesh, NodeID meshNode) :mesh(mesh) 
+		MeshInScene(Mesh* mesh, NodeID meshNode) :mesh(mesh) 
 		{
 			--instanceNumber;
 			id = mesh->id;
@@ -27,6 +27,16 @@ class DrawVisitor :public Scene::Visitor
 
 		uint32_t getVerticesCount() const;
 		uint32_t getIndicesCount() const;
+
+		virtual void startParam();
+		virtual void nextParam();
+
+		virtual bool getCurrentParam(string_id& s) const;
+		virtual bool getCurrentParam(float& f) const;
+		virtual bool getCurrentParam(flt2& f2) const;
+		virtual bool getCurrentParam(flt3& f3) const;
+		virtual bool getCurrentParam(flt4& f4) const;
+		virtual bool getCurrentParam(flt4x4& f4x4) const;
 
 		virtual bool getParam(const ParamKey& param, string_id& s) const;
 		virtual bool getParam(const ParamKey& param, float& f) const;

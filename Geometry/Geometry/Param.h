@@ -13,16 +13,17 @@ struct ParamKey
 };
 
 extern bool operator<(const ParamKey& p0, const ParamKey& p1);
+extern bool operator==(const ParamKey& p0, const ParamKey& p1);
 
 struct ParamValue
 {
-	ParamValue(){}
-	ParamValue(string_id s) :s(s) {}
-	ParamValue(float f) :f(f) {}
-	ParamValue(flt2 f2) :f2(f2) {}
-	ParamValue(flt3 f3) :f3(f3) {}
-	ParamValue(flt4 f4) :f4(f4) {}
-	ParamValue(flt4x4 f4x4) :f4x4(f4x4) {}
+	ParamValue() :valid(false) {}
+	ParamValue(string_id s) :s(s), valid(true) {}
+	ParamValue(float f) :f(f), valid(true) {}
+	ParamValue(flt2 f2) :f2(f2), valid(true) {}
+	ParamValue(flt3 f3) :f3(f3), valid(true) {}
+	ParamValue(flt4 f4) :f4(f4), valid(true) {}
+	ParamValue(flt4x4 f4x4) :f4x4(f4x4), valid(true) {}
 
 	string_id s = string_id(-1);
 	float f = 0;
@@ -30,4 +31,6 @@ struct ParamValue
 	flt3 f3;
 	flt4 f4;
 	flt4x4 f4x4;
+
+	bool valid = false;
 };

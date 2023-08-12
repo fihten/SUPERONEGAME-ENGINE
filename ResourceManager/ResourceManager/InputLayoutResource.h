@@ -1,6 +1,6 @@
 #pragma once
 #include <d3d11.h>
-#include "Mesh.h"
+#include "StreamType.h"
 #include "StringManager.h"
 
 struct InputLayoutResource
@@ -8,7 +8,7 @@ struct InputLayoutResource
 	struct StreamInfo
 	{
 		string_id name;
-		Mesh::StreamType type;
+		StreamType type;
 		uint32_t size;
 	};
 	std::vector<StreamInfo> streamsInfo;

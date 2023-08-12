@@ -2,7 +2,8 @@
 
 void DrawVisitor::startVisit(const Scene::MeshNode* node)
 {
-	GraphicsCore::instance()->draw(MeshInScene(node->mesh, node->ID));
+	MeshInScene m(const_cast<Mesh*>(node->mesh), node->ID);
+	GraphicsCore::instance()->draw(m);
 }
 
 string_id DrawVisitor::MeshInScene::getTechnique() const
@@ -59,6 +60,92 @@ uint32_t DrawVisitor::MeshInScene::getIndicesCount() const
 		return 0;
 
 	return mesh->getIndicesCount();
+}
+
+void DrawVisitor::MeshInScene::startParam()
+{
+	if (mesh == nullptr)
+		return;
+	mesh->startParam();
+}
+
+void DrawVisitor::MeshInScene::nextParam()
+{
+	if (mesh == nullptr)
+		return;
+	mesh->nextParam();
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(string_id& s) const
+{
+	s = string_id(-1);
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(s))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), s);
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(float& f) const
+{
+	f = 0;
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(f))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f);
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(flt2& f2) const
+{
+	f2 = flt2();
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(f2))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f2);
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(flt3& f3) const
+{
+	f3 = flt3();
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(f3))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f3);
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(flt4& f4) const
+{
+	f4 = flt4();
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(f4))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f4);
+}
+
+bool DrawVisitor::MeshInScene::getCurrentParam(flt4x4& f4x4) const
+{
+	f4x4 = flt4x4();
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getCurrentParam(f4x4))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f4x4);
 }
 
 bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, string_id& s) const

@@ -12,6 +12,8 @@
 #include "StringManager.h"
 #include "Param.h"
 
+enum StreamType;
+
 class Mesh;
 Mesh createCube();
 Mesh createTrees();
@@ -37,7 +39,8 @@ private:
 
 	std::vector<uint32_t> indicies;
 
-	std::map<ParamKey, ParamValue> params;
+	std::vector<std::pair<ParamKey, ParamValue>> params;
+	int currentParam = 0;
 
 public:
 	Mesh():id(instanceNumber)
@@ -123,13 +126,6 @@ public:
 	virtual string_id getTechnique() const;
 	virtual string_id getPass() const;
 
-	enum StreamType
-	{
-		FLT1,
-		FLT2,
-		FLT3,
-		FLT4
-	};
 	virtual const void* getStream(string_id name, StreamType type) const;
 	virtual const std::vector<uint32_t>* getIndicies() const;
 	
@@ -138,6 +134,18 @@ public:
 
 	virtual uint32_t getVerticesCount() const;
 	virtual uint32_t getIndicesCount() const;
+
+	virtual void startParam();
+	virtual void nextParam();
+
+	virtual bool getCurrentParam(string_id& s) const;
+	virtual bool getCurrentParam(float& f) const;
+	virtual bool getCurrentParam(flt2& f2) const;
+	virtual bool getCurrentParam(flt3& f3) const;
+	virtual bool getCurrentParam(flt4& f4) const;
+	virtual bool getCurrentParam(flt4x4& f4x4) const;
+
+	virtual ParamKey& getCurrentKey();
 
 	virtual bool getParam(const ParamKey& param, string_id& s) const;
 	virtual bool getParam(const ParamKey& param, float& f) const;

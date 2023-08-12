@@ -309,19 +309,19 @@ void InputLayoutVisitor::getStreamsInfo(std::vector<InputLayoutResource::StreamI
 		switch (inputElements[i].Format)
 		{
 		case DXGI_FORMAT_R32_FLOAT:
-			info.type = Mesh::FLT1;
+			info.type = FLT1;
 			info.size = 4;
 			break;
 		case DXGI_FORMAT_R32G32_FLOAT:
-			info.type = Mesh::FLT2;
+			info.type = FLT2;
 			info.size = 8;
 			break;
 		case DXGI_FORMAT_R32G32B32_FLOAT:
-			info.type = Mesh::FLT3;
+			info.type = FLT3;
 			info.size = 12;
 			break;
 		case DXGI_FORMAT_R32G32B32A32_FLOAT:
-			info.type = Mesh::FLT4;
+			info.type = FLT4;
 			info.size = 16;
 			break;
 		default:

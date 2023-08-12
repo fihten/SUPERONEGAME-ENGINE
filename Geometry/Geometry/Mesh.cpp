@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "Mesh.h"
 #include "Matrix4x4.h"
+#include "ResourceManager.h"
 
 uint32_t Mesh::instanceNumber = 0;
 
@@ -248,12 +249,11 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	m.technique_name_id = StringManager::toStringId("Light0Tex");
-	m.pass_name_id = StringManager::toStringId("P0");
+	m.setTechnique(StringManager::toStringId("Light0Tex"));
+	m.setPass(StringManager::toStringId("P0"));
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	ParamValue diffuse_map_value{ StringManager::toStringId("test.dds") };
-	m.params[diffuse_map_key] = diffuse_map_value;
+	m.setParam(diffuse_map_key, StringManager::toStringId("test.dds"));
 
 	return m;
 }
@@ -300,24 +300,20 @@ Mesh createTrees()
 		}
 	}
 
-	m.technique_name_id = StringManager::toStringId("Light3gTexAlphaClipFog");
-	m.pass_name_id = StringManager::toStringId("P0");
+	m.setTechnique(StringManager::toStringId("Light3gTexAlphaClipFog"));
+	m.setPass(StringManager::toStringId("P0"));
 
 	ParamKey tree_map_array_key{ StringManager::toStringId("gTreeMapArray"), -1, string_id(-1) };
-	ParamValue tree_map_array_value{ StringManager::toStringId("tree0.dds;tree1.dds;tree2.dds;tree3.dds;") };
-	m.params[tree_map_array_key] = tree_map_array_value;
+	m.setParam(tree_map_array_key, StringManager::toStringId("tree0.dds;tree1.dds;tree2.dds;tree3.dds;"));
 
 	ParamKey fog_start_key{ StringManager::toStringId("gFogStart"), -1, string_id(-1) };
-	ParamValue fog_start_value(5.0f);
-	m.params[fog_start_key] = fog_start_value;
+	m.setParam(fog_start_key, 5.0f);
 
 	ParamKey fog_range_key{ StringManager::toStringId("gFogRange"), -1, string_id(-1) };
-	ParamValue fog_range_value(20.0f);
-	m.params[fog_range_key] = fog_range_value;
+	m.setParam(fog_range_key, 20.0f);
 
 	ParamKey fog_color_key{ StringManager::toStringId("gFogColor"), -1, string_id(-1) };
-	ParamValue fog_color_value(flt4(1, 0, 0, 1));
-	m.params[fog_color_key] = fog_color_value;
+	m.setParam(fog_color_key, flt4(1, 0, 0, 1));
 
 	return m;
 }
@@ -417,8 +413,8 @@ Mesh createSelectionBoxes()
 		}
 	}
 
-	m.technique_name_id = StringManager::toStringId("SelectedObjectsBox");
-	m.pass_name_id = StringManager::toStringId("P0");
+	m.setTechnique(StringManager::toStringId("SelectedObjectsBox"));
+	m.setPass(StringManager::toStringId("P0"));
 
 	return m;
 }
@@ -539,12 +535,11 @@ Mesh createSphere(int latitudes, int longitudes)
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi + 1);
 	}
 
-	sphere.technique_name_id = StringManager::toStringId("Light0Tex");
-	sphere.pass_name_id = StringManager::toStringId("P0");
+	sphere.setTechnique(StringManager::toStringId("Light0Tex"));
+	sphere.setPass(StringManager::toStringId("P0"));
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	ParamValue diffuse_map_value{ StringManager::toStringId("earth.jpg") };
-	sphere.params[diffuse_map_key] = diffuse_map_value;
+	sphere.setParam(diffuse_map_key, StringManager::toStringId("earth.jpg"));
 
 	return sphere;
 }
@@ -676,12 +671,11 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		inds.push_back(2 * edgesNumbers + 1 + vi);
 	}
 
-	cone.technique_name_id = StringManager::toStringId("Light0Tex");
-	cone.pass_name_id = StringManager::toStringId("P0");
+	cone.setTechnique(StringManager::toStringId("Light0Tex"));
+	cone.setPass(StringManager::toStringId("P0"));
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	ParamValue diffuse_map_value{ StringManager::toStringId("vase.jpg") };
-	cone.params[diffuse_map_key] = diffuse_map_value;
+	cone.setParam(diffuse_map_key, StringManager::toStringId("vase.jpg"));
 
 	return cone;
 }
@@ -766,12 +760,11 @@ Mesh createPlane(float width, float height, float m, float n)
 		}
 	}
 
-	plane.technique_name_id = StringManager::toStringId("Light0Tex");
-	plane.pass_name_id = StringManager::toStringId("P0");
+	plane.setTechnique(StringManager::toStringId("Light0Tex"));
+	plane.setPass(StringManager::toStringId("P0"));
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	ParamValue diffuse_map_value{ StringManager::toStringId("bosh.jpg") };
-	plane.params[diffuse_map_key] = diffuse_map_value;
+	plane.setParam(diffuse_map_key, StringManager::toStringId("bosh.jpg"));
 
 	return plane;
 }
@@ -779,6 +772,90 @@ Mesh createPlane(float width, float height, float m, float n)
 void Mesh::setTechnique(string_id technique_name_id)
 {
 	this->technique_name_id = technique_name_id;
+
+	params.clear();
+
+	std::map<string_id, Float4Resource>& flt4s =
+		ResourceManager::instance()->getFloat4s(technique_name_id);
+	for (auto& f4 : flt4s)
+	{
+		ParamKey pk{ f4.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Float3Resource>& flt3s =
+		ResourceManager::instance()->getFloat3s(technique_name_id);
+	for (auto& f3 : flt3s)
+	{
+		ParamKey pk{ f3.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Float2Resource>& flt2s =
+		ResourceManager::instance()->getFloat2s(technique_name_id);
+	for (auto& f2 : flt2s)
+	{
+		ParamKey pk{ f2.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Float1Resource>& flt1s =
+		ResourceManager::instance()->getFloat1s(technique_name_id);
+	for (auto& f1 : flt1s)
+	{
+		ParamKey pk{ f1.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Float4x4Resource>& flt4x4s =
+		ResourceManager::instance()->getFloat4x4s(technique_name_id);
+	for (auto& f4x4 : flt4x4s)
+	{
+		ParamKey pk{ f4x4.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, StructResource>& structs =
+		ResourceManager::instance()->getStructures(technique_name_id);
+	for (auto& s : structs)
+	{
+		string_id var = s.first;
+		const StructResource& sr = s.second;
+		for (int e = 0; e < sr.elementsCount; ++e)
+		{
+			for (int f = 0; f < sr.fieldsCount; ++f)
+			{
+				auto& fr = sr.fields[f];
+
+				ParamKey pk{ var,e,fr.name };
+				ParamValue pv;
+				params.push_back({ pk,pv });
+			}
+		}
+	}
+
+	std::map<string_id, Texture2dResource>& textures =
+		ResourceManager::instance()->getTextures(technique_name_id);
+	for (auto& t : textures)
+	{
+		ParamKey pk{ t.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Texture2dArrayResource>& texArrs =
+		ResourceManager::instance()->getTexturesArrays(technique_name_id);
+	for (auto& ta : texArrs)
+	{
+		ParamKey pk{ ta.first,-1,string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
 }
 
 void Mesh::setPass(string_id pass_name_id)
@@ -891,111 +968,252 @@ uint32_t Mesh::getIndicesCount() const
 	return indicies.size();
 }
 
+void Mesh::startParam()
+{
+	currentParam = 0;
+}
+
+void Mesh::nextParam()
+{
+	currentParam = (currentParam + 1) % params.size();
+}
+
+bool Mesh::getCurrentParam(string_id& s) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	s = params[currentParam].second.s;
+}
+
+bool Mesh::getCurrentParam(float& f) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	f = params[currentParam].second.f;
+}
+
+bool Mesh::getCurrentParam(flt2& f2) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	f2 = params[currentParam].second.f2;
+}
+
+bool Mesh::getCurrentParam(flt3& f3) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	f3 = params[currentParam].second.f3;
+}
+
+bool Mesh::getCurrentParam(flt4& f4) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	f4 = params[currentParam].second.f4;
+}
+
+bool Mesh::getCurrentParam(flt4x4& f4x4) const
+{
+	if (!params[currentParam].second.valid)
+		return false;
+	f4x4 = params[currentParam].second.f4x4;
+}
+
+ParamKey& Mesh::getCurrentKey()
+{
+	return params[currentParam].first;
+}
+
 bool Mesh::getParam(const ParamKey& param, string_id& s) const
 {
 	s = string_id(-1);
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	s = params.at(param).s;
+	s = it->second.s;
 	
-	return true;
+	return it->second.valid;
 }
 
 bool Mesh::getParam(const ParamKey& param, float& f) const
 {
 	f = 0;
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	f = params.at(param).f;
+	f = it->second.f;
 
-	return true;
+	return it->second.valid;
 }
 
 bool Mesh::getParam(const ParamKey& param, flt2& f2) const
 {
 	f2 = flt2();
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	f2 = params.at(param).f2;
+	f2 = it->second.f2;
 
-	return true;
+	return it->second.valid;
 }
 
 bool Mesh::getParam(const ParamKey& param, flt3& f3) const
 {
 	f3 = flt3();
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	f3 = params.at(param).f3;
+	f3 = it->second.f3;
 
-	return true;
+	return it->second.valid;
 }
 
 bool Mesh::getParam(const ParamKey& param, flt4& f4) const
 {
 	f4 = flt4();
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	f4 = params.at(param).f4;
+	f4 = it->second.f4;
 
-	return true;
+	return it->second.valid;
 }
 
 bool Mesh::getParam(const ParamKey& param, flt4x4& f4x4) const
 {
 	f4x4 = flt4x4();
 
-	if (params.count(param) == 0)
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
 		return false;
 
-	f4x4 = params.at(param).f4x4;
+	f4x4 = it->second.f4x4;
 
-	return true;
+	return it->second.valid;
 }
 
 void Mesh::setParam(const ParamKey& param, const string_id& s)
 {
-	params[param].s = s;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(s) });
+		return;
+	}
+	it->second.s = s;
+	it->second.valid = true;
 }
 
 void Mesh::setParam(const ParamKey& param, const float& f)
 {
-	params[param].f = f;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(f) });
+		return;
+	}
+	it->second.f = f;
+	it->second.valid = true;
 }
 
 void Mesh::setParam(const ParamKey& param, const flt2& f2)
 {
-	params[param].f2 = f2;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(f2) });
+		return;
+	}
+	it->second.f2 = f2;
+	it->second.valid = true;
 }
 
 void Mesh::setParam(const ParamKey& param, const flt3& f3)
 {
-	params[param].f3 = f3;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(f3) });
+		return;
+	}
+	it->second.f3 = f3;
+	it->second.valid = true;
 }
 
 void Mesh::setParam(const ParamKey& param, const flt4& f4)
 {
-	params[param].f4 = f4;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(f4) });
+		return;
+	}
+	it->second.f4 = f4;
+	it->second.valid = true;
 }
 
 void Mesh::setParam(const ParamKey& param, const flt4x4& f4x4)
 {
-	params[param].f4x4 = f4x4;
+	auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+	{
+		return p.first == param;
+	});
+	if (it == params.end())
+	{
+		params.push_back({ param,ParamValue(f4x4) });
+		return;
+	}
+	it->second.f4x4 = f4x4;
+	it->second.valid = true;
 }
 
 flt3 Mesh::getBottomBorder() const
 {
-	flt3 min(FLT_MAX, FLT_MAX, FLT_MAX);
+	flt3 min_corner(FLT_MAX, FLT_MAX, FLT_MAX);
 
 	const auto& it = std::find_if(
 		flt3_streams.begin(),
@@ -1006,22 +1224,22 @@ flt3 Mesh::getBottomBorder() const
 	}
 	);
 	if (it == flt3_streams.end())
-		return min;
+		return min_corner;
 	
 	auto& flt3s = it->second;
 	for (auto& pos : flt3s)
 	{
-		min.x() = std::min(min.x(), const_cast<flt3&>(pos).x());
-		min.y() = std::min(min.y(), const_cast<flt3&>(pos).y());
-		min.z() = std::min(min.z(), const_cast<flt3&>(pos).z());
+		min_corner.x() = std::min<float>(min_corner.x(), const_cast<flt3&>(pos).x());
+		min_corner.y() = std::min<float>(min_corner.y(), const_cast<flt3&>(pos).y());
+		min_corner.z() = std::min<float>(min_corner.z(), const_cast<flt3&>(pos).z());
 	}
 
-	return min;
+	return min_corner;
 }
 
 flt3 Mesh::getTopBorder() const
 {
-	flt3 max(-FLT_MAX, -FLT_MAX, -FLT_MAX);
+	flt3 max_corner(-FLT_MAX, -FLT_MAX, -FLT_MAX);
 
 	const auto& it = std::find_if(
 		flt3_streams.begin(),
@@ -1032,17 +1250,17 @@ flt3 Mesh::getTopBorder() const
 	}
 	);
 	if (it == flt3_streams.end())
-		return max;
+		return max_corner;
 
 	auto& flt3s = it->second;
 	for (auto& pos : flt3s)
 	{
-		max.x() = std::max(max.x(), const_cast<flt3&>(pos).x());
-		max.y() = std::max(max.y(), const_cast<flt3&>(pos).y());
-		max.z() = std::max(max.z(), const_cast<flt3&>(pos).z());
+		max_corner.x() = std::max<float>(max_corner.x(), const_cast<flt3&>(pos).x());
+		max_corner.y() = std::max<float>(max_corner.y(), const_cast<flt3&>(pos).y());
+		max_corner.z() = std::max<float>(max_corner.z(), const_cast<flt3&>(pos).z());
 	}
 
-	return max;
+	return max_corner;
 }
 
 void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
