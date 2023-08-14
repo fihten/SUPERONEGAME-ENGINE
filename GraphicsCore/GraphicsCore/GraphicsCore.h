@@ -113,7 +113,7 @@ private:
 	flt3 getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	flt2 getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	flt1 getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const;
-	void* getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr) const;
+	void* getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr);
 	
 	ID3D11Buffer* getVertexBuffer(
 		const Mesh& mesh,
@@ -163,6 +163,8 @@ private:
 	ID3D11DepthStencilView* mDepthStencilView = 0;
 
 	DRAW_FUNC drawFunc = nullptr;
+
+	int param_index = 0;
 
 private:
 	static GraphicsCore* pGraphicsCore;

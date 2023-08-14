@@ -968,61 +968,52 @@ uint32_t Mesh::getIndicesCount() const
 	return indicies.size();
 }
 
-void Mesh::startParam()
+bool Mesh::getParam(int param_index, string_id& s) const
 {
-	currentParam = 0;
-}
-
-void Mesh::nextParam()
-{
-	currentParam = (currentParam + 1) % params.size();
-}
-
-bool Mesh::getCurrentParam(string_id& s) const
-{
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	s = params[currentParam].second.s;
+	s = params[param_index].second.s;
+	return true;
 }
 
-bool Mesh::getCurrentParam(float& f) const
+bool Mesh::getParam(int param_index, float& f) const
 {
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	f = params[currentParam].second.f;
+	f = params[param_index].second.f;
+	return true;
 }
 
-bool Mesh::getCurrentParam(flt2& f2) const
+bool Mesh::getParam(int param_index, flt2& f2) const
 {
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	f2 = params[currentParam].second.f2;
+	f2 = params[param_index].second.f2;
+	return true;
 }
 
-bool Mesh::getCurrentParam(flt3& f3) const
+bool Mesh::getParam(int param_index, flt3& f3) const
 {
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	f3 = params[currentParam].second.f3;
+	f3 = params[param_index].second.f3;
+	return true;
 }
 
-bool Mesh::getCurrentParam(flt4& f4) const
+bool Mesh::getParam(int param_index, flt4& f4) const
 {
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	f4 = params[currentParam].second.f4;
+	f4 = params[param_index].second.f4;
+	return true;
 }
 
-bool Mesh::getCurrentParam(flt4x4& f4x4) const
+bool Mesh::getParam(int param_index, flt4x4& f4x4) const
 {
-	if (!params[currentParam].second.valid)
+	if (!params[param_index].second.valid)
 		return false;
-	f4x4 = params[currentParam].second.f4x4;
-}
-
-ParamKey& Mesh::getCurrentKey()
-{
-	return params[currentParam].first;
+	f4x4 = params[param_index].second.f4x4;
+	return true;
 }
 
 bool Mesh::getParam(const ParamKey& param, string_id& s) const

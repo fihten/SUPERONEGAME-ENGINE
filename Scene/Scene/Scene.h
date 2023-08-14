@@ -1,8 +1,7 @@
 #pragma once
-#include <list>
 #include "Matrix4x4.h"
 #include "Mesh.h"
-#include <map>
+#include <vector>
 #include <string>
 
 typedef int NodeID;
@@ -17,7 +16,9 @@ public:
 	protected:
 		Node* parent = nullptr;
 		Scene* scene = nullptr;
-		std::map<ParamKey, ParamValue> params;
+
+		std::vector<std::pair<ParamKey, ParamValue>> params;
+
 	public:
 		Node(NodeID id);
 		virtual ~Node();
@@ -25,6 +26,13 @@ public:
 		virtual void addChild(Node* n);
 		virtual Node* findNodeByID(NodeID id);
 		virtual flt4x4 getPos() const;
+
+		virtual bool getParam(int param_index, string_id& s) const;
+		virtual bool getParam(int param_index, float& f) const;
+		virtual bool getParam(int param_index, flt2& f2) const;
+		virtual bool getParam(int param_index, flt3& f3) const;
+		virtual bool getParam(int param_index, flt4& f4) const;
+		virtual bool getParam(int param_index, flt4x4& f4x4) const;
 
 		virtual bool getParam(const ParamKey& paramName, string_id& s) const;
 		virtual bool getParam(const ParamKey& paramName, float& f) const;
@@ -92,9 +100,9 @@ private:
 private:
 	struct ParamsLocations
 	{
-		std::map<ParamKey, NodeID> location;
+		std::vector<std::pair<ParamKey, NodeID>> location;
 	};
-	std::map<NodeID, ParamsLocations> paramsLocations;
+	std::vector<ParamsLocations> paramsLocations;
 
 private:
 	std::vector<Node*> nodes;
@@ -105,6 +113,13 @@ public:
 
 	NodeID addTransformNode(const flt4x4& pos, NodeID id = 0);
 	NodeID addMeshNode(Mesh* mesh, NodeID id = 0);
+
+	bool getNodeParam(NodeID id, int param_index, string_id& s) const;
+	bool getNodeParam(NodeID id, int param_index, float& f) const;
+	bool getNodeParam(NodeID id, int param_index, flt2& f2) const;
+	bool getNodeParam(NodeID id, int param_index, flt3& f3) const;
+	bool getNodeParam(NodeID id, int param_index, flt4& f4) const;
+	bool getNodeParam(NodeID id, int param_index, flt4x4& f4x4) const;
 
 	void setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s);
 	void setNodeParam(NodeID id, const ParamKey& paramName, const float& f);

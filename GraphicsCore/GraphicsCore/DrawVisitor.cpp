@@ -62,90 +62,76 @@ uint32_t DrawVisitor::MeshInScene::getIndicesCount() const
 	return mesh->getIndicesCount();
 }
 
-void DrawVisitor::MeshInScene::startParam()
-{
-	if (mesh == nullptr)
-		return;
-	mesh->startParam();
-}
-
-void DrawVisitor::MeshInScene::nextParam()
-{
-	if (mesh == nullptr)
-		return;
-	mesh->nextParam();
-}
-
-bool DrawVisitor::MeshInScene::getCurrentParam(string_id& s) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, string_id& s) const
 {
 	s = string_id(-1);
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(s))
+	if (mesh->getParam(param_index, s))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), s);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, s);
 }
 
-bool DrawVisitor::MeshInScene::getCurrentParam(float& f) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, float& f) const
 {
 	f = 0;
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(f))
+	if (mesh->getParam(param_index, f))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f);
 }
 
-bool DrawVisitor::MeshInScene::getCurrentParam(flt2& f2) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, flt2& f2) const
 {
 	f2 = flt2();
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(f2))
+	if (mesh->getParam(param_index, f2))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f2);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f2);
 }
 
-bool DrawVisitor::MeshInScene::getCurrentParam(flt3& f3) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, flt3& f3) const
 {
 	f3 = flt3();
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(f3))
+	if (mesh->getParam(param_index, f3))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f3);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f3);
 }
 
-bool DrawVisitor::MeshInScene::getCurrentParam(flt4& f4) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, flt4& f4) const
 {
 	f4 = flt4();
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(f4))
+	if (mesh->getParam(param_index, f4))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f4);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f4);
 }
 
-bool DrawVisitor::MeshInScene::getCurrentParam(flt4x4& f4x4) const
+bool DrawVisitor::MeshInScene::getParam(int param_index, flt4x4& f4x4) const
 {
 	f4x4 = flt4x4();
 	if (mesh == nullptr)
 		return false;
 
-	if (mesh->getCurrentParam(f4x4))
+	if (mesh->getParam(param_index, f4x4))
 		return true;
 
-	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, mesh->getCurrentKey(), f4x4);
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f4x4);
 }
 
 bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, string_id& s) const

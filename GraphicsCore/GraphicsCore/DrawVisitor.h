@@ -28,15 +28,12 @@ class DrawVisitor :public Scene::Visitor
 		uint32_t getVerticesCount() const;
 		uint32_t getIndicesCount() const;
 
-		virtual void startParam();
-		virtual void nextParam();
-
-		virtual bool getCurrentParam(string_id& s) const;
-		virtual bool getCurrentParam(float& f) const;
-		virtual bool getCurrentParam(flt2& f2) const;
-		virtual bool getCurrentParam(flt3& f3) const;
-		virtual bool getCurrentParam(flt4& f4) const;
-		virtual bool getCurrentParam(flt4x4& f4x4) const;
+		virtual bool getParam(int param_index, string_id& s) const;
+		virtual bool getParam(int param_index, float& f) const;
+		virtual bool getParam(int param_index, flt2& f2) const;
+		virtual bool getParam(int param_index, flt3& f3) const;
+		virtual bool getParam(int param_index, flt4& f4) const;
+		virtual bool getParam(int param_index, flt4x4& f4x4) const;
 
 		virtual bool getParam(const ParamKey& param, string_id& s) const;
 		virtual bool getParam(const ParamKey& param, float& f) const;
