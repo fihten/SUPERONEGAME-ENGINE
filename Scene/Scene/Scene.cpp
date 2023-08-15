@@ -651,6 +651,42 @@ void Scene::createNodeParamReference(NodeID reference, NodeID referenced, const 
 	}
 	);
 	it->second = referenced;
+
+	bool updateReferencedNodeParams = false;
+	updateReferencedNodeParams = nodes[reference]->params.size() !=
+		nodes[referenced]->params.size();
+	if (!updateReferencedNodeParams)
+	{
+		for (int i = 0; i < nodes[reference]->params.size(); ++i)
+		{
+			if (nodes[reference]->params[i].first ==
+				nodes[referenced]->params[i].first)
+			{
+				continue;
+			}
+
+			updateReferencedNodeParams = true;
+			break;
+		}
+	}
+
+	if (!updateReferencedNodeParams)
+		return;
+
+	std::vector<std::pair<ParamKey, ParamValue>> params(nodes[reference]->params);
+	for (auto& p : params)
+		p.second = ParamValue();
+	for (auto& param : nodes[referenced]->params)
+	{
+		auto it = std::find_if(params.begin(), params.end(), [&param](auto& p)
+		{
+			return p.first == param.first;
+		});
+		if (it == params.end())
+			continue;
+		it->second = param.second;
+	}
+	nodes[referenced]->params.swap(params);
 }
 
 bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, string_id& s) const
