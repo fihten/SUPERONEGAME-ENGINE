@@ -20,4 +20,4 @@ technique11 SelectedObject
 		SetGeometryShader(NULL);
 		SetPixelShader(CompileShader(ps_5_0, PS()));
 	}
-};
+}

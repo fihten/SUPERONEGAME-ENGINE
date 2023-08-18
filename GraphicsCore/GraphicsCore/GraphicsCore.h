@@ -19,7 +19,7 @@ class GraphicsCore;
 typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
 typedef void (*DRAW_FUNC)(GraphicsCore*);
 
-class RoughlySelectedObjectVisitor
+class SelectedObjectVisitor
 {
 public:
 	virtual void operator()(uint32_t objectID) = 0;
@@ -51,7 +51,7 @@ public:
 	void setSelectorFrustumRough(Frustum& selectorFrustum);
 	void setV(const flt4x4& V);
 	void findRoughlySelectedObjects();
-	void traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor);
+	void traverseRoughlySelectedObjects(SelectedObjectVisitor* visitor);
 
 private:
 	void initRoughObjectsSelection();
@@ -79,8 +79,10 @@ public:
 	void setThreshold(float threshold);
 	void setGeometryForFineSelection(const Mesh& mesh);
 	void setTrianglesCount(uint32_t trianglesCount);
+	void setMeshId(uint32_t meshId);
+	void initSelectedTrianglesWithZeros();
 	void checkIntersection();
-	bool isObjectIntersected();
+	void traverseFineSelectedObjects(SelectedObjectVisitor* visitor);
 
 private:
 	void initFineObjectsSelection();
@@ -96,6 +98,7 @@ private:
 	ID3DX11EffectVariable* mTrianglesCount = nullptr;
 	
 	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
+	ID3DX11EffectVariable* mMeshId = nullptr;
 	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
 	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
 	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;

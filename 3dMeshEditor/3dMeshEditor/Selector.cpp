@@ -94,8 +94,9 @@ void Selector::selectObjects(
 	GraphicsCore::instance()->setSelectorFrustumFine(selectorFrustum);
 	GraphicsCore::instance()->setThreshold(0.0);
 
-	selectedObjectsCount = 0;
-	class VisitSelectedObjects : public RoughlySelectedObjectVisitor
+	GraphicsCore::instance()->initSelectedTrianglesWithZeros();
+
+	class VisitRoughlySelectedObjects : public SelectedObjectVisitor
 	{
 	public:
 		void operator()(uint32_t objectID)
@@ -110,18 +111,28 @@ void Selector::selectObjects(
 			GraphicsCore::instance()->setWV(wv);
 			GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
 			GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
+			GraphicsCore::instance()->setMeshId(objectID);
 
 			GraphicsCore::instance()->checkIntersection();
-			if (GraphicsCore::instance()->isObjectIntersected())
-			{
-				auto& boxes = Selector::instance()->selectedObjectsBoxes;
-				auto& count = Selector::instance()->selectedObjectsCount;
-				boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
-			}
 		}
 	};
-	VisitSelectedObjects visitor;
-	GraphicsCore::instance()->traverseRoughlySelectedObjects(&visitor);
+	VisitRoughlySelectedObjects roughVisitor;
+	GraphicsCore::instance()->traverseRoughlySelectedObjects(&roughVisitor);
+
+	selectedObjectsCount = 0;
+	class VisitFineSelectedObjects : public SelectedObjectVisitor
+	{
+	public:
+		void operator()(uint32_t objectID)
+		{
+			auto& boxes = Selector::instance()->selectedObjectsBoxes;
+			auto& count = Selector::instance()->selectedObjectsCount;
+			boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
+		}
+	};
+	VisitFineSelectedObjects fineVisitor;
+	GraphicsCore::instance()->traverseFineSelectedObjects(&fineVisitor);
+
 	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
 }
 

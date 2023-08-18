@@ -1051,7 +1051,7 @@ void GraphicsCore::findRoughlySelectedObjects()
 	context->CSSetShader(0, 0, 0);
 }
 
-void GraphicsCore::traverseRoughlySelectedObjects(RoughlySelectedObjectVisitor* visitor)
+void GraphicsCore::traverseRoughlySelectedObjects(SelectedObjectVisitor* visitor)
 {
 	context->CopyResource(mOutputSelectedObjectsBuffer, mInputSelectedObjectsBuffer);
 	
@@ -1103,11 +1103,12 @@ void GraphicsCore::initFineObjectsSelection()
 	mIndicies = mFineObjectsSelectionFX->GetVariableByName("indicies")->AsShaderResource();
 	mTrianglesCount = mFineObjectsSelectionFX->GetVariableByName("trianglesCount");
 	mSelectedTriangles = mFineObjectsSelectionFX->GetVariableByName("selectedTriangles")->AsUnorderedAccessView();
+	mMeshId = mFineObjectsSelectionFX->GetVariableByName("meshId");
 
 	D3D11_BUFFER_DESC inputDesc;
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_TRIANGLES_COUNT;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_BOUNDING_SPHERES_COUNT;
 	inputDesc.CPUAccessFlags = 0;
 	inputDesc.StructureByteStride = sizeof uint32_t;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1119,7 +1120,7 @@ void GraphicsCore::initFineObjectsSelection()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
-	uavDesc.Buffer.NumElements = MAX_TRIANGLES_COUNT;
+	uavDesc.Buffer.NumElements = MAX_BOUNDING_SPHERES_COUNT;
 
 	device->CreateUnorderedAccessView(mInputSelectedTrianglesBuffer, &uavDesc, &selectedTrianglesUAV);
 	mSelectedTriangles->SetUnorderedAccessView(selectedTrianglesUAV);
@@ -1127,7 +1128,7 @@ void GraphicsCore::initFineObjectsSelection()
 	D3D11_BUFFER_DESC outputDesc;
 	outputDesc.Usage = D3D11_USAGE_STAGING;
 	outputDesc.BindFlags = 0;
-	outputDesc.ByteWidth = sizeof(uint32_t) * MAX_TRIANGLES_COUNT;
+	outputDesc.ByteWidth = sizeof(uint32_t) * MAX_BOUNDING_SPHERES_COUNT;
 	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	outputDesc.StructureByteStride = sizeof uint32_t;
 	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1194,6 +1195,7 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 	ID3D11ShaderResourceView* mVerticesSRV = nullptr;
 	device->CreateShaderResourceView(mVerticesBuffer, &srvDesc, &mVerticesSRV);
 	mVertices->SetResource(mVerticesSRV);
+	mVerticesSRV->Release();
 
 	ID3D11Buffer* mIndicesBuffer = this->getIndexBuffer(mesh, true);
 
@@ -1206,12 +1208,24 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 	ID3D11ShaderResourceView* mIndicesSRV = nullptr;
 	device->CreateShaderResourceView(mIndicesBuffer, &srvDesc, &mIndicesSRV);
 	mIndicies->SetResource(mIndicesSRV);
+	mIndicesSRV->Release();
 }
 
 void GraphicsCore::setTrianglesCount(uint32_t trianglesCount)
 {
 	mTrianglesCount->SetRawValue(&trianglesCount, 0, sizeof(uint32_t));
 	this->trianglesCount = trianglesCount;
+}
+
+void GraphicsCore::setMeshId(uint32_t meshId)
+{
+	mMeshId->SetRawValue(&meshId, 0, sizeof(uint32_t));
+}
+
+void GraphicsCore::initSelectedTrianglesWithZeros()
+{
+	static uint32_t zeros[MAX_BOUNDING_SPHERES_COUNT];
+	context->UpdateSubresource(mInputSelectedTrianglesBuffer, 0, 0, zeros, 0, 0);
 }
 
 void GraphicsCore::checkIntersection()
@@ -1223,23 +1237,18 @@ void GraphicsCore::checkIntersection()
 	context->CSSetShader(0, 0, 0);
 }
 
-bool GraphicsCore::isObjectIntersected()
+void GraphicsCore::traverseFineSelectedObjects(SelectedObjectVisitor* visitor)
 {
 	context->CopyResource(mOutputSelectedTrianglesBuffer, mInputSelectedTrianglesBuffer);
 
 	D3D11_MAPPED_SUBRESOURCE mappedData;
 	context->Map(mOutputSelectedTrianglesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
-	bool intersected = false;
-	for (int i = 0; i < trianglesCount; ++i)
+	for (int i = 0; i < spheresCount; ++i)
 	{
-		if (((uint32_t*)mappedData.pData)[i] == 1)
-		{
-			intersected = true;
-			break;
-		}
+		if (((uint32_t*)mappedData.pData)[i] > 0)
+			visitor->operator()(i);
 	}
 
 	context->Unmap(mOutputSelectedTrianglesBuffer, 0);
-	return intersected;
 }

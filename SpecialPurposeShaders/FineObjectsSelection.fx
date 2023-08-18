@@ -11,6 +11,7 @@ StructuredBuffer<uint> indicies;
 uint trianglesCount;
 
 RWStructuredBuffer<uint> selectedTriangles;
+uint meshId;
 
 [numthreads(256, 1, 1)]
 void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -36,9 +37,8 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	tri.v1 = v1.xyz;
 	tri.v2 = v2.xyz;
 
-	selectedTriangles[triangleIndex] = 0;
 	if (checkIntersection(selectorFrustum, selectorFrustumDiagonals, tri, threshold))
-		selectedTriangles[triangleIndex] = 1;
+		InterlockedAdd(selectedTriangles[meshId], 1);
 }
 
 technique11 FineObjectsSelection
