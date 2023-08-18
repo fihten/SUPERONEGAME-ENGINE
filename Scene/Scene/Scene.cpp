@@ -1169,3 +1169,8 @@ void Scene::accept(Visitor* visitor) const
 {
 	root->accept(visitor);
 }
+
+void* Scene::getNode(NodeID id)
+{
+	return nodes[id];
+}

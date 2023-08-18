@@ -100,38 +100,24 @@ void Selector::selectObjects(
 	public:
 		void operator()(uint32_t objectID)
 		{
-			class MeshVisitor : public Scene::Visitor
+			NodeID meshID = MainScene::instance()->boundingSphereToNode[objectID];
+			Scene::MeshNode* node = (Scene::MeshNode*)MainScene::instance()->getNode(meshID);
+
+			flt4x4 world = MainScene::instance()->getNodePosition(meshID);
+			flt4x4 view = cameras()[MAIN_CAMERA].getView();
+
+			flt4x4 wv = world * view;
+			GraphicsCore::instance()->setWV(wv);
+			GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
+			GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
+
+			GraphicsCore::instance()->checkIntersection();
+			if (GraphicsCore::instance()->isObjectIntersected())
 			{
-				uint32_t objectID = -1;
-			public:
-				MeshVisitor(uint32_t objectID) :objectID(objectID) {}
-
-				void startVisit(const Scene::MeshNode* node)
-				{
-					NodeID meshID = MainScene::instance()->boundingSphereToNode[objectID];
-					if (node->ID != meshID)
-						return;
-					
-					flt4x4 world = MainScene::instance()->getNodePosition(meshID);
-					flt4x4 view = cameras()[MAIN_CAMERA].getView();
-
-					flt4x4 wv = world * view;
-					GraphicsCore::instance()->setWV(wv);
-					GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
-					GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
-
-					GraphicsCore::instance()->checkIntersection();
-					if (GraphicsCore::instance()->isObjectIntersected())
-					{
-						auto& boxes = Selector::instance()->selectedObjectsBoxes;
-						auto& count = Selector::instance()->selectedObjectsCount;
-						boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
-					}
-				}
-			};
-
-			MeshVisitor visitor(objectID);
-			MainScene::instance()->accept(&visitor);
+				auto& boxes = Selector::instance()->selectedObjectsBoxes;
+				auto& count = Selector::instance()->selectedObjectsCount;
+				boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
+			}
 		}
 	};
 	VisitSelectedObjects visitor;

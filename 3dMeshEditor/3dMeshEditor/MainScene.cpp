@@ -125,3 +125,8 @@ void MainScene::accept(Scene::Visitor* visitor) const
 {
 	scene.accept(visitor);
 }
+
+void* MainScene::getNode(NodeID id)
+{
+	return scene.getNode(id);
+}

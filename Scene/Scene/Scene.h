@@ -176,4 +176,5 @@ public:
 	flt4x4& getNodeInvTrPosition(NodeID id);
 
 	void accept(Visitor* visitor) const;
+	void* getNode(NodeID id);
 };

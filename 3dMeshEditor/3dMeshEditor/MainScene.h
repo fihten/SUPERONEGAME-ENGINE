@@ -30,6 +30,7 @@ public:
 	
 	flt4x4& getNodePosition(NodeID id);
 	void accept(Scene::Visitor* visitor) const;
+	void* getNode(NodeID id);
 
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];
