@@ -28,6 +28,13 @@ class DrawVisitor :public Scene::Visitor
 		uint32_t getVerticesCount() const;
 		uint32_t getIndicesCount() const;
 
+		virtual string_id* getStringID(int param_index);
+		virtual float* getFloat(int param_index);
+		virtual flt2* getFlt2(int param_index);
+		virtual flt3* getFlt3(int param_index);
+		virtual flt4* getFlt4(int param_index);
+		virtual flt4x4* getFlt4x4(int param_index);
+
 		virtual bool getParam(int param_index, string_id& s) const;
 		virtual bool getParam(int param_index, float& f) const;
 		virtual bool getParam(int param_index, flt2& f2) const;
@@ -43,7 +50,11 @@ class DrawVisitor :public Scene::Visitor
 		virtual bool getParam(const ParamKey& param, flt4x4& f4x4) const;
 
 
-		flt4x4 getPosition() const;
+		flt4x4& getPos4x4();
+		flt3& getPos3();
+		flt4& getPos4();
+		flt3& getAxisZ();
+		flt4x4& getPosInvTr();
 	};
 public:
 	void startVisit(const Scene::MeshNode* node);

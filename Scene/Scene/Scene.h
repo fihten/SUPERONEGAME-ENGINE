@@ -19,13 +19,32 @@ public:
 
 		std::vector<std::pair<ParamKey, ParamValue>> params;
 
+		flt4x4 cachedPosition4x4;
+		flt3 cachedPosition3;
+		flt4 cachedPosition4;
+		flt3 cachedAxisZ;
+		flt4x4 cachedInverseTransposePosition;
+		bool bCached;
+
 	public:
 		Node(NodeID id);
 		virtual ~Node();
 
 		virtual void addChild(Node* n);
 		virtual Node* findNodeByID(NodeID id);
-		virtual flt4x4 getPos() const;
+		
+		virtual flt4x4& getPos4x4();
+		virtual flt3& getPos3();
+		virtual flt4& getPos4();
+		virtual flt3& getAxisZ();
+		virtual flt4x4& getPosInvTr();
+
+		virtual string_id* getStringID(int param_index);
+		virtual float* getFloat(int param_index);
+		virtual flt2* getFlt2(int param_index);
+		virtual flt3* getFlt3(int param_index);
+		virtual flt4* getFlt4(int param_index);
+		virtual flt4x4* getFlt4x4(int param_index);
 
 		virtual bool getParam(int param_index, string_id& s) const;
 		virtual bool getParam(int param_index, float& f) const;
@@ -66,7 +85,13 @@ public:
 		flt4x4 pos;
 	public:
 		TransformNode(NodeID id, const flt4x4& pos) :Node(id), pos(pos) {}
-		flt4x4 getPos() const;
+		
+		virtual flt4x4& getPos4x4();
+		virtual flt3& getPos3();
+		virtual flt4& getPos4();
+		virtual flt3& getAxisZ();
+		virtual flt4x4& getPosInvTr();
+
 		virtual void accept(Visitor* visitor) const;
 	};
 
@@ -114,6 +139,13 @@ public:
 	NodeID addTransformNode(const flt4x4& pos, NodeID id = 0);
 	NodeID addMeshNode(Mesh* mesh, NodeID id = 0);
 
+	string_id* getStringID(NodeID id, int param_index);
+	float* getFloat(NodeID id, int param_index);
+	flt2* getFlt2(NodeID id, int param_index);
+	flt3* getFlt3(NodeID id, int param_index);
+	flt4* getFlt4(NodeID id, int param_index);
+	flt4x4* getFlt4x4(NodeID id, int param_index);
+
 	bool getNodeParam(NodeID id, int param_index, string_id& s) const;
 	bool getNodeParam(NodeID id, int param_index, float& f) const;
 	bool getNodeParam(NodeID id, int param_index, flt2& f2) const;
@@ -137,6 +169,11 @@ public:
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4& f4) const;
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) const;
 
-	flt4x4 getNodePosition(NodeID id) const;
+	flt4x4& getNodePosition4x4(NodeID id);
+	flt4& getNodePosition4(NodeID id);
+	flt3& getNodePosition3(NodeID id);
+	flt3& getNodeAxisZ(NodeID id);
+	flt4x4& getNodeInvTrPosition(NodeID id);
+
 	void accept(Visitor* visitor) const;
 };

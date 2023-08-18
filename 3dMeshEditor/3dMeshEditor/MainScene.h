@@ -28,7 +28,7 @@ public:
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4& f4) const;
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) const;
 	
-	flt4x4 getNodePosition(NodeID id) const;
+	flt4x4& getNodePosition(NodeID id);
 	void accept(Scene::Visitor* visitor) const;
 
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];

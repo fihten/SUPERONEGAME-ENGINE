@@ -26,7 +26,7 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 
 	flt4 posL(0.5f * (min + max), 1.0f);
 	
-	flt4x4 pos = scene.getNodePosition(id);
+	flt4x4& pos = scene.getNodePosition4x4(id);
 	selectedObjectBox.posW = (posL * pos).xyz();
 
 	selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
@@ -116,9 +116,9 @@ bool MainScene::getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4)
 	return scene.getNodeParam(id, paramName, f4x4);
 }
 
-flt4x4 MainScene::getNodePosition(NodeID id) const
+flt4x4& MainScene::getNodePosition(NodeID id)
 {
-	return scene.getNodePosition(id);
+	return scene.getNodePosition4x4(id);
 }
 
 void MainScene::accept(Scene::Visitor* visitor) const

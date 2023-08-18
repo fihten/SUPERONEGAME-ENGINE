@@ -7,9 +7,19 @@ const flt3& Camera::getEyePos()
 	return position;
 }
 
+const flt4& Camera::getEyePos4()
+{
+	return position4;
+}
+
 const flt3& Camera::getFwd()
 {
 	return fwd;
+}
+
+const flt4& Camera::getFwd4()
+{
+	return fwd4;
 }
 
 const flt4x4& Camera::getView()
@@ -30,6 +40,7 @@ void Camera::updateView()
 	up = cross(right, fwd);
 
 	fwd.normalize();
+	fwd4 = flt4(fwd, 1);
 	right.normalize();
 	up.normalize();
 
@@ -50,6 +61,18 @@ const flt4x4& Camera::getProj()
 	}
 
 	return proj;
+}
+
+const flt4x4& Camera::getViewProj()
+{
+	if (changed)
+	{
+		updateView();
+		updateProj();
+		view_x_proj = view * proj;
+	}
+
+	return view_x_proj;
 }
 
 float Camera::getNear()
@@ -106,6 +129,7 @@ void Camera::walk(float dt)
 {
 	float l = walkVelocity * dt;
 	position = position + fwd * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -113,6 +137,7 @@ void Camera::walkBackward(float dt)
 {
 	float l = -walkVelocity * dt;
 	position = position + fwd * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -120,6 +145,7 @@ void Camera::run(float dt)
 {
 	float l = runVelocity * dt;
 	position = position + fwd * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -129,6 +155,7 @@ void Camera::lookUp(float d)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	Matrix4x4<float> rot = makeRotate<float>(right, angle);
 	fwd = fwd * rot;
+	fwd4 = flt4(fwd, 1);
 	changed = true;
 }
 
@@ -138,6 +165,7 @@ void Camera::lookDown(float d)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	Matrix4x4<float> rot = makeRotate<float>(right, angle);
 	fwd = fwd * rot;
+	fwd4 = flt4(fwd, 1);
 	changed = true;
 }
 
@@ -147,6 +175,7 @@ void Camera::lookLeft(float d)
 	flt3 up(0, 1, 0);
 	Matrix4x4<float> rot = makeRotate<float>(up, angle);
 	fwd = fwd * rot;
+	fwd4 = flt4(fwd, 1);
 	changed = true;
 }
 
@@ -156,6 +185,7 @@ void Camera::lookRight(float d)
 	flt3 up(0, 1, 0);
 	Matrix4x4<float> rot = makeRotate<float>(up, angle);
 	fwd = fwd * rot;
+	fwd4 = flt4(fwd, 1);
 	changed = true;
 }
 
@@ -165,6 +195,7 @@ void Camera::rightSidestep(float dt)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	right.normalize();
 	position = position + right * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -174,6 +205,7 @@ void Camera::leftSidestep(float dt)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	right.normalize();
 	position = position - right * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -183,6 +215,7 @@ void Camera::rightSidefaststep(float dt)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	right.normalize();
 	position = position + right * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 
@@ -192,6 +225,7 @@ void Camera::leftSidefaststep(float dt)
 	flt3 right = cross(fwd, flt3(0, 1, 0));
 	right.normalize();
 	position = position - right * l;
+	position4 = flt4(position, 1);
 	changed = true;
 }
 

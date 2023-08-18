@@ -52,14 +52,224 @@ Scene::Node* Scene::Node::findNodeByID(NodeID id)
 	return nullptr;
 }
 
-flt4x4 Scene::Node::getPos() const
+flt4x4& Scene::Node::getPos4x4()
 {
-	return parent ? parent->getPos() : flt4x4();
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() : flt4x4();
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition4x4;
 }
 
-flt4x4 Scene::TransformNode::getPos() const
+flt3& Scene::Node::getPos3()
 {
-	return parent ? parent->getPos() * pos : pos;
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() : flt4x4();
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition3;
+}
+
+flt4& Scene::Node::getPos4()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() : flt4x4();
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition4;
+}
+
+flt3& Scene::Node::getAxisZ()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() : flt4x4();
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedAxisZ;
+}
+
+flt4x4& Scene::Node::getPosInvTr()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() : flt4x4();
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedInverseTransposePosition;
+}
+
+flt4x4& Scene::TransformNode::getPos4x4()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() * pos : pos;
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition4x4;
+}
+
+flt3& Scene::TransformNode::getPos3()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() * pos : pos;
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition3;
+}
+
+flt4& Scene::TransformNode::getPos4()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() * pos : pos;
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedPosition4;
+}
+
+flt3& Scene::TransformNode::getAxisZ()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() * pos : pos;
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedAxisZ;
+}
+
+flt4x4& Scene::TransformNode::getPosInvTr()
+{
+	if (!bCached)
+	{
+		cachedPosition4x4 = parent ? parent->getPos4x4() * pos : pos;
+		cachedPosition3 = flt3(
+			cachedPosition4x4.m30(),
+			cachedPosition4x4.m31(),
+			cachedPosition4x4.m32()
+		);
+		cachedPosition4 = flt4(cachedPosition3, 1);
+		cachedAxisZ = flt3(
+			cachedPosition4x4.m20(),
+			cachedPosition4x4.m21(),
+			cachedPosition4x4.m22()
+		);
+		cachedInverseTransposePosition = cachedPosition4x4.inverse().transpose();
+		bCached = true;
+	}
+	return cachedInverseTransposePosition;
 }
 
 void Scene::TransformNode::accept(Visitor* visitor) const
@@ -217,6 +427,48 @@ NodeID Scene::addMeshNode(Mesh* mesh, NodeID id)
 		paramsLocations[id].location.push_back({ p.first, id });
 
 	return id;
+}
+
+string_id* Scene::Node::getStringID(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.s;
+}
+
+float* Scene::Node::getFloat(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f;
+}
+
+flt2* Scene::Node::getFlt2(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f2;
+}
+
+flt3* Scene::Node::getFlt3(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f3;
+}
+
+flt4* Scene::Node::getFlt4(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f4;
+}
+
+flt4x4* Scene::Node::getFlt4x4(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f4x4;
 }
 
 bool Scene::Node::getParam(int param_index, string_id& s) const
@@ -497,6 +749,78 @@ void Scene::RootNode::accept(Visitor* visitor) const
 	visitor->finishVisit(this);
 }
 
+string_id* Scene::getStringID(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	return &node->params[param_index].second.s;
+}
+
+float* Scene::getFloat(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	return &node->params[param_index].second.f;
+}
+
+flt2* Scene::getFlt2(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	return &node->params[param_index].second.f2;
+}
+
+flt3* Scene::getFlt3(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	string_id s = node->params[param_index].second.s;
+
+	if (s == node_position_id)
+		return &node->getPos3();
+	if (s == node_axis_z_id)
+		return &node->getAxisZ();
+	return &node->params[param_index].second.f3;
+}
+
+flt4* Scene::getFlt4(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	return &node->params[param_index].second.f4;
+}
+
+flt4x4* Scene::getFlt4x4(NodeID id, int param_index)
+{
+	id = paramsLocations[id].location[param_index].second;
+
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return nullptr;
+
+	return &node->params[param_index].second.f4x4;
+}
+
 bool Scene::getNodeParam(NodeID id, int param_index, string_id& s) const
 {
 	id = paramsLocations[id].location[param_index].second;
@@ -548,18 +872,12 @@ bool Scene::getNodeParam(NodeID id, int param_index, flt3& f3) const
 
 	if (s == node_position_id)
 	{
-		flt4x4 pos = node->getPos();
-		f3.x() = pos.m30();
-		f3.y() = pos.m31();
-		f3.z() = pos.m32();
+		f3 = node->getPos3();
 		return true;
 	}
 	if (s == node_axis_z_id)
 	{
-		flt4x4 pos = node->getPos();
-		f3.x() = pos.m20();
-		f3.y() = pos.m21();
-		f3.z() = pos.m22();
+		f3 = node->getAxisZ();
 		return true;
 	}
 
@@ -765,18 +1083,12 @@ bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt3& f3) const
 
 	if (s == node_position_id)
 	{
-		flt4x4 pos = node->getPos();
-		f3.x() = pos.m30();
-		f3.y() = pos.m31();
-		f3.z() = pos.m32();
+		f3 = node->getPos3();
 		return true;
 	}
 	if (s == node_axis_z_id)
 	{
-		flt4x4 pos = node->getPos();
-		f3.x() = pos.m20();
-		f3.y() = pos.m21();
-		f3.z() = pos.m22();
+		f3 = node->getAxisZ();
 		return true;
 	}
 
@@ -823,12 +1135,34 @@ bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) con
 	return true;
 }
 
-flt4x4 Scene::getNodePosition(NodeID id) const
+flt4x4& Scene::getNodePosition4x4(NodeID id)
 {
 	Node* node = nodes[id];
-	if (node == nullptr)
-		return flt4x4();
-	return node->getPos();
+	return node->getPos4x4();
+}
+
+flt4& Scene::getNodePosition4(NodeID id)
+{
+	Node* node = nodes[id];
+	return node->getPos4();
+}
+
+flt3& Scene::getNodePosition3(NodeID id)
+{
+	Node* node = nodes[id];
+	return node->getPos3();
+}
+
+flt3& Scene::getNodeAxisZ(NodeID id)
+{
+	Node* node = nodes[id];
+	return node->getAxisZ();
+}
+
+flt4x4& Scene::getNodeInvTrPosition(NodeID id)
+{
+	Node* node = nodes[id];
+	return node->getPosInvTr();
 }
 
 void Scene::accept(Visitor* visitor) const

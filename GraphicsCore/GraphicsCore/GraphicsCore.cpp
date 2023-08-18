@@ -363,132 +363,66 @@ void GraphicsCore::resize(UINT width, UINT height)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }
 
-flt4x4 GraphicsCore::getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const
+const flt4x4* GraphicsCore::getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
-	flt4x4 res;
-
-	for (int mi = 0; mi < location.countOfMultipliers; mi++)
+	if (location.name == cameras_id)
 	{
-		if (location.name[mi] == cameras_id)
-		{
-			int index = location.index[mi];
-			if (location.field[mi] == wvp_id)
-			{
-				const flt4x4& v = cameras()[index].getView();
-				const flt4x4& p = cameras()[index].getProj();
-				res = res * v * p;
-			}
-			if (location.field[mi] == vp_id)
-			{
-				const flt4x4& v = cameras()[index].getView();
-				const flt4x4& p = cameras()[index].getProj();
-				res = res * v * p;
-			}
-			if (location.field[mi] == v_id)
-			{
-				const flt4x4& v = cameras()[index].getView();
-				res = res * v;
-			}
-			if (location.field[mi] == p_id)
-			{
-				const flt4x4& p = cameras()[index].getProj();
-				res = res * p;
-			}
-			continue;
-		}
-		if (location.name[mi] == position_in_scene_id)
-		{
-			res = res * mesh.getPosition();
-			continue;
-		}
-		if (location.name[mi] == inverse_transpose_of_position_in_scene_id)
-		{
-			res = res * mesh.getPosition().inverse().transpose();
-			continue;
-		}
+		int index = location.index;
+		if (location.field == wvp_id)
+			return &cameras()[index].getViewProj();
+		if (location.field == vp_id)
+			return &cameras()[index].getViewProj();
+		if (location.field == v_id)
+			return &cameras()[index].getView();
+		if (location.field == p_id)
+			return &cameras()[index].getProj();
 	}
+	if (location.name == position_in_scene_id)
+		return &mesh.getPos4x4();
+	if (location.name == inverse_transpose_of_position_in_scene_id)
+		return &mesh.getPosInvTr();
 	
-	return res;
+	return mesh.getFlt4x4(param_index);
 }
 
-flt4 GraphicsCore::getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const
+const flt4* GraphicsCore::getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
-	flt4 res;
-
-	if (location.name[0] == cameras_id)
+	if (location.name == cameras_id)
 	{
-		int index = location.index[0];
-		if (location.field[0] == eye_pos_id)
-		{
-			res.xyz() = cameras()[index].getEyePos();
-			res.w() = 1;
-			return res;
-		}
-		if (location.field[0] == fwd_id)
-		{
-			res.xyz() = cameras()[index].getFwd();
-			res.w() = 1;
-			return res;
-		}
+		int index = location.index;
+		if (location.field == eye_pos_id)
+			return &cameras()[index].getEyePos4();
+		if (location.field == fwd_id)
+			return &cameras()[index].getFwd4();
 	}
-	if (location.name[0] == position_in_scene_id)
-	{
-		flt4x4 pos = mesh.getPosition();
-		res = flt4(pos.m30(), pos.m31(), pos.m32(), 1);
-		return res;
-	}
-
-	mesh.getParam(param_index, res);
-
-	return res;
+	if (location.name == position_in_scene_id)
+		return &mesh.getPos4();
+	return mesh.getFlt4(param_index);
 }
 
-flt3 GraphicsCore::getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const
+const flt3* GraphicsCore::getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
-	flt3 res;
-
-	if (location.name[0] == cameras_id)
+	if (location.name == cameras_id)
 	{
-		int index = location.index[0];
-		if (location.field[0] == eye_pos_id)
-		{
-			res = cameras()[index].getEyePos();
-			return res;
-		}
-		if (location.field[0] == fwd_id)
-		{
-			res = cameras()[index].getFwd();
-			return res;
-		}
+		int index = location.index;
+		if (location.field == eye_pos_id)
+			return &cameras()[index].getEyePos();
+		if (location.field == fwd_id)
+			return &cameras()[index].getFwd();
 	}
-	if (location.name[0] == position_in_scene_id)
-	{
-		flt4x4 pos = mesh.getPosition();
-		res = flt3(pos.m30(), pos.m31(), pos.m32());
-		return res;
-	}
-
-	mesh.getParam(param_index, res);
-
-	return res;
+	if (location.name == position_in_scene_id)
+		return &mesh.getPos3();
+	return mesh.getFlt3(param_index);
 }
 
-flt2 GraphicsCore::getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const
+const flt2* GraphicsCore::getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
-	flt2 res;
-	
-	mesh.getParam(param_index, res);
-
-	return res;
+	return mesh.getFlt2(param_index);
 }
 
-flt1 GraphicsCore::getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const
+const float* GraphicsCore::getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
-	float res;
-
-	mesh.getParam(param_index, res);
-
-	return res;
+	return mesh.getFloat(param_index);
 }
 
 void* GraphicsCore::getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes)
@@ -826,9 +760,11 @@ void GraphicsCore::setFloat4x4sOnGPU(Mesh& mesh)
 		ResourceManager::instance()->getFloat4x4s(technique_name_id);
 	for (auto& f4x4 : flt4x4s)
 	{
-		flt4x4 v = getFloat4x4(mesh, f4x4.first, f4x4.second.location);
+		const flt4x4* v = getFloat4x4(mesh, f4x4.first, f4x4.second.location);
 		param_index++;
-		f4x4.second.ptr->SetMatrix(reinterpret_cast<float*>(&v));
+		if (v == nullptr)
+			continue;
+		f4x4.second.ptr->SetMatrix(reinterpret_cast<const float*>(v));
 	}
 }
 
@@ -840,9 +776,11 @@ void GraphicsCore::setFloat4sOnGPU(Mesh& mesh)
 		ResourceManager::instance()->getFloat4s(technique_name_id);
 	for (auto& f4 : flt4s)
 	{
-		flt4 v = getFloat4(mesh, f4.first, f4.second.location);
+		const flt4* v = getFloat4(mesh, f4.first, f4.second.location);
 		param_index++;
-		f4.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 4 * sizeof(float));
+		if (v == nullptr)
+			continue;
+		f4.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, 4 * sizeof(float));
 	}
 }
 
@@ -854,9 +792,11 @@ void GraphicsCore::setFloat3sOnGPU(Mesh& mesh)
 		ResourceManager::instance()->getFloat3s(technique_name_id);
 	for (auto& f3 : flt3s)
 	{
-		flt3 v = getFloat3(mesh, f3.first, f3.second.location);
+		const flt3* v = getFloat3(mesh, f3.first, f3.second.location);
 		param_index++;
-		f3.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 3 * sizeof(float));
+		if (v == nullptr)
+			continue;
+		f3.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, 3 * sizeof(float));
 	}
 }
 
@@ -868,9 +808,11 @@ void GraphicsCore::setFloat2sOnGPU(Mesh& mesh)
 		ResourceManager::instance()->getFloat2s(technique_name_id);
 	for (auto& f2 : flt2s)
 	{
-		flt2 v = getFloat2(mesh, f2.first, f2.second.location);
+		const flt2* v = getFloat2(mesh, f2.first, f2.second.location);
 		param_index++;
-		f2.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, 2 * sizeof(float));
+		if (v == nullptr)
+			continue;
+		f2.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, 2 * sizeof(float));
 	}
 }
 
@@ -882,9 +824,11 @@ void GraphicsCore::setFloat1sOnGPU(Mesh& mesh)
 		ResourceManager::instance()->getFloat1s(technique_name_id);
 	for (auto& f1 : flt1s)
 	{
-		flt1 v = getFloat1(mesh, f1.first, f1.second.location);
+		const float* v = getFloat1(mesh, f1.first, f1.second.location);
 		param_index++;
-		f1.second.ptr->SetRawValue(reinterpret_cast<void*>(&v), 0, sizeof(float));
+		if (v == nullptr)
+			continue;
+		f1.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, sizeof(float));
 	}
 }
 

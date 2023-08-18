@@ -11,7 +11,10 @@
 class Camera
 {
 	flt3 position = flt3(0, 0, -2);
+	flt4 position4 = flt4(0, 0, -2, 1);
+	
 	flt3 fwd = flt3(0, 0, 1);
+	flt4 fwd4 = flt4(0, 0, 1, 1);
 
 	float nearZ = 0.1;
 	float farZ = 100;
@@ -21,6 +24,7 @@ class Camera
 
 	flt4x4 view;
 	flt4x4 proj;
+	flt4x4 view_x_proj;
 
 	bool changed = true;
 
@@ -32,9 +36,12 @@ class Camera
 
 public:
 	const flt3& getEyePos();
+	const flt4& getEyePos4();
 	const flt3& getFwd();
+	const flt4& getFwd4();
 	const flt4x4& getView();
 	const flt4x4& getProj();
+	const flt4x4& getViewProj();
 	float getNear();
 	float getFar();
 	float getFov();

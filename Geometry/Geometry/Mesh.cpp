@@ -255,6 +255,9 @@ Mesh createCube()
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	m.setParam(diffuse_map_key, StringManager::toStringId("test.dds"));
 
+	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
+	m.setParam(tex_transform_key, flt4x4());
+
 	return m;
 }
 
@@ -541,6 +544,9 @@ Mesh createSphere(int latitudes, int longitudes)
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	sphere.setParam(diffuse_map_key, StringManager::toStringId("earth.jpg"));
 
+	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
+	sphere.setParam(tex_transform_key, flt4x4());
+
 	return sphere;
 }
 
@@ -677,6 +683,9 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	cone.setParam(diffuse_map_key, StringManager::toStringId("vase.jpg"));
 
+	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
+	cone.setParam(tex_transform_key, flt4x4());
+
 	return cone;
 }
 
@@ -765,6 +774,9 @@ Mesh createPlane(float width, float height, float m, float n)
 
 	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
 	plane.setParam(diffuse_map_key, StringManager::toStringId("bosh.jpg"));
+
+	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
+	plane.setParam(tex_transform_key, flt4x4());
 
 	return plane;
 }
@@ -966,6 +978,48 @@ uint32_t Mesh::getVerticesCount() const
 uint32_t Mesh::getIndicesCount() const
 {
 	return indicies.size();
+}
+
+string_id* Mesh::getStringID(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.s;
+}
+
+float* Mesh::getFloat(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f;
+}
+
+flt2* Mesh::getFlt2(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f2;
+}
+
+flt3* Mesh::getFlt3(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f3;
+}
+
+flt4* Mesh::getFlt4(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f4;
+}
+
+flt4x4* Mesh::getFlt4x4(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.f4x4;
 }
 
 bool Mesh::getParam(int param_index, string_id& s) const

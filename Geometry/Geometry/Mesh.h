@@ -134,6 +134,13 @@ public:
 	virtual uint32_t getVerticesCount() const;
 	virtual uint32_t getIndicesCount() const;
 
+	virtual string_id* getStringID(int param_index);
+	virtual float* getFloat(int param_index);
+	virtual flt2* getFlt2(int param_index);
+	virtual flt3* getFlt3(int param_index);
+	virtual flt4* getFlt4(int param_index);
+	virtual flt4x4* getFlt4x4(int param_index);
+
 	virtual bool getParam(int param_index, string_id& s) const;
 	virtual bool getParam(int param_index, float& f) const;
 	virtual bool getParam(int param_index, flt2& f2) const;
@@ -155,7 +162,35 @@ public:
 	virtual void setParam(const ParamKey& param, const flt4& f4);
 	virtual void setParam(const ParamKey& param, const flt4x4& f4x4);
 
-	virtual flt4x4 getPosition() const { return flt4x4(); }
+	virtual flt4x4& getPos4x4() 
+	{
+		static flt4x4 pos;
+		return pos; 
+	}
+
+	virtual flt3& getPos3()
+	{
+		static flt3 pos;
+		return pos;
+	}
+
+	virtual flt4& getPos4()
+	{
+		static flt4 pos;
+		return pos;
+	}
+
+	virtual flt3& getAxisZ()
+	{
+		static flt3 axis;
+		return axis;
+	}
+
+	virtual flt4x4& getPosInvTr()
+	{
+		static flt4x4 posInvTr;
+		return posInvTr;
+	}
 
 	virtual flt3 getBottomBorder() const;
 	virtual flt3 getTopBorder() const;

@@ -188,59 +188,37 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 
 				std::string& place = variableLocations[elementsOfCbuffers[i].name];
 
-				auto placeEnd = std::remove_if(place.begin(), place.end(), [&](char c)->bool {return c == ' '; });
-				place = place.substr(0, placeEnd - place.begin());
-
-				size_t startOfMultiplier = 0;
-				int mi = -1;
-				while (startOfMultiplier != place.length() + 1)
+				size_t pos = place.find("cameras[");
+				if (pos == 0)
 				{
-					size_t endOfMultiplier = place.find_first_of('*', startOfMultiplier);
-					if (endOfMultiplier == std::string::npos)
-						endOfMultiplier = place.length();
+					location.name = cameras_id;
 
-					std::string multiplier = place.substr(startOfMultiplier, endOfMultiplier - startOfMultiplier);
-					startOfMultiplier = endOfMultiplier + 1;
+					size_t beg = 7;
+					size_t end = place.find(']', beg);
 
-					if (std::strcmp(multiplier.c_str(), "") == 0)
-						continue;
+					int index = std::atoi(std::string(place, beg, end - beg).c_str());
 
-					mi++;
+					location.index = index;
 
-					size_t pos = multiplier.find("cameras[");
-					if (pos == 0)
-					{
-						location.name[mi] = cameras_id;
-
-						size_t beg = 7;
-						size_t end = multiplier.find(']', beg);
-
-						int index = std::atoi(std::string(multiplier, beg, end - beg).c_str());
-
-						location.index[mi] = index;
-
-						beg = end + 2;
-						std::string what(multiplier, beg, std::string::npos);
-						if (std::strcmp(what.c_str(), "WVP") == 0)
-							location.field[mi] = wvp_id;
-						if (std::strcmp(what.c_str(), "VP") == 0)
-							location.field[mi] = vp_id;
-						if (std::strcmp(what.c_str(), "V") == 0)
-							location.field[mi] = v_id;
-						if (std::strcmp(what.c_str(), "P") == 0)
-							location.field[mi] = p_id;
-						if (std::strcmp(what.c_str(), "eye_pos") == 0)
-							location.field[mi] = eye_pos_id;
-						if (std::strcmp(what.c_str(), "fwd") == 0)
-							location.field[mi] = fwd_id;
-						continue;
-					}
-					if (std::strcmp(multiplier.c_str(), "position_in_scene") == 0)
-						location.name[mi] = position_in_scene_id;
-					if (std::strcmp(multiplier.c_str(), "inverse_transpose_of_position_in_scene") == 0)
-						location.name[mi] = inverse_transpose_of_position_in_scene_id;
+					beg = end + 2;
+					std::string what(place, beg, std::string::npos);
+					if (std::strcmp(what.c_str(), "WVP") == 0)
+						location.field = wvp_id;
+					if (std::strcmp(what.c_str(), "VP") == 0)
+						location.field = vp_id;
+					if (std::strcmp(what.c_str(), "V") == 0)
+						location.field = v_id;
+					if (std::strcmp(what.c_str(), "P") == 0)
+						location.field = p_id;
+					if (std::strcmp(what.c_str(), "eye_pos") == 0)
+						location.field = eye_pos_id;
+					if (std::strcmp(what.c_str(), "fwd") == 0)
+						location.field = fwd_id;
 				}
-				location.countOfMultipliers = mi + 1;
+				if (std::strcmp(place.c_str(), "position_in_scene") == 0)
+					location.name = position_in_scene_id;
+				if (std::strcmp(place.c_str(), "inverse_transpose_of_position_in_scene") == 0)
+					location.name = inverse_transpose_of_position_in_scene_id;
 
 				ResourceManager::instance()->registerVariableLocation(
 					technique_id,

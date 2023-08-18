@@ -108,11 +108,11 @@ private:
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
-	flt4x4 getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt4 getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt3 getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt2 getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const;
-	flt1 getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const flt4* getFloat4(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const flt3* getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const flt2* getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const float* getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	void* getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr);
 	
 	ID3D11Buffer* getVertexBuffer(
