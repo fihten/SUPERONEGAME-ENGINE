@@ -211,9 +211,33 @@ ResourceManager::RegisterMessage ResourceManager::registerVertexBuffer(string_id
 	auto* vertexBuffers = &pass.vertexBuffers;
 	if (structured)
 		vertexBuffers = &pass.vertexBuffersStructured;
-	if ((*vertexBuffers).count(meshId))
+
+	if (meshId >= vertexBuffers->size())
+		vertexBuffers->resize(meshId + 1, nullptr);
+
+	if ((*vertexBuffers)[meshId])
 		(*vertexBuffers)[meshId]->Release();
 	(*vertexBuffers)[meshId] = vertexBuffer;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mVerticesSRV)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (meshId >= pass.vertexBuffersSRVs.size())
+		pass.vertexBuffersSRVs.resize(meshId + 1, nullptr);
+
+	if (pass.vertexBuffersSRVs[meshId])
+		pass.vertexBuffersSRVs[meshId]->Release();
+	pass.vertexBuffersSRVs[meshId] = mVerticesSRV;
 
 	return RegisterMessage::OK;
 }
@@ -231,9 +255,33 @@ ResourceManager::RegisterMessage ResourceManager::registerIndexBuffer(string_id 
 	auto* indexBuffers = &pass.indexBuffers;
 	if(structured)
 		indexBuffers = &pass.indexBuffersStructured;
-	if ((*indexBuffers).count(meshId))
+
+	if (meshId >= indexBuffers->size())
+		indexBuffers->resize(meshId + 1, nullptr);
+
+	if ((*indexBuffers)[meshId])
 		(*indexBuffers)[meshId]->Release();
 	(*indexBuffers)[meshId] = indexBuffer;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mIndicesSRV)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.passes.count(passName) == 0)
+		return RegisterMessage::PASS_DOESNT_EXIST;
+
+	auto& pass = techniqueRes.passes[passName];
+	if (meshId >= pass.indexBuffersSRVs.size())
+		pass.indexBuffersSRVs.resize(meshId + 1, nullptr);
+
+	if (pass.indexBuffersSRVs[meshId])
+		pass.indexBuffersSRVs[meshId]->Release();
+	pass.indexBuffersSRVs[meshId] = mIndicesSRV;
 
 	return RegisterMessage::OK;
 }
@@ -541,10 +589,40 @@ ID3D11Buffer* ResourceManager::getVertexBuffer(string_id techniqueName, string_i
 	auto* vertexBuffers = &cashed_pass_resource->vertexBuffers;
 	if (structured)
 		vertexBuffers = &cashed_pass_resource->vertexBuffersStructured;
-	if ((*vertexBuffers).count(meshId) == 0)
+
+	if (meshId >= vertexBuffers->size())
 		return nullptr;
 
 	return (*vertexBuffers)[meshId];
+}
+
+ID3D11ShaderResourceView* ResourceManager::getVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId)
+{
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
+
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	auto& vertexBuffersSRVs = cashed_pass_resource->vertexBuffersSRVs;
+
+	if (meshId >= vertexBuffersSRVs.size())
+		return nullptr;
+
+	return vertexBuffersSRVs[meshId];
 }
 
 ID3D11Buffer* ResourceManager::getIndexBuffer(string_id techniqueName, string_id passName, uint32_t meshId, bool structured)
@@ -571,10 +649,40 @@ ID3D11Buffer* ResourceManager::getIndexBuffer(string_id techniqueName, string_id
 	auto* indexBuffers = &cashed_pass_resource->indexBuffers;
 	if(structured)
 		indexBuffers = &cashed_pass_resource->indexBuffersStructured;
-	if ((*indexBuffers).count(meshId) == 0)
+
+	if (meshId >= indexBuffers->size())
 		return nullptr;
 
 	return (*indexBuffers)[meshId];
+}
+
+ID3D11ShaderResourceView* ResourceManager::getIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId)
+{
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return nullptr;
+
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	if (passName != cashed_pass_name_id || techniqueCasheWasUpdated)
+	{
+		if (cashed_technique_resource->passes.count(passName) == 0)
+			return nullptr;
+		cashed_pass_resource = &cashed_technique_resource->passes.at(passName);
+		cashed_pass_name_id = passName;
+		techniqueCasheWasUpdated = false;
+	}
+
+	auto& indexBuffersSRVs = cashed_pass_resource->indexBuffersSRVs;
+
+	if (meshId >= indexBuffersSRVs.size())
+		return nullptr;
+
+	return indexBuffersSRVs[meshId];
 }
 
 ID3D11ShaderResourceView* ResourceManager::getImage(string_id name)

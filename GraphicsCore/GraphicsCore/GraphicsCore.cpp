@@ -579,6 +579,48 @@ void* GraphicsCore::fetchVerticesFromMesh(
 	return (void*)data;
 }
 
+ID3D11ShaderResourceView* GraphicsCore::getVertexBufferSRV(
+	const Mesh& mesh,
+	string_id* technique,
+	string_id* pass
+) const
+{
+	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
+	string_id pass_name_id = pass ? *pass : mesh.getPass();
+
+	ID3D11ShaderResourceView* ret =
+		ResourceManager::instance()->getVertexBufferSRV(
+			technique_name_id,
+			pass_name_id,
+			mesh.id
+		);
+	if (ret)
+		return ret;
+
+	uint32_t elementSize = 0;
+	ID3D11Buffer* vertexBuffer = 
+		getVertexBuffer(
+			mesh, 
+			&elementSize, 
+			technique, 
+			pass,
+			true
+		);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = mesh.getVerticesCount();
+
+	device->CreateShaderResourceView(vertexBuffer, &srvDesc, &ret);
+
+	ResourceManager::instance()->registerVertexBufferSRV(technique_name_id, pass_name_id, mesh.id, ret);
+
+	return ret;
+}
+
 ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) const
 {
 	string_id technique_name_id = mesh.getTechnique();
@@ -607,6 +649,36 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) co
 		ResourceManager::instance()->registerIndexBuffer(technique_name_id, pass_name_id, mesh.id, mIB, structured);
 	}
 	return mIB;
+}
+
+ID3D11ShaderResourceView* GraphicsCore::getIndexBufferSRV(const Mesh& mesh) const
+{
+	string_id technique_name_id = mesh.getTechnique();
+	string_id pass_name_id = mesh.getPass();
+
+	ID3D11ShaderResourceView* ret =
+		ResourceManager::instance()->getIndexBufferSRV(
+			technique_name_id,
+			pass_name_id,
+			mesh.id
+		);
+	if (ret)
+		return ret;
+
+	ID3D11Buffer* indexBuffer = getIndexBuffer(mesh, true);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
+	srvDesc.BufferEx.FirstElement = 0;
+	srvDesc.BufferEx.Flags = 0;
+	srvDesc.BufferEx.NumElements = mesh.getIndicesCount();
+
+	device->CreateShaderResourceView(indexBuffer, &srvDesc, &ret);
+
+	ResourceManager::instance()->registerIndexBufferSRV(technique_name_id, pass_name_id, mesh.id, ret);
+
+	return ret;
 }
 
 ID3D11ShaderResourceView* GraphicsCore::getImage(Mesh& mesh, string_id var) const
@@ -1176,39 +1248,16 @@ void GraphicsCore::setThreshold(float threshold)
 
 void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 {
-	uint32_t elementSize = 0;
-	ID3D11Buffer* mVerticesBuffer = this->getVertexBuffer(
-		mesh,
-		&elementSize,
-		&selected_object_technique_id,
-		&p0_pass_id,
-		true
+	mVertices->SetResource(
+		getVertexBufferSRV(
+			mesh,
+			&selected_object_technique_id,
+			&p0_pass_id
+		)
 	);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
-	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
-	srvDesc.BufferEx.FirstElement = 0;
-	srvDesc.BufferEx.Flags = 0;
-	srvDesc.BufferEx.NumElements = mesh.getVerticesCount();
-
-	ID3D11ShaderResourceView* mVerticesSRV = nullptr;
-	device->CreateShaderResourceView(mVerticesBuffer, &srvDesc, &mVerticesSRV);
-	mVertices->SetResource(mVerticesSRV);
-	mVerticesSRV->Release();
-
-	ID3D11Buffer* mIndicesBuffer = this->getIndexBuffer(mesh, true);
-
-	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
-	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
-	srvDesc.BufferEx.FirstElement = 0;
-	srvDesc.BufferEx.Flags = 0;
-	srvDesc.BufferEx.NumElements = mesh.getIndicesCount();
-
-	ID3D11ShaderResourceView* mIndicesSRV = nullptr;
-	device->CreateShaderResourceView(mIndicesBuffer, &srvDesc, &mIndicesSRV);
-	mIndicies->SetResource(mIndicesSRV);
-	mIndicesSRV->Release();
+	mIndicies->SetResource(
+		getIndexBufferSRV(mesh)
+	);
 }
 
 void GraphicsCore::setTrianglesCount(uint32_t trianglesCount)

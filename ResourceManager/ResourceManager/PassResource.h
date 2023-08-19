@@ -19,11 +19,14 @@ struct PassResource
 
 	InputLayoutResource inputLayout;
 	
-	std::map<uint32_t, ID3D11Buffer*> vertexBuffers;
-	std::map<uint32_t, ID3D11Buffer*> indexBuffers;
+	std::vector<ID3D11Buffer*> vertexBuffers;
+	std::vector<ID3D11Buffer*> indexBuffers;
 
-	std::map<uint32_t, ID3D11Buffer*> vertexBuffersStructured;
-	std::map<uint32_t, ID3D11Buffer*> indexBuffersStructured;
+	std::vector<ID3D11Buffer*> vertexBuffersStructured;
+	std::vector<ID3D11Buffer*> indexBuffersStructured;
+
+	std::vector<ID3D11ShaderResourceView*> vertexBuffersSRVs;
+	std::vector<ID3D11ShaderResourceView*> indexBuffersSRVs;
 
 	bool isThereAGeometryShaderHere = false;
 	PrimitiveType primType = NONE;

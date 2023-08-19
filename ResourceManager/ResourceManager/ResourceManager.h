@@ -63,6 +63,8 @@ public:
 	RegisterMessage registerImagesArray(string_id name, ID3D11ShaderResourceView* imagesArray);
 	RegisterMessage registerPresenceOfGeometryShader(string_id techniqueName, string_id passName);
 	RegisterMessage registerPrimitiveType(string_id techniqueName, string_id passName, PassResource::PrimitiveType primType);
+	RegisterMessage registerVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mVerticesSRV);
+	RegisterMessage registerIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mIndicesSRV);
 
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName);
 	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName);
@@ -82,6 +84,8 @@ public:
 	ID3D11ShaderResourceView* getImagesArray(string_id name);
 	bool isThereAGeometryShaderInThePass(string_id techniqueName, string_id passName);
 	PassResource::PrimitiveType getPrimitiveType(string_id techniqueName, string_id passName);
+	ID3D11ShaderResourceView* getVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
+	ID3D11ShaderResourceView* getIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
 
 public:
 	static ResourceManager* instance();

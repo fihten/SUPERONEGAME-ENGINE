@@ -132,6 +132,14 @@ private:
 
 	ID3D11Buffer* getIndexBuffer(const Mesh& mesh, bool structured = false) const;
 
+	ID3D11ShaderResourceView* getVertexBufferSRV(
+		const Mesh& mesh,
+		string_id* technique = nullptr,
+		string_id* pass = nullptr
+	) const;
+
+	ID3D11ShaderResourceView* getIndexBufferSRV(const Mesh& mesh) const;
+
 	ID3D11ShaderResourceView* getImage(Mesh& mesh, string_id var) const;
 	ID3D11ShaderResourceView* getImagesArray(Mesh& mesh, string_id var) const;
 
