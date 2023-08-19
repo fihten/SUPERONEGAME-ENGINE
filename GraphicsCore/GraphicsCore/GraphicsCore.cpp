@@ -621,10 +621,15 @@ ID3D11ShaderResourceView* GraphicsCore::getVertexBufferSRV(
 	return ret;
 }
 
-ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) const
+ID3D11Buffer* GraphicsCore::getIndexBuffer(
+	const Mesh& mesh,
+	string_id* technique,
+	string_id* pass,
+	bool structured
+) const
 {
-	string_id technique_name_id = mesh.getTechnique();
-	string_id pass_name_id = mesh.getPass();
+	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
+	string_id pass_name_id = pass ? *pass : mesh.getPass();
 
 	if (ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		return nullptr;
@@ -651,10 +656,14 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(const Mesh& mesh, bool structured) co
 	return mIB;
 }
 
-ID3D11ShaderResourceView* GraphicsCore::getIndexBufferSRV(const Mesh& mesh) const
+ID3D11ShaderResourceView* GraphicsCore::getIndexBufferSRV(
+	const Mesh& mesh,
+	string_id* technique,
+	string_id* pass
+) const
 {
-	string_id technique_name_id = mesh.getTechnique();
-	string_id pass_name_id = mesh.getPass();
+	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
+	string_id pass_name_id = pass ? *pass : mesh.getPass();
 
 	ID3D11ShaderResourceView* ret =
 		ResourceManager::instance()->getIndexBufferSRV(
@@ -665,7 +674,7 @@ ID3D11ShaderResourceView* GraphicsCore::getIndexBufferSRV(const Mesh& mesh) cons
 	if (ret)
 		return ret;
 
-	ID3D11Buffer* indexBuffer = getIndexBuffer(mesh, true);
+	ID3D11Buffer* indexBuffer = getIndexBuffer(mesh, technique, pass, true);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -1256,7 +1265,11 @@ void GraphicsCore::setGeometryForFineSelection(const Mesh& mesh)
 		)
 	);
 	mIndicies->SetResource(
-		getIndexBufferSRV(mesh)
+		getIndexBufferSRV(
+			mesh,
+			&selected_object_technique_id,
+			&p0_pass_id
+		)
 	);
 }
 
@@ -1279,11 +1292,8 @@ void GraphicsCore::initSelectedTrianglesWithZeros()
 
 void GraphicsCore::checkIntersection()
 {
-	mFineObjectsSelectionTech->GetPassByName("P0")->Apply(0, context);
-
 	uint32_t threads_x = std::ceil(float(trianglesCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
-	context->CSSetShader(0, 0, 0);
 }
 
 void GraphicsCore::traverseFineSelectedObjects(SelectedObjectVisitor* visitor)
@@ -1300,4 +1310,10 @@ void GraphicsCore::traverseFineSelectedObjects(SelectedObjectVisitor* visitor)
 	}
 
 	context->Unmap(mOutputSelectedTrianglesBuffer, 0);
+}
+
+void GraphicsCore::applyContextForFineSelection()
+{
+	const auto& pass = mFineObjectsSelectionTech->GetPassByName("P0");
+	pass->Apply(0, context);
 }

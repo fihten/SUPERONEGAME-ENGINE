@@ -113,6 +113,7 @@ void Selector::selectObjects(
 			GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
 			GraphicsCore::instance()->setMeshId(objectID);
 
+			GraphicsCore::instance()->applyContextForFineSelection();
 			GraphicsCore::instance()->checkIntersection();
 		}
 	};
