@@ -21,6 +21,7 @@ Mesh createSelectionBoxes();
 Mesh createSphere(int latitudes, int longitudes);
 Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 Mesh createPlane(float width, float height, float m, float n);
+Mesh createAreaOfSelection();
 
 class Mesh
 {
@@ -31,6 +32,7 @@ private:
 	
 	string_id technique_name_id = string_id(-1);
 	string_id pass_name_id = string_id(-1);
+	string_id blend_state_id = string_id(-1);
 
 	std::vector<std::pair<string_id, std::vector<flt1>>> flt1_streams;
 	std::vector<std::pair<string_id, std::vector<flt2>>> flt2_streams;
@@ -54,6 +56,7 @@ public:
 		this->name = m.name;
 		this->technique_name_id = m.technique_name_id;
 		this->pass_name_id = m.pass_name_id;
+		this->blend_state_id = m.blend_state_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -72,6 +75,7 @@ public:
 		this->name = std::move(m.name);
 		this->technique_name_id = std::move(m.technique_name_id);
 		this->pass_name_id = std::move(m.pass_name_id);
+		this->blend_state_id = std::move(m.blend_state_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -88,6 +92,7 @@ public:
 		this->name = std::move(m.name);
 		this->technique_name_id = std::move(m.technique_name_id);
 		this->pass_name_id = std::move(m.pass_name_id);
+		this->blend_state_id = std::move(m.blend_state_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -106,6 +111,7 @@ public:
 		this->name = m.name;
 		this->technique_name_id = m.technique_name_id;
 		this->pass_name_id = m.pass_name_id;
+		this->blend_state_id = m.blend_state_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -121,9 +127,11 @@ public:
 
 	virtual void setTechnique(string_id technique_name_id);
 	virtual void setPass(string_id pass_name_id);
+	virtual void setBlendState(string_id blend_state_id);
 
 	virtual string_id getTechnique() const;
 	virtual string_id getPass() const;
+	virtual string_id getBlendState() const;
 
 	virtual const void* getStream(string_id name, StreamType type) const;
 	virtual const std::vector<uint32_t>* getIndicies() const;
@@ -203,6 +211,7 @@ public:
 	friend Mesh createSphere(int latitudes, int longitudes);
 	friend Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 	friend Mesh createPlane(float width, float height, float m, float n);
+	friend Mesh createAreaOfSelection();
 public:
 	uint32_t id;
 	void* scene = nullptr;

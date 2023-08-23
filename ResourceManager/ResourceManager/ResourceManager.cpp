@@ -339,6 +339,16 @@ ResourceManager::RegisterMessage ResourceManager::registerPrimitiveType(string_i
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerBlendState(string_id blendStateName, ID3D11BlendState* blendState)
+{
+	if (blendStates.count(blendStateName) > 0)
+		return RegisterMessage::BLEND_STATE_ALREADY_EXISTS;
+
+	blendStates[blendStateName] = blendState;
+
+	return RegisterMessage::OK;
+}
+
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(string_id techniqueName, string_id passName) 
 {
 	if (techniqueName != cashed_technique_name_id)
@@ -745,6 +755,13 @@ PassResource::PrimitiveType ResourceManager::getPrimitiveType(string_id techniqu
 	}
 
 	return cashed_pass_resource->primType;
+}
+
+ID3D11BlendState* ResourceManager::getBlendState(string_id blendStateName)
+{
+	if (blendStates.count(blendStateName) == 0)
+		return nullptr;
+	return blendStates[blendStateName];
 }
 
 ResourceManager* ResourceManager::instance()

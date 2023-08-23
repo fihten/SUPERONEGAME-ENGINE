@@ -14,7 +14,6 @@ public:
 		float mousePosX0, float mousePosY0,
 		float mousePosX1, float mousePosY1
 	);
-	void processRoughlySelectedObject(uint32_t objectId);
 	void draw();
 	void turnOn();
 	void turnOff();
@@ -28,4 +27,6 @@ public:
 private:
 	static Selector* pSelector;
 	Mesh selectedObjectsBoxesMesh;
+	Mesh areaOfSelection;
+	bool bDrawAreaOfSelection = false;
 };

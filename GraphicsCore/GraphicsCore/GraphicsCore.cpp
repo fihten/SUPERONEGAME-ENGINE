@@ -3,6 +3,7 @@
 #include "ResourceManager.h"
 #include "Cameras.h"
 #include "auto_ptr.h"
+#include "ParseBlendState.h"
 #include <algorithm>
 #include <sstream>
 #include <D3DX11tex.h>
@@ -188,6 +189,7 @@ void GraphicsCore::draw(Mesh& mesh)
 	param_index = 0;
 	setVariablesOnGPU(mesh);
 	setGeometryOnGPU(mesh);
+	setPipelineStates(mesh);
 
 	string_id technique_name_id = mesh.getTechnique();
 	string_id pass_name_id = mesh.getPass();
@@ -1019,6 +1021,36 @@ void GraphicsCore::setGeometryOnGPU(Mesh& mesh)
 	context->IASetVertexBuffers(0, 1, &mVB, &elementSize, &offset);
 	if (!ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		context->IASetIndexBuffer(mIB, DXGI_FORMAT_R32_UINT, 0);
+}
+
+ID3D11BlendState* GraphicsCore::getBlendState(Mesh& mesh)
+{
+	string_id blend_state_id = mesh.getBlendState();
+	if (blend_state_id == string_id(-1))
+		return nullptr;
+
+	ID3D11BlendState* blendState = ResourceManager::instance()->getBlendState(blend_state_id);
+	if (blendState)
+		return blendState;
+
+	D3D11_BLEND_DESC blendDesc;
+	parseBlendState(StringManager::toString(blend_state_id), blendDesc);
+
+	device->CreateBlendState(&blendDesc, &blendState);
+	ResourceManager::instance()->registerBlendState(blend_state_id, blendState);
+
+	return blendState;
+}
+
+void GraphicsCore::setBlendState(Mesh& mesh)
+{
+	ID3D11BlendState* blendState = getBlendState(mesh);
+	context->OMSetBlendState(blendState, NULL, 0xffffffff);
+}
+
+void GraphicsCore::setPipelineStates(Mesh& mesh)
+{
+	setBlendState(mesh);
 }
 
 void GraphicsCore::initRoughObjectsSelection()

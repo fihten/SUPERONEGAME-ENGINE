@@ -166,6 +166,10 @@ private:
 
 	void setGeometryOnGPU(Mesh& mesh);
 
+	ID3D11BlendState* getBlendState(Mesh& mesh);
+	void setBlendState(Mesh& mesh);
+	void setPipelineStates(Mesh& mesh);
+
 private:
 	UINT mWidth = 0;
 	UINT mHeight = 0;

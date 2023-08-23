@@ -27,6 +27,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_LBUTTONDOWN:
 	{
 		bMarginSelection = true;
+		Selector::instance()->turnOn();
 
 		mousePosX0 = LOWORD(lparam) + 0.5f;
 		mousePosY0 = HIWORD(lparam) + 0.5f;
@@ -80,7 +81,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		);
 		
 		if (msg == WM_LBUTTONUP)
+		{
 			bMarginSelection = false;
+			Selector::instance()->turnOff();
+		}
 
 		return 0;
 	}

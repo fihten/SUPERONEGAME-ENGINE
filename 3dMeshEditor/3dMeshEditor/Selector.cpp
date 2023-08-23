@@ -13,6 +13,8 @@ Selector::Selector()
 
 	selectedObjectsBoxesMesh.gpuReadyData = selectedObjectsBoxes;
 	selectedObjectsBoxesMesh.elementSize = sizeof SelectedObjectBox;
+
+	areaOfSelection = createAreaOfSelection();
 }
 
 Selector* Selector::instance()
@@ -36,11 +38,27 @@ void Selector::selectObjects(
 	float ar = camera.getAspectRatio();
 	float w = ar * h;
 
-	float minX = 0.5 * w * std::min<float>(mousePosX0, mousePosX1);
-	float maxX = 0.5 * w * std::max<float>(mousePosX0, mousePosX1);
+	float minX = std::min<float>(mousePosX0, mousePosX1);
+	float maxX = std::max<float>(mousePosX0, mousePosX1);
 
-	float minY = 0.5 * h * std::min<float>(mousePosY0, mousePosY1);
-	float maxY = 0.5 * h * std::max<float>(mousePosY0, mousePosY1);
+	float minY = std::min<float>(mousePosY0, mousePosY1);
+	float maxY = std::max<float>(mousePosY0, mousePosY1);
+
+	flt4x4 areaOfSelectionPos(
+		maxX - minX, 0, 0, 0,
+		0, maxY - minY, 0, 0,
+		0, 0, 1, 0,
+		minX, minY, 0, 1
+	);
+
+	ParamKey areaTransform_key{ StringManager::toStringId("areaTransform"),-1,string_id(-1) };
+	areaOfSelection.setParam(areaTransform_key, areaOfSelectionPos);
+
+	minX *= 0.5 * w;
+	maxX *= 0.5 * w;
+
+	minY *= 0.5 * h;
+	maxY *= 0.5 * h;
 
 	flt3 frontNormal(0, 0, -1);
 	flt3 frontPoint(0, 0, nearZ);
@@ -139,22 +157,18 @@ void Selector::selectObjects(
 
 void Selector::draw()
 {
-	if (selectedObjectsCount == 0)
-		return;
-	GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
+	if (selectedObjectsCount > 0)
+		GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
+	if (bDrawAreaOfSelection)
+		GraphicsCore::instance()->draw(areaOfSelection);
 }
 
 void Selector::turnOn()
 {
-
+	bDrawAreaOfSelection = true;
 }
 
 void Selector::turnOff()
 {
-
-}
-
-void Selector::processRoughlySelectedObject(uint32_t objectId)
-{
-
+	bDrawAreaOfSelection = false;
 }

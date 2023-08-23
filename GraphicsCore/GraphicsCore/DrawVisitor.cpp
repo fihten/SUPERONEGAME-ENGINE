@@ -22,6 +22,14 @@ string_id DrawVisitor::MeshInScene::getPass() const
 	return mesh->getPass();
 }
 
+string_id DrawVisitor::MeshInScene::getBlendState() const
+{
+	if (mesh == nullptr)
+		return string_id(-1);
+
+	return mesh->getBlendState();
+}
+
 const void* DrawVisitor::MeshInScene::getStream(string_id name, StreamType type) const
 {
 	if (mesh == nullptr)

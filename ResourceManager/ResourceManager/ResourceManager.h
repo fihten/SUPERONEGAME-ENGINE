@@ -13,6 +13,7 @@ private:
 	std::map<string_id, TechniqueResource> techniques;
 	std::map<string_id, ID3D11ShaderResourceView*> imgs;
 	std::map<string_id, ID3D11ShaderResourceView*> imgsArrs;
+	std::map<string_id, ID3D11BlendState*> blendStates;
 
 private:
 	string_id cashed_technique_name_id = string_id(-1);
@@ -41,7 +42,8 @@ public:
 		TEXTURES_ARRAY_ALREADY_EXISTS,
 		IMAGE_ALREADY_EXISTS,
 		IMAGES_ARRAY_ALREADY_EXISTS,
-		THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS
+		THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS,
+		BLEND_STATE_ALREADY_EXISTS
 	};
 
 	RegisterMessage registerTechnique(string_id techniqueName, const ID3DX11EffectTechnique* technique);
@@ -65,6 +67,7 @@ public:
 	RegisterMessage registerPrimitiveType(string_id techniqueName, string_id passName, PassResource::PrimitiveType primType);
 	RegisterMessage registerVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mVerticesSRV);
 	RegisterMessage registerIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mIndicesSRV);
+	RegisterMessage registerBlendState(string_id blendStateName, ID3D11BlendState* blendState);
 
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName);
 	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName);
@@ -86,6 +89,7 @@ public:
 	PassResource::PrimitiveType getPrimitiveType(string_id techniqueName, string_id passName);
 	ID3D11ShaderResourceView* getVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
 	ID3D11ShaderResourceView* getIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
+	ID3D11BlendState* getBlendState(string_id blendStateName);
 
 public:
 	static ResourceManager* instance();

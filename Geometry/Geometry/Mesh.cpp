@@ -781,6 +781,43 @@ Mesh createPlane(float width, float height, float m, float n)
 	return plane;
 }
 
+Mesh createAreaOfSelection()
+{
+	Mesh m;
+
+	m.flt4_streams.push_back(
+		std::pair<string_id, std::vector<flt4>>(
+			StringManager::toStringId("NDC"),
+			std::vector<flt4>())
+	);
+	auto& ndcs = m.flt4_streams.back().second;
+
+	ndcs.push_back(flt4(0, 0, 0, 1));
+	ndcs.push_back(flt4(1, 0, 0, 1));
+	ndcs.push_back(flt4(1, 1, 0, 1));
+	ndcs.push_back(flt4(0, 1, 0, 1));
+
+	auto& inds = m.indicies;
+
+	inds.push_back(0);
+	inds.push_back(2);
+	inds.push_back(1);
+
+	inds.push_back(0);
+	inds.push_back(3);
+	inds.push_back(2);
+
+	m.setTechnique(StringManager::toStringId("AreaOfSelection"));
+	m.setPass(StringManager::toStringId("P0"));
+
+	ParamKey color_key{ StringManager::toStringId("color"),-1,string_id(-1) };
+	m.setParam(color_key, flt4(0, 0, 1, 0.5));
+
+	m.setBlendState(StringManager::toStringId("RenderTarget[0].BlendEnable=TRUE;RenderTarget[0].SrcBlend=D3D11_BLEND_INV_SRC_ALPHA;RenderTarget[0].DestBlend=D3D11_BLEND_SRC_ALPHA;RenderTarget[0].BlendOp=D3D11_BLEND_OP_ADD;RenderTarget[0].RenderTargetWriteMask=15"));
+
+	return m;
+}
+
 void Mesh::setTechnique(string_id technique_name_id)
 {
 	this->technique_name_id = technique_name_id;
@@ -875,6 +912,11 @@ void Mesh::setPass(string_id pass_name_id)
 	this->pass_name_id = pass_name_id;
 }
 
+void Mesh::setBlendState(string_id blend_state_id)
+{
+	this->blend_state_id = blend_state_id;
+}
+
 string_id Mesh::getTechnique() const
 {
 	return technique_name_id;
@@ -883,6 +925,11 @@ string_id Mesh::getTechnique() const
 string_id Mesh::getPass() const
 {
 	return pass_name_id;
+}
+
+string_id Mesh::getBlendState() const
+{
+	return blend_state_id;
 }
 
 const void* Mesh::getStream(string_id name, StreamType type) const
