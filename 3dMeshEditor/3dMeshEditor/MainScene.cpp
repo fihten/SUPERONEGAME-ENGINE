@@ -3,6 +3,12 @@
 
 MainScene* MainScene::pMainScene = nullptr;
 
+MainScene::MainScene()
+{
+	std::memset(meshIDtoStartVertex, 0xff, sizeof meshIDtoStartVertex);
+	std::memset(meshIDtoStartIndex, 0xff, sizeof meshIDtoStartIndex);
+}
+
 MainScene* MainScene::instance()
 {
 	if (pMainScene == nullptr)
@@ -43,10 +49,34 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 
 	mesh->getBoundingSphere(boundingSpheres[spheresCount], pos);
 	boundingSphereToNode[spheresCount] = meshNode;
+	
+	if (meshIDtoStartIndex[mesh->id] == uint32_t(-1))
+	{
+		const std::vector<flt3>& verts = *(const std::vector<flt3>*)mesh->getStream(StringManager::toStringId("POSITION"), StreamType::FLT3);
+		std::memcpy(vertices + verticesCount, verts.data(), verts.size() * sizeof(flt3));
+		meshIDtoStartVertex[mesh->id] = verticesCount;
+		verticesCount += verts.size();
+
+		const std::vector<uint32_t>& inds = *mesh->getIndicies();
+		std::memcpy(indices + indicesCount, inds.data(), inds.size() * sizeof(uint32_t));
+		meshIDtoStartIndex[mesh->id] = indicesCount;
+		indicesCount += inds.size();
+	}
+
+	objectsInfo[spheresCount].verticesOffset = meshIDtoStartVertex[mesh->id];
+	objectsInfo[spheresCount].indicesOffset = meshIDtoStartIndex[mesh->id];
+	objectsInfo[spheresCount].trianglesCount = mesh->getIndicesCount() / 3;
+	objectsInfo[spheresCount].world = pos.transpose();
+
 	++spheresCount;
 
 	GraphicsCore::instance()->updateBoundingSpheres(boundingSpheres);
 	GraphicsCore::instance()->setSpheresCount(spheresCount);
+
+	GraphicsCore::instance()->updateVertices(vertices);
+	GraphicsCore::instance()->updateIndices(indices);
+	GraphicsCore::instance()->updateObjectsInfo(objectsInfo, spheresCount);
+	GraphicsCore::instance()->setObjectsCount(spheresCount);
 
 	return meshNode;
 }

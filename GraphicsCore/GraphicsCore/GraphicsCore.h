@@ -11,8 +11,12 @@
 #include "VariableLocation.h"
 #include "InputLayoutResource.h"
 #include "VariableResources.h"
+#include "OBjectInfo.h"
 
-#define MAX_BOUNDING_SPHERES_COUNT 65536
+#define MAX_BOUNDING_SPHERES_COUNT 1024
+#define MAX_VERTICES_COUNT 16384
+#define MAX_TRIANGLES_COUNT 16384
+#define MAX_OBJECTS_COUNT 64
 
 class GraphicsCore;
 
@@ -67,6 +71,7 @@ private:
 
 	ID3D11Buffer* mInputSelectedObjectsBuffer = nullptr;
 	ID3D11UnorderedAccessView* mSelectedObjectsUAV = nullptr;
+	ID3D11ShaderResourceView* mSelectedObjectsSRV = nullptr;
 	ID3D11Buffer* mOutputSelectedObjectsBuffer = nullptr;
 
 	ID3D11Buffer* mBoundingSpheresBuffer = nullptr;
@@ -75,15 +80,20 @@ private:
 public:
 	void setSelectorFrustumFine(Frustum& selectorFrustum);
 	void updateSelectorFrustumDiagonals(Segment diagonals[]);
-	void setWV(flt4x4& WV);
+	void setVFine(const flt4x4& V);
 	void setThreshold(float threshold);
-	void setGeometryForFineSelection(const Mesh& mesh);
-	void setTrianglesCount(uint32_t trianglesCount);
-	void setMeshId(uint32_t meshId);
+	void updateVertices(flt3 vertices[]);
+	void updateIndices(uint32_t indices[]);
+	void updateObjectsInfo(ObjectInfo objectsInfo[], uint32_t count);
+	void setRoughlySelectedObjects();
+	void setObjectsCount(uint32_t objectsCount);
+
 	void initSelectedTrianglesWithZeros();
 	void checkIntersection();
 	void traverseFineSelectedObjects(SelectedObjectVisitor* visitor);
 	void applyContextForFineSelection();
+
+	uint32_t maxTrianglesCount = 0;
 
 private:
 	void initFineObjectsSelection();
@@ -91,23 +101,34 @@ private:
 	ID3DX11EffectTechnique* mFineObjectsSelectionTech = nullptr;
 	ID3DX11EffectVariable* mSelectorFrustumFine = nullptr;
 	ID3DX11EffectShaderResourceVariable* mSelectorFrustumDiagonals = nullptr;
-	ID3DX11EffectMatrixVariable* mWV = nullptr;
+	ID3DX11EffectMatrixVariable* mVFine = nullptr;
 	ID3DX11EffectVariable* mThreshold = nullptr;
 	
 	ID3DX11EffectShaderResourceVariable* mVertices = nullptr;
 	ID3DX11EffectShaderResourceVariable* mIndicies = nullptr;
-	ID3DX11EffectVariable* mTrianglesCount = nullptr;
 	
-	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
-	ID3DX11EffectVariable* mMeshId = nullptr;
-	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
-	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
-	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
+	ID3DX11EffectShaderResourceVariable* mObjectsInfo = nullptr;
 
-	uint32_t trianglesCount = 0;
+	ID3DX11EffectShaderResourceVariable* mRoughlySelectedObjects = nullptr;
+	ID3DX11EffectVariable* mObjectsCount = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedTriangles = nullptr;
 
 	ID3D11Buffer* mSelectorFrustumDiagonalsBuffer = nullptr;
 	ID3D11ShaderResourceView* mSelectorFrustumDiagonalsBufferSRV = nullptr;
+
+	ID3D11Buffer* mVerticesBuffer = nullptr;
+	ID3D11ShaderResourceView* mVerticesBufferSRV = nullptr;
+
+	ID3D11Buffer* mIndicesBuffer = nullptr;
+	ID3D11ShaderResourceView* mIndicesBufferSRV = nullptr;
+
+	ID3D11Buffer* mObjectsInfoBuffer = nullptr;
+	ID3D11ShaderResourceView* mObjectsInfoBufferSRV = nullptr;
+
+	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
+	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
+	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

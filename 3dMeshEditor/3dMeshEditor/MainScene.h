@@ -6,7 +6,7 @@
 
 class MainScene
 {
-	MainScene() {}
+	MainScene();
 public:
 	static MainScene* instance();
 	NodeID addTransformNode(const flt4x4& pos, NodeID id = 0);
@@ -33,9 +33,22 @@ public:
 	void* getNode(NodeID id);
 
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
+	
 	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];
+	ObjectInfo objectsInfo[MAX_BOUNDING_SPHERES_COUNT];
+	
 	NodeID boundingSphereToNode[MAX_BOUNDING_SPHERES_COUNT];
+	
 	uint32_t spheresCount = 0;
+
+	flt3 vertices[MAX_OBJECTS_COUNT * MAX_VERTICES_COUNT];
+	uint32_t verticesCount = 0;
+
+	uint32_t indices[MAX_OBJECTS_COUNT * MAX_TRIANGLES_COUNT * 3];
+	uint32_t indicesCount = 0;
+
+	uint32_t meshIDtoStartVertex[MAX_OBJECTS_COUNT];
+	uint32_t meshIDtoStartIndex[MAX_OBJECTS_COUNT];
 
 private:
 	Scene scene;

@@ -103,40 +103,19 @@ void Selector::selectObjects(
 	selectorFrustumDiagonals[3].v0 = flt3(maxX, maxY, nearZ);
 	selectorFrustumDiagonals[3].v1 = (farZ / nearZ) * flt3(minX, minY, nearZ);
 
-	GraphicsCore::instance()->updateSelectorFrustumDiagonals(selectorFrustumDiagonals);
-
 	GraphicsCore::instance()->setV(camera.getView());
 
 	GraphicsCore::instance()->findRoughlySelectedObjects();
 
 	GraphicsCore::instance()->setSelectorFrustumFine(selectorFrustum);
+	GraphicsCore::instance()->updateSelectorFrustumDiagonals(selectorFrustumDiagonals);
+	GraphicsCore::instance()->setVFine(camera.getView());
 	GraphicsCore::instance()->setThreshold(0.0);
-
+	GraphicsCore::instance()->setRoughlySelectedObjects();
 	GraphicsCore::instance()->initSelectedTrianglesWithZeros();
 
-	class VisitRoughlySelectedObjects : public SelectedObjectVisitor
-	{
-	public:
-		void operator()(uint32_t objectID)
-		{
-			NodeID meshID = MainScene::instance()->boundingSphereToNode[objectID];
-			Scene::MeshNode* node = (Scene::MeshNode*)MainScene::instance()->getNode(meshID);
-
-			flt4x4 world = MainScene::instance()->getNodePosition(meshID);
-			flt4x4 view = cameras()[MAIN_CAMERA].getView();
-
-			flt4x4 wv = world * view;
-			GraphicsCore::instance()->setWV(wv);
-			GraphicsCore::instance()->setGeometryForFineSelection(*node->mesh);
-			GraphicsCore::instance()->setTrianglesCount(node->mesh->getIndicesCount() / 3);
-			GraphicsCore::instance()->setMeshId(objectID);
-
-			GraphicsCore::instance()->applyContextForFineSelection();
-			GraphicsCore::instance()->checkIntersection();
-		}
-	};
-	VisitRoughlySelectedObjects roughVisitor;
-	GraphicsCore::instance()->traverseRoughlySelectedObjects(&roughVisitor);
+	GraphicsCore::instance()->applyContextForFineSelection();
+	GraphicsCore::instance()->checkIntersection();
 
 	selectedObjectsCount = 0;
 	class VisitFineSelectedObjects : public SelectedObjectVisitor

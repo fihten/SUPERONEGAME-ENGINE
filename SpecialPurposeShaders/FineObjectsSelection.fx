@@ -3,30 +3,52 @@
 Frustum selectorFrustum;
 StructuredBuffer<Segment> selectorFrustumDiagonals;
 
-float4x4 WV;
+float4x4 view;
 float threshold;
 
 StructuredBuffer<float3> vertices;
 StructuredBuffer<uint> indicies;
-uint trianglesCount;
+
+struct ObjectInfo
+{
+	float4x4 world;
+	uint verticesOffset;
+	uint indicesOffset;
+	uint trianglesCount;
+};
+StructuredBuffer<ObjectInfo> objectsInfo;
+
+StructuredBuffer<uint> roughlySelectedObjects;
+uint objectsCount;
 
 RWStructuredBuffer<uint> selectedTriangles;
-uint meshId;
 
-[numthreads(256, 1, 1)]
+[numthreads(1, 256, 1)]
 void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint triangleIndex = dispatchThreadID.x;
-	if (triangleIndex >= trianglesCount)
+	uint objectIndex = dispatchThreadID.x;
+	if (objectIndex >= objectsCount)
+		return;
+	if (roughlySelectedObjects[objectIndex] == 0)
 		return;
 
-	uint vi0 = indicies[3 * triangleIndex + 0];
-	uint vi1 = indicies[3 * triangleIndex + 1];
-	uint vi2 = indicies[3 * triangleIndex + 2];
+	uint triangleIndex = dispatchThreadID.y;
+	if (triangleIndex >= objectsInfo[objectIndex].trianglesCount)
+		return;
+
+	uint ii0 = 3 * triangleIndex + 0 + objectsInfo[objectIndex].indicesOffset;
+	uint ii1 = 3 * triangleIndex + 1 + objectsInfo[objectIndex].indicesOffset;
+	uint ii2 = 3 * triangleIndex + 2 + objectsInfo[objectIndex].indicesOffset;
+
+	uint vi0 = indicies[ii0] + objectsInfo[objectIndex].verticesOffset;
+	uint vi1 = indicies[ii1] + objectsInfo[objectIndex].verticesOffset;
+	uint vi2 = indicies[ii2] + objectsInfo[objectIndex].verticesOffset;
 
 	float4 v0 = float4(vertices[vi0], 1);
 	float4 v1 = float4(vertices[vi1], 1);
 	float4 v2 = float4(vertices[vi2], 1);
+
+	float4x4 WV = mul(objectsInfo[objectIndex].world, view);
 
 	v0 = mul(v0, WV);
 	v1 = mul(v1, WV);
@@ -38,7 +60,7 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	tri.v2 = v2.xyz;
 
 	if (checkIntersection(selectorFrustum, selectorFrustumDiagonals, tri, threshold))
-		InterlockedAdd(selectedTriangles[meshId], 1);
+		InterlockedAdd(selectedTriangles[objectIndex], 1);
 }
 
 technique11 FineObjectsSelection
