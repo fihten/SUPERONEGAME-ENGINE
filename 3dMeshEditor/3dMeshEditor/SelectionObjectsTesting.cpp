@@ -65,5 +65,5 @@ void fillSceneForObjectsSelectionTesting()
 			}
 		}
 	}
-
+	MainScene::instance()->updateGpu();
 }

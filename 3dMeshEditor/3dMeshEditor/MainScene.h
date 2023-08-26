@@ -32,6 +32,8 @@ public:
 	void accept(Scene::Visitor* visitor) const;
 	void* getNode(NodeID id);
 
+	void updateGpu();
+
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	
 	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];

@@ -70,6 +70,11 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 
 	++spheresCount;
 
+	return meshNode;
+}
+
+void MainScene::updateGpu()
+{
 	GraphicsCore::instance()->updateBoundingSpheres(boundingSpheres);
 	GraphicsCore::instance()->setSpheresCount(spheresCount);
 
@@ -77,8 +82,6 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 	GraphicsCore::instance()->updateIndices(indices);
 	GraphicsCore::instance()->updateObjectsInfo(objectsInfo, spheresCount);
 	GraphicsCore::instance()->setObjectsCount(spheresCount);
-
-	return meshNode;
 }
 
 void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s)
