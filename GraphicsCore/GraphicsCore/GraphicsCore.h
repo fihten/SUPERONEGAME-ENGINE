@@ -17,6 +17,7 @@
 #define MAX_VERTICES_COUNT 16384
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
+#define MAX_SELECTING_SEGMENTS_COUNT 8
 
 class GraphicsCore;
 
@@ -51,8 +52,10 @@ public:
 
 public:
 	void updateBoundingSpheres(flt4 spheres[]);
+	void setBoundingSpheresRoughByFrustum();
 	void setSpheresCount(uint32_t spheresCount);
 	void setSelectorFrustumRough(Frustum& selectorFrustum);
+	void setSelectedObjectsForWritingRoughByFrustum();
 	void setV(const flt4x4& V);
 	void findRoughlySelectedObjects();
 	void traverseRoughlySelectedObjects(SelectedObjectVisitor* visitor);
@@ -80,15 +83,20 @@ private:
 public:
 	void setSelectorFrustumFine(Frustum& selectorFrustum);
 	void updateSelectorFrustumDiagonals(Segment diagonals[]);
+	void setSelectorFrustumDiagonals();
 	void setVFine(const flt4x4& V);
 	void setThreshold(float threshold);
 	void updateVertices(flt3 vertices[]);
+	void setVerticesFineByFrustum();
 	void updateIndices(uint32_t indices[]);
+	void setIndicesFineByFrustum();
 	void updateObjectsInfo(ObjectInfo objectsInfo[], uint32_t count);
+	void setObjectsInfoFineByFrustum();
 	void setRoughlySelectedObjects();
 	void setObjectsCount(uint32_t objectsCount);
 
 	void initSelectedTrianglesWithZeros();
+	void setSelectedTrianglesWriteFineByFrustum();
 	void checkIntersection();
 	void traverseFineSelectedObjects(SelectedObjectVisitor* visitor);
 	void applyContextForFineSelection();
@@ -129,6 +137,84 @@ private:
 	ID3D11Buffer* mInputSelectedTrianglesBuffer = nullptr;
 	ID3D11UnorderedAccessView* selectedTrianglesUAV = nullptr;
 	ID3D11Buffer* mOutputSelectedTrianglesBuffer = nullptr;
+
+public:
+	void updateSelectingSegments(Segment segments[]);
+	void setSelectingSegmentsRoughBySegments();
+
+	void setSelectingSegmentsCountRoughBySegments(uint32_t count);
+
+	void setBoundingSpheresRoughBySegments();
+	void setBoundingSpheresCountRoughBySegments(uint32_t count);
+
+	void setSelectedObjectsWriteRoughBySegments();
+
+	void findRoughlySelectedObjectsBySegments();
+
+private:
+	void initRoughObjectsSelectionBySegments();
+
+	ID3DX11Effect* mRoughObjectsSelectionBySegmentsFX = nullptr;
+	ID3DX11EffectTechnique* mRoughObjectsSelectionBySegmentsTech = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mSelectingSegments = nullptr;
+	ID3DX11EffectVariable* mSelectingSegmentsCount = nullptr;
+	
+	ID3DX11EffectShaderResourceVariable* mBoundingSpheresRoughBySegments = nullptr;
+	ID3DX11EffectVariable* mBoundingSpheresCountRoughBySegments = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mSelectedObjectsRoughBySegments = nullptr;
+
+	ID3D11Buffer* mSelectingSegmentsBuffer = nullptr;
+	ID3D11ShaderResourceView* mSelectingSegmentsBufferSRV = nullptr;
+
+	ID3D11Buffer* mSelectedObjectsRoughBySegmentsBuffer = nullptr;
+	ID3D11UnorderedAccessView* mSelectedObjectsRoughBySegmentsUAV = nullptr;
+	ID3D11ShaderResourceView* mSelectedObjectsRoughBySegmentsSRV = nullptr;
+
+	uint32_t selectingSegmentsCount = 0;
+
+public:
+	void setSelectingSegmentsFineBySegments();
+	void setSelectedObjectsFineBySegments();
+
+	void setSelectingSegmentsCountFineBySegments(uint32_t count);
+	void setObjectsCountFineBySegments(uint32_t count);
+
+	void setVerticesFineBySegments();
+	void setIndicesFineBySegments();
+	void setObjectsInfoFineBySegments();
+
+	void setDistancesToClosestObjects();
+	void setClosestObjects();
+
+	void findSelectedObjectsFineBySegments();
+
+private:
+	void initFineObjectsSelectionBySegments();
+
+	ID3DX11Effect* mFineObjectsSelectionBySegmentsFX = nullptr;
+	ID3DX11EffectTechnique* mFineObjectsSelectionBySegmentsTech = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mSelectingSegmentsFineBySegments = nullptr;
+	ID3DX11EffectShaderResourceVariable* mSelectedObjectsFineBySegments = nullptr;
+
+	ID3DX11EffectVariable* mSelectingSegmentsCountFineBySegments = nullptr;
+	ID3DX11EffectVariable* mObjectsCountFineBySegments = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mVerticesFineBySegments = nullptr;
+	ID3DX11EffectShaderResourceVariable* mIndicesFineBySegments = nullptr;
+	ID3DX11EffectShaderResourceVariable* mObjectsInfoFineBySegments = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mDistancesToClosestObjects = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mClosestObjects = nullptr;
+
+	ID3D11Buffer* mDistancesToClosestObjectsBuffer = nullptr;
+	ID3D11UnorderedAccessView* mDistancesToClosestObjectsUAV = nullptr;
+
+	ID3D11Buffer* mClosestObjectsBuffer = nullptr;
+	ID3D11UnorderedAccessView* mClosestObjectsUAV = nullptr;
+	ID3D11Buffer* mOutputClosestObjectsBuffer = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

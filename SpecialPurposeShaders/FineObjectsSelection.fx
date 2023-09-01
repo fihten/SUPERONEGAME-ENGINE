@@ -1,4 +1,5 @@
 #include "IntersectionUtils.hlsl"
+#include "ObjectInfo.hlsl"
 
 Frustum selectorFrustum;
 StructuredBuffer<Segment> selectorFrustumDiagonals;
@@ -8,14 +9,6 @@ float threshold;
 
 StructuredBuffer<float3> vertices;
 StructuredBuffer<uint> indicies;
-
-struct ObjectInfo
-{
-	float4x4 world;
-	uint verticesOffset;
-	uint indicesOffset;
-	uint trianglesCount;
-};
 StructuredBuffer<ObjectInfo> objectsInfo;
 
 StructuredBuffer<uint> roughlySelectedObjects;

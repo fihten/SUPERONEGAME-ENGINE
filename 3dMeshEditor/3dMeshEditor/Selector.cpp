@@ -104,15 +104,22 @@ void Selector::selectObjects(
 	selectorFrustumDiagonals[3].v1 = (farZ / nearZ) * flt3(minX, minY, nearZ);
 
 	GraphicsCore::instance()->setV(camera.getView());
+	GraphicsCore::instance()->setSelectedObjectsForWritingRoughByFrustum();
+	GraphicsCore::instance()->setBoundingSpheresRoughByFrustum();
 
 	GraphicsCore::instance()->findRoughlySelectedObjects();
 
 	GraphicsCore::instance()->setSelectorFrustumFine(selectorFrustum);
 	GraphicsCore::instance()->updateSelectorFrustumDiagonals(selectorFrustumDiagonals);
+	GraphicsCore::instance()->setSelectorFrustumDiagonals();
+	GraphicsCore::instance()->setVerticesFineByFrustum();
+	GraphicsCore::instance()->setIndicesFineByFrustum();
+	GraphicsCore::instance()->setObjectsInfoFineByFrustum();
 	GraphicsCore::instance()->setVFine(camera.getView());
 	GraphicsCore::instance()->setThreshold(0.0);
 	GraphicsCore::instance()->setRoughlySelectedObjects();
 	GraphicsCore::instance()->initSelectedTrianglesWithZeros();
+	GraphicsCore::instance()->setSelectedTrianglesWriteFineByFrustum();
 
 	GraphicsCore::instance()->applyContextForFineSelection();
 	GraphicsCore::instance()->checkIntersection();

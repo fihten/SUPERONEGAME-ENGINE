@@ -68,6 +68,45 @@ bool checkIntersection(Triangle tri, Segment seg)
 		0.0f <= c && c <= 1.0f;
 }
 
+bool checkIntersection(Triangle tri, Segment seg, out float t)
+{
+	float3 t0 = tri.v1 - tri.v0;
+	float3 t1 = tri.v2 - tri.v0;
+
+	float3 n = cross(t0, t1);
+	n = normalize(n);
+
+	float4 plane = float4(n, -dot(n, tri.v0));
+	t = 0;
+	uint intersectionInfo = findIntersection(plane, seg, t);
+	if (intersectionInfo != SEGMENT_SHARES_SINGLE_POINT_WITH_PLANE)
+		return false;
+
+	float3 intersection = t * (seg.v1 - seg.v0) + seg.v0;
+
+	float m00 = dot(tri.v0 - tri.v2, tri.v0 - tri.v2);
+	float m01 = dot(tri.v1 - tri.v2, tri.v0 - tri.v2);
+
+	float m10 = m01;
+	float m11 = dot(tri.v1 - tri.v2, tri.v1 - tri.v2);
+
+	float r0 = dot(intersection - tri.v2, tri.v0 - tri.v2);
+	float r1 = dot(intersection - tri.v2, tri.v1 - tri.v2);
+
+	float d = m00 * m11 - m01 * m10;
+	float d0 = r0 * m11 - r1 * m01;
+	float d1 = r1 * m00 - r0 * m10;
+
+	float a = d0 / d;
+	float b = d1 / d;
+	float c = 1.0f - a - b;
+
+	return
+		0.0f <= a && a <= 1.0f &&
+		0.0f <= b && b <= 1.0f &&
+		0.0f <= c && c <= 1.0f;
+}
+
 bool checkIntersection(Frustum frustum, float4 sphere)
 {
 	bool bIntersect = true;
@@ -80,6 +119,23 @@ bool checkIntersection(Frustum frustum, float4 sphere)
 		bIntersect = bIntersect && (dot(frustum.plane[pi], center) < radius);
 
 	return bIntersect;
+}
+
+bool checkIntersection(Segment segment, float4 sphere)
+{
+	float a = dot(segment.v1 - segment.v0, segment.v1 - segment.v0);
+	float b = 2 * dot(segment.v1 - segment.v0, segment.v0 - sphere.xyz);
+	float c = dot(segment.v0 - sphere.xyz, segment.v0 - sphere.xyz) - sphere.w * sphere.w;
+
+	float d = b * b - 4 * a * c;
+	if (d < 0)
+		return false;
+
+	d = sqrt(d);
+	float t0 = (-b - d) / 2 / a;
+	float t1 = (-b + d) / 2 / a;
+
+	return (0 <= t0 && t0 <= 1) || (0 <= t1 && t1 <= 1);
 }
 
 bool doesContain(Frustum frustum, int plane_number, float3 pt)
