@@ -82,6 +82,9 @@ void MainScene::updateGpu()
 	GraphicsCore::instance()->updateIndices(indices);
 	GraphicsCore::instance()->updateObjectsInfo(objectsInfo, spheresCount);
 	GraphicsCore::instance()->setObjectsCount(spheresCount);
+
+	GraphicsCore::instance()->setBoundingSpheresCountRoughBySegments(spheresCount);
+	GraphicsCore::instance()->setObjectsCountFineBySegments(spheresCount);
 }
 
 void MainScene::setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s)

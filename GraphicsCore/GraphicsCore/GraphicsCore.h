@@ -188,8 +188,11 @@ public:
 	void setDistancesToClosestObjects();
 	void setClosestObjects();
 
-	void findSelectedObjectsFineBySegments();
+	void initDistancesToClosestObjects();
+	void initClosestObjects();
 
+	void findSelectedObjectsFineBySegments();
+	void getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t count);
 private:
 	void initFineObjectsSelectionBySegments();
 

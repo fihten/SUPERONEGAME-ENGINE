@@ -141,6 +141,60 @@ void Selector::selectObjects(
 	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
 }
 
+void Selector::selectObject(float mousePosX, float mousePosY)
+{
+	auto& camera = cameras()[MAIN_CAMERA];
+
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	Segment selectingSegments[MAX_SELECTING_SEGMENTS_COUNT];
+	auto& seg = selectingSegments[0];
+
+	seg.v0 = flt3(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	seg.v1 = flt3(farZ * mousePosX / nearZ, farZ * mousePosY / nearZ, farZ);
+
+	flt4x4 viewInv = camera.getView().inverse();
+	seg.v0 = seg.v0 * viewInv;
+	seg.v1 = seg.v1 * viewInv;
+
+	GraphicsCore::instance()->updateSelectingSegments(selectingSegments);
+	GraphicsCore::instance()->setSelectingSegmentsRoughBySegments();
+
+	GraphicsCore::instance()->setSelectingSegmentsCountRoughBySegments(1);
+	GraphicsCore::instance()->setBoundingSpheresRoughBySegments();
+	GraphicsCore::instance()->setSelectedObjectsWriteRoughBySegments();
+
+	GraphicsCore::instance()->findRoughlySelectedObjectsBySegments();
+
+	GraphicsCore::instance()->setSelectingSegmentsFineBySegments();
+	GraphicsCore::instance()->setSelectedObjectsFineBySegments();
+
+	GraphicsCore::instance()->setSelectingSegmentsCountFineBySegments(1);
+
+	GraphicsCore::instance()->setVerticesFineBySegments();
+	GraphicsCore::instance()->setIndicesFineBySegments();
+	GraphicsCore::instance()->setObjectsInfoFineBySegments();
+
+	GraphicsCore::instance()->setDistancesToClosestObjects();
+	GraphicsCore::instance()->setClosestObjects();
+
+	GraphicsCore::instance()->initDistancesToClosestObjects();
+	GraphicsCore::instance()->initClosestObjects();
+
+	GraphicsCore::instance()->findSelectedObjectsFineBySegments();
+	GraphicsCore::instance()->getSelectedObjectsFineBySegments(&selectedObject, 1);
+}
+
 void Selector::draw()
 {
 	if (selectedObjectsCount > 0)
