@@ -203,18 +203,18 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 
 	GraphicsCore::instance()->findSelectedObjectsFineBySegments();
 	
+	if (bPopSelectedObject)
+	{
+		selectedObjectsCount--;
+		selectedObject = uint32_t(-1);
+		selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
+		bPopSelectedObject = false;
+	}
 	if (selectedObject != uint32_t(-1))
 	{
-		if (bPopSelectedObject)
-		{
-			selectedObjectsCount--;
-		}
-		else
-		{
-			auto pSelectedObject = std::find(selectedObjects, selectedObjects + selectedObjectsCount, selectedObject);
-			uint32_t selectedObjectBox = pSelectedObject - selectedObjects;
-			selectedObjectsBoxes[selectedObjectBox].color = flt3(1, 0, 0);
-		}
+		auto pSelectedObject = std::find(selectedObjects, selectedObjects + selectedObjectsCount, selectedObject);
+		uint32_t selectedObjectBox = pSelectedObject - selectedObjects;
+		selectedObjectsBoxes[selectedObjectBox].color = flt3(1, 0, 0);
 	}
 	
 	GraphicsCore::instance()->getSelectedObjectsFineBySegments(&selectedObject, 1);
