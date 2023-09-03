@@ -16,13 +16,16 @@ public:
 	);
 	void selectObject(float mousePosX, float mousePosY);
 	void draw();
-	void turnOn();
-	void turnOff();
+	bool turnOnMultipleSelection();
+	void turnOffMultipleSelection();
 
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	uint32_t selectedObjectsCount = 0;
 	
+	uint32_t selectedObjects[MAX_BOUNDING_SPHERES_COUNT];
 	uint32_t selectedObject = uint32_t(-1);
+
+	bool bPopSelectedObject = false;
 
 	Frustum selectorFrustum;
 	Segment selectorFrustumDiagonals[4];
@@ -31,5 +34,5 @@ private:
 	static Selector* pSelector;
 	Mesh selectedObjectsBoxesMesh;
 	Mesh areaOfSelection;
-	bool bDrawAreaOfSelection = false;
+	bool bProcessOfMultipleSelection = false;
 };

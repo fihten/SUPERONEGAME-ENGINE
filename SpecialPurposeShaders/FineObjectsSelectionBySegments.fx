@@ -1,10 +1,10 @@
+#include "constants.hlsl"
 #include "Segment.hlsl"
-#include "SelectedObjects.hlsl"
 #include "IntersectionUtils.hlsl"
 #include "ObjectInfo.hlsl"
 
 StructuredBuffer<Segment> selectingSegments;
-StructuredBuffer<SelectedObjects> selectedObjects;
+StructuredBuffer<uint> selectedObjects;
 
 uint selectingSegmentsCount;
 uint objectsCount;
@@ -13,13 +13,13 @@ StructuredBuffer<float3> vertices;
 StructuredBuffer<uint> indicies;
 StructuredBuffer<ObjectInfo> objectsInfo;
 
-RWStructuredBuffer<float> distancesToClosestObjects;
+RWStructuredBuffer<uint> distancesToClosestObjects;
 RWStructuredBuffer<uint> closestObjects;
 
-[numthreads(8, 1, 256)]
+[numthreads(256, 1, 4)]
 void CS_distance_to_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint segmentIndex = dispatchThreadID.x;
+	uint segmentIndex = dispatchThreadID.z;
 	if (segmentIndex >= selectingSegmentsCount)
 		return;
 
@@ -27,7 +27,11 @@ void CS_distance_to_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (objectIndex >= objectsCount)
 		return;
 
-	uint triangleIndex = dispatchThreadID.z;
+	uint selectedObjectIndex = segmentIndex * MAX_BOUNDING_SPHERES_COUNT + objectIndex;
+	if (selectedObjects[selectedObjectIndex] == 0)
+		return;
+
+	uint triangleIndex = dispatchThreadID.x;
 	if (triangleIndex >= objectsInfo[objectIndex].trianglesCount)
 		return;
 
@@ -54,14 +58,14 @@ void CS_distance_to_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (!checkIntersection(tri, seg, t))
 		return;
 
-	float distance = length(seg.v1 - seg.v0) * t;
+	uint distance = length(seg.v1 - seg.v0) * t * 1000000;
 	InterlockedMin(distancesToClosestObjects[segmentIndex], distance);
 }
 
-[numthreads(8, 1, 256)]
+[numthreads(256, 1, 4)]
 void CS_closest_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint segmentIndex = dispatchThreadID.x;
+	uint segmentIndex = dispatchThreadID.z;
 	if (segmentIndex >= selectingSegmentsCount)
 		return;
 
@@ -69,7 +73,7 @@ void CS_closest_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (objectIndex >= objectsCount)
 		return;
 
-	uint triangleIndex = dispatchThreadID.z;
+	uint triangleIndex = dispatchThreadID.x;
 	if (triangleIndex >= objectsInfo[objectIndex].trianglesCount)
 		return;
 
@@ -96,7 +100,7 @@ void CS_closest_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (!checkIntersection(tri, seg, t))
 		return;
 
-	float distance = length(seg.v1 - seg.v0) * t;
+	uint distance = length(seg.v1 - seg.v0) * t * 1000000;
 	uint objectIndexOriginal = 0;
 	if (distance == distancesToClosestObjects[segmentIndex])
 		InterlockedExchange(closestObjects[segmentIndex], objectIndex, objectIndexOriginal);
@@ -109,7 +113,7 @@ technique11 FineObjectsSelectionBySegments
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, CS_distance_to_object()));
-	},
+	}
 	pass SearchOfClosestObjects
 	{
 		SetVertexShader(NULL);

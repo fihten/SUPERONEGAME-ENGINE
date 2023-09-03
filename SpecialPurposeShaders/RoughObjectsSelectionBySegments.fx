@@ -1,5 +1,5 @@
+#include "constants.hlsl"
 #include "Segment.hlsl"
-#include "SelectedObjects.hlsl"
 #include "IntersectionUtils.hlsl"
 
 StructuredBuffer<Segment> selectingSegments;
@@ -8,9 +8,9 @@ uint selectingSegmentsCount;
 StructuredBuffer<float4> boundingSpheres;
 uint boundingSpheresCount;
 
-RWStructuredBuffer<SelectedObjects> selectedObjects;
+RWStructuredBuffer<uint> selectedObjects;
 
-[numthreads(8, 256, 1)]
+[numthreads(4, 256, 1)]
 void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	uint segmentIndex = dispatchThreadID.x;
@@ -24,9 +24,10 @@ void CS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	Segment segment = selectingSegments[segmentIndex];
 	float4 sphere = boundingSpheres[objectIndex];
 
-	selectedObjects[segmentIndex][objectIndex] = 0;
+	uint selectedObjectIndex = segmentIndex * MAX_BOUNDING_SPHERES_COUNT + objectIndex;
+	selectedObjects[selectedObjectIndex] = 0;
 	if (checkIntersection(segment, sphere))
-		selectedObjects[segmentIndex][objectIndex] = 1;
+		selectedObjects[selectedObjectIndex] = 1;
 }
 
 technique11 RoughObjectsSelectionBySegments

@@ -132,7 +132,10 @@ void Selector::selectObjects(
 		{
 			auto& boxes = Selector::instance()->selectedObjectsBoxes;
 			auto& count = Selector::instance()->selectedObjectsCount;
-			boxes[count++] = MainScene::instance()->selectedObjectsBoxes[objectID];
+			auto& objects = Selector::instance()->selectedObjects;
+			boxes[count] = MainScene::instance()->selectedObjectsBoxes[objectID];
+			objects[count] = objectID;
+			count++;
 		}
 	};
 	VisitFineSelectedObjects fineVisitor;
@@ -143,6 +146,9 @@ void Selector::selectObjects(
 
 void Selector::selectObject(float mousePosX, float mousePosY)
 {
+	if (bProcessOfMultipleSelection)
+		return;
+
 	auto& camera = cameras()[MAIN_CAMERA];
 
 	float nearZ = camera.getNear();
@@ -164,8 +170,12 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 	seg.v1 = flt3(farZ * mousePosX / nearZ, farZ * mousePosY / nearZ, farZ);
 
 	flt4x4 viewInv = camera.getView().inverse();
-	seg.v0 = seg.v0 * viewInv;
-	seg.v1 = seg.v1 * viewInv;
+
+	flt4 v0(seg.v0, 1);
+	seg.v0 = (v0 * viewInv).xyz();
+
+	flt4 v1(seg.v1, 1);
+	seg.v1 = (v1 * viewInv).xyz();
 
 	GraphicsCore::instance()->updateSelectingSegments(selectingSegments);
 	GraphicsCore::instance()->setSelectingSegmentsRoughBySegments();
@@ -192,23 +202,54 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 	GraphicsCore::instance()->initClosestObjects();
 
 	GraphicsCore::instance()->findSelectedObjectsFineBySegments();
+	
+	if (selectedObject != uint32_t(-1))
+	{
+		if (bPopSelectedObject)
+		{
+			selectedObjectsCount--;
+		}
+		else
+		{
+			auto pSelectedObject = std::find(selectedObjects, selectedObjects + selectedObjectsCount, selectedObject);
+			uint32_t selectedObjectBox = pSelectedObject - selectedObjects;
+			selectedObjectsBoxes[selectedObjectBox].color = flt3(1, 0, 0);
+		}
+	}
+	
 	GraphicsCore::instance()->getSelectedObjectsFineBySegments(&selectedObject, 1);
+
+	if (selectedObject == uint32_t(-1))
+		return;
+
+	auto pSelectedObject = std::find(selectedObjects, selectedObjects + selectedObjectsCount, selectedObject);
+	uint32_t selectedObjectBox = pSelectedObject - selectedObjects;
+	if (selectedObjectBox == selectedObjectsCount)
+	{
+		selectedObjectsBoxes[selectedObjectBox] = MainScene::instance()->selectedObjectsBoxes[selectedObject];
+		selectedObjectsCount++;
+		selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
+		bPopSelectedObject = true;
+	}
+	selectedObjectsBoxes[selectedObjectBox].color = flt3(0, 0, 1);
 }
 
 void Selector::draw()
 {
 	if (selectedObjectsCount > 0)
 		GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
-	if (bDrawAreaOfSelection)
+	if (bProcessOfMultipleSelection)
 		GraphicsCore::instance()->draw(areaOfSelection);
 }
 
-void Selector::turnOn()
+bool Selector::turnOnMultipleSelection()
 {
-	bDrawAreaOfSelection = true;
+	if (selectedObject == uint32_t(-1))
+		bProcessOfMultipleSelection = true;
+	return bProcessOfMultipleSelection;
 }
 
-void Selector::turnOff()
+void Selector::turnOffMultipleSelection()
 {
-	bDrawAreaOfSelection = false;
+	bProcessOfMultipleSelection = false;
 }

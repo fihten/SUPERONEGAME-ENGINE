@@ -4,7 +4,6 @@
 #include "Cameras.h"
 #include "auto_ptr.h"
 #include "ParseBlendState.h"
-#include "SelectedObjects.h"
 #include <algorithm>
 #include <sstream>
 #include <D3DX11tex.h>
@@ -170,6 +169,8 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	// 11. Init objects' selection 
 	initRoughObjectsSelection();
 	initFineObjectsSelection();
+	initRoughObjectsSelectionBySegments();
+	initFineObjectsSelectionBySegments();
 }
 
 void GraphicsCore::startFrame()
@@ -1481,9 +1482,9 @@ void GraphicsCore::initRoughObjectsSelectionBySegments()
 
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	inputDesc.ByteWidth = sizeof(SelectedObjects) * MAX_SELECTING_SEGMENTS_COUNT;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_SELECTING_SEGMENTS_COUNT * MAX_BOUNDING_SPHERES_COUNT;
 	inputDesc.CPUAccessFlags = 0;
-	inputDesc.StructureByteStride = sizeof SelectedObjects;
+	inputDesc.StructureByteStride = sizeof uint32_t;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	device->CreateBuffer(&inputDesc, 0, &mSelectedObjectsRoughBySegmentsBuffer);
 
@@ -1492,14 +1493,14 @@ void GraphicsCore::initRoughObjectsSelectionBySegments()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
-	uavDesc.Buffer.NumElements = MAX_SELECTING_SEGMENTS_COUNT;
+	uavDesc.Buffer.NumElements = MAX_SELECTING_SEGMENTS_COUNT * MAX_BOUNDING_SPHERES_COUNT;
 	device->CreateUnorderedAccessView(mSelectedObjectsRoughBySegmentsBuffer, &uavDesc, &mSelectedObjectsRoughBySegmentsUAV);
 
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFEREX;
 	srvDesc.BufferEx.FirstElement = 0;
 	srvDesc.BufferEx.Flags = 0;
-	srvDesc.BufferEx.NumElements = MAX_SELECTING_SEGMENTS_COUNT;
+	srvDesc.BufferEx.NumElements = MAX_SELECTING_SEGMENTS_COUNT * MAX_BOUNDING_SPHERES_COUNT;
 	device->CreateShaderResourceView(mSelectedObjectsRoughBySegmentsBuffer, &srvDesc, &mSelectedObjectsRoughBySegmentsSRV);
 }
 
@@ -1539,7 +1540,7 @@ void GraphicsCore::findRoughlySelectedObjectsBySegments()
 {
 	mRoughObjectsSelectionBySegmentsTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t threads_x = std::ceil(float(selectingSegmentsCount) / 8.0f);
+	uint32_t threads_x = std::ceil(float(selectingSegmentsCount) / 4.0f);
 	uint32_t threads_y = std::ceil(float(spheresCount) / 256.0f);
 	uint32_t threads_z = 1.0f;
 	context->Dispatch(threads_x, threads_y, threads_z);
@@ -1588,9 +1589,9 @@ void GraphicsCore::initFineObjectsSelectionBySegments()
 	D3D11_BUFFER_DESC inputDesc;
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	inputDesc.ByteWidth = sizeof(float) * MAX_SELECTING_SEGMENTS_COUNT;
+	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_SELECTING_SEGMENTS_COUNT;
 	inputDesc.CPUAccessFlags = 0;
-	inputDesc.StructureByteStride = sizeof(float);
+	inputDesc.StructureByteStride = sizeof(uint32_t);
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	device->CreateBuffer(&inputDesc, 0, &mDistancesToClosestObjectsBuffer);
 
@@ -1676,11 +1677,11 @@ void GraphicsCore::setClosestObjects()
 
 void GraphicsCore::initDistancesToClosestObjects()
 {
-	float maxFloats[MAX_SELECTING_SEGMENTS_COUNT];
+	uint32_t maxInts[MAX_SELECTING_SEGMENTS_COUNT];
 	for (int i = 0; i < MAX_SELECTING_SEGMENTS_COUNT; i++)
-		maxFloats[i] = FLT_MAX;
+		maxInts[i] = UINT_MAX;
 
-	context->UpdateSubresource(mDistancesToClosestObjectsBuffer, 0, 0, maxFloats, 0, 0);
+	context->UpdateSubresource(mDistancesToClosestObjectsBuffer, 0, 0, maxInts, 0, 0);
 }
 
 void GraphicsCore::initClosestObjects()
@@ -1696,17 +1697,17 @@ void GraphicsCore::findSelectedObjectsFineBySegments()
 {
 	mFineObjectsSelectionBySegmentsTech->GetPassByName("CalculationOfDistancesToClosestObjects")->Apply(0, context);
 
-	uint32_t threads_x = std::ceil(float(selectingSegmentsCount) / 8.0f);
+	uint32_t threads_x = std::ceil(float(maxTrianglesCount) / 256.0f);
 	uint32_t threads_y = std::ceil(float(spheresCount) / 1.0f);
-	uint32_t threads_z = std::ceil(float(maxTrianglesCount) / 256.0f);
+	uint32_t threads_z = std::ceil(float(selectingSegmentsCount) / 4.0f);
 	context->Dispatch(threads_x, threads_y, threads_z);
 	context->CSSetShader(0, 0, 0);
 
 	mFineObjectsSelectionBySegmentsTech->GetPassByName("SearchOfClosestObjects")->Apply(0, context);
 
-	uint32_t threads_x = std::ceil(float(selectingSegmentsCount) / 8.0f);
-	uint32_t threads_y = std::ceil(float(spheresCount) / 1.0f);
-	uint32_t threads_z = std::ceil(float(maxTrianglesCount) / 256.0f);
+	threads_x = std::ceil(float(maxTrianglesCount) / 256.0f);
+	threads_y = std::ceil(float(spheresCount) / 1.0f);
+	threads_z = std::ceil(float(selectingSegmentsCount) / 4.0f);
 	context->Dispatch(threads_x, threads_y, threads_z);
 	context->CSSetShader(0, 0, 0);
 }

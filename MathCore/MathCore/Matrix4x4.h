@@ -51,7 +51,7 @@ public:
 		{
 			for (int c = 0; c < columns; ++c)
 			{
-				ret.m[r * columns + c] = det(m, c, r) / d;
+				ret.m[r * columns + c] = pow(-1, c + r) * det(m, c, r) / d;
 			}
 		}
 

@@ -26,8 +26,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	{
 	case WM_LBUTTONDOWN:
 	{
+		if (!Selector::instance()->turnOnMultipleSelection())
+			break;
 		bMarginSelection = true;
-		Selector::instance()->turnOn();
 
 		mousePosX0 = LOWORD(lparam) + 0.5f;
 		mousePosY0 = HIWORD(lparam) + 0.5f;
@@ -55,6 +56,24 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		return 0;
 	}
 	case WM_MOUSEMOVE:
+	{
+		float mousePosX = LOWORD(lparam) + 0.5f;
+		float mousePosY = HIWORD(lparam) + 0.5f;
+
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+
+		float width = rect.right - rect.left;
+		float height = rect.bottom - rect.top;
+
+		mousePosX /= width;
+		mousePosY /= height;
+
+		mousePosX = 2 * (mousePosX - 0.5);
+		mousePosY = 2 * (0.5 - mousePosY);
+
+		Selector::instance()->selectObject(mousePosX, mousePosY);
+	}
 	case WM_LBUTTONUP:
 	{
 		if (!bMarginSelection)
@@ -83,7 +102,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 		if (msg == WM_LBUTTONUP)
 		{
 			bMarginSelection = false;
-			Selector::instance()->turnOff();
+			Selector::instance()->turnOffMultipleSelection();
 		}
 
 		return 0;
