@@ -1722,5 +1722,5 @@ void GraphicsCore::getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t
 	for (int i = 0; i < count; i++)
 		objects[i] = ((uint32_t*)mappedData.pData)[i];
 	
-	context->Unmap(mOutputSelectedTrianglesBuffer, 0);
+	context->Unmap(mOutputClosestObjectsBuffer, 0);
 }
