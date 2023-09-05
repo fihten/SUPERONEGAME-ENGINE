@@ -7,4 +7,6 @@
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
 
+#define PI 3.14159
+
 #endif
