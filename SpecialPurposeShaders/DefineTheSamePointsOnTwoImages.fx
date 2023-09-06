@@ -11,10 +11,8 @@ RWTexture2D<uint> mapBtoA;
 
 RWTexture2D<uint> error;
 
-float4 sampleImageB(uint2 posInA, float3x3 transform)
+float4 sampleImageB(float2 posInB)
 {
-	float2 posInB = mul(float3(posInA, 1), transform).xy;
-	
 	uint2 posInB0 = floor(posInB);
 	uint2 posInB1 = ceil(posInB);
 
@@ -40,7 +38,7 @@ float4 sampleImageB(uint2 posInA, float3x3 transform)
 	return colorInB;
 }
 
-float calculateDiscrepancy0(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
+float calculateDiscrepancy(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
 {
 	float discrepancy = 0.0f;
 
@@ -50,24 +48,26 @@ float calculateDiscrepancy0(uint2 posInA, float3x3 transform, uint sizeX, uint s
 	uint mips = 0;
 	imageA.GetDimensions(mip, width, height, mips);
 
-	for (int i = posInA.x - sizeX; i <= posInA.x + sizeX; i++)
+	for (int i = -sizeX; i <= sizeX; i++)
 	{
-		if (i < 0)
+		if (posInA.x + i < 0)
 			continue;
-		if (i >= width)
+		if (posInA.x + i >= width)
 			break;
 
-		for (int j = posInA.y - sizeY; j <= posInA.y + sizeY; j++)
+		for (int j = -sizeY; j <= sizeY; j++)
 		{
-			if (j < 0)
+			if (posInA.y + j < 0)
 				continue;
-			if (j >= height)
+			if (posInA.y + j >= height)
 				break;
 
-			uint2 posInAij = uint2(i, j);
+			uint2 posInAij = posInA + int2(i, j);
 
 			float4 colorInAij = imageA[posInAij];
-			float4 colorInBij = sampleImageB(posInAij, transform);
+
+			float2 posInB = posInA + mul(float3(i, j, 1), transform).xy;
+			float4 colorInBij = sampleImageB(posInB);
 
 			float4 diff = colorInBij - colorInAij;
 			discrepancy += dot(diff, diff);
@@ -77,27 +77,64 @@ float calculateDiscrepancy0(uint2 posInA, float3x3 transform, uint sizeX, uint s
 	return discrepancy;
 }
 
-float calculateSquaredGradientLength(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
+float gradientLength(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
 {
 	float4 gradient;
 
-	float discrepancy = calculateDiscrepancy0(posInA, transform, sizeX, sizeY);
+	float discrepancy = calculateDiscrepancy(posInA, transform, sizeX, sizeY);
 
 	float3x3 transform0 = transform;
 	transform0[0][0] += dParam;
-	float discrepancy0 = calculateDiscrepancy0(posInA, transform0, sizeX, sizeY);
+	float discrepancy0 = calculateDiscrepancy(posInA, transform0, sizeX, sizeY);
 
 	float3x3 transform1 = transform;
 	transform1[0][1] += dParam;
-	float discrepancy1 = calculateDiscrepancy0(posInA, transform1, sizeX, sizeY);
+	float discrepancy1 = calculateDiscrepancy(posInA, transform1, sizeX, sizeY);
 
 	float3x3 transform2 = transform;
 	transform2[1][0] += dParam;
-	float discrepancy2 = calculateDiscrepancy0(posInA, transform2, sizeX, sizeY);
+	float discrepancy2 = calculateDiscrepancy(posInA, transform2, sizeX, sizeY);
 	
 	float3x3 transform3 = transform;
 	transform3[1][1] += dParam;
-	float discrepancy3 = calculateDiscrepancy0(posInA, transform3, sizeX, sizeY);
+	float discrepancy3 = calculateDiscrepancy(posInA, transform3, sizeX, sizeY);
+
+	gradient.x = (discrepancy0 - discrepancy) / dParam;
+	gradient.y = (discrepancy1 - discrepancy) / dParam;
+	gradient.z = (discrepancy2 - discrepancy) / dParam;
+	gradient.w = (discrepancy3 - discrepancy) / dParam;
+
+	return dot(gradient, gradient);
+}
+
+float4 gradientOfGradientLength(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
+{
+	float4 gradient;
+
+	float gradientLength = gradientLength(posInA, transform, sizeX, sizeY);
+
+	float3x3 transform0 = transform;
+	transform0[0][0] += dParam;
+	float gradientLength0 = gradientLength(posInA, transform0, sizeX, sizeY);
+
+	float3x3 transform1 = transform;
+	transform1[0][1] += dParam;
+	float gradientLength1 = gradientLength(posInA, transform1, sizeX, sizeY);
+
+	float3x3 transform2 = transform;
+	transform2[1][0] += dParam;
+	float gradientLength2 = gradientLength(posInA, transform2, sizeX, sizeY);
+
+	float3x3 transform3 = transform;
+	transform3[1][1] += dParam;
+	float gradientLength3 = gradientLength(posInA, transform3, sizeX, sizeY);
+
+	gradient.x = (gradientLength0 - gradientLength) / dParam;
+	gradient.y = (gradientLength1 - gradientLength) / dParam;
+	gradient.z = (gradientLength2 - gradientLength) / dParam;
+	gradient.w = (gradientLength3 - gradientLength) / dParam;
+
+	return gradient;
 }
 
 void calculateCoarseTransformByNetMethod(
@@ -153,6 +190,29 @@ void calculateCoarseTransformByNetMethod(
 	}
 }
 
+void fittingTransformByGradientDescent(
+	uint2 posInA,
+	uint2 posInB,
+	uint sizeX,
+	uint sizeY,
+	inout float3x3 transform
+)
+{
+	for (int i = 0; i < 5; i++)
+	{
+		float gradientLength = gradientLength(posInA, transform, sizeX, sizeY);
+		float4 gradient = gradientOfGradientLength(posInA, transform, sizeX, sizeY);
+
+		float c = -gradientLength / dot(gradient, gradient);
+
+		transform[0][0] += c * gradient.x;
+		transform[0][1] += c * gradient.y;
+
+		transform[1][0] += c * gradient.z;
+		transform[1][1] += c * gradient.w;
+	}
+}
+
 [numthreads(16,16,4)]
 void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -199,4 +259,106 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		);
 
 	float3x3 transform = mul(translate0, mul(scaleRotate, translate1));
+
+	fittingTransformByGradientDescent(
+		posInA,
+		posInB,
+		sizeX,
+		sizeY,
+		transform
+	);
+
+	uint err = gradientLength(posInA, transform, sizeX, sizeY)*1000000;
+	InterlockedMin(error[posInA], err);
 }
+
+[numthreads(16, 16, 4)]
+void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint mips = 0;
+	imageA.GetDimensions(mip, width, height, mips);
+
+	uint wXh = width * height;
+	if (dispatchThreadID.x >= wXh)
+		return;
+	if (dispatchThreadID.y >= wXh)
+		return;
+
+	uint2 posInA(dispatchThreadID.x % width, dispatchThreadID.x / width);
+	uint2 posInB(dispatchThreadID.y % width, dispatchThreadID.y / width);
+	uint size = size0 + dispatchThreadID.z;
+
+	float3x3 transformAxisX;
+	calculateCoarseTransformByNetMethod(posInA, posInB, size, 0, transformAxisX);
+	float3 axisX = float3(1, 0, 0);
+	axisX = mul(axisX, transformAxisX);
+
+	float3x3 transformAxisY;
+	calculateCoarseTransformByNetMethod(posInA, posInB, 0, size, transformAxisY);
+	float3 axisY = float3(0, 1, 0);
+	axisY = mul(axisY, transformAxisY);
+
+	float3x3 translate0 = float3x3(
+		1, 0, 0,
+		0, 1, 0,
+		-posInA.x, -posInA.y, 1
+		);
+	float3x3 scaleRotate = float3x3(
+		axisX,
+		axisY,
+		float3(0, 0, 1)
+		);
+	float3x3 translate1 = float3x3(
+		1, 0, 0,
+		0, 1, 0,
+		posInB.x, posInB.y, 1
+		);
+
+	float3x3 transform = mul(translate0, mul(scaleRotate, translate1));
+
+	fittingTransformByGradientDescent(
+		posInA,
+		posInB,
+		sizeX,
+		sizeY,
+		transform
+	);
+
+	uint err = gradientLength(posInA, transform, sizeX, sizeY) * 1000000;
+	if (err == error[posInA])
+	{
+		uint original_value;
+		InterlockedExchange(mapAtoB[posInA], dispatchThreadID.y);
+	}
+}
+
+[numthreads(32, 32, 1)]
+void CS_map_B_onto_A(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+
+}
+
+technique11 DefineTheSamePointsOnTwoImages
+{
+	pass CalculateError
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_calculate_error()));
+	}
+	pass MapAontoB
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_map_A_onto_B()));
+	}
+	pass MapBontoA
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_map_B_onto_A()));
+	}
+};
