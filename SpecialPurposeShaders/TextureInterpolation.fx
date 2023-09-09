@@ -1,3 +1,5 @@
+#define COLUMNS 6
+
 Texture2D tex;
 RWTexture2DArray<float4> coeffs;
 
@@ -77,18 +79,74 @@ void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint2 ij = dispatchThreadID.xy;
-	uint col = dispatchThreadID.z + 1;
+	uint3 ijk = dispatchThreadID.xyz;
+	uint col = dispatchThreadID.z;
 
 	uint width = 0;
 	uint height = 0;
 	uint elements = 0;
 	coeffs.GetDimensions(width, height, elements);
 
-	if (ij.x > width - 1)
+	if (ijk.x > width - 1)
 		return;
-	if (ij.y > height - 1)
+	if (ijk.y > height - 1)
 		return;
 	if (col > 5)
 		return;
+
+	float4 a = coeffs[ijk];
+
+	uint3 ijk_prev_prev = ijk;
+	ijk_prev_prev.y = max(ijk.y - 2, 0);
+	float4 a_prev_prev = coeffs[ijk_prev_prev];
+
+	uint3 ijk_prev = ijk;
+	ijk_prev.y = max(ijk.y - 1, 0);
+	float4 a_prev = coeffs[ijk_prev];
+
+	uint3 ijk_next = ijk;
+	ijk_next.y = min(ijk_next.y + 1, height - 1);
+	float4 a_next = coeffs[ijk_next];
+
+	uint3 ijk_next_next = ijk;
+	ijk_next_next.y = min(ijk_next_next.y + 2, height - 1);
+	float4 a_next_next = coeffs[ijk_next_next];
+
+	float4 f0 = a;
+	float4 f1 = a_next;
+
+	bool4 extremum0 = bool4(
+		(a_prev.x - a.x) * (a_next.x - a.x) >= 0,
+		(a_prev.y - a.y) * (a_next.y - a.y) >= 0,
+		(a_prev.z - a.z) * (a_next.z - a.z) >= 0,
+		(a_prev.w - a.w) * (a_next.w - a.w) >= 0
+		);
+	float4 f01 = float4(
+		extremum0.x ? 0 : 0.5 * (a_next.x - a_prev.x),
+		extremum0.y ? 0 : 0.5 * (a_next.y - a_prev.y),
+		extremum0.z ? 0 : 0.5 * (a_next.z - a_prev.z),
+		extremum0.w ? 0 : 0.5 * (a_next.w - a_prev.w)
+		);
+	float4 f02 = a_prev + a_next - 2 * a;
+
+	bool4 extremum1 = bool4(
+		(a_next_next.x - a_next.x) * (a.x - a_next.x) >= 0,
+		(a_next_next.y - a_next.y) * (a.y - a_next.y) >= 0,
+		(a_next_next.z - a_next.z) * (a.z - a_next.z) >= 0,
+		(a_next_next.w - a_next.w) * (a.w - a_next.w) >= 0
+		);
+	float4 f11 = float4(
+		extremum1.x ? 0 : 0.5 * (a_next_next.x - a.x),
+		extremum1.y ? 0 : 0.5 * (a_next_next.y - a.y),
+		extremum1.z ? 0 : 0.5 * (a_next_next.z - a.z),
+		extremum1.w ? 0 : 0.5 * (a_next_next.w - a.w)
+		);
+	float4 f12 = a + a_next_next - 2 * a_next;
+
+	uint2 ij = ijk.xy;
+	coeffs[uint3(ij, 1 * COLUMNS + col)] = f01;
+	coeffs[uint3(ij, 2 * COLUMNS + col)] = 0.5 * f02;
+	coeffs[uint3(ij, 3 * COLUMNS + col)] = 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12;
+	coeffs[uint3(ij, 4 * COLUMNS + col)] = -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12;
+	coeffs[uint3(ij, 5 * COLUMNS + col)] = 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12;
 }
