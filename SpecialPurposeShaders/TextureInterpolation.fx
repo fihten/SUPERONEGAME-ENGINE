@@ -12,9 +12,9 @@ void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mips = 0;
 	tex.GetDimensions(mip, width, height, mips);
 
-	if (ij.x >= width)
+	if (ij.x > width - 1)
 		return;
-	if (ij.y >= height)
+	if (ij.y > height - 1)
 		return;
 
 	float4 c = tex[ij];
@@ -66,8 +66,29 @@ void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 		);
 	float4 f12 = c + c_next_next - 2 * c_next;
 
-	coeffs[0] = f0;
-	coeffs[1] = f01;
-	coeffs[2] = 0.5 * f02;
-	
+	coeffs[uint3(ij, 0)] = f0;
+	coeffs[uint3(ij, 1)] = f01;
+	coeffs[uint3(ij, 2)] = 0.5 * f02;
+	coeffs[uint3(ij, 3)] = 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12;
+	coeffs[uint3(ij, 4)] = -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12;
+	coeffs[uint3(ij, 5)] = 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12;
+}
+
+[numthreads(16, 16, 4)]
+void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint2 ij = dispatchThreadID.xy;
+	uint col = dispatchThreadID.z + 1;
+
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	coeffs.GetDimensions(width, height, elements);
+
+	if (ij.x > width - 1)
+		return;
+	if (ij.y > height - 1)
+		return;
+	if (col > 5)
+		return;
 }
