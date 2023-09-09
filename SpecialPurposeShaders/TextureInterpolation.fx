@@ -150,3 +150,19 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	coeffs[uint3(ij, 4 * COLUMNS + col)] = -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12;
 	coeffs[uint3(ij, 5 * COLUMNS + col)] = 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12;
 }
+
+technique11 TextureInterpolation
+{
+	pass AlongAxisU
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_U_AXIS()));
+	}
+	pass AlongAxisV
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_V_AXIS()));
+	}
+};

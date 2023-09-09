@@ -1,41 +1,79 @@
 #include "constants.hlsl"
 
-#define dParam 0.0001
 #define size0 5
 
-Texture2D<float4> imageA;
-Texture2D<float4> imageB;
+Texture2DArray<float4> imageA;
+Texture2DArray<float4> imageB;
 
 RWTexture2D<uint> mapAtoB;
 RWTexture2D<uint> mapBtoA;
 
 RWTexture2D<uint> error;
 
-float4 sampleImageB(float2 posInB)
+float4 sampleImage(Texture2DArray<float4> image, float2 fPos)
 {
-	uint2 posInB0 = floor(posInB);
-	uint2 posInB1 = ceil(posInB);
+	uint2 uiPos = floor(fPos);
 
-	uint2 posInB00 = uint2(posInB0.x, posInB0.y);
-	uint2 posInB01 = uint2(posInB0.x, posInB1.y);
+	float4 a00 = image[uint3(uiPos, 0)];
+	float4 a10 = image[uint3(uiPos, 1)];
+	float4 a20 = image[uint3(uiPos, 2)];
+	float4 a30 = image[uint3(uiPos, 3)];
+	float4 a40 = image[uint3(uiPos, 4)];
+	float4 a50 = image[uint3(uiPos, 5)];
 
-	uint2 posInB10 = uint2(posInB1.x, posInB0.y);
-	uint2 posInB11 = uint2(posInB1.x, posInB1.y);
+	float4 a01 = image[uint3(uiPos, 6)];
+	float4 a11 = image[uint3(uiPos, 7)];
+	float4 a21 = image[uint3(uiPos, 8)];
+	float4 a31 = image[uint3(uiPos, 9)];
+	float4 a41 = image[uint3(uiPos, 10)];
+	float4 a51 = image[uint3(uiPos, 11)];
 
-	float4 colorInB00 = imageB[posInB00];
-	float4 colorInB01 = imageB[posInB01];
+	float4 a02 = image[uint3(uiPos, 12)];
+	float4 a12 = image[uint3(uiPos, 13)];
+	float4 a22 = image[uint3(uiPos, 14)];
+	float4 a32 = image[uint3(uiPos, 15)];
+	float4 a42 = image[uint3(uiPos, 16)];
+	float4 a52 = image[uint3(uiPos, 17)];
 
-	float4 colorInB10 = imageB[posInB10];
-	float4 colorInB11 = imageB[posInB11];
+	float4 a03 = image[uint3(uiPos, 18)];
+	float4 a13 = image[uint3(uiPos, 19)];
+	float4 a23 = image[uint3(uiPos, 20)];
+	float4 a33 = image[uint3(uiPos, 21)];
+	float4 a43 = image[uint3(uiPos, 22)];
+	float4 a53 = image[uint3(uiPos, 23)];
 
-	float2 l = smoothstep(posInB0, posInB1, posInB);
+	float4 a04 = image[uint3(uiPos, 24)];
+	float4 a14 = image[uint3(uiPos, 25)];
+	float4 a24 = image[uint3(uiPos, 26)];
+	float4 a34 = image[uint3(uiPos, 27)];
+	float4 a44 = image[uint3(uiPos, 28)];
+	float4 a54 = image[uint3(uiPos, 29)];
+
+	float4 a05 = image[uint3(uiPos, 30)];
+	float4 a15 = image[uint3(uiPos, 31)];
+	float4 a25 = image[uint3(uiPos, 32)];
+	float4 a35 = image[uint3(uiPos, 33)];
+	float4 a45 = image[uint3(uiPos, 34)];
+	float4 a55 = image[uint3(uiPos, 35)];
+
+	float2 xy = fPos - uiPos;
 	
-	float4 colorInB0 = lerp(colorInB00, colorInB01, l.y);
-	float4 colorInB1 = lerp(colorInB10, colorInB11, l.y);
+	float x = xy.x;
+	float x2 = x * x;
+	float x3 = x2 * x;
+	float x4 = x3 * x;
+	float x5 = x4 * x;
 
-	float4 colorInB = lerp(colorInB0, colorInB1, l.x);
+	float y = xy.y;
+	float y2 = y * y;
+	float y3 = y2 * y;
+	float y4 = y3 * x;
+	float y5 = y4 * x;
 
-	return colorInB;
+	float4 color = 0;
+
+	color += a00 + a10 * x + a20 * x2 + a30 * x3 + a40 * x4 + a50 * x5;
+	 
 }
 
 float calculateDiscrepancy(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
