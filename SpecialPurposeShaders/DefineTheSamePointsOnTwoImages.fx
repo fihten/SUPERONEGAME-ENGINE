@@ -550,11 +550,58 @@ float3x3 calculateTransform_da1_da0(float2 t, float a0, float s0, float a1, floa
 	return calculateTransform_da0_da1(t, a0, s0, a1, s1);
 }
 
+float3x3 calculateTransform_da1_ds0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_ds0_da1(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_da1_da1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		s1 * sin(a1), -s1 * cos(a1), 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da1_ds1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		-cos(a1), -sin(a1), 0,
+		0, 0, 0
+		);
+}
+
 float3x3 calculateTransform_ds1(float2 t, float a0, float s0, float a1, float s1)
 {
 	return float3x3(
 		0, 0, 0,
 		-sin(a1), cos(a1), 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_ds1_da0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_da0_ds1(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_ds1_ds0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_ds0_ds1(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_ds1_da1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_da1_ds1(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_ds1_ds1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
 		0, 0, 0
 		);
 }
