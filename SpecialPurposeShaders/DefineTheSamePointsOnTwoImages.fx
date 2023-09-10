@@ -73,11 +73,11 @@ float4 sampleImage(Texture2DArray<float4> image, float2 fPos)
 	float4 color = 0;
 
 	color += a00 + a10 * x + a20 * x2 + a30 * x3 + a40 * x4 + a50 * x5;
-	color += a01 * y + a11 * x * y + a21 * x2 * y + a31 * x3 * y + a41 * x4 * y + a51 * x5 * y;
-	color += a02 * y2 + a12 * x * y2 + a22 * x2 * y2 + a32 * x3 * y2 + a42 * x4 * y2 + a52 * x5 * y2;
-	color += a03 * y3 + a13 * x * y3 + a23 * x2 * y3 + a33 * x3 * y3 + a43 * x4 * y3 + a53 * x5 * y3;
-	color += a04 * y4 + a14 * x * y4 + a24 * x2 * y4 + a34 * x3 * y4 + a44 * x4 * y4 + a54 * x5 * y4;
-	color += a05 * y5 + a15 * x * y5 + a25 * x2 * y5 + a35 * x3 * y5 + a45 * x4 * y5 + a55 * x5 * y5;
+	color += (a01 + a11 * x + a21 * x2 + a31 * x3 + a41 * x4 + a51 * x5) * y;
+	color += (a02 + a12 * x + a22 * x2 + a32 * x3 + a42 * x4 + a52 * x5) * y2;
+	color += (a03 + a13 * x + a23 * x2 + a33 * x3 + a43 * x4 + a53 * x5) * y3;
+	color += (a04 + a14 * x + a24 * x2 + a34 * x3 + a44 * x4 + a54 * x5) * y4;
+	color += (a05 + a15 * x + a25 * x2 + a35 * x3 + a45 * x4 + a55 * x5) * y5;
 
 	return color;
 }
@@ -145,11 +145,11 @@ float4 sampleImage_dx(Texture2DArray<float4> image, float2 fPos)
 	float4 color_dx = 0;
 
 	color_dx += a10 * x_dx + a20 * x2_dx + a30 * x3_dx + a40 * x4_dx + a50 * x5_dx;
-	color_dx += a11 * x_dx * y + a21 * x2_dx * y + a31 * x3_dx * y + a41 * x4_dx * y + a51 * x5_dx * y;
-	color_dx += a12 * x_dx * y2 + a22 * x2_dx * y2 + a32 * x3_dx * y2 + a42 * x4_dx * y2 + a52 * x5_dx * y2;
-	color_dx += a13 * x_dx * y3 + a23 * x2_dx * y3 + a33 * x3_dx * y3 + a43 * x4_dx * y3 + a53 * x5_dx * y3;
-	color_dx += a14 * x_dx * y4 + a24 * x2_dx * y4 + a34 * x3_dx * y4 + a44 * x4_dx * y4 + a54 * x5_dx * y4;
-	color_dx += a15 * x_dx * y5 + a25 * x2_dx * y5 + a35 * x3_dx * y5 + a45 * x4_dx * y5 + a55 * x5_dx * y5;
+	color_dx += (a11 * x_dx + a21 * x2_dx + a31 * x3_dx + a41 * x4_dx + a51 * x5_dx) * y;
+	color_dx += (a12 * x_dx + a22 * x2_dx + a32 * x3_dx + a42 * x4_dx + a52 * x5_dx) * y2;
+	color_dx += (a13 * x_dx + a23 * x2_dx + a33 * x3_dx + a43 * x4_dx + a53 * x5_dx) * y3;
+	color_dx += (a14 * x_dx + a24 * x2_dx + a34 * x3_dx + a44 * x4_dx + a54 * x5_dx) * y4;
+	color_dx += (a15 * x_dx + a25 * x2_dx + a35 * x3_dx + a45 * x4_dx + a55 * x5_dx) * y5;
 
 	return color_dx;
 }
@@ -216,13 +216,347 @@ float4 sampleImage_dy(Texture2DArray<float4> image, float2 fPos)
 
 	float4 color_dy = 0;
 
-	color_dy += a01 * y_dy + a11 * x * y_dy + a21 * x2 * y_dy + a31 * x3 * y_dy + a41 * x4 * y_dy + a51 * x5 * y_dy;
-	color_dy += a02 * y2_dy + a12 * x * y2_dy + a22 * x2 * y2_dy + a32 * x3 * y2_dy + a42 * x4 * y2_dy + a52 * x5 * y2_dy;
-	color_dy += a03 * y3_dy + a13 * x * y3_dy + a23 * x2 * y3_dy + a33 * x3 * y3_dy + a43 * x4 * y3_dy + a53 * x5 * y3_dy;
-	color_dy += a04 * y4_dy + a14 * x * y4_dy + a24 * x2 * y4_dy + a34 * x3 * y4_dy + a44 * x4 * y4_dy + a54 * x5 * y4_dy;
-	color_dy += a05 * y5_dy + a15 * x * y5_dy + a25 * x2 * y5_dy + a35 * x3 * y5_dy + a45 * x4 * y5_dy + a55 * x5 * y5_dy;
+	color_dy += (a01 + a11 * x + a21 * x2 + a31 * x3 + a41 * x4 + a51 * x5) * y_dy;
+	color_dy += (a02 + a12 * x + a22 * x2 + a32 * x3 + a42 * x4 + a52 * x5) * y2_dy;
+	color_dy += (a03 + a13 * x + a23 * x2 + a33 * x3 + a43 * x4 + a53 * x5) * y3_dy;
+	color_dy += (a04 + a14 * x + a24 * x2 + a34 * x3 + a44 * x4 + a54 * x5) * y4_dy;
+	color_dy += (a05 + a15 * x + a25 * x2 + a35 * x3 + a45 * x4 + a55 * x5) * y5_dy;
 
 	return color_dy;
+}
+
+float4 sampleImage_dx_dy(Texture2DArray<float4> image, float2 fPos)
+{
+	uint2 uiPos = floor(fPos);
+
+	float4 a00 = image[uint3(uiPos, 0)];
+	float4 a10 = image[uint3(uiPos, 1)];
+	float4 a20 = image[uint3(uiPos, 2)];
+	float4 a30 = image[uint3(uiPos, 3)];
+	float4 a40 = image[uint3(uiPos, 4)];
+	float4 a50 = image[uint3(uiPos, 5)];
+
+	float4 a01 = image[uint3(uiPos, 6)];
+	float4 a11 = image[uint3(uiPos, 7)];
+	float4 a21 = image[uint3(uiPos, 8)];
+	float4 a31 = image[uint3(uiPos, 9)];
+	float4 a41 = image[uint3(uiPos, 10)];
+	float4 a51 = image[uint3(uiPos, 11)];
+
+	float4 a02 = image[uint3(uiPos, 12)];
+	float4 a12 = image[uint3(uiPos, 13)];
+	float4 a22 = image[uint3(uiPos, 14)];
+	float4 a32 = image[uint3(uiPos, 15)];
+	float4 a42 = image[uint3(uiPos, 16)];
+	float4 a52 = image[uint3(uiPos, 17)];
+
+	float4 a03 = image[uint3(uiPos, 18)];
+	float4 a13 = image[uint3(uiPos, 19)];
+	float4 a23 = image[uint3(uiPos, 20)];
+	float4 a33 = image[uint3(uiPos, 21)];
+	float4 a43 = image[uint3(uiPos, 22)];
+	float4 a53 = image[uint3(uiPos, 23)];
+
+	float4 a04 = image[uint3(uiPos, 24)];
+	float4 a14 = image[uint3(uiPos, 25)];
+	float4 a24 = image[uint3(uiPos, 26)];
+	float4 a34 = image[uint3(uiPos, 27)];
+	float4 a44 = image[uint3(uiPos, 28)];
+	float4 a54 = image[uint3(uiPos, 29)];
+
+	float4 a05 = image[uint3(uiPos, 30)];
+	float4 a15 = image[uint3(uiPos, 31)];
+	float4 a25 = image[uint3(uiPos, 32)];
+	float4 a35 = image[uint3(uiPos, 33)];
+	float4 a45 = image[uint3(uiPos, 34)];
+	float4 a55 = image[uint3(uiPos, 35)];
+
+	float2 xy = fPos - uiPos;
+
+	float x_dx = 1;
+	float x2_dx = 2 * x;
+	float x3_dx = 3 * x2;
+	float x4_dx = 4 * x3;
+	float x5_dx = 5 * x4;
+
+	float y_dy = 1;
+	float y2_dy = 2 * y;
+	float y3_dy = 3 * y2;
+	float y4_dy = 4 * y3;
+	float y5_dy = 5 * y4;
+
+	float4 color_dx_dy = 0;
+
+	color_dx_dy += (a11 * x_dx + a21 * x2_dx + a31 * x3_dx + a41 * x4_dx + a51 * x5_dx) * y_dy;
+	color_dx_dy += (a12 * x_dx + a22 * x2_dx + a32 * x3_dx + a42 * x4_dx + a52 * x5_dx) * y2_dy;
+	color_dx_dy += (a13 * x_dx + a23 * x2_dx + a33 * x3_dx + a43 * x4_dx + a53 * x5_dx) * y3_dy;
+	color_dx_dy += (a14 * x_dx + a24 * x2_dx + a34 * x3_dx + a44 * x4_dx + a54 * x5_dx) * y4_dy;
+	color_dx_dy += (a15 * x_dx + a25 * x2_dx + a35 * x3_dx + a45 * x4_dx + a55 * x5_dx) * y5_dy;
+
+	return color_dx_dy;
+}
+
+float4 sampleImage_dy_dx(Texture2DArray<float4> image, float2 fPos)
+{
+	return sampleImage_dx_dy(image, fPos);
+}
+
+float4 sampleImage_dx_dx(Texture2DArray<float4> image, float2 fPos)
+{
+	uint2 uiPos = floor(fPos);
+
+	float4 a00 = image[uint3(uiPos, 0)];
+	float4 a10 = image[uint3(uiPos, 1)];
+	float4 a20 = image[uint3(uiPos, 2)];
+	float4 a30 = image[uint3(uiPos, 3)];
+	float4 a40 = image[uint3(uiPos, 4)];
+	float4 a50 = image[uint3(uiPos, 5)];
+
+	float4 a01 = image[uint3(uiPos, 6)];
+	float4 a11 = image[uint3(uiPos, 7)];
+	float4 a21 = image[uint3(uiPos, 8)];
+	float4 a31 = image[uint3(uiPos, 9)];
+	float4 a41 = image[uint3(uiPos, 10)];
+	float4 a51 = image[uint3(uiPos, 11)];
+
+	float4 a02 = image[uint3(uiPos, 12)];
+	float4 a12 = image[uint3(uiPos, 13)];
+	float4 a22 = image[uint3(uiPos, 14)];
+	float4 a32 = image[uint3(uiPos, 15)];
+	float4 a42 = image[uint3(uiPos, 16)];
+	float4 a52 = image[uint3(uiPos, 17)];
+
+	float4 a03 = image[uint3(uiPos, 18)];
+	float4 a13 = image[uint3(uiPos, 19)];
+	float4 a23 = image[uint3(uiPos, 20)];
+	float4 a33 = image[uint3(uiPos, 21)];
+	float4 a43 = image[uint3(uiPos, 22)];
+	float4 a53 = image[uint3(uiPos, 23)];
+
+	float4 a04 = image[uint3(uiPos, 24)];
+	float4 a14 = image[uint3(uiPos, 25)];
+	float4 a24 = image[uint3(uiPos, 26)];
+	float4 a34 = image[uint3(uiPos, 27)];
+	float4 a44 = image[uint3(uiPos, 28)];
+	float4 a54 = image[uint3(uiPos, 29)];
+
+	float4 a05 = image[uint3(uiPos, 30)];
+	float4 a15 = image[uint3(uiPos, 31)];
+	float4 a25 = image[uint3(uiPos, 32)];
+	float4 a35 = image[uint3(uiPos, 33)];
+	float4 a45 = image[uint3(uiPos, 34)];
+	float4 a55 = image[uint3(uiPos, 35)];
+
+	float2 xy = fPos - uiPos;
+
+	float x2_dx_dx = 2;
+	float x3_dx_dx = 6 * x;
+	float x4_dx_dx = 12 * x2;
+	float x5_dx_dx = 20 * x3;
+
+	float y = xy.y;
+	float y2 = y * y;
+	float y3 = y2 * y;
+	float y4 = y3 * x;
+	float y5 = y4 * x;
+
+	float4 color_dx_dx = 0;
+
+	color_dx_dx += a20 * x2_dx_dx + a30 * x3_dx_dx + a40 * x4_dx_dx + a50 * x5_dx_dx;
+	color_dx_dx += (a21 * x2_dx_dx + a31 * x3_dx_dx + a41 * x4_dx_dx + a51 * x5_dx_dx) * y;
+	color_dx_dx += (a22 * x2_dx_dx + a32 * x3_dx_dx + a42 * x4_dx_dx + a52 * x5_dx_dx) * y2;
+	color_dx_dx += (a23 * x2_dx_dx + a33 * x3_dx_dx + a43 * x4_dx_dx + a53 * x5_dx_dx) * y3;
+	color_dx_dx += (a24 * x2_dx_dx + a34 * x3_dx_dx + a44 * x4_dx_dx + a54 * x5_dx_dx) * y4;
+	color_dx_dx += (a25 * x2_dx_dx + a35 * x3_dx_dx + a45 * x4_dx_dx + a55 * x5_dx_dx) * y5;
+
+	return color_dx_dx;
+}
+
+float4 sampleImage_dy_dy(Texture2DArray<float4> image, float2 fPos)
+{
+	uint2 uiPos = floor(fPos);
+
+	float4 a00 = image[uint3(uiPos, 0)];
+	float4 a10 = image[uint3(uiPos, 1)];
+	float4 a20 = image[uint3(uiPos, 2)];
+	float4 a30 = image[uint3(uiPos, 3)];
+	float4 a40 = image[uint3(uiPos, 4)];
+	float4 a50 = image[uint3(uiPos, 5)];
+
+	float4 a01 = image[uint3(uiPos, 6)];
+	float4 a11 = image[uint3(uiPos, 7)];
+	float4 a21 = image[uint3(uiPos, 8)];
+	float4 a31 = image[uint3(uiPos, 9)];
+	float4 a41 = image[uint3(uiPos, 10)];
+	float4 a51 = image[uint3(uiPos, 11)];
+
+	float4 a02 = image[uint3(uiPos, 12)];
+	float4 a12 = image[uint3(uiPos, 13)];
+	float4 a22 = image[uint3(uiPos, 14)];
+	float4 a32 = image[uint3(uiPos, 15)];
+	float4 a42 = image[uint3(uiPos, 16)];
+	float4 a52 = image[uint3(uiPos, 17)];
+
+	float4 a03 = image[uint3(uiPos, 18)];
+	float4 a13 = image[uint3(uiPos, 19)];
+	float4 a23 = image[uint3(uiPos, 20)];
+	float4 a33 = image[uint3(uiPos, 21)];
+	float4 a43 = image[uint3(uiPos, 22)];
+	float4 a53 = image[uint3(uiPos, 23)];
+
+	float4 a04 = image[uint3(uiPos, 24)];
+	float4 a14 = image[uint3(uiPos, 25)];
+	float4 a24 = image[uint3(uiPos, 26)];
+	float4 a34 = image[uint3(uiPos, 27)];
+	float4 a44 = image[uint3(uiPos, 28)];
+	float4 a54 = image[uint3(uiPos, 29)];
+
+	float4 a05 = image[uint3(uiPos, 30)];
+	float4 a15 = image[uint3(uiPos, 31)];
+	float4 a25 = image[uint3(uiPos, 32)];
+	float4 a35 = image[uint3(uiPos, 33)];
+	float4 a45 = image[uint3(uiPos, 34)];
+	float4 a55 = image[uint3(uiPos, 35)];
+
+	float2 xy = fPos - uiPos;
+
+	float x = xy.x;
+	float x2 = x * x;
+	float x3 = x2 * x;
+	float x4 = x3 * x;
+	float x5 = x4 * x;
+
+	float y2_dy_dy = 2;
+	float y3_dy_dy = 6 * y;
+	float y4_dy_dy = 12 * y2;
+	float y5_dy_dy = 20 * y3;
+
+	float4 color_dy_dy = 0;
+
+	color_dy_dy += (a02 + a12 * x + a22 * x2 + a32 * x3 + a42 * x4 + a52 * x5) * y2_dy_dy;
+	color_dy_dy += (a03 + a13 * x + a23 * x2 + a33 * x3 + a43 * x4 + a53 * x5) * y3_dy_dy;
+	color_dy_dy += (a04 + a14 * x + a24 * x2 + a34 * x3 + a44 * x4 + a54 * x5) * y4_dy_dy;
+	color_dy_dy += (a05 + a15 * x + a25 * x2 + a35 * x3 + a45 * x4 + a55 * x5) * y5_dy_dy;
+
+	return color_dy_dy;
+}
+
+float3x3 calculateTransform(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		s0 * cos(a0), s0 * sin(a0), 0,
+		-s1 * sin(a1), s1 * cos(a1), 0,
+		t.x, t.y, 1
+		);
+}
+
+float3x3 calculateTransform_da0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		-s0 * sin(a0), s0 * cos(a0), 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da0_da0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		-s0 * cos(a0), -s0 * sin(a0), 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da0_ds0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		-sin(a0), cos(a0), 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da0_da1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da0_ds1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_ds0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		cos(a0), sin(a0), 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_ds0_da0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_da0_ds0(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_ds0_ds0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_ds0_da1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_ds0_ds1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		0, 0, 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		-s1 * cos(a1), -s1 * sin(a1), 0,
+		0, 0, 0
+		);
+}
+
+float3x3 calculateTransform_da1_da0(float2 t, float a0, float s0, float a1, float s1)
+{
+	return calculateTransform_da0_da1(t, a0, s0, a1, s1);
+}
+
+float3x3 calculateTransform_ds1(float2 t, float a0, float s0, float a1, float s1)
+{
+	return float3x3(
+		0, 0, 0,
+		-sin(a1), cos(a1), 0,
+		0, 0, 0
+		);
 }
 
 float calculateDiscrepancy(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
