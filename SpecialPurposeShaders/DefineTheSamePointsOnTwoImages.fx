@@ -813,64 +813,64 @@ float calculateDiscrepancy(
 	return discrepancy;
 }
 
-float gradientLength(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
+void calculateGradients(
+	Texture2DArray<float4> imageA,
+	uint2 originInA,
+	uint2 relativePosInA,
+	Texture2DArray<float4> imageB,
+	uint2 translation,
+	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
+	out float4 gradient,
+	out float4 gradientOfGradientSquaredLength
+)
 {
-	float4 gradient;
+	uint2 posInA = originInA + relativePosInA;
+	float3 A = imageA[uint3(posInA, 0)];
 
-	float discrepancy = calculateDiscrepancy(posInA, transform, sizeX, sizeY);
+	float3x3 transform = calculateTransform(
+		translation,
+		paramsOfTransform[0],
+		paramsOfTransform[1],
+		paramsOfTransform[2],
+		paramsOfTransform[3]
+	);
+	float2 posInB = originInA + mul(float3(relativePosInA, 1), transform).xy;
 
-	float3x3 transform0 = transform;
-	transform0[0][0] += dParam;
-	float discrepancy0 = calculateDiscrepancy(posInA, transform0, sizeX, sizeY);
+	float3 B;
 
-	float3x3 transform1 = transform;
-	transform1[0][1] += dParam;
-	float discrepancy1 = calculateDiscrepancy(posInA, transform1, sizeX, sizeY);
+	float2 grad_B_r;
+	float2 grad_B_g;
+	float2 grad_B_b;
 
-	float3x3 transform2 = transform;
-	transform2[1][0] += dParam;
-	float discrepancy2 = calculateDiscrepancy(posInA, transform2, sizeX, sizeY);
+	float2x2 hessian_B_r;
+	float2x2 hessian_B_g;
+	float2x2 hessian_B_b;
+
+	sampleImage(
+		imageB,
+		posInB,
+		B,
+		grad_B_r,
+		grad_B_g,
+		grad_B_b,
+		hessian_B_r,
+		hessian_B_g,
+		hessian_B_b
+	);
 	
-	float3x3 transform3 = transform;
-	transform3[1][1] += dParam;
-	float discrepancy3 = calculateDiscrepancy(posInA, transform3, sizeX, sizeY);
+	float2 grad_B[3] = { grad_B_r,grad_B_g,grad_B_b };
 
-	gradient.x = (discrepancy0 - discrepancy) / dParam;
-	gradient.y = (discrepancy1 - discrepancy) / dParam;
-	gradient.z = (discrepancy2 - discrepancy) / dParam;
-	gradient.w = (discrepancy3 - discrepancy) / dParam;
-
-	return dot(gradient, gradient);
-}
-
-float4 gradientOfGradientLength(uint2 posInA, float3x3 transform, uint sizeX, uint sizeY)
-{
-	float4 gradient;
-
-	float gradientLength = gradientLength(posInA, transform, sizeX, sizeY);
-
-	float3x3 transform0 = transform;
-	transform0[0][0] += dParam;
-	float gradientLength0 = gradientLength(posInA, transform0, sizeX, sizeY);
-
-	float3x3 transform1 = transform;
-	transform1[0][1] += dParam;
-	float gradientLength1 = gradientLength(posInA, transform1, sizeX, sizeY);
-
-	float3x3 transform2 = transform;
-	transform2[1][0] += dParam;
-	float gradientLength2 = gradientLength(posInA, transform2, sizeX, sizeY);
-
-	float3x3 transform3 = transform;
-	transform3[1][1] += dParam;
-	float gradientLength3 = gradientLength(posInA, transform3, sizeX, sizeY);
-
-	gradient.x = (gradientLength0 - gradientLength) / dParam;
-	gradient.y = (gradientLength1 - gradientLength) / dParam;
-	gradient.z = (gradientLength2 - gradientLength) / dParam;
-	gradient.w = (gradientLength3 - gradientLength) / dParam;
-
-	return gradient;
+	float3x3 transform_da0 = calculateTransform_da0(
+		translation,
+		paramsOfTransform[0],
+		paramsOfTransform[1],
+		paramsOfTransform[2],
+		paramsOfTransform[3]
+	);
+	float2 affectedPos = mul(pos)
+	gradient.x = 0;
+	for(int i = 0;i<3;i++)
+		gradient.x+=2*(B[i]-A[i])*dot(grad_B[i],)
 }
 
 void calculateCoarseTransformByNetMethod(
