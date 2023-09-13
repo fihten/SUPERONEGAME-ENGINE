@@ -867,10 +867,46 @@ void calculateGradients(
 		paramsOfTransform[2],
 		paramsOfTransform[3]
 	);
-	float2 affectedPos = mul(pos)
+	float2 pos_da0 = mul(float3(relativePosInA, 1), transform_da0).xy;
 	gradient.x = 0;
-	for(int i = 0;i<3;i++)
-		gradient.x+=2*(B[i]-A[i])*dot(grad_B[i],)
+	for (int i = 0; i < 3; i++)
+		gradient.x += 2 * (B[i] - A[i]) * dot(grad_B[i], pos_da0);
+
+	float3x3 transform_ds0 = calculateTransform_ds0(
+		translation,
+		paramsOfTransform[0],
+		paramsOfTransform[1],
+		paramsOfTransform[2],
+		paramsOfTransform[3]
+	);
+	float2 pos_ds0 = mul(float3(relativePosInA, 1), transform_ds0).xy;
+	gradient.y = 0;
+	for (int i = 0; i < 3; i++)
+		gradient.y += 2 * (B[i] - A[i]) * dot(grad_B[i], pos_ds0);
+
+	float3x3 transform_da1 = calculateTransform_da1(
+		translation,
+		paramsOfTransform[0],
+		paramsOfTransform[1],
+		paramsOfTransform[2],
+		paramsOfTransform[3]
+	);
+	float2 pos_da1 = mul(float3(relativePosInA, 1), transform_da1).xy;
+	gradient.z = 0;
+	for (int i = 0; i < 3; i++)
+		gradient.z += 2 * (B[i] - A[i]) * dot(grad_B[i], pos_da1);
+
+	float3x3 transform_ds1 = calculateTransform_ds1(
+		translation,
+		paramsOfTransform[0],
+		paramsOfTransform[1],
+		paramsOfTransform[2],
+		paramsOfTransform[3]
+	);
+	float2 pos_ds1 = mul(float3(relativePosInA, 1), transform_ds1).xy;
+	gradient.w = 0;
+	for (int i = 0; i < 3; i++)
+		gradient.w += 2 * (B[i] - A[i]) * dot(grad_B[i], pos_ds1);
 }
 
 void calculateCoarseTransformByNetMethod(
