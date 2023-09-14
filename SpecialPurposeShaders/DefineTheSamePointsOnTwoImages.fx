@@ -816,9 +816,9 @@ float calculateDiscrepancy(
 void calculateGradients(
 	Texture2DArray<float4> imageA,
 	uint2 originInA,
-	uint2 relativePosInA,
+	int2 relativePosInA,
 	Texture2DArray<float4> imageB,
-	uint2 translation,
+	int2 translation,
 	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
 	out float4 gradient,
 	out float4 gradientOfGradientSquaredLength
@@ -1036,55 +1036,22 @@ void calculateGradients(
 	}
 }
 
-void calculateCoarseTransformByNetMethod(
-	uint2 posInA, 
-	uint2 posInB, 
-	uint sizeX, 
-	uint sizeY, 
-	out float3x3 transform
+float3x3 calculateCoarseTransformOfAxisX_NetMethod(
+	Texture2DArray<float4> imageA,
+	uint2 posInA,
+	Texture2DArray<float4> imageB,
+	uint2 posInB,
+	uint size
 )
 {
-	float minScale = 0.0f;
-	float maxScale = 10.0f;
-	uint m = 1000;
-	float dS = (maxScale - minScale) / m;
-
-	float minAngle = 0.0f;
-	float maxAngle = 2 * PI;
-	uint n = 100;
-	float dA = (maxAngle - minAngle) / n;
-
-	float discrepancy = 1000000;
-	for (int si = 0; si < m; si++)
+	for (int i = -size; i <= size; i++)
 	{
-		for (int ai = 0; ai < n; ai++)
+		for (int j = -size; j <= size; j++)
 		{
-			float scale = minScale + si * dS;
-			float angle = minAngle + ai * dA;
+			if (i == 0 && j == 0)
+				continue;
 
-			float3x3 translate0 = float3x3(
-				1, 0, 0,
-				0, 1, 0,
-				-posInA.x, -posInA.y, 1
-				);
-			float3x3 scaleRotate = scale * float3x3(
-				cos(angle), sin(angle), 0,
-				-sin(angle), cos(angle), 0,
-				0, 0, 1
-				);
-			float3x3 translate1 = float3x3(
-				1, 0, 0,
-				0, 1, 0,
-				posInB.x, posInB.y, 1
-				);
-
-			float3x3 tmpTransform = mul(translate0, mul(scaleRotate, translate1));
-			float tmpDiscrepancy = calculateDiscrepancy0(posInA, tmpTransform, sizeX, sizeY);
-			if (tmpDiscrepancy < discrepancy)
-			{
-				discrepancy = tmpDiscrepancy;
-				transform = tmpTransform;
-			}
+			float2 relativePosInB = float2(i, j);
 		}
 	}
 }
