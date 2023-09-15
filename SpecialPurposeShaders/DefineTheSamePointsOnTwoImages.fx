@@ -1044,6 +1044,8 @@ float3x3 calculateCoarseTransformOfAxisX_NetMethod(
 	uint size
 )
 {
+	float3x3 transform;
+	float discrepancy = FLT_MAX;
 	for (int i = -size; i <= size; i++)
 	{
 		for (int j = -size; j <= size; j++)
@@ -1051,9 +1053,38 @@ float3x3 calculateCoarseTransformOfAxisX_NetMethod(
 			if (i == 0 && j == 0)
 				continue;
 
-			float2 relativePosInB = float2(i, j);
+			float l = sqrt(i + j);
+			
+			float s = l / size;
+
+			float cos_ = (float)i / (float)l;
+			float sin_ = (float)j / (float)l;
+			
+			float tx = (posInB - posInA).x;
+			float ty = (posInB - posInA).y;
+
+			float3x3 m = float3x3(
+				s * cos_, s * sin_, 0,
+				-s * sin_, s * cos_, 0,
+				tx, ty, 1
+				);
+
+			float d = calculateDiscrepancy(
+				imageA,
+				imageB,
+				posInA,
+				m,
+				size,
+				0
+			);
+			if (d < discrepancy)
+			{
+				discrepancy = d;
+				transform = m;
+			}
 		}
 	}
+	return transform;
 }
 
 void fittingTransformByGradientDescent(
