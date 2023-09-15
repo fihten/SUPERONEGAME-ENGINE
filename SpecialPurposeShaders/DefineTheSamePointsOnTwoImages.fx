@@ -813,7 +813,7 @@ float calculateDiscrepancy(
 	return discrepancy;
 }
 
-void calculateGradients(
+void calculateGradientsOfCell(
 	Texture2DArray<float4> imageA,
 	uint2 originInA,
 	int2 relativePosInA,
@@ -1032,6 +1032,44 @@ void calculateGradients(
 			}
 			x *= 4 * gradient[j];
 			gradientOfGradientSquaredLength[k] += x;
+		}
+	}
+}
+
+void calculateGradients(
+	Texture2DArray<float4> imageA,
+	uint2 originInA,
+	Texture2DArray<float4> imageB,
+	int2 translation,
+	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
+	uint sizeX,
+	uint sizeY,
+	out float4 gradient,
+	out float4 gradientOfGradientSquaredLength
+)
+{
+	gradient = 0;
+	gradientOfGradientSquaredLength = 0;
+	for (int i = -sizeX; i <= sizeX; i++)
+	{
+		for (int j = -sizeY; j <= sizeY; j++)
+		{
+			int2 relativePosInA = int2(i, j);
+			float4 gradient_cell = 0;
+			float4 gradientOfGradientSquaredLength_cell = 0;
+			calculateGradientsOfCell(
+				imageA,
+				originInA,
+				relativePosInA,
+				imageB,
+				translation,
+				paramsOfTransform, // {angle0,scale0,angle1,scale1}
+				gradient_cell,
+				gradientOfGradientSquaredLength_cell
+			);
+
+			gradient += gradient_cell;
+			gradientOfGradientSquaredLength += gradientOfGradientSquaredLength_cell;
 		}
 	}
 }
