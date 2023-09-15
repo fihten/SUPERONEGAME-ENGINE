@@ -1079,11 +1079,12 @@ float3x3 calculateCoarseTransformOfAxisX_NetMethod(
 	uint2 posInA,
 	Texture2DArray<float4> imageB,
 	uint2 posInB,
-	uint size
+	uint size,
+	out float discrepancy
 )
 {
 	float3x3 transform;
-	float discrepancy = FLT_MAX;
+	discrepancy = FLT_MAX;
 	for (int i = -size; i <= size; i++)
 	{
 		for (int j = -size; j <= size; j++)
@@ -1130,11 +1131,12 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 	uint2 posInA,
 	Texture2DArray<float4> imageB,
 	uint2 posInB,
-	uint size
+	uint size,
+	out float discrepancy
 )
 {
 	float3x3 transform;
-	float discrepancy = FLT_MAX;
+	discrepancy = FLT_MAX;
 	for (int i = -size; i <= size; i++)
 	{
 		for (int j = -size; j <= size; j++)
@@ -1174,6 +1176,57 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 		}
 	}
 	return transform;
+}
+
+// returns {angle0, scale0, angle1, scale1}
+float4 calculateCoarseTransformParams_NetMethod(
+	Texture2DArray<float4> imageA,
+	uint2 posInA,
+	Texture2DArray<float4> imageB,
+	uint2 posInB,
+	uint sizeX,
+	uint sizeY
+)
+{
+	float discrepacyAtoBx;
+	float3x3 AtoBx = calculateCoarseTransformOfAxisX_NetMethod(
+		imageA,
+		posInA,
+		imageB,
+		posInB,
+		sizeX,
+		discrepacyAtoBx
+	);
+
+	float discrepacyAtoBy;
+	float3x3 AtoBy = calculateCoarseTransformOfAxisY_NetMethod(
+		imageA,
+		posInA,
+		imageB,
+		posInB,
+		sizeY,
+		discrepacyAtoBy
+	);
+
+	float discrepacyBtoAx;
+	float3x3 BtoAx = calculateCoarseTransformOfAxisX_NetMethod(
+		imageB,
+		posInB,
+		imageA,
+		posInA,
+		sizeX,
+		discrepacyBtoAx
+	);
+
+	float discrepacyBtoAy;
+	float3x3 BtoAy = calculateCoarseTransformOfAxisY_NetMethod(
+		imageB,
+		posInB,
+		imageA,
+		posInA,
+		sizeY,
+		discrepacyBtoAy
+	);
 }
 
 void fittingTransformByGradientDescent(
