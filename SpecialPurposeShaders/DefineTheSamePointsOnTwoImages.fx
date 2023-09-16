@@ -1183,31 +1183,47 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 #define B_TO_A_AXIS_X 2
 #define B_TO_A_AXIS_Y 3
 uint2 defineAxisesWithMinimalDiscrepacies(
-	float4 discrepancies
+	float4 discrepancies,
+	float2 originalAxises,
+	float2 transformedAxises
 )
 {
 	uint2 axises = -1;
-	float2 minimalDiscrepancies = float2(FLT_MAX, FLT_MAX);
+	float minimalDiscrepancy = FLT_MAX;
 	for (int i = 0; i < 4; i++)
 	{
-		if (discrepancies[i] < minimalDiscrepancies[0])
+		if (discrepancies[i] < minimalDiscrepancy)
 		{
-			axises[1] = axises[0];
-			minimalDiscrepancies[1] = minimalDiscrepancies[0];
-
 			axises[0] = i;
-			minimalDiscrepancies[0] = discrepancies[i];
-
-			continue;
+			minimalDiscrepancy = discrepancies[i];
 		}
-		if (discrepancies[i] < minimalDiscrepancies[1])
+	}
+
+	minimalDiscrepancy = FLT_MAX;
+	for (int i = 0; i < 4; i++)
+	{
+		if (i == axises[0])
+			continue;
+
+		bool bSameTexture = i < 2 && axises[0] < 2;
+		bSameTexture |= i > 1 && axises[0] > 1;
+
+		if (discrepancies[i] < minimalDiscrepancy && bSameTexture)
 		{
 			axises[1] = i;
-			minimalDiscrepancies[1] = discrepancies[i];
+			minimalDiscrepancy = discrepancies[i];
+			continue;
+		}
 
+		bool bCollinear = abs(dot(originalAxises[axises[0]], transformedAxises[i]) > 0.9;
+		if (discrepancies[i] < minimalDiscrepancy && !bCollinear)
+		{
+			axises[1] = i;
+			minimalDiscrepancy = discrepancies[i];
 			continue;
 		}
 	}
+
 	return axises;
 }
 
@@ -1272,10 +1288,10 @@ uint calculateCoarseTransformParams_NetMethod(
 	if ((axises.x == A_TO_B_AXIS_X && axises.y == A_TO_B_AXIS_Y) ||
 		(axises.x == A_TO_B_AXIS_Y && axises.y == A_TO_B_AXIS_X))
 	{
-		params[0] = atan2(transformAtoBx[0][1], transformAtoBx[0][0]);
-		params[1] = length(transformAtoBx[0]);
-		params[2] = atan2(transformAtoBy[0][1], transformAtoBy[0][0]);
-		params[3] = length(transformAtoBy[0]);
+		params[0] = atan2(AtoBx[0][1], AtoBx[0][0]);
+		params[1] = length(AtoBx[0]);
+		params[2] = atan2(AtoBy[0][1], AtoBy[0][0]);
+		params[3] = length(AtoBy[0]);
 
 		return MAP_A_TO_B;
 	}
@@ -1283,10 +1299,10 @@ uint calculateCoarseTransformParams_NetMethod(
 	if ((axises.x == B_TO_A_AXIS_X && axises.y == B_TO_A_AXIS_Y) ||
 		(axises.x == B_TO_A_AXIS_Y && axises.y == B_TO_A_AXIS_X))
 	{
-		params[0] = atan2(transformBtoAx[0][1], transformBtoAx[0][0]);
-		params[1] = length(transformBtoAx[0]);
-		params[2] = atan2(transformBtoAy[0][1], transformBtoAy[0][0]);
-		params[3] = length(transformBtoAy[0]);
+		params[0] = atan2(BtoAx[0][1], BtoAx[0][0]);
+		params[1] = length(BtoAx[0]);
+		params[2] = atan2(BtoAy[0][1], BtoAy[0][0]);
+		params[3] = length(BtoAy[0]);
 
 		return MAP_B_TO_A;
 	}
