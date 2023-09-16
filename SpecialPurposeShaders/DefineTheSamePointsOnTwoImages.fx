@@ -1178,24 +1178,63 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 	return transform;
 }
 
+#define A_TO_B_AXIS_X 0
+#define A_TO_B_AXIS_Y 1
+#define B_TO_A_AXIS_X 2
+#define B_TO_A_AXIS_Y 3
+uint2 defineAxisesWithMinimalDiscrepacies(
+	float4 discrepancies
+)
+{
+	uint2 axises = -1;
+	float2 minimalDiscrepancies = float2(FLT_MAX, FLT_MAX);
+	for (int i = 0; i < 4; i++)
+	{
+		if (discrepancies[i] < minimalDiscrepancies[0])
+		{
+			axises[1] = axises[0];
+			minimalDiscrepancies[1] = minimalDiscrepancies[0];
+
+			axises[0] = i;
+			minimalDiscrepancies[0] = discrepancies[i];
+
+			continue;
+		}
+		if (discrepancies[i] < minimalDiscrepancies[1])
+		{
+			axises[1] = i;
+			minimalDiscrepancies[1] = discrepancies[i];
+
+			continue;
+		}
+	}
+	return axises;
+}
+
+#define MAP_A_TO_B 0
+#define MAP_B_TO_A 1
 // returns {angle0, scale0, angle1, scale1}
-float4 calculateCoarseTransformParams_NetMethod(
+uint calculateCoarseTransformParams_NetMethod(
 	Texture2DArray<float4> imageA,
 	uint2 posInA,
 	Texture2DArray<float4> imageB,
 	uint2 posInB,
-	uint sizeX,
-	uint sizeY
+	inout uint sizeX,
+	inout uint sizeY,
+	out float4 params
 )
 {
-	float discrepacyAtoBx;
+	params = 0;
+
+	float4 discrepancies;
+
 	float3x3 AtoBx = calculateCoarseTransformOfAxisX_NetMethod(
 		imageA,
 		posInA,
 		imageB,
 		posInB,
 		sizeX,
-		discrepacyAtoBx
+		discrepacies[A_TO_B_AXIS_X]
 	);
 
 	float discrepacyAtoBy;
@@ -1205,7 +1244,7 @@ float4 calculateCoarseTransformParams_NetMethod(
 		imageB,
 		posInB,
 		sizeY,
-		discrepacyAtoBy
+		discrepacies[A_TO_B_AXIS_Y]
 	);
 
 	float discrepacyBtoAx;
@@ -1215,7 +1254,7 @@ float4 calculateCoarseTransformParams_NetMethod(
 		imageA,
 		posInA,
 		sizeX,
-		discrepacyBtoAx
+		discrepacies[B_TO_A_AXIS_X]
 	);
 
 	float discrepacyBtoAy;
@@ -1225,8 +1264,32 @@ float4 calculateCoarseTransformParams_NetMethod(
 		imageA,
 		posInA,
 		sizeY,
-		discrepacyBtoAy
+		discrepacies[B_TO_A_AXIS_Y]
 	);
+
+	uint2 axises = defineAxisesWithMinimalDiscrepacies(discrepancies);
+
+	if ((axises.x == A_TO_B_AXIS_X && axises.y == A_TO_B_AXIS_Y) ||
+		(axises.x == A_TO_B_AXIS_Y && axises.y == A_TO_B_AXIS_X))
+	{
+		params[0] = atan2(transformAtoBx[0][1], transformAtoBx[0][0]);
+		params[1] = length(transformAtoBx[0]);
+		params[2] = atan2(transformAtoBy[0][1], transformAtoBy[0][0]);
+		params[3] = length(transformAtoBy[0]);
+
+		return MAP_A_TO_B;
+	}
+
+	if ((axises.x == B_TO_A_AXIS_X && axises.y == B_TO_A_AXIS_Y) ||
+		(axises.x == B_TO_A_AXIS_Y && axises.y == B_TO_A_AXIS_X))
+	{
+		params[0] = atan2(transformBtoAx[0][1], transformBtoAx[0][0]);
+		params[1] = length(transformBtoAx[0]);
+		params[2] = atan2(transformBtoAy[0][1], transformBtoAy[0][0]);
+		params[3] = length(transformBtoAy[0]);
+
+		return MAP_B_TO_A;
+	}
 }
 
 void fittingTransformByGradientDescent(
