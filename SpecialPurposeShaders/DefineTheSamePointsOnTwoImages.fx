@@ -1215,7 +1215,9 @@ uint2 defineAxisesWithMinimalDiscrepacies(
 			continue;
 		}
 
-		bool bCollinear = abs(dot(originalAxises[axises[0]], transformedAxises[i]) > 0.9;
+		float2 a = normalize(originalAxises[axises[0]]);
+		float2 b = normalize(transformedAxises[i]);
+		bool bCollinear = abs(dot(a, b) > 0.9;
 		if (discrepancies[i] < minimalDiscrepancy && !bCollinear)
 		{
 			axises[1] = i;
@@ -1227,17 +1229,36 @@ uint2 defineAxisesWithMinimalDiscrepacies(
 	return axises;
 }
 
-#define MAP_A_TO_B 0
-#define MAP_B_TO_A 1
+float3x3 calculateTransform(float2 a0, float2 b0, float2 a1, float2 b1)
+{
+	float d = a0.x * b0.y - a0.y * b0.x;
+	float d0 = a1.x * b0.y - a0.y * b1.x;
+	float d1 = a0.x * b1.x - b0.x * a1.x;
+
+	float m00 = d0 / d;
+	float m10 = d1 / d;
+
+	d0 = a1.y * b0.y - a0.y * b1.y;
+	d1 = a0.x * b1.y - b0.x * a1.y;
+
+	float m01 = d0 / d;
+	float m11 = d1 / d;
+
+	return float3x3(
+		m00, m01, 0,
+		m10, m11, 0,
+		0, 0, 1
+		);
+}
+
 // returns {angle0, scale0, angle1, scale1}
-uint calculateCoarseTransformParams_NetMethod(
+float4 calculateCoarseTransformParams_NetMethod(
 	Texture2DArray<float4> imageA,
 	uint2 posInA,
 	Texture2DArray<float4> imageB,
 	uint2 posInB,
 	inout uint sizeX,
-	inout uint sizeY,
-	out float4 params
+	inout uint sizeY
 )
 {
 	params = 0;
@@ -1285,27 +1306,7 @@ uint calculateCoarseTransformParams_NetMethod(
 
 	uint2 axises = defineAxisesWithMinimalDiscrepacies(discrepancies);
 
-	if ((axises.x == A_TO_B_AXIS_X && axises.y == A_TO_B_AXIS_Y) ||
-		(axises.x == A_TO_B_AXIS_Y && axises.y == A_TO_B_AXIS_X))
-	{
-		params[0] = atan2(AtoBx[0][1], AtoBx[0][0]);
-		params[1] = length(AtoBx[0]);
-		params[2] = atan2(AtoBy[0][1], AtoBy[0][0]);
-		params[3] = length(AtoBy[0]);
-
-		return MAP_A_TO_B;
-	}
-
-	if ((axises.x == B_TO_A_AXIS_X && axises.y == B_TO_A_AXIS_Y) ||
-		(axises.x == B_TO_A_AXIS_Y && axises.y == B_TO_A_AXIS_X))
-	{
-		params[0] = atan2(BtoAx[0][1], BtoAx[0][0]);
-		params[1] = length(BtoAx[0]);
-		params[2] = atan2(BtoAy[0][1], BtoAy[0][0]);
-		params[3] = length(BtoAy[0]);
-
-		return MAP_B_TO_A;
-	}
+	
 }
 
 void fittingTransformByGradientDescent(
