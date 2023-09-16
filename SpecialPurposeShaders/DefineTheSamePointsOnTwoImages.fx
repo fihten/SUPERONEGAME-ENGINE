@@ -1251,6 +1251,8 @@ float3x3 calculateTransform(float2 a0, float2 b0, float2 a1, float2 b1)
 		);
 }
 
+#define MAP_A_TO_B
+#define MAP_B_TO_A
 // returns {angle0, scale0, angle1, scale1}
 float4 calculateCoarseTransformParams_NetMethod(
 	Texture2DArray<float4> imageA,
@@ -1304,9 +1306,38 @@ float4 calculateCoarseTransformParams_NetMethod(
 		discrepacies[B_TO_A_AXIS_Y]
 	);
 
-	uint2 axises = defineAxisesWithMinimalDiscrepacies(discrepancies);
+	float2 originalAxises[4] = {
+		float2(1,0),
+		float2(0,1),
+		float2(1,0),
+		float2(0,1)
+	};
+	float2 transformedAxises[4] = {
+		mul(float3(1,0,0),AtoBx).xy,
+		mul(float3(0,1,0),AtoBy).xy,
+		mul(float3(1,0,0),BtoAx).xy,
+		mul(float3(0,1,0),BtoAy).xy
+	};
 
-	
+	uint2 axises = defineAxisesWithMinimalDiscrepancies(
+		discrepancies,
+		originalAxises,
+		transformedAxises
+	);
+
+	float2 a0 = originalAxises[axises[0]];
+	float2 b0 = originalAxises[axises[1]];
+
+	float2 a1 = transformedAxises[axises[0]];
+	float2 b1 = transformedAxises[axises[1]];
+
+	if ((axises[0] & 2) != (axises[1] & 2))
+	{
+		b0 = transformedAxises[axises[1]];
+		b1 = originalAxises[axises[1]];
+	}
+
+	return (axises[0] & 2) ? MAP_B_TO_A : MAP_A_TO_B;
 }
 
 void fittingTransformByGradientDescent(
