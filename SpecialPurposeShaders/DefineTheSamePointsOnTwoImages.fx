@@ -1254,13 +1254,15 @@ float3x3 calculateTransform(float2 a0, float2 b0, float2 a1, float2 b1)
 #define MAP_A_TO_B
 #define MAP_B_TO_A
 // returns {angle0, scale0, angle1, scale1}
-float4 calculateCoarseTransformParams_NetMethod(
+uint calculateCoarseTransformParams_NetMethod(
 	Texture2DArray<float4> imageA,
 	uint2 posInA,
 	Texture2DArray<float4> imageB,
 	uint2 posInB,
 	inout uint sizeX,
-	inout uint sizeY
+	inout uint sizeY,
+	out float4 params,
+	out float2 translation
 )
 {
 	params = 0;
@@ -1336,6 +1338,15 @@ float4 calculateCoarseTransformParams_NetMethod(
 		b0 = transformedAxises[axises[1]];
 		b1 = originalAxises[axises[1]];
 	}
+
+	float3x3 m = calculateTransform(a0, b0, a1, b1);
+
+	params[0] = atan2(m[0][1], m[0][0]);
+	params[1] = length(m[0]);
+	params[2] = atan2(-m[1][0], m[1][1]);
+	params[3] = length(m[1]);
+
+	translation = (axises[0] & 2) ? posInA - posInB : posInB - posInA;
 
 	return (axises[0] & 2) ? MAP_B_TO_A : MAP_A_TO_B;
 }
