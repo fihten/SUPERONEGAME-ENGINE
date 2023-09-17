@@ -810,6 +810,8 @@ float calculateDiscrepancy(
 		}
 	}
 
+	discrepancy /= (2 * sizeX + 1) * (2 * sizeY + 1);
+
 	return discrepancy;
 }
 
@@ -1072,6 +1074,8 @@ void calculateGradients(
 			gradientOfGradientSquaredLength += gradientOfGradientSquaredLength_cell;
 		}
 	}
+	gradient /= (2 * sizeX + 1) * (2 * sizeY + 1);
+	gradientOfGradientSquaredLength /= (2 * sizeX + 1) * (2 * sizeY + 1);
 }
 
 float3x3 calculateCoarseTransformOfAxisX_NetMethod(
