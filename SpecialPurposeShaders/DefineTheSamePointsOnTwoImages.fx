@@ -1182,7 +1182,7 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 #define A_TO_B_AXIS_Y 1
 #define B_TO_A_AXIS_X 2
 #define B_TO_A_AXIS_Y 3
-uint2 defineAxisesWithMinimalDiscrepacies(
+uint2 defineAxisesWithMinimalDiscrepancies(
 	float4 discrepancies,
 	float2 originalAxises,
 	float2 transformedAxises
@@ -1217,7 +1217,7 @@ uint2 defineAxisesWithMinimalDiscrepacies(
 
 		float2 a = normalize(originalAxises[axises[0]]);
 		float2 b = normalize(transformedAxises[i]);
-		bool bCollinear = abs(dot(a, b) > 0.9;
+		bool bCollinear = abs(dot(a, b)) > 0.9;
 		if (discrepancies[i] < minimalDiscrepancy && !bCollinear)
 		{
 			axises[1] = i;
@@ -1309,16 +1309,16 @@ uint calculateCoarseTransformParams_NetMethod(
 	);
 
 	float2 originalAxises[4] = {
-		float2(1,0),
-		float2(0,1),
-		float2(1,0),
-		float2(0,1)
+		float2(sizeX,0),
+		float2(0,sizeY),
+		float2(sizeX,0),
+		float2(0,sizeY)
 	};
 	float2 transformedAxises[4] = {
-		mul(float3(1,0,0),AtoBx).xy,
-		mul(float3(0,1,0),AtoBy).xy,
-		mul(float3(1,0,0),BtoAx).xy,
-		mul(float3(0,1,0),BtoAy).xy
+		mul(float3(sizeX,0,0),AtoBx).xy,
+		mul(float3(0,sizeY,0),AtoBy).xy,
+		mul(float3(sizeX,0,0),BtoAx).xy,
+		mul(float3(0,sizeY,0),BtoAy).xy
 	};
 
 	uint2 axises = defineAxisesWithMinimalDiscrepancies(
@@ -1347,6 +1347,12 @@ uint calculateCoarseTransformParams_NetMethod(
 	params[3] = length(m[1]);
 
 	translation = (axises[0] & 2) ? posInA - posInB : posInB - posInA;
+
+	sizeX = max(0, floor(abs(a0.x)));
+	sizeX = max(sizeX, floor(abs(b0.x)));
+
+	sizeY = max(0, floor(abs(a0.y)));
+	sizeY = max(sizeY, floor(abs(b0.y)));
 
 	return (axises[0] & 2) ? MAP_B_TO_A : MAP_A_TO_B;
 }
