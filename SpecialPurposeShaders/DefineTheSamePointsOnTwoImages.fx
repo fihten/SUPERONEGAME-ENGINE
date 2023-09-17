@@ -1361,27 +1361,43 @@ uint calculateCoarseTransformParams_NetMethod(
 	return (axises[0] & 2) ? MAP_B_TO_A : MAP_A_TO_B;
 }
 
-void fittingTransformByGradientDescent(
+// return error
+float fittingTransformByGradientDescent(
+	Texture2DArray<float4> imageA,
 	uint2 posInA,
+	Texture2DArray<float4> imageB,
 	uint2 posInB,
 	uint sizeX,
 	uint sizeY,
-	inout float3x3 transform
+	inout float4 params
 )
 {
+	float error = FLT_MAX;
 	for (int i = 0; i < 5; i++)
 	{
-		float gradientLength = gradientLength(posInA, transform, sizeX, sizeY);
-		float4 gradient = gradientOfGradientLength(posInA, transform, sizeX, sizeY);
+		float4 gradient;
+		float4 gradientOfGradientSquaredLength;
+		calculateGradients(
+			imageA,
+			posInA,
+			imageB,
+			posInB - posInA,
+			params, // {angle0,scale0,angle1,scale1}
+			sizeX,
+			sizeY,
+			gradient,
+			gradientOfGradientSquaredLength
+		);
 
-		float c = -gradientLength / dot(gradient, gradient);
+		float gradient2 = dot(gradient, gradient);
+		float c =
+			-gradient2 /
+			dot(gradientOfGradientSquaredLength, gradientOfGradientSquaredLength);
+		params += c * gradientOfGradientSquaredLength;
 
-		transform[0][0] += c * gradient.x;
-		transform[0][1] += c * gradient.y;
-
-		transform[1][0] += c * gradient.z;
-		transform[1][1] += c * gradient.w;
+		error = min(error, gradient2);
 	}
+	return error;
 }
 
 [numthreads(16,16,4)]
