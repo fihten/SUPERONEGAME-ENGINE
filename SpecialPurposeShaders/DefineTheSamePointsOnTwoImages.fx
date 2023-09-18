@@ -1,13 +1,11 @@
 #include "constants.hlsl"
 
-#define size0 5
+#define SIZE 10
 
 Texture2DArray<float4> imageA;
 Texture2DArray<float4> imageB;
 
 RWTexture2D<uint> mapAtoB;
-RWTexture2D<uint> mapBtoA;
-
 RWTexture2D<uint> error;
 
 float4 sampleImage(Texture2DArray<float4> image, float2 fPos)
@@ -1388,11 +1386,13 @@ float fittingTransformByGradientDescent(
 			gradient,
 			gradientOfGradientSquaredLength
 		);
-
+		
+		float gradientOfGradientSquaredLength2 = dot(gradientOfGradientSquaredLength, gradientOfGradientSquaredLength);
+		if (gradientOfGradientSquaredLength2 == 0)
+			return;
+		
 		float gradient2 = dot(gradient, gradient);
-		float c =
-			-gradient2 /
-			dot(gradientOfGradientSquaredLength, gradientOfGradientSquaredLength);
+		float c = -gradient2 / gradientOfGradientSquaredLength2;
 		params += c * gradientOfGradientSquaredLength;
 
 		error = min(error, gradient2);
@@ -1400,14 +1400,15 @@ float fittingTransformByGradientDescent(
 	return error;
 }
 
-[numthreads(16,16,4)]
+[numthreads(32,32,1)]
 void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	uint mip = 0;
 	uint width = 0;
 	uint height = 0;
+	uint elements = 0;
 	uint mips = 0;
-	imageA.GetDimensions(mip, width, height, mips);
+	imageA.GetDimensions(mip, width, height, elements, mips);
 
 	uint wXh = width * height;
 	if (dispatchThreadID.x >= wXh)
@@ -1417,56 +1418,69 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint2 posInA(dispatchThreadID.x % width, dispatchThreadID.x / width);
 	uint2 posInB(dispatchThreadID.y % width, dispatchThreadID.y / width);
-	uint size = size0 + dispatchThreadID.z;
+	
+	uint currentErr = 0;
+	uint originalErr = 0;
+	InterlockedExchange(currentErr, error[posInA], originalErr);
+	if (currentErr < 10)
+		return;
 
-	float3x3 transformAxisX;
-	calculateCoarseTransformByNetMethod(posInA, posInB, size, 0, transformAxisX);
-	float3 axisX = float3(1, 0, 0);
-	axisX = mul(axisX, transformAxisX);
-
-	float3x3 transformAxisY;
-	calculateCoarseTransformByNetMethod(posInA, posInB, 0, size, transformAxisY);
-	float3 axisY = float3(0, 1, 0);
-	axisY = mul(axisY, transformAxisY);
-
-	float3x3 translate0 = float3x3(
-		1, 0, 0,
-		0, 1, 0,
-		-posInA.x, -posInA.y, 1
-		);
-	float3x3 scaleRotate = float3x3(
-		axisX,
-		axisY,
-		float3(0, 0, 1)
-		);
-	float3x3 translate1 = float3x3(
-		1, 0, 0,
-		0, 1, 0,
-		posInB.x, posInB.y, 1
-		);
-
-	float3x3 transform = mul(translate0, mul(scaleRotate, translate1));
-
-	fittingTransformByGradientDescent(
+	float sizeX = SIZE;
+	float sizeY = SIZE;
+	float4 params = 0;
+	float2 translation = 0;
+	uint typeOfMapping = calculateCoarseTransformParams_NetMethod(
+		imageA,
 		posInA,
+		imageB,
 		posInB,
 		sizeX,
 		sizeY,
-		transform
+		params,
+		translation
 	);
 
-	uint err = gradientLength(posInA, transform, sizeX, sizeY)*1000000;
+	uint err = UINT_MAX;
+	if (typeOfMapping == MAP_A_TO_B)
+	{
+		err = 1000000 * fittingTransformByGradientDescent(
+			imageA,
+			posInA,
+			imageB,
+			posInB,
+			sizeX,
+			sizeY,
+			params
+		);
+	}
+	if (typeOfMapping == MAP_B_TO_A)
+	{
+		err = 1000000 * fittingTransformByGradientDescent(
+			imageB,
+			posInB,
+			imageA,
+			posInA,
+			sizeX,
+			sizeY,
+			params
+		);
+	}
+
 	InterlockedMin(error[posInA], err);
+
+	uint original_value;
+	InterlockedExchange(mapAtoB[posInA], UINT_MAX, original_value);
 }
 
-[numthreads(16, 16, 4)]
+[numthreads(32, 32, 1)]
 void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	uint mip = 0;
 	uint width = 0;
 	uint height = 0;
+	uint elements = 0;
 	uint mips = 0;
-	imageA.GetDimensions(mip, width, height, mips);
+	imageA.GetDimensions(mip, width, height, elements, mips);
 
 	uint wXh = width * height;
 	if (dispatchThreadID.x >= wXh)
@@ -1476,56 +1490,59 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint2 posInA(dispatchThreadID.x % width, dispatchThreadID.x / width);
 	uint2 posInB(dispatchThreadID.y % width, dispatchThreadID.y / width);
-	uint size = size0 + dispatchThreadID.z;
 
-	float3x3 transformAxisX;
-	calculateCoarseTransformByNetMethod(posInA, posInB, size, 0, transformAxisX);
-	float3 axisX = float3(1, 0, 0);
-	axisX = mul(axisX, transformAxisX);
+	uint currentMappedPixel = 0;
+	uint originalMappedPixel = 0;
+	InterlockedExchange(currentMappedPixel, mapAtoB[posInA], originalMappedPixel);
+	if (currentMappedPixel != UINT_MAX)
+		return;
 
-	float3x3 transformAxisY;
-	calculateCoarseTransformByNetMethod(posInA, posInB, 0, size, transformAxisY);
-	float3 axisY = float3(0, 1, 0);
-	axisY = mul(axisY, transformAxisY);
-
-	float3x3 translate0 = float3x3(
-		1, 0, 0,
-		0, 1, 0,
-		-posInA.x, -posInA.y, 1
-		);
-	float3x3 scaleRotate = float3x3(
-		axisX,
-		axisY,
-		float3(0, 0, 1)
-		);
-	float3x3 translate1 = float3x3(
-		1, 0, 0,
-		0, 1, 0,
-		posInB.x, posInB.y, 1
-		);
-
-	float3x3 transform = mul(translate0, mul(scaleRotate, translate1));
-
-	fittingTransformByGradientDescent(
+	float sizeX = SIZE;
+	float sizeY = SIZE;
+	float4 params = 0;
+	float2 translation = 0;
+	uint typeOfMapping = calculateCoarseTransformParams_NetMethod(
+		imageA,
 		posInA,
+		imageB,
 		posInB,
 		sizeX,
 		sizeY,
-		transform
+		params,
+		translation
 	);
 
-	uint err = gradientLength(posInA, transform, sizeX, sizeY) * 1000000;
+	uint err = UINT_MAX;
+	if (typeOfMapping == MAP_A_TO_B)
+	{
+		err = 1000000 * fittingTransformByGradientDescent(
+			imageA,
+			posInA,
+			imageB,
+			posInB,
+			sizeX,
+			sizeY,
+			params
+		);
+	}
+	if (typeOfMapping == MAP_B_TO_A)
+	{
+		err = 1000000 * fittingTransformByGradientDescent(
+			imageB,
+			posInB,
+			imageA,
+			posInA,
+			sizeX,
+			sizeY,
+			params
+		);
+	}
+
 	if (err == error[posInA])
 	{
 		uint original_value;
 		InterlockedExchange(mapAtoB[posInA], dispatchThreadID.y);
 	}
-}
-
-[numthreads(32, 32, 1)]
-void CS_map_B_onto_A(uint3 dispatchThreadID : SV_DispatchThreadID)
-{
-
 }
 
 technique11 DefineTheSamePointsOnTwoImages
@@ -1541,11 +1558,5 @@ technique11 DefineTheSamePointsOnTwoImages
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, CS_map_A_onto_B()));
-	}
-	pass MapBontoA
-	{
-		SetVertexShader(NULL);
-		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, CS_map_B_onto_A()));
 	}
 };
