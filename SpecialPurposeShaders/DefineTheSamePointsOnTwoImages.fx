@@ -1420,8 +1420,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint2 posInB(dispatchThreadID.y % width, dispatchThreadID.y / width);
 	
 	uint currentErr = 0;
-	uint originalErr = 0;
-	InterlockedExchange(currentErr, error[posInA], originalErr);
+	InterlockedExchange(error[posInA], error[posInA], currentErr);
 	if (currentErr < 10)
 		return;
 
@@ -1492,8 +1491,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint2 posInB(dispatchThreadID.y % width, dispatchThreadID.y / width);
 
 	uint currentMappedPixel = 0;
-	uint originalMappedPixel = 0;
-	InterlockedExchange(currentMappedPixel, mapAtoB[posInA], originalMappedPixel);
+	InterlockedExchange(mapAtoB[posInA], mapAtoB[posInA], currentMappedPixel);
 	if (currentMappedPixel != UINT_MAX)
 		return;
 
@@ -1541,7 +1539,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (err == error[posInA])
 	{
 		uint original_value;
-		InterlockedExchange(mapAtoB[posInA], dispatchThreadID.y);
+		InterlockedExchange(mapAtoB[posInA], dispatchThreadID.y, original_value);
 	}
 }
 

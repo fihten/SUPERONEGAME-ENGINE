@@ -220,6 +220,20 @@ private:
 	ID3D11Buffer* mOutputClosestObjectsBuffer = nullptr;
 
 private:
+	void initTextureInterpolation();
+	ID3DX11Effect* mTextureInterpolationFX = nullptr;
+	ID3DX11EffectTechnique* mTextureInterpolationTech = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mTextureBeforeInterpolating = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mTextureAfterInterpolating = nullptr;
+
+	ID3D11ShaderResourceView* mTextureBeforeInterpolatingA = nullptr;
+	ID3D11ShaderResourceView* mTextureBeforeInterpolatingB = nullptr;
+
+	ID3D11UnorderedAccessView* mTextureAfterInterpolatingA = nullptr;
+	ID3D11UnorderedAccessView* mTextureAfterInterpolatingB = nullptr;
+
+private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
