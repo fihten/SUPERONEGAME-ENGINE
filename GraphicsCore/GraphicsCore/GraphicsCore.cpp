@@ -1754,3 +1754,30 @@ void GraphicsCore::initTextureInterpolation()
 	mTextureBeforeInterpolating = mTextureInterpolationFX->GetVariableByName("tex")->AsShaderResource();
 	mTextureAfterInterpolating = mTextureInterpolationFX->GetVariableByName("coeffs")->AsUnorderedAccessView();
 }
+
+void GraphicsCore::openTextureA(const std::string& path)
+{
+	char texturesFolder[200];
+	int sz = sizeof texturesFolder / sizeof * texturesFolder;
+	GetEnvironmentVariableA("TEXTURES", texturesFolder, sz);
+
+	std::string texturePath = std::string(texturesFolder) + '\\' + path;
+
+	D3DX11_IMAGE_LOAD_INFO texInfo;
+	D3DX11CreateShaderResourceViewFromFileA(
+		device, texturePath.c_str(), &texInfo, 0, &mTextureBeforeInterpolatingAsrv, 0
+	);
+
+	D3D11_TEXTURE2D_DESC tex_desc;
+	tex_desc.Width = texInfo.Width;
+	tex_desc.Height = texInfo.Height;
+	tex_desc.MipLevels = 0;
+	tex_desc.ArraySize = 36;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	tex_desc.CPUAccessFlags = 0;
+	tex_desc.MiscFlags = 0;
+}

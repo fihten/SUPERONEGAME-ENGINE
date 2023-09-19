@@ -1387,15 +1387,15 @@ float fittingTransformByGradientDescent(
 			gradientOfGradientSquaredLength
 		);
 		
+		float gradient2 = dot(gradient, gradient);
+		error = min(error, gradient2);
+
 		float gradientOfGradientSquaredLength2 = dot(gradientOfGradientSquaredLength, gradientOfGradientSquaredLength);
 		if (gradientOfGradientSquaredLength2 == 0)
-			return;
-		
-		float gradient2 = dot(gradient, gradient);
+			return error;
+
 		float c = -gradient2 / gradientOfGradientSquaredLength2;
 		params += c * gradientOfGradientSquaredLength;
-
-		error = min(error, gradient2);
 	}
 	return error;
 }

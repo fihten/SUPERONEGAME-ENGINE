@@ -219,6 +219,9 @@ private:
 	ID3D11UnorderedAccessView* mClosestObjectsUAV = nullptr;
 	ID3D11Buffer* mOutputClosestObjectsBuffer = nullptr;
 
+public:
+	void openTextureA(const std::string& path);
+
 private:
 	void initTextureInterpolation();
 	ID3DX11Effect* mTextureInterpolationFX = nullptr;
@@ -227,11 +230,13 @@ private:
 	ID3DX11EffectShaderResourceVariable* mTextureBeforeInterpolating = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mTextureAfterInterpolating = nullptr;
 
-	ID3D11ShaderResourceView* mTextureBeforeInterpolatingA = nullptr;
-	ID3D11ShaderResourceView* mTextureBeforeInterpolatingB = nullptr;
+	ID3D11ShaderResourceView* mTextureBeforeInterpolatingAsrv = nullptr;
+	ID3D11ShaderResourceView* mTextureBeforeInterpolatingBsrv = nullptr;
 
-	ID3D11UnorderedAccessView* mTextureAfterInterpolatingA = nullptr;
-	ID3D11UnorderedAccessView* mTextureAfterInterpolatingB = nullptr;
+	ID3D11UnorderedAccessView* mTextureAfterInterpolatingAuav = nullptr;
+	ID3D11UnorderedAccessView* mTextureAfterInterpolatingBuav = nullptr;
+
+	ID3D11Texture2D* mTextureAfterInterpolatingAtex = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
