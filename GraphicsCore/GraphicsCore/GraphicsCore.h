@@ -251,6 +251,9 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
+public:
+	void defineTheSamePoints();
+
 private:
 	void initDefinitionOfTheSamePoints();
 	ID3DX11Effect* mDefinitionOfTheSamePointsFX = nullptr;
@@ -263,7 +266,11 @@ private:
 	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;
 
 	ID3D11Texture2D* mMapAtoBtex = nullptr;
+	ID3D11UnorderedAccessView* mMapAtoBuav = nullptr;
 	ID3D11Texture2D* mMapAtoBtexCopy = nullptr;
+
+	ID3D11Texture2D* mErrorOfTheSamePointsDefinitionTex = nullptr;
+	ID3D11UnorderedAccessView* mErrorOfTheSamePointsDefinitionUAV = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

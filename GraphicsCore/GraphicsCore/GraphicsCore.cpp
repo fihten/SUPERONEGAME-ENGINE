@@ -1815,6 +1815,11 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mMapAtoBtex);
 
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uav_desc.Texture2D.MipSlice = 0;
+	device->CreateUnorderedAccessView(mMapAtoBtex, &uav_desc, &mMapAtoBuav);
+
 	tex_desc.Width = texInfo.Width;
 	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
@@ -1827,6 +1832,24 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mMapAtoBtexCopy);
+
+	tex_desc.Width = texInfo.Width;
+	tex_desc.Height = texInfo.Height;
+	tex_desc.MipLevels = 1;
+	tex_desc.ArraySize = 1;
+	tex_desc.Format = DXGI_FORMAT_R32_UINT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	tex_desc.CPUAccessFlags = 0;
+	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mErrorOfTheSamePointsDefinitionTex);
+
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2D;
+	uav_desc.Texture2D.MipSlice = 0;
+	device->CreateUnorderedAccessView(mErrorOfTheSamePointsDefinitionTex, &uav_desc, &mErrorOfTheSamePointsDefinitionUAV);
 }
 
 void GraphicsCore::openTextureB(const std::string& path)
@@ -1930,4 +1953,29 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
 	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
+}
+
+void GraphicsCore::defineTheSamePoints()
+{
+	mImageA->SetResource(mTextureAfterInterpolatingAsrv);
+	mImageB->SetResource(mTextureAfterInterpolatingBsrv);
+
+	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
+	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	uint32_t groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+	context->CSSetShader(0, 0, 0);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
+
+	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
+	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+	context->CSSetShader(0, 0, 0);
 }
