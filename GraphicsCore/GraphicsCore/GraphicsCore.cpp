@@ -1979,3 +1979,14 @@ void GraphicsCore::defineTheSamePoints()
 	context->Dispatch(groups_x, groups_y, groups_z);
 	context->CSSetShader(0, 0, 0);
 }
+
+Vec2d<uint32_t> GraphicsCore::mapAtoB(const Vec2d<uint32_t>& posInA)
+{
+	context->CopyResource(mMapAtoBtexCopy, mMapAtoBtex);
+
+	D3D11_MAPPED_SUBRESOURCE texData;
+	context->Map(mMapAtoBtexCopy, 0, D3D11_MAP_READ, 0, &texData);
+
+
+	context->Unmap(mMapAtoBtexCopy, 0);
+}
