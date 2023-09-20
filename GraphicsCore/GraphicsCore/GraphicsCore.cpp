@@ -1858,9 +1858,50 @@ void GraphicsCore::interpolateTextureA()
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisU")->Apply(0, context);
 
-	uint32_t threads_x = std::ceil((float)(widthOfA) / 32.0f);
-	uint32_t threads_y = std::ceil((float)(heightOfA) / 32.0f);
-	uint32_t threads_z = 1;
-	context->Dispatch(threads_x, threads_y, threads_z);
+	uint32_t groups_x = std::ceil((float)(widthOfA) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA) / 32.0f);
+	uint32_t groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
 	context->CSSetShader(0, 0, 0);
+
+	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfA) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
+	uint32_t groups_z = 2;
+	context->Dispatch(groups_x, groups_y, groups_z);
+	context->CSSetShader(0, 0, 0);
+}
+
+void GraphicsCore::initDefinitionOfTheSamePoints()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sDefinitionOfTheSamePoints = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sDefinitionOfTheSamePoints.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mDefinitionOfTheSamePointsFX);
+
+	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
+
+	mImageA = mDefinitionOfTheSamePointsFX->GetVariableByName("imageA")->AsShaderResource();
+	mImageB = mDefinitionOfTheSamePointsFX->GetVariableByName("imageB")->AsShaderResource();
+
+	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
+	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
 }

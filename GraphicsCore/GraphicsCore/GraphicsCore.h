@@ -252,6 +252,19 @@ private:
 	uint32_t heightOfB = 0;
 
 private:
+	void initDefinitionOfTheSamePoints();
+	ID3DX11Effect* mDefinitionOfTheSamePointsFX = nullptr;
+	ID3DX11EffectTechnique* mDefineTheSamePointsOnTwoImagesTech = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mImageA = nullptr;
+	ID3DX11EffectShaderResourceVariable* mImageB = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mMapAtoB = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;
+
+	ID3D11Texture2D* mMapAtoBtex = nullptr;
+
+private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
