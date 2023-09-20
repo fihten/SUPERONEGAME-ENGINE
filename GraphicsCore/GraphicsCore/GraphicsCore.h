@@ -263,6 +263,7 @@ private:
 	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;
 
 	ID3D11Texture2D* mMapAtoBtex = nullptr;
+	ID3D11Texture2D* mMapAtoBtexCopy = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

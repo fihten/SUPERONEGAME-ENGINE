@@ -1771,7 +1771,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	D3D11_TEXTURE2D_DESC tex_desc;
 	tex_desc.Width = texInfo.Width;
 	tex_desc.Height = texInfo.Height;
-	tex_desc.MipLevels = 0;
+	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
@@ -1801,6 +1801,32 @@ void GraphicsCore::openTextureA(const std::string& path)
 
 	widthOfA = texInfo.Width;
 	heightOfA = texInfo.Height;
+
+	tex_desc.Width = texInfo.Width;
+	tex_desc.Height = texInfo.Height;
+	tex_desc.MipLevels = 1;
+	tex_desc.ArraySize = 1;
+	tex_desc.Format = DXGI_FORMAT_R32_UINT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	tex_desc.CPUAccessFlags = 0;
+	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mMapAtoBtex);
+
+	tex_desc.Width = texInfo.Width;
+	tex_desc.Height = texInfo.Height;
+	tex_desc.MipLevels = 1;
+	tex_desc.ArraySize = 1;
+	tex_desc.Format = DXGI_FORMAT_R32_UINT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_STAGING;
+	tex_desc.BindFlags = 0;
+	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mMapAtoBtexCopy);
 }
 
 void GraphicsCore::openTextureB(const std::string& path)
@@ -1819,7 +1845,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	D3D11_TEXTURE2D_DESC tex_desc;
 	tex_desc.Width = texInfo.Width;
 	tex_desc.Height = texInfo.Height;
-	tex_desc.MipLevels = 0;
+	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
