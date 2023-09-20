@@ -221,6 +221,9 @@ private:
 
 public:
 	void openTextureA(const std::string& path);
+	void openTextureB(const std::string& path);
+
+	void interpolateTextureA();
 
 private:
 	void initTextureInterpolation();
@@ -236,7 +239,17 @@ private:
 	ID3D11UnorderedAccessView* mTextureAfterInterpolatingAuav = nullptr;
 	ID3D11UnorderedAccessView* mTextureAfterInterpolatingBuav = nullptr;
 
+	ID3D11ShaderResourceView* mTextureAfterInterpolatingAsrv = nullptr;
+	ID3D11ShaderResourceView* mTextureAfterInterpolatingBsrv = nullptr;
+
 	ID3D11Texture2D* mTextureAfterInterpolatingAtex = nullptr;
+	ID3D11Texture2D* mTextureAfterInterpolatingBtex = nullptr;
+
+	uint32_t widthOfA = 0;
+	uint32_t heightOfA = 0;
+
+	uint32_t widthOfB = 0;
+	uint32_t heightOfB = 0;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

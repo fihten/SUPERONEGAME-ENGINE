@@ -1780,4 +1780,87 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mTextureAfterInterpolatingAtex);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = 36;
+	device->CreateUnorderedAccessView(mTextureAfterInterpolatingAtex, &uav_desc, &mTextureAfterInterpolatingAuav);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = 36;
+	device->CreateShaderResourceView(mTextureAfterInterpolatingAtex, &srv_desc, &mTextureAfterInterpolatingAsrv);
+
+	widthOfA = texInfo.Width;
+	heightOfA = texInfo.Height;
+}
+
+void GraphicsCore::openTextureB(const std::string& path)
+{
+	char texturesFolder[200];
+	int sz = sizeof texturesFolder / sizeof * texturesFolder;
+	GetEnvironmentVariableA("TEXTURES", texturesFolder, sz);
+
+	std::string texturePath = std::string(texturesFolder) + '\\' + path;
+
+	D3DX11_IMAGE_LOAD_INFO texInfo;
+	D3DX11CreateShaderResourceViewFromFileA(
+		device, texturePath.c_str(), &texInfo, 0, &mTextureBeforeInterpolatingAsrv, 0
+	);
+
+	D3D11_TEXTURE2D_DESC tex_desc;
+	tex_desc.Width = texInfo.Width;
+	tex_desc.Height = texInfo.Height;
+	tex_desc.MipLevels = 0;
+	tex_desc.ArraySize = 36;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	tex_desc.CPUAccessFlags = 0;
+	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mTextureAfterInterpolatingBtex);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = 36;
+	device->CreateUnorderedAccessView(mTextureAfterInterpolatingBtex, &uav_desc, &mTextureAfterInterpolatingBuav);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = 36;
+	device->CreateShaderResourceView(mTextureAfterInterpolatingBtex, &srv_desc, &mTextureAfterInterpolatingBsrv);
+
+	widthOfB = texInfo.Width;
+	heightOfB = texInfo.Height;
+}
+
+void GraphicsCore::interpolateTextureA()
+{
+	mTextureBeforeInterpolating->SetResource(mTextureBeforeInterpolatingAsrv);
+	mTextureAfterInterpolating->SetUnorderedAccessView(mTextureAfterInterpolatingAuav);
+
+	mTextureInterpolationTech->GetPassByName("AlongAxisU")->Apply(0, context);
+
+	uint32_t threads_x = std::ceil((float)(widthOfA) / 32.0f);
+	uint32_t threads_y = std::ceil((float)(heightOfA) / 32.0f);
+	uint32_t threads_z = 1;
+	context->Dispatch(threads_x, threads_y, threads_z);
+	context->CSSetShader(0, 0, 0);
 }
