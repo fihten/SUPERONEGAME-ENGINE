@@ -253,7 +253,7 @@ private:
 
 public:
 	void defineTheSamePoints();
-	Vec2d<uint32_t> mapAtoB(const Vec2d<uint32_t>& posInA);
+	Vec2d<uint32_t> mapAtoB(Vec2d<uint32_t>& posInA);
 
 private:
 	void initDefinitionOfTheSamePoints();

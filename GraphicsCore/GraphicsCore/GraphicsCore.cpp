@@ -1980,13 +1980,19 @@ void GraphicsCore::defineTheSamePoints()
 	context->CSSetShader(0, 0, 0);
 }
 
-Vec2d<uint32_t> GraphicsCore::mapAtoB(const Vec2d<uint32_t>& posInA)
+Vec2d<uint32_t> GraphicsCore::mapAtoB(Vec2d<uint32_t>& posInA)
 {
 	context->CopyResource(mMapAtoBtexCopy, mMapAtoBtex);
 
 	D3D11_MAPPED_SUBRESOURCE texData;
 	context->Map(mMapAtoBtexCopy, 0, D3D11_MAP_READ, 0, &texData);
 
+	char* pRow = (char*)texData.pData + posInA.y() * texData.RowPitch;
+	uint32_t mappedPixel = *((uint32_t*)pRow + posInA.x());
+
+	Vec2d<uint32_t> posInB(mappedPixel % widthOfB, mappedPixel / widthOfB);
 
 	context->Unmap(mMapAtoBtexCopy, 0);
+
+	return posInB;
 }

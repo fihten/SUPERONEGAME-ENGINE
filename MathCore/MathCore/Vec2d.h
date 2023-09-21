@@ -20,6 +20,9 @@ public:
 		return numbersToString((float*)(v), sizeof v / sizeof * v); 
 	};
 
+	value_type& x() { return v[0]; };
+	value_type& y() { return v[1]; };
+
 	friend value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
 	friend value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
 };
