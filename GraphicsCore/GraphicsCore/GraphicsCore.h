@@ -224,6 +224,7 @@ public:
 	void openTextureB(const std::string& path);
 
 	void interpolateTextureA();
+	void interpolateTextureB();
 
 private:
 	void initTextureInterpolation();

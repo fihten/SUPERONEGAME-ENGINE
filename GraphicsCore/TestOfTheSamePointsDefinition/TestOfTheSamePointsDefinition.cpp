@@ -1,5 +1,8 @@
 #include "GraphicsCore.h"
 #include "StringManager.h"
+#include "Mesh.h"
+
+Mesh testMesh;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -15,6 +18,14 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 {
 	StringManager::init();
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
+
+	GraphicsCore::instance()->openTextureA("imageA.jpg");
+	GraphicsCore::instance()->interpolateTextureA();
+
+	GraphicsCore::instance()->openTextureB("imageB.jpg");
+	GraphicsCore::instance()->interpolateTextureB();
+
+	testMesh = createMeshForTestingDefinitionOfTheSamePoints();
 
 
 	return GraphicsCore::instance()->run();

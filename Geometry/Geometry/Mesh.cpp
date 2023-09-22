@@ -818,6 +818,44 @@ Mesh createAreaOfSelection()
 	return m;
 }
 
+Mesh createMeshForTestingDefinitionOfTheSamePoints()
+{
+	Mesh m;
+
+	m.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("Position"),
+			std::vector<flt2>())
+	);
+	auto& positions = m.flt2_streams.back().second;
+
+	positions.push_back(flt2(-1, -1));
+	positions.push_back(flt2(1, -1));
+	positions.push_back(flt2(1, 1));
+	positions.push_back(flt2(-1, 1));
+
+	auto& inds = m.indicies;
+
+	inds.push_back(0);
+	inds.push_back(2);
+	inds.push_back(1);
+
+	inds.push_back(0);
+	inds.push_back(3);
+	inds.push_back(2);
+
+	m.setTechnique(StringManager::toStringId("TestOfTheSamePointsDefinition"));
+	m.setPass(StringManager::toStringId("P0"));
+
+	ParamKey imageA_key{ StringManager::toStringId("imageA"),-1, string_id(-1) };
+	m.setParam(imageA_key, StringManager::toStringId("imageA.jpg"));
+
+	ParamKey imageB_key{ StringManager::toStringId("imageB"),-1, string_id(-1) };
+	m.setParam(imageB_key, StringManager::toStringId("imageB.jpg"));
+
+	return m;
+}
+
 void Mesh::setTechnique(string_id technique_name_id)
 {
 	this->technique_name_id = technique_name_id;

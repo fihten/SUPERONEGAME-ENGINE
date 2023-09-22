@@ -1922,6 +1922,28 @@ void GraphicsCore::interpolateTextureA()
 	context->CSSetShader(0, 0, 0);
 }
 
+void GraphicsCore::interpolateTextureB()
+{
+	mTextureBeforeInterpolating->SetResource(mTextureBeforeInterpolatingBsrv);
+	mTextureAfterInterpolating->SetUnorderedAccessView(mTextureAfterInterpolatingBuav);
+
+	mTextureInterpolationTech->GetPassByName("AlongAxisU")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfB) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfB) / 32.0f);
+	uint32_t groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+	context->CSSetShader(0, 0, 0);
+
+	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfB) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
+	uint32_t groups_z = 2;
+	context->Dispatch(groups_x, groups_y, groups_z);
+	context->CSSetShader(0, 0, 0);
+}
+
 void GraphicsCore::initDefinitionOfTheSamePoints()
 {
 	char shadersFolder[200];
