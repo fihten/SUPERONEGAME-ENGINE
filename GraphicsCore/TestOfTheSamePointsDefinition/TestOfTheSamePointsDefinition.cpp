@@ -11,7 +11,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 void drawFunc(GraphicsCore* graphicsCore)
 {
-
+	graphicsCore->startFrame();
+	graphicsCore->draw(testMesh);
+	graphicsCore->endFrame();
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
@@ -24,6 +26,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	GraphicsCore::instance()->openTextureB("imageB.jpg");
 	GraphicsCore::instance()->interpolateTextureB();
+
+	GraphicsCore::instance()->defineTheSamePoints();
 
 	testMesh = createMeshForTestingDefinitionOfTheSamePoints();
 

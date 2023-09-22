@@ -2002,19 +2002,28 @@ void GraphicsCore::defineTheSamePoints()
 	context->CSSetShader(0, 0, 0);
 }
 
-Vec2d<uint32_t> GraphicsCore::mapAtoB(Vec2d<uint32_t>& posInA)
+flt2 GraphicsCore::mapAtoB(flt2& uvA)
 {
 	context->CopyResource(mMapAtoBtexCopy, mMapAtoBtex);
 
 	D3D11_MAPPED_SUBRESOURCE texData;
 	context->Map(mMapAtoBtexCopy, 0, D3D11_MAP_READ, 0, &texData);
 
-	char* pRow = (char*)texData.pData + posInA.y() * texData.RowPitch;
-	uint32_t mappedPixel = *((uint32_t*)pRow + posInA.x());
+	float posInAx = widthOfA * uvA.x() - 0.5f;
+	float posInAy = heightOfA * uvA.y() - 0.5f;
 
-	Vec2d<uint32_t> posInB(mappedPixel % widthOfB, mappedPixel / widthOfB);
+	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 1);
+	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 1);
+
+	char* pRow = (char*)texData.pData + uiPosInAy * texData.RowPitch;
+	uint32_t mappedPixel = *((uint32_t*)pRow + uiPosInAx);
+
+	uint32_t uiPosInBx = mappedPixel % widthOfB;
+	uint32_t uiPosInBy = mappedPixel / widthOfB;
+
+	flt2 uvB(((float)(uiPosInBx)+0.5f) / widthOfB, ((float)(uiPosInBy)+0.5f) / heightOfB);
 
 	context->Unmap(mMapAtoBtexCopy, 0);
 
-	return posInB;
+	return uvB;
 }

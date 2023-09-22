@@ -254,7 +254,7 @@ private:
 
 public:
 	void defineTheSamePoints();
-	Vec2d<uint32_t> mapAtoB(Vec2d<uint32_t>& posInA);
+	flt2 mapAtoB(flt2& uvA);
 
 private:
 	void initDefinitionOfTheSamePoints();
