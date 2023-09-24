@@ -232,19 +232,43 @@ private:
 	ID3DX11EffectTechnique* mTextureInterpolationTech = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mTextureBeforeInterpolating = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mTextureAfterInterpolating = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mR = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mG = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mB = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mA = nullptr;
 
 	ID3D11ShaderResourceView* mTextureBeforeInterpolatingAsrv = nullptr;
 	ID3D11ShaderResourceView* mTextureBeforeInterpolatingBsrv = nullptr;
 
-	ID3D11UnorderedAccessView* mTextureAfterInterpolatingAuav = nullptr;
-	ID3D11UnorderedAccessView* mTextureAfterInterpolatingBuav = nullptr;
+	ID3D11UnorderedAccessView* mARuav = nullptr;
+	ID3D11UnorderedAccessView* mAGuav = nullptr;
+	ID3D11UnorderedAccessView* mABuav = nullptr;
+	ID3D11UnorderedAccessView* mAAuav = nullptr;
 
-	ID3D11ShaderResourceView* mTextureAfterInterpolatingAsrv = nullptr;
-	ID3D11ShaderResourceView* mTextureAfterInterpolatingBsrv = nullptr;
+	ID3D11UnorderedAccessView* mBRuav = nullptr;
+	ID3D11UnorderedAccessView* mBGuav = nullptr;
+	ID3D11UnorderedAccessView* mBBuav = nullptr;
+	ID3D11UnorderedAccessView* mBAuav = nullptr;
 
-	ID3D11Texture2D* mTextureAfterInterpolatingAtex = nullptr;
-	ID3D11Texture2D* mTextureAfterInterpolatingBtex = nullptr;
+	ID3D11ShaderResourceView* mARsrv = nullptr;
+	ID3D11ShaderResourceView* mAGsrv = nullptr;
+	ID3D11ShaderResourceView* mABsrv = nullptr;
+	ID3D11ShaderResourceView* mAAsrv = nullptr;
+
+	ID3D11ShaderResourceView* mBRsrv = nullptr;
+	ID3D11ShaderResourceView* mBGsrv = nullptr;
+	ID3D11ShaderResourceView* mBBsrv = nullptr;
+	ID3D11ShaderResourceView* mBAsrv = nullptr;
+
+	ID3D11Texture2D* mARtex = nullptr;
+	ID3D11Texture2D* mAGtex = nullptr;
+	ID3D11Texture2D* mABtex = nullptr;
+	ID3D11Texture2D* mAAtex = nullptr;
+
+	ID3D11Texture2D* mBRtex = nullptr;
+	ID3D11Texture2D* mBGtex = nullptr;
+	ID3D11Texture2D* mBBtex = nullptr;
+	ID3D11Texture2D* mBAtex = nullptr;
 
 	uint32_t widthOfA = 0;
 	uint32_t heightOfA = 0;
@@ -261,8 +285,15 @@ private:
 	ID3DX11Effect* mDefinitionOfTheSamePointsFX = nullptr;
 	ID3DX11EffectTechnique* mDefineTheSamePointsOnTwoImagesTech = nullptr;
 
-	ID3DX11EffectShaderResourceVariable* mImageA = nullptr;
-	ID3DX11EffectShaderResourceVariable* mImageB = nullptr;
+	ID3DX11EffectShaderResourceVariable* mAr = nullptr;
+	ID3DX11EffectShaderResourceVariable* mAg = nullptr;
+	ID3DX11EffectShaderResourceVariable* mAb = nullptr;
+	ID3DX11EffectShaderResourceVariable* mAa = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mBr = nullptr;
+	ID3DX11EffectShaderResourceVariable* mBg = nullptr;
+	ID3DX11EffectShaderResourceVariable* mBb = nullptr;
+	ID3DX11EffectShaderResourceVariable* mBa = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* mMapAtoB = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;

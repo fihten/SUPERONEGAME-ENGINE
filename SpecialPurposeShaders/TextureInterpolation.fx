@@ -1,7 +1,42 @@
 #define COLUMNS 6
 
 Texture2D tex;
-RWTexture2DArray<float4> coeffs;
+
+RWTexture2DArray<float> r;
+RWTexture2DArray<float> g;
+RWTexture2DArray<float> b;
+RWTexture2DArray<float> a;
+
+void set(
+	RWTexture2DArray<float> coeffs_r,
+	RWTexture2DArray<float> coeffs_g,
+	RWTexture2DArray<float> coeffs_b,
+	RWTexture2DArray<float> coeffs_a,
+	uint3 pos,
+	float4 value
+	)
+{
+	coeffs_r[pos] = value.r;
+	coeffs_g[pos] = value.g;
+	coeffs_b[pos] = value.b;
+	coeffs_a[pos] = value.a;
+}
+
+float4 get(
+	RWTexture2DArray<float> coeffs_r,
+	RWTexture2DArray<float> coeffs_g,
+	RWTexture2DArray<float> coeffs_b,
+	RWTexture2DArray<float> coeffs_a,
+	uint3 pos
+)
+{
+	float4 res;
+	res.r = coeffs_r[pos];
+	res.g = coeffs_g[pos];
+	res.b = coeffs_b[pos];
+	res.a = coeffs_a[pos];
+	return res;
+}
 
 [numthreads(32, 32, 1)]
 void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -68,12 +103,12 @@ void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 		);
 	float4 f12 = c + c_next_next - 2 * c_next;
 
-	coeffs[uint3(ij, 0)] = f0;
-	coeffs[uint3(ij, 1)] = f01;
-	coeffs[uint3(ij, 2)] = 0.5 * f02;
-	coeffs[uint3(ij, 3)] = 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12;
-	coeffs[uint3(ij, 4)] = -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12;
-	coeffs[uint3(ij, 5)] = 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12;
+	set(r, g, b, a, uint3(ij, 0), f0);
+	set(r, g, b, a, uint3(ij, 1), f01);
+	set(r, g, b, a, uint3(ij, 2), 0.5 * f02);
+	set(r, g, b, a, uint3(ij, 3), 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12);
+	set(r, g, b, a, uint3(ij, 4), -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12);
+	set(r, g, b, a, uint3(ij, 5), 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12);
 }
 
 [numthreads(16, 16, 4)]
@@ -85,7 +120,7 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint width = 0;
 	uint height = 0;
 	uint elements = 0;
-	coeffs.GetDimensions(width, height, elements);
+	r.GetDimensions(width, height, elements);
 
 	if (ijk.x > width - 1)
 		return;
@@ -94,32 +129,32 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (col > 5)
 		return;
 
-	float4 a = coeffs[ijk];
+	float4 a_ = get(r, g, b, a, ijk);
 
 	uint3 ijk_prev_prev = ijk;
 	ijk_prev_prev.y = max(ijk.y - 2, 0);
-	float4 a_prev_prev = coeffs[ijk_prev_prev];
+	float4 a_prev_prev = get(r, g, b, a, ijk_prev_prev); 
 
 	uint3 ijk_prev = ijk;
 	ijk_prev.y = max(ijk.y - 1, 0);
-	float4 a_prev = coeffs[ijk_prev];
+	float4 a_prev = get(r, g, b, a, ijk_prev); 
 
 	uint3 ijk_next = ijk;
 	ijk_next.y = min(ijk_next.y + 1, height - 1);
-	float4 a_next = coeffs[ijk_next];
+	float4 a_next = get(r, g, b, a, ijk_next); 
 
 	uint3 ijk_next_next = ijk;
 	ijk_next_next.y = min(ijk_next_next.y + 2, height - 1);
-	float4 a_next_next = coeffs[ijk_next_next];
+	float4 a_next_next = get(r, g, b, a, ijk_next_next); 
 
-	float4 f0 = a;
+	float4 f0 = a_;
 	float4 f1 = a_next;
 
 	bool4 extremum0 = bool4(
-		(a_prev.x - a.x) * (a_next.x - a.x) >= 0,
-		(a_prev.y - a.y) * (a_next.y - a.y) >= 0,
-		(a_prev.z - a.z) * (a_next.z - a.z) >= 0,
-		(a_prev.w - a.w) * (a_next.w - a.w) >= 0
+		(a_prev.x - a_.x) * (a_next.x - a_.x) >= 0,
+		(a_prev.y - a_.y) * (a_next.y - a_.y) >= 0,
+		(a_prev.z - a_.z) * (a_next.z - a_.z) >= 0,
+		(a_prev.w - a_.w) * (a_next.w - a_.w) >= 0
 		);
 	float4 f01 = float4(
 		extremum0.x ? 0 : 0.5 * (a_next.x - a_prev.x),
@@ -127,28 +162,28 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 		extremum0.z ? 0 : 0.5 * (a_next.z - a_prev.z),
 		extremum0.w ? 0 : 0.5 * (a_next.w - a_prev.w)
 		);
-	float4 f02 = a_prev + a_next - 2 * a;
+	float4 f02 = a_prev + a_next - 2 * a_;
 
 	bool4 extremum1 = bool4(
-		(a_next_next.x - a_next.x) * (a.x - a_next.x) >= 0,
-		(a_next_next.y - a_next.y) * (a.y - a_next.y) >= 0,
-		(a_next_next.z - a_next.z) * (a.z - a_next.z) >= 0,
-		(a_next_next.w - a_next.w) * (a.w - a_next.w) >= 0
+		(a_next_next.x - a_next.x) * (a_.x - a_next.x) >= 0,
+		(a_next_next.y - a_next.y) * (a_.y - a_next.y) >= 0,
+		(a_next_next.z - a_next.z) * (a_.z - a_next.z) >= 0,
+		(a_next_next.w - a_next.w) * (a_.w - a_next.w) >= 0
 		);
 	float4 f11 = float4(
-		extremum1.x ? 0 : 0.5 * (a_next_next.x - a.x),
-		extremum1.y ? 0 : 0.5 * (a_next_next.y - a.y),
-		extremum1.z ? 0 : 0.5 * (a_next_next.z - a.z),
-		extremum1.w ? 0 : 0.5 * (a_next_next.w - a.w)
+		extremum1.x ? 0 : 0.5 * (a_next_next.x - a_.x),
+		extremum1.y ? 0 : 0.5 * (a_next_next.y - a_.y),
+		extremum1.z ? 0 : 0.5 * (a_next_next.z - a_.z),
+		extremum1.w ? 0 : 0.5 * (a_next_next.w - a_.w)
 		);
-	float4 f12 = a + a_next_next - 2 * a_next;
+	float4 f12 = a_ + a_next_next - 2 * a_next;
 
 	uint2 ij = ijk.xy;
-	coeffs[uint3(ij, 1 * COLUMNS + col)] = f01;
-	coeffs[uint3(ij, 2 * COLUMNS + col)] = 0.5 * f02;
-	coeffs[uint3(ij, 3 * COLUMNS + col)] = 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12;
-	coeffs[uint3(ij, 4 * COLUMNS + col)] = -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12;
-	coeffs[uint3(ij, 5 * COLUMNS + col)] = 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12;
+	set(r, g, b, a, uint3(ij, 1 * COLUMNS + col), f01);
+	set(r, g, b, a, uint3(ij, 2 * COLUMNS + col), 0.5 * f02);
+	set(r, g, b, a, uint3(ij, 3 * COLUMNS + col), 10 * f1 - 10 * f0 - 6 * f01 - 1.5 * f02 - 4 * f11 + 0.5 * f12);
+	set(r, g, b, a, uint3(ij, 4 * COLUMNS + col), -15 * f1 + 15 * f0 + 8 * f01 + 7 * f11 + 1.5 * f02 - f12);
+	set(r, g, b, a, uint3(ij, 5 * COLUMNS + col), 6 * f1 - 6 * f0 - 3 * f01 - 3 * f11 - 0.5 * f02 + 0.5 * f12);
 }
 
 technique11 TextureInterpolation

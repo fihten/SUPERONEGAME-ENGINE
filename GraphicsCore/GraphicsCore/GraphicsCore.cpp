@@ -171,6 +171,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initFineObjectsSelection();
 	initRoughObjectsSelectionBySegments();
 	initFineObjectsSelectionBySegments();
+
+	// 12. Init photogrammetry
+	initTextureInterpolation();
+	initDefinitionOfTheSamePoints();
 }
 
 void GraphicsCore::startFrame()
@@ -1752,7 +1756,11 @@ void GraphicsCore::initTextureInterpolation()
 	mTextureInterpolationTech = mTextureInterpolationFX->GetTechniqueByName("TextureInterpolation");
 
 	mTextureBeforeInterpolating = mTextureInterpolationFX->GetVariableByName("tex")->AsShaderResource();
-	mTextureAfterInterpolating = mTextureInterpolationFX->GetVariableByName("coeffs")->AsUnorderedAccessView();
+	
+	mR = mTextureInterpolationFX->GetVariableByName("r")->AsUnorderedAccessView();
+	mG = mTextureInterpolationFX->GetVariableByName("g")->AsUnorderedAccessView();
+	mB = mTextureInterpolationFX->GetVariableByName("b")->AsUnorderedAccessView();
+	mA = mTextureInterpolationFX->GetVariableByName("a")->AsUnorderedAccessView();
 }
 
 void GraphicsCore::openTextureA(const std::string& path)
@@ -1773,31 +1781,40 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
 	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
-	device->CreateTexture2D(&tex_desc, nullptr, &mTextureAfterInterpolatingAtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mARtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mAGtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mABtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mAAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
 	uav_desc.Texture2DArray.ArraySize = 36;
-	device->CreateUnorderedAccessView(mTextureAfterInterpolatingAtex, &uav_desc, &mTextureAfterInterpolatingAuav);
+	device->CreateUnorderedAccessView(mARtex, &uav_desc, &mARuav);
+	device->CreateUnorderedAccessView(mAGtex, &uav_desc, &mAGuav);
+	device->CreateUnorderedAccessView(mABtex, &uav_desc, &mABuav);
+	device->CreateUnorderedAccessView(mAAtex, &uav_desc, &mAAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srv_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = 36;
-	device->CreateShaderResourceView(mTextureAfterInterpolatingAtex, &srv_desc, &mTextureAfterInterpolatingAsrv);
+	device->CreateShaderResourceView(mARtex, &srv_desc, &mARsrv);
+	device->CreateShaderResourceView(mAGtex, &srv_desc, &mAGsrv);
+	device->CreateShaderResourceView(mABtex, &srv_desc, &mABsrv);
+	device->CreateShaderResourceView(mAAtex, &srv_desc, &mAAsrv);
 
 	widthOfA = texInfo.Width;
 	heightOfA = texInfo.Height;
@@ -1870,31 +1887,40 @@ void GraphicsCore::openTextureB(const std::string& path)
 	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
 	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
-	device->CreateTexture2D(&tex_desc, nullptr, &mTextureAfterInterpolatingBtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mBRtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mBGtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mBBtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mBAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
 	uav_desc.Texture2DArray.ArraySize = 36;
-	device->CreateUnorderedAccessView(mTextureAfterInterpolatingBtex, &uav_desc, &mTextureAfterInterpolatingBuav);
+	device->CreateUnorderedAccessView(mBRtex, &uav_desc, &mBRuav);
+	device->CreateUnorderedAccessView(mBGtex, &uav_desc, &mBGuav);
+	device->CreateUnorderedAccessView(mBBtex, &uav_desc, &mBBuav);
+	device->CreateUnorderedAccessView(mBAtex, &uav_desc, &mBAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srv_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = 36;
-	device->CreateShaderResourceView(mTextureAfterInterpolatingBtex, &srv_desc, &mTextureAfterInterpolatingBsrv);
+	device->CreateShaderResourceView(mBRtex, &srv_desc, &mBRsrv);
+	device->CreateShaderResourceView(mBGtex, &srv_desc, &mBGsrv);
+	device->CreateShaderResourceView(mBBtex, &srv_desc, &mBBsrv);
+	device->CreateShaderResourceView(mBAtex, &srv_desc, &mBAsrv);
 
 	widthOfB = texInfo.Width;
 	heightOfB = texInfo.Height;
@@ -1903,7 +1929,10 @@ void GraphicsCore::openTextureB(const std::string& path)
 void GraphicsCore::interpolateTextureA()
 {
 	mTextureBeforeInterpolating->SetResource(mTextureBeforeInterpolatingAsrv);
-	mTextureAfterInterpolating->SetUnorderedAccessView(mTextureAfterInterpolatingAuav);
+	mR->SetUnorderedAccessView(mARuav);
+	mG->SetUnorderedAccessView(mAGuav);
+	mB->SetUnorderedAccessView(mABuav);
+	mA->SetUnorderedAccessView(mAAuav);
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisU")->Apply(0, context);
 
@@ -1915,9 +1944,9 @@ void GraphicsCore::interpolateTextureA()
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfA) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
-	uint32_t groups_z = 2;
+	groups_x = std::ceil((float)(widthOfA) / 16.0f);
+	groups_y = std::ceil((float)(heightOfA) / 16.0f);
+	groups_z = 2;
 	context->Dispatch(groups_x, groups_y, groups_z);
 	context->CSSetShader(0, 0, 0);
 }
@@ -1925,7 +1954,10 @@ void GraphicsCore::interpolateTextureA()
 void GraphicsCore::interpolateTextureB()
 {
 	mTextureBeforeInterpolating->SetResource(mTextureBeforeInterpolatingBsrv);
-	mTextureAfterInterpolating->SetUnorderedAccessView(mTextureAfterInterpolatingBuav);
+	mR->SetUnorderedAccessView(mBRuav);
+	mG->SetUnorderedAccessView(mBGuav);
+	mB->SetUnorderedAccessView(mBBuav);
+	mA->SetUnorderedAccessView(mBAuav);
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisU")->Apply(0, context);
 
@@ -1937,9 +1969,9 @@ void GraphicsCore::interpolateTextureB()
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfB) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
-	uint32_t groups_z = 2;
+	groups_x = std::ceil((float)(widthOfB) / 16.0f);
+	groups_y = std::ceil((float)(heightOfB) / 16.0f);
+	groups_z = 2;
 	context->Dispatch(groups_x, groups_y, groups_z);
 	context->CSSetShader(0, 0, 0);
 }
@@ -1970,8 +2002,15 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
-	mImageA = mDefinitionOfTheSamePointsFX->GetVariableByName("imageA")->AsShaderResource();
-	mImageB = mDefinitionOfTheSamePointsFX->GetVariableByName("imageB")->AsShaderResource();
+	mAr = mDefinitionOfTheSamePointsFX->GetVariableByName("Ar")->AsShaderResource();
+	mAg = mDefinitionOfTheSamePointsFX->GetVariableByName("Ag")->AsShaderResource();
+	mAb = mDefinitionOfTheSamePointsFX->GetVariableByName("Ab")->AsShaderResource();
+	mAa = mDefinitionOfTheSamePointsFX->GetVariableByName("Aa")->AsShaderResource();
+
+	mBr = mDefinitionOfTheSamePointsFX->GetVariableByName("Br")->AsShaderResource();
+	mBg = mDefinitionOfTheSamePointsFX->GetVariableByName("Bg")->AsShaderResource();
+	mBb = mDefinitionOfTheSamePointsFX->GetVariableByName("Bb")->AsShaderResource();
+	mBa = mDefinitionOfTheSamePointsFX->GetVariableByName("Ba")->AsShaderResource();
 
 	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
 	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
@@ -1979,8 +2018,15 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 void GraphicsCore::defineTheSamePoints()
 {
-	mImageA->SetResource(mTextureAfterInterpolatingAsrv);
-	mImageB->SetResource(mTextureAfterInterpolatingBsrv);
+	mAr->SetResource(mARsrv);
+	mAg->SetResource(mAGsrv);
+	mAb->SetResource(mABsrv);
+	mAa->SetResource(mAAsrv);
+
+	mBr->SetResource(mBRsrv);
+	mBg->SetResource(mBGsrv);
+	mBb->SetResource(mBBsrv);
+	mBa->SetResource(mBAsrv);
 
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
