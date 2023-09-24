@@ -109,437 +109,6 @@ float4 sampleImage(
 	return color;
 }
 
-float4 sampleImage_dx(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	uint2 uiPos = floor(fPos);
-
-	float4 a00 = get(r, g, b, a, uint3(uiPos, 0));
-	float4 a10 = get(r, g, b, a, uint3(uiPos, 1));
-	float4 a20 = get(r, g, b, a, uint3(uiPos, 2));
-	float4 a30 = get(r, g, b, a, uint3(uiPos, 3));
-	float4 a40 = get(r, g, b, a, uint3(uiPos, 4));
-	float4 a50 = get(r, g, b, a, uint3(uiPos, 5));
-
-	float4 a01 = get(r, g, b, a, uint3(uiPos, 6));
-	float4 a11 = get(r, g, b, a, uint3(uiPos, 7));
-	float4 a21 = get(r, g, b, a, uint3(uiPos, 8));
-	float4 a31 = get(r, g, b, a, uint3(uiPos, 9));
-	float4 a41 = get(r, g, b, a, uint3(uiPos, 10));
-	float4 a51 = get(r, g, b, a, uint3(uiPos, 11));
-
-	float4 a02 = get(r, g, b, a, uint3(uiPos, 12));
-	float4 a12 = get(r, g, b, a, uint3(uiPos, 13));
-	float4 a22 = get(r, g, b, a, uint3(uiPos, 14));
-	float4 a32 = get(r, g, b, a, uint3(uiPos, 15));
-	float4 a42 = get(r, g, b, a, uint3(uiPos, 16));
-	float4 a52 = get(r, g, b, a, uint3(uiPos, 17));
-
-	float4 a03 = get(r, g, b, a, uint3(uiPos, 18));
-	float4 a13 = get(r, g, b, a, uint3(uiPos, 19));
-	float4 a23 = get(r, g, b, a, uint3(uiPos, 20));
-	float4 a33 = get(r, g, b, a, uint3(uiPos, 21));
-	float4 a43 = get(r, g, b, a, uint3(uiPos, 22));
-	float4 a53 = get(r, g, b, a, uint3(uiPos, 23));
-
-	float4 a04 = get(r, g, b, a, uint3(uiPos, 24));
-	float4 a14 = get(r, g, b, a, uint3(uiPos, 25));
-	float4 a24 = get(r, g, b, a, uint3(uiPos, 26));
-	float4 a34 = get(r, g, b, a, uint3(uiPos, 27));
-	float4 a44 = get(r, g, b, a, uint3(uiPos, 28));
-	float4 a54 = get(r, g, b, a, uint3(uiPos, 29));
-
-	float4 a05 = get(r, g, b, a, uint3(uiPos, 30));
-	float4 a15 = get(r, g, b, a, uint3(uiPos, 31));
-	float4 a25 = get(r, g, b, a, uint3(uiPos, 32));
-	float4 a35 = get(r, g, b, a, uint3(uiPos, 33));
-	float4 a45 = get(r, g, b, a, uint3(uiPos, 34));
-	float4 a55 = get(r, g, b, a, uint3(uiPos, 35));
-
-	float2 xy = fPos - uiPos;
-
-	float x = xy.x;
-	float x2 = x * x;
-	float x3 = x2 * x;
-	float x4 = x3 * x;
-	float x5 = x4 * x;
-
-	float x_dx = 1;
-	float x2_dx = 2 * x;
-	float x3_dx = 3 * x2;
-	float x4_dx = 4 * x3;
-	float x5_dx = 5 * x4;
-
-	float y = xy.y;
-	float y2 = y * y;
-	float y3 = y2 * y;
-	float y4 = y3 * y;
-	float y5 = y4 * y;
-
-	float4 color_dx = 0;
-
-	color_dx += a10 * x_dx + a20 * x2_dx + a30 * x3_dx + a40 * x4_dx + a50 * x5_dx;
-	color_dx += (a11 * x_dx + a21 * x2_dx + a31 * x3_dx + a41 * x4_dx + a51 * x5_dx) * y;
-	color_dx += (a12 * x_dx + a22 * x2_dx + a32 * x3_dx + a42 * x4_dx + a52 * x5_dx) * y2;
-	color_dx += (a13 * x_dx + a23 * x2_dx + a33 * x3_dx + a43 * x4_dx + a53 * x5_dx) * y3;
-	color_dx += (a14 * x_dx + a24 * x2_dx + a34 * x3_dx + a44 * x4_dx + a54 * x5_dx) * y4;
-	color_dx += (a15 * x_dx + a25 * x2_dx + a35 * x3_dx + a45 * x4_dx + a55 * x5_dx) * y5;
-
-	return color_dx;
-}
-
-float4 sampleImage_dy(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	uint2 uiPos = floor(fPos);
-
-	float4 a00 = get(r, g, b, a, uint3(uiPos, 0));
-	float4 a10 = get(r, g, b, a, uint3(uiPos, 1));
-	float4 a20 = get(r, g, b, a, uint3(uiPos, 2));
-	float4 a30 = get(r, g, b, a, uint3(uiPos, 3));
-	float4 a40 = get(r, g, b, a, uint3(uiPos, 4));
-	float4 a50 = get(r, g, b, a, uint3(uiPos, 5));
-
-	float4 a01 = get(r, g, b, a, uint3(uiPos, 6));
-	float4 a11 = get(r, g, b, a, uint3(uiPos, 7));
-	float4 a21 = get(r, g, b, a, uint3(uiPos, 8));
-	float4 a31 = get(r, g, b, a, uint3(uiPos, 9));
-	float4 a41 = get(r, g, b, a, uint3(uiPos, 10));
-	float4 a51 = get(r, g, b, a, uint3(uiPos, 11));
-
-	float4 a02 = get(r, g, b, a, uint3(uiPos, 12));
-	float4 a12 = get(r, g, b, a, uint3(uiPos, 13));
-	float4 a22 = get(r, g, b, a, uint3(uiPos, 14));
-	float4 a32 = get(r, g, b, a, uint3(uiPos, 15));
-	float4 a42 = get(r, g, b, a, uint3(uiPos, 16));
-	float4 a52 = get(r, g, b, a, uint3(uiPos, 17));
-
-	float4 a03 = get(r, g, b, a, uint3(uiPos, 18));
-	float4 a13 = get(r, g, b, a, uint3(uiPos, 19));
-	float4 a23 = get(r, g, b, a, uint3(uiPos, 20));
-	float4 a33 = get(r, g, b, a, uint3(uiPos, 21));
-	float4 a43 = get(r, g, b, a, uint3(uiPos, 22));
-	float4 a53 = get(r, g, b, a, uint3(uiPos, 23));
-
-	float4 a04 = get(r, g, b, a, uint3(uiPos, 24));
-	float4 a14 = get(r, g, b, a, uint3(uiPos, 25));
-	float4 a24 = get(r, g, b, a, uint3(uiPos, 26));
-	float4 a34 = get(r, g, b, a, uint3(uiPos, 27));
-	float4 a44 = get(r, g, b, a, uint3(uiPos, 28));
-	float4 a54 = get(r, g, b, a, uint3(uiPos, 29));
-
-	float4 a05 = get(r, g, b, a, uint3(uiPos, 30));
-	float4 a15 = get(r, g, b, a, uint3(uiPos, 31));
-	float4 a25 = get(r, g, b, a, uint3(uiPos, 32));
-	float4 a35 = get(r, g, b, a, uint3(uiPos, 33));
-	float4 a45 = get(r, g, b, a, uint3(uiPos, 34));
-	float4 a55 = get(r, g, b, a, uint3(uiPos, 35));
-
-	float2 xy = fPos - uiPos;
-
-	float x = xy.x;
-	float x2 = x * x;
-	float x3 = x2 * x;
-	float x4 = x3 * x;
-	float x5 = x4 * x;
-
-	float y = xy.y;
-	float y2 = y * y;
-	float y3 = y2 * y;
-	float y4 = y3 * y;
-	float y5 = y4 * y;
-
-	float y_dy = 1;
-	float y2_dy = 2 * y;
-	float y3_dy = 3 * y2;
-	float y4_dy = 4 * y3;
-	float y5_dy = 5 * y4;
-
-	float4 color_dy = 0;
-
-	color_dy += (a01 + a11 * x + a21 * x2 + a31 * x3 + a41 * x4 + a51 * x5) * y_dy;
-	color_dy += (a02 + a12 * x + a22 * x2 + a32 * x3 + a42 * x4 + a52 * x5) * y2_dy;
-	color_dy += (a03 + a13 * x + a23 * x2 + a33 * x3 + a43 * x4 + a53 * x5) * y3_dy;
-	color_dy += (a04 + a14 * x + a24 * x2 + a34 * x3 + a44 * x4 + a54 * x5) * y4_dy;
-	color_dy += (a05 + a15 * x + a25 * x2 + a35 * x3 + a45 * x4 + a55 * x5) * y5_dy;
-
-	return color_dy;
-}
-
-float4 sampleImage_dx_dy(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	uint2 uiPos = floor(fPos);
-
-	float4 a00 = get(r, g, b, a, uint3(uiPos, 0));
-	float4 a10 = get(r, g, b, a, uint3(uiPos, 1));
-	float4 a20 = get(r, g, b, a, uint3(uiPos, 2));
-	float4 a30 = get(r, g, b, a, uint3(uiPos, 3));
-	float4 a40 = get(r, g, b, a, uint3(uiPos, 4));
-	float4 a50 = get(r, g, b, a, uint3(uiPos, 5));
-
-	float4 a01 = get(r, g, b, a, uint3(uiPos, 6));
-	float4 a11 = get(r, g, b, a, uint3(uiPos, 7));
-	float4 a21 = get(r, g, b, a, uint3(uiPos, 8));
-	float4 a31 = get(r, g, b, a, uint3(uiPos, 9));
-	float4 a41 = get(r, g, b, a, uint3(uiPos, 10));
-	float4 a51 = get(r, g, b, a, uint3(uiPos, 11));
-
-	float4 a02 = get(r, g, b, a, uint3(uiPos, 12));
-	float4 a12 = get(r, g, b, a, uint3(uiPos, 13));
-	float4 a22 = get(r, g, b, a, uint3(uiPos, 14));
-	float4 a32 = get(r, g, b, a, uint3(uiPos, 15));
-	float4 a42 = get(r, g, b, a, uint3(uiPos, 16));
-	float4 a52 = get(r, g, b, a, uint3(uiPos, 17));
-
-	float4 a03 = get(r, g, b, a, uint3(uiPos, 18));
-	float4 a13 = get(r, g, b, a, uint3(uiPos, 19));
-	float4 a23 = get(r, g, b, a, uint3(uiPos, 20));
-	float4 a33 = get(r, g, b, a, uint3(uiPos, 21));
-	float4 a43 = get(r, g, b, a, uint3(uiPos, 22));
-	float4 a53 = get(r, g, b, a, uint3(uiPos, 23));
-
-	float4 a04 = get(r, g, b, a, uint3(uiPos, 24));
-	float4 a14 = get(r, g, b, a, uint3(uiPos, 25));
-	float4 a24 = get(r, g, b, a, uint3(uiPos, 26));
-	float4 a34 = get(r, g, b, a, uint3(uiPos, 27));
-	float4 a44 = get(r, g, b, a, uint3(uiPos, 28));
-	float4 a54 = get(r, g, b, a, uint3(uiPos, 29));
-
-	float4 a05 = get(r, g, b, a, uint3(uiPos, 30));
-	float4 a15 = get(r, g, b, a, uint3(uiPos, 31));
-	float4 a25 = get(r, g, b, a, uint3(uiPos, 32));
-	float4 a35 = get(r, g, b, a, uint3(uiPos, 33));
-	float4 a45 = get(r, g, b, a, uint3(uiPos, 34));
-	float4 a55 = get(r, g, b, a, uint3(uiPos, 35));
-
-	float2 xy = fPos - uiPos;
-
-	float x = xy.x;
-	float x2 = x * x;
-	float x3 = x2 * x;
-	float x4 = x3 * x;
-	float x5 = x4 * x;
-
-	float x_dx = 1;
-	float x2_dx = 2 * x;
-	float x3_dx = 3 * x2;
-	float x4_dx = 4 * x3;
-	float x5_dx = 5 * x4;
-
-	float y = xy.y;
-	float y2 = y * y;
-	float y3 = y2 * y;
-	float y4 = y3 * y;
-	float y5 = y4 * y;
-
-	float y_dy = 1;
-	float y2_dy = 2 * y;
-	float y3_dy = 3 * y2;
-	float y4_dy = 4 * y3;
-	float y5_dy = 5 * y4;
-
-	float4 color_dx_dy = 0;
-
-	color_dx_dy += (a11 * x_dx + a21 * x2_dx + a31 * x3_dx + a41 * x4_dx + a51 * x5_dx) * y_dy;
-	color_dx_dy += (a12 * x_dx + a22 * x2_dx + a32 * x3_dx + a42 * x4_dx + a52 * x5_dx) * y2_dy;
-	color_dx_dy += (a13 * x_dx + a23 * x2_dx + a33 * x3_dx + a43 * x4_dx + a53 * x5_dx) * y3_dy;
-	color_dx_dy += (a14 * x_dx + a24 * x2_dx + a34 * x3_dx + a44 * x4_dx + a54 * x5_dx) * y4_dy;
-	color_dx_dy += (a15 * x_dx + a25 * x2_dx + a35 * x3_dx + a45 * x4_dx + a55 * x5_dx) * y5_dy;
-
-	return color_dx_dy;
-}
-
-float4 sampleImage_dy_dx(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	return sampleImage_dx_dy(r, g, b, a, fPos);
-}
-
-float4 sampleImage_dx_dx(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	uint2 uiPos = floor(fPos);
-
-	float4 a00 = get(r, g, b, a, uint3(uiPos, 0));
-	float4 a10 = get(r, g, b, a, uint3(uiPos, 1));
-	float4 a20 = get(r, g, b, a, uint3(uiPos, 2));
-	float4 a30 = get(r, g, b, a, uint3(uiPos, 3));
-	float4 a40 = get(r, g, b, a, uint3(uiPos, 4));
-	float4 a50 = get(r, g, b, a, uint3(uiPos, 5));
-
-	float4 a01 = get(r, g, b, a, uint3(uiPos, 6));
-	float4 a11 = get(r, g, b, a, uint3(uiPos, 7));
-	float4 a21 = get(r, g, b, a, uint3(uiPos, 8));
-	float4 a31 = get(r, g, b, a, uint3(uiPos, 9));
-	float4 a41 = get(r, g, b, a, uint3(uiPos, 10));
-	float4 a51 = get(r, g, b, a, uint3(uiPos, 11));
-
-	float4 a02 = get(r, g, b, a, uint3(uiPos, 12));
-	float4 a12 = get(r, g, b, a, uint3(uiPos, 13));
-	float4 a22 = get(r, g, b, a, uint3(uiPos, 14));
-	float4 a32 = get(r, g, b, a, uint3(uiPos, 15));
-	float4 a42 = get(r, g, b, a, uint3(uiPos, 16));
-	float4 a52 = get(r, g, b, a, uint3(uiPos, 17));
-
-	float4 a03 = get(r, g, b, a, uint3(uiPos, 18));
-	float4 a13 = get(r, g, b, a, uint3(uiPos, 19));
-	float4 a23 = get(r, g, b, a, uint3(uiPos, 20));
-	float4 a33 = get(r, g, b, a, uint3(uiPos, 21));
-	float4 a43 = get(r, g, b, a, uint3(uiPos, 22));
-	float4 a53 = get(r, g, b, a, uint3(uiPos, 23));
-
-	float4 a04 = get(r, g, b, a, uint3(uiPos, 24));
-	float4 a14 = get(r, g, b, a, uint3(uiPos, 25));
-	float4 a24 = get(r, g, b, a, uint3(uiPos, 26));
-	float4 a34 = get(r, g, b, a, uint3(uiPos, 27));
-	float4 a44 = get(r, g, b, a, uint3(uiPos, 28));
-	float4 a54 = get(r, g, b, a, uint3(uiPos, 29));
-
-	float4 a05 = get(r, g, b, a, uint3(uiPos, 30));
-	float4 a15 = get(r, g, b, a, uint3(uiPos, 31));
-	float4 a25 = get(r, g, b, a, uint3(uiPos, 32));
-	float4 a35 = get(r, g, b, a, uint3(uiPos, 33));
-	float4 a45 = get(r, g, b, a, uint3(uiPos, 34));
-	float4 a55 = get(r, g, b, a, uint3(uiPos, 35));
-
-	float2 xy = fPos - uiPos;
-
-	float x = xy.x;
-	float x2 = x * x;
-	float x3 = x2 * x;
-	float x4 = x3 * x;
-	float x5 = x4 * x;
-
-	float x2_dx_dx = 2;
-	float x3_dx_dx = 6 * x;
-	float x4_dx_dx = 12 * x2;
-	float x5_dx_dx = 20 * x3;
-
-	float y = xy.y;
-	float y2 = y * y;
-	float y3 = y2 * y;
-	float y4 = y3 * y;
-	float y5 = y4 * y;
-
-	float4 color_dx_dx = 0;
-
-	color_dx_dx += a20 * x2_dx_dx + a30 * x3_dx_dx + a40 * x4_dx_dx + a50 * x5_dx_dx;
-	color_dx_dx += (a21 * x2_dx_dx + a31 * x3_dx_dx + a41 * x4_dx_dx + a51 * x5_dx_dx) * y;
-	color_dx_dx += (a22 * x2_dx_dx + a32 * x3_dx_dx + a42 * x4_dx_dx + a52 * x5_dx_dx) * y2;
-	color_dx_dx += (a23 * x2_dx_dx + a33 * x3_dx_dx + a43 * x4_dx_dx + a53 * x5_dx_dx) * y3;
-	color_dx_dx += (a24 * x2_dx_dx + a34 * x3_dx_dx + a44 * x4_dx_dx + a54 * x5_dx_dx) * y4;
-	color_dx_dx += (a25 * x2_dx_dx + a35 * x3_dx_dx + a45 * x4_dx_dx + a55 * x5_dx_dx) * y5;
-
-	return color_dx_dx;
-}
-
-float4 sampleImage_dy_dy(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	float2 fPos
-)
-{
-	uint2 uiPos = floor(fPos);
-
-	float4 a00 = get(r, g, b, a, uint3(uiPos, 0));
-	float4 a10 = get(r, g, b, a, uint3(uiPos, 1));
-	float4 a20 = get(r, g, b, a, uint3(uiPos, 2));
-	float4 a30 = get(r, g, b, a, uint3(uiPos, 3));
-	float4 a40 = get(r, g, b, a, uint3(uiPos, 4));
-	float4 a50 = get(r, g, b, a, uint3(uiPos, 5));
-
-	float4 a01 = get(r, g, b, a, uint3(uiPos, 6));
-	float4 a11 = get(r, g, b, a, uint3(uiPos, 7));
-	float4 a21 = get(r, g, b, a, uint3(uiPos, 8));
-	float4 a31 = get(r, g, b, a, uint3(uiPos, 9));
-	float4 a41 = get(r, g, b, a, uint3(uiPos, 10));
-	float4 a51 = get(r, g, b, a, uint3(uiPos, 11));
-
-	float4 a02 = get(r, g, b, a, uint3(uiPos, 12));
-	float4 a12 = get(r, g, b, a, uint3(uiPos, 13));
-	float4 a22 = get(r, g, b, a, uint3(uiPos, 14));
-	float4 a32 = get(r, g, b, a, uint3(uiPos, 15));
-	float4 a42 = get(r, g, b, a, uint3(uiPos, 16));
-	float4 a52 = get(r, g, b, a, uint3(uiPos, 17));
-
-	float4 a03 = get(r, g, b, a, uint3(uiPos, 18));
-	float4 a13 = get(r, g, b, a, uint3(uiPos, 19));
-	float4 a23 = get(r, g, b, a, uint3(uiPos, 20));
-	float4 a33 = get(r, g, b, a, uint3(uiPos, 21));
-	float4 a43 = get(r, g, b, a, uint3(uiPos, 22));
-	float4 a53 = get(r, g, b, a, uint3(uiPos, 23));
-
-	float4 a04 = get(r, g, b, a, uint3(uiPos, 24));
-	float4 a14 = get(r, g, b, a, uint3(uiPos, 25));
-	float4 a24 = get(r, g, b, a, uint3(uiPos, 26));
-	float4 a34 = get(r, g, b, a, uint3(uiPos, 27));
-	float4 a44 = get(r, g, b, a, uint3(uiPos, 28));
-	float4 a54 = get(r, g, b, a, uint3(uiPos, 29));
-
-	float4 a05 = get(r, g, b, a, uint3(uiPos, 30));
-	float4 a15 = get(r, g, b, a, uint3(uiPos, 31));
-	float4 a25 = get(r, g, b, a, uint3(uiPos, 32));
-	float4 a35 = get(r, g, b, a, uint3(uiPos, 33));
-	float4 a45 = get(r, g, b, a, uint3(uiPos, 34));
-	float4 a55 = get(r, g, b, a, uint3(uiPos, 35));
-
-	float2 xy = fPos - uiPos;
-
-	float x = xy.x;
-	float x2 = x * x;
-	float x3 = x2 * x;
-	float x4 = x3 * x;
-	float x5 = x4 * x;
-
-	float y = xy.y;
-	float y2 = y * y;
-	float y3 = y2 * y;
-	float y4 = y3 * y;
-	float y5 = y4 * y;
-
-	float y2_dy_dy = 2;
-	float y3_dy_dy = 6 * y;
-	float y4_dy_dy = 12 * y2;
-	float y5_dy_dy = 20 * y3;
-
-	float4 color_dy_dy = 0;
-
-	color_dy_dy += (a02 + a12 * x + a22 * x2 + a32 * x3 + a42 * x4 + a52 * x5) * y2_dy_dy;
-	color_dy_dy += (a03 + a13 * x + a23 * x2 + a33 * x3 + a43 * x4 + a53 * x5) * y3_dy_dy;
-	color_dy_dy += (a04 + a14 * x + a24 * x2 + a34 * x3 + a44 * x4 + a54 * x5) * y4_dy_dy;
-	color_dy_dy += (a05 + a15 * x + a25 * x2 + a35 * x3 + a45 * x4 + a55 * x5) * y5_dy_dy;
-
-	return color_dy_dy;
-}
-
 void sampleImage(
 	Texture2DArray<float> r,
 	Texture2DArray<float> g,
@@ -879,8 +448,8 @@ float calculateDiscrepancy(
 	Texture2DArray<float> Ba,
 	uint2 posInA, 
 	float3x3 transform, 
-	uint sizeX, 
-	uint sizeY
+	int sizeX, 
+	int sizeY
 )
 {
 	float discrepancy = 0.0f;
@@ -1002,8 +571,6 @@ void calculateGradientsOfCell(
 	};
 
 	float2 pos_dParam[4];
-
-	[unroll]
 	for (int j = 0; j < 4; j++)
 	{
 		pos_dParam[j] = mul(float3(relativePosInA, 1), transform_dParam[j]).xy;
@@ -1131,7 +698,6 @@ void calculateGradientsOfCell(
 	)
 	};
 
-	[unroll]
 	for (int k = 0; k < 4; k++)
 	{
 		gradientOfGradientSquaredLength[k] = 0;
@@ -1167,8 +733,8 @@ void calculateGradients(
 	Texture2DArray<float> Ba,
 	int2 translation,
 	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
-	uint sizeX,
-	uint sizeY,
+	int sizeX,
+	int sizeY,
 	out float4 gradient,
 	out float4 gradientOfGradientSquaredLength
 )
@@ -1218,7 +784,7 @@ float3x3 calculateCoarseTransformOfAxisX_NetMethod(
 	Texture2DArray<float> Bb,
 	Texture2DArray<float> Ba,
 	uint2 posInB,
-	uint size,
+	int size,
 	out float discrepancy
 )
 {
@@ -1231,7 +797,7 @@ float3x3 calculateCoarseTransformOfAxisX_NetMethod(
 			if (i == 0 && j == 0)
 				continue;
 
-			float l = sqrt(i + j);
+			float l = sqrt(i * i + j * j);
 			
 			float s = l / size;
 
@@ -1282,7 +848,7 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 	Texture2DArray<float> Bb,
 	Texture2DArray<float> Ba,
 	uint2 posInB,
-	uint size,
+	int size,
 	out float discrepancy
 )
 {
@@ -1295,7 +861,7 @@ float3x3 calculateCoarseTransformOfAxisY_NetMethod(
 			if (i == 0 && j == 0)
 				continue;
 
-			float l = sqrt(i + j);
+			float l = sqrt(i * i + j * j);
 
 			float s = l / size;
 
@@ -1347,7 +913,7 @@ uint2 defineAxisesWithMinimalDiscrepancies(
 {
 	uint2 axises = -1;
 	float minimalDiscrepancy = FLT_MAX;
-	for (int i = 0; i < 4; i++)
+	for (uint i = 0; i < 4; i++)
 	{
 		if (discrepancies[i] < minimalDiscrepancy)
 		{
@@ -1357,26 +923,26 @@ uint2 defineAxisesWithMinimalDiscrepancies(
 	}
 
 	minimalDiscrepancy = FLT_MAX;
-	for (int i = 0; i < 4; i++)
+	for (uint j = 0; j < 4; j++)
 	{
-		if (i == axises[0])
+		if (j == axises[0])
 			continue;
 
-		bool bSameTexture = (i < 2 && axises[0] < 2) || (i > 1 && axises[0] > 1);
-		if (discrepancies[i] < minimalDiscrepancy && bSameTexture)
+		bool bSameTexture = (j < 2 && axises[0] < 2) || (j > 1 && axises[0] > 1);
+		if (discrepancies[j] < minimalDiscrepancy && bSameTexture)
 		{
-			axises[1] = i;
-			minimalDiscrepancy = discrepancies[i];
+			axises[1] = j;
+			minimalDiscrepancy = discrepancies[j];
 			continue;
 		}
 
 		float2 a = normalize(originalAxises[axises[0]]);
-		float2 b = normalize(transformedAxises[i]);
+		float2 b = normalize(transformedAxises[j]);
 		bool bCollinear = abs(dot(a, b)) > 0.9;
-		if (discrepancies[i] < minimalDiscrepancy && !bCollinear)
+		if (discrepancies[j] < minimalDiscrepancy && !bCollinear)
 		{
-			axises[1] = i;
-			minimalDiscrepancy = discrepancies[i];
+			axises[1] = j;
+			minimalDiscrepancy = discrepancies[j];
 			continue;
 		}
 	}
@@ -1614,11 +1180,6 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint2 posInA = uint2(dispatchThreadID.x % width, dispatchThreadID.x / width);
 	uint2 posInB = uint2(dispatchThreadID.y % width, dispatchThreadID.y / width);
 	
-	uint currentErr = 0;
-	InterlockedExchange(error[posInA], error[posInA], currentErr);
-	if (currentErr < 10)
-		return;
-
 	float sizeX = SIZE;
 	float sizeY = SIZE;
 	float4 params = 0;
@@ -1702,11 +1263,6 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint2 posInA = uint2(dispatchThreadID.x % width, dispatchThreadID.x / width);
 	uint2 posInB = uint2(dispatchThreadID.y % width, dispatchThreadID.y / width);
-
-	uint currentMappedPixel = 0;
-	InterlockedExchange(mapAtoB[posInA], mapAtoB[posInA], currentMappedPixel);
-	if (currentMappedPixel != UINT_MAX)
-		return;
 
 	float sizeX = SIZE;
 	float sizeY = SIZE;

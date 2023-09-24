@@ -174,7 +174,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 
 	// 12. Init photogrammetry
 	initTextureInterpolation();
-	initDefinitionOfTheSamePoints();
+//	initDefinitionOfTheSamePoints();
 }
 
 void GraphicsCore::startFrame()
@@ -1771,14 +1771,16 @@ void GraphicsCore::openTextureA(const std::string& path)
 
 	std::string texturePath = std::string(texturesFolder) + '\\' + path;
 
-	D3DX11_IMAGE_LOAD_INFO texInfo;
 	D3DX11CreateShaderResourceViewFromFileA(
-		device, texturePath.c_str(), &texInfo, 0, &mTextureBeforeInterpolatingAsrv, 0
+		device, texturePath.c_str(), 0, 0, &mTextureBeforeInterpolatingAsrv, 0
 	);
 
+	ID3D11Texture2D* tex;
+	mTextureBeforeInterpolatingAsrv->GetResource((ID3D11Resource * *)& tex);
+
 	D3D11_TEXTURE2D_DESC tex_desc;
-	tex_desc.Width = texInfo.Width;
-	tex_desc.Height = texInfo.Height;
+	tex->GetDesc(&tex_desc);
+
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
 	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -1816,11 +1818,9 @@ void GraphicsCore::openTextureA(const std::string& path)
 	device->CreateShaderResourceView(mABtex, &srv_desc, &mABsrv);
 	device->CreateShaderResourceView(mAAtex, &srv_desc, &mAAsrv);
 
-	widthOfA = texInfo.Width;
-	heightOfA = texInfo.Height;
+	widthOfA = tex_desc.Width;
+	heightOfA = tex_desc.Height;
 
-	tex_desc.Width = texInfo.Width;
-	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
 	tex_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1837,8 +1837,6 @@ void GraphicsCore::openTextureA(const std::string& path)
 	uav_desc.Texture2D.MipSlice = 0;
 	device->CreateUnorderedAccessView(mMapAtoBtex, &uav_desc, &mMapAtoBuav);
 
-	tex_desc.Width = texInfo.Width;
-	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
 	tex_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1850,8 +1848,6 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mMapAtoBtexCopy);
 
-	tex_desc.Width = texInfo.Width;
-	tex_desc.Height = texInfo.Height;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
 	tex_desc.Format = DXGI_FORMAT_R32_UINT;
