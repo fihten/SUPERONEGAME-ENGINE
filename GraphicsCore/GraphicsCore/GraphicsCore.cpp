@@ -1873,14 +1873,16 @@ void GraphicsCore::openTextureB(const std::string& path)
 
 	std::string texturePath = std::string(texturesFolder) + '\\' + path;
 
-	D3DX11_IMAGE_LOAD_INFO texInfo;
 	D3DX11CreateShaderResourceViewFromFileA(
-		device, texturePath.c_str(), &texInfo, 0, &mTextureBeforeInterpolatingAsrv, 0
+		device, texturePath.c_str(), 0, 0, &mTextureBeforeInterpolatingBsrv, 0
 	);
 
+	ID3D11Texture2D* tex;
+	mTextureBeforeInterpolatingBsrv->GetResource((ID3D11Resource * *)& tex);
+
 	D3D11_TEXTURE2D_DESC tex_desc;
-	tex_desc.Width = texInfo.Width;
-	tex_desc.Height = texInfo.Height;
+	tex->GetDesc(&tex_desc);
+
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 36;
 	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -1918,8 +1920,8 @@ void GraphicsCore::openTextureB(const std::string& path)
 	device->CreateShaderResourceView(mBBtex, &srv_desc, &mBBsrv);
 	device->CreateShaderResourceView(mBAtex, &srv_desc, &mBAsrv);
 
-	widthOfB = texInfo.Width;
-	heightOfB = texInfo.Height;
+	widthOfB = tex_desc.Width;
+	heightOfB = tex_desc.Height;
 }
 
 void GraphicsCore::interpolateTextureA()
