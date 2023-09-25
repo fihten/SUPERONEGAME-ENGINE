@@ -460,7 +460,6 @@ float calculateDiscrepancy(
 	uint elements = 0;
 	uint mips = 0;
 	Ar.GetDimensions(mip, width, height, elements, mips);
-
 	for (int i = -sizeX; i <= sizeX; i++)
 	{
 		if (posInA.x + i < 0)

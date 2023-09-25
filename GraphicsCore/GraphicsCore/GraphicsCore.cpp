@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <sstream>
 #include <D3DX11tex.h>
+#include <fstream>
 
 GraphicsCore* GraphicsCore::pGraphicsCore = nullptr;
 
@@ -174,7 +175,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 
 	// 12. Init photogrammetry
 	initTextureInterpolation();
-//	initDefinitionOfTheSamePoints();
+	initDefinitionOfTheSamePoints();
 }
 
 void GraphicsCore::startFrame()
@@ -1980,23 +1981,48 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 	int sz = sizeof shadersFolder / sizeof * shadersFolder;
 	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
 
-	std::string sDefinitionOfTheSamePoints = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fx";
+	char* buffer = nullptr;
+	uint32_t bufferSize = 0;
 
-	DWORD shaderFlags = 0;
+	std::string sObjectFile = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fxo";
+	std::ifstream objectFile_in(sObjectFile.c_str(), std::ifstream::binary);
+	if (objectFile_in)
+	{
+		objectFile_in.seekg(0, objectFile_in.end);
+		bufferSize = objectFile_in.tellg();
+		objectFile_in.seekg(0, objectFile_in.beg);
+
+		buffer = new char[bufferSize];
+
+		objectFile_in.read(buffer, bufferSize);
+	}
+	else
+	{
+		std::string sDefinitionOfTheSamePoints = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fx";
+
+		DWORD shaderFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+		shaderFlags |= D3D10_SHADER_DEBUG;
+		shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
 #endif
 
-	ID3D10Blob* compiledShader = 0;
-	ID3D10Blob* compilationMsgs = 0;
-	HRESULT res = D3DX11CompileFromFileA(sDefinitionOfTheSamePoints.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
-	if (res != S_OK)
-	{
-		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
-		return;
+		ID3D10Blob* compiledShader = 0;
+		ID3D10Blob* compilationMsgs = 0;
+		HRESULT res = D3DX11CompileFromFileA(sDefinitionOfTheSamePoints.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+		if (res != S_OK)
+		{
+			MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+			return;
+		}
+
+		buffer = (char*)compiledShader->GetBufferPointer();
+		bufferSize = compiledShader->GetBufferSize();
+
+		std::ofstream objectFile_out(sObjectFile.c_str(), std::ifstream::binary);
+		objectFile_out.write(buffer, bufferSize);
+		objectFile_out.close();
 	}
-	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mDefinitionOfTheSamePointsFX);
+	auto res = D3DX11CreateEffectFromMemory((LPVOID)buffer, bufferSize, 0, device, &mDefinitionOfTheSamePointsFX);
 
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
