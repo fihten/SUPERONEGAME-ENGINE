@@ -783,7 +783,8 @@ void calculateInitialTransformParams(
 	Texture2DArray<float> Bb,
 	Texture2DArray<float> Ba,
 	uint2 posInB,
-	out float params[5]
+	out float4 params,
+	out float k
 )
 {
 	float4 a00 = get(Ar, Ag, Ab, Aa, uint3(uiPos, 0));
@@ -794,11 +795,39 @@ void calculateInitialTransformParams(
 	float4 b10 = get(Br, Bg, Bb, Ba, uint3(uiPos, 1));
 	float4 b01 = get(Br, Bg, Bb, Ba, uint3(uiPos, 6));
 
-	params[4] = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
-	a10 *= params[4];
-	a01 *= params[4];
+	k = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
+	a10 *= k;
+	a01 *= k;
 
+	float l00 = dot(b10.xyz, b10.xyz);
+	float l01 = dot(b10.xyz, b01.xyz);
+	float l10 = l01;
+	float l11 = dot(b01.xyz, b01.xyz);
 
+	float r0 = dot(a10.xyz, b10.xyz);
+	float r1 = dot(a10.xyz, b01.xyz);
+
+	float d = l00 * l11 - l01 * l10;
+	float d0 = r0 * l11 - l01 * r1;
+	float d1 = l00 * r1 - r0 * l10;
+
+	float mxx = d0 / d;
+	float myx = d1 / d;
+
+	l00 = dot(b10.xyz, b10.xyz);
+	l01 = dot(b10.xyz, b01.xyz);
+	l10 = l01;
+	l11 = dot(b01.xyz, b01.xyz);
+
+	r0 = dot(b10.xyz, a01.xyz);
+	r1 = dot(a01.xyz, b01.xyz);
+
+	d = l00 * l11 - l01 * l10;
+	d0 = r0 * l11 - l01 * r1;
+	d1 = l00 * r1 - r0 * l10;
+
+	float mxy = d0 / d;
+	float myy = d1 / d;
 }
 
 // return error
