@@ -1,6 +1,6 @@
 #include "constants.hlsl"
 
-#define SIZE 10
+#define SIZE 5
 
 Texture2DArray<float> Ar;
 Texture2DArray<float> Ag;
@@ -437,60 +437,6 @@ float3x3 calculateTransform_ds1_ds1(float2 t, float a0, float s0, float a1, floa
 		);
 }
 
-float calculateDiscrepancy(
-	Texture2DArray<float> Ar,
-	Texture2DArray<float> Ag,
-	Texture2DArray<float> Ab,
-	Texture2DArray<float> Aa,
-	Texture2DArray<float> Br,
-	Texture2DArray<float> Bg,
-	Texture2DArray<float> Bb,
-	Texture2DArray<float> Ba,
-	uint2 posInA, 
-	float3x3 transform, 
-	int sizeX, 
-	int sizeY
-)
-{
-	float discrepancy = 0.0f;
-
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
-	for (int i = -sizeX; i <= sizeX; i++)
-	{
-		if (posInA.x + i < 0)
-			continue;
-		if (posInA.x + i >= width)
-			break;
-
-		for (int j = -sizeY; j <= sizeY; j++)
-		{
-			if (posInA.y + j < 0)
-				continue;
-			if (posInA.y + j >= height)
-				break;
-
-			uint2 posInAij = posInA + int2(i, j);
-
-			float4 colorInAij = get(Ar, Ag, Ab, Aa, uint3(posInAij, 0));
-
-			float2 posInB = posInA + mul(float3(i, j, 1), transform).xy;
-			float4 colorInBij = sampleImage(Br, Bg, Bb, Ba, posInB);
-
-			float4 diff = colorInBij - colorInAij;
-			discrepancy += dot(diff, diff);
-		}
-	}
-
-	discrepancy /= (2 * sizeX + 1) * (2 * sizeY + 1);
-
-	return discrepancy;
-}
-
 void calculateGradientsOfCell(
 	Texture2DArray<float> Ar,
 	Texture2DArray<float> Ag,
@@ -504,12 +450,13 @@ void calculateGradientsOfCell(
 	Texture2DArray<float> Ba,
 	int2 translation,
 	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
+	float kl,
 	out float4 gradient,
 	out float4 gradientOfGradientSquaredLength
 )
 {
 	uint2 posInA = originInA + relativePosInA;
-	float3 A = get(Ar, Ag, Ab, Aa, uint3(posInA, 0)).xyz;
+	float3 A = kl * get(Ar, Ag, Ab, Aa, uint3(posInA, 0)).xyz;
 
 	float3x3 transform = calculateTransform(
 		translation,
@@ -732,6 +679,7 @@ void calculateGradients(
 	Texture2DArray<float> Ba,
 	int2 translation,
 	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
+	float k,
 	int sizeX,
 	int sizeY,
 	out float4 gradient,
@@ -740,9 +688,9 @@ void calculateGradients(
 {
 	gradient = 0;
 	gradientOfGradientSquaredLength = 0;
-	for (int i = -sizeX; i <= sizeX; i++)
+	for (int i = -sizeX; i <= sizeX; i += sizeX)
 	{
-		for (int j = -sizeY; j <= sizeY; j++)
+		for (int j = -sizeY; j <= sizeY; j += sizeY)
 		{
 			int2 relativePosInA = int2(i, j);
 			float4 gradient_cell = 0;
@@ -760,6 +708,7 @@ void calculateGradients(
 				Ba,
 				translation,
 				paramsOfTransform, // {angle0,scale0,angle1,scale1}
+				k,
 				gradient_cell,
 				gradientOfGradientSquaredLength_cell
 			);
@@ -784,16 +733,17 @@ void calculateInitialTransformParams(
 	Texture2DArray<float> Ba,
 	uint2 posInB,
 	out float4 params,
-	out float k
+	out float k,
+	out float discrepancy
 )
 {
-	float4 a00 = get(Ar, Ag, Ab, Aa, uint3(uiPos, 0));
-	float4 a10 = get(Ar, Ag, Ab, Aa, uint3(uiPos, 1));
-	float4 a01 = get(Ar, Ag, Ab, Aa, uint3(uiPos, 6));
+	float4 a00 = get(Ar, Ag, Ab, Aa, uint3(posInA, 0));
+	float4 a10 = get(Ar, Ag, Ab, Aa, uint3(posInA, 1));
+	float4 a01 = get(Ar, Ag, Ab, Aa, uint3(posInA, 6));
 
-	float4 b00 = get(Br, Bg, Bb, Ba, uint3(uiPos, 0));
-	float4 b10 = get(Br, Bg, Bb, Ba, uint3(uiPos, 1));
-	float4 b01 = get(Br, Bg, Bb, Ba, uint3(uiPos, 6));
+	float4 b00 = get(Br, Bg, Bb, Ba, uint3(posInB, 0));
+	float4 b10 = get(Br, Bg, Bb, Ba, uint3(posInB, 1));
+	float4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, 6));
 
 	k = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
 	a10 *= k;
@@ -812,7 +762,7 @@ void calculateInitialTransformParams(
 	float d1 = l00 * r1 - r0 * l10;
 
 	float mxx = d0 / d;
-	float myx = d1 / d;
+	float mxy = d1 / d;
 
 	l00 = dot(b10.xyz, b10.xyz);
 	l01 = dot(b10.xyz, b01.xyz);
@@ -826,8 +776,24 @@ void calculateInitialTransformParams(
 	d0 = r0 * l11 - l01 * r1;
 	d1 = l00 * r1 - r0 * l10;
 
-	float mxy = d0 / d;
+	float myx = d0 / d;
 	float myy = d1 / d;
+
+	params.x = atan2(mxy, mxx);
+	params.y = sqrt(mxy * mxy + mxx * mxx);
+	params.z = atan2(-myx, myy);
+	params.w = sqrt(myx * myx + myy * myy);
+
+	float3 v = (mxx * b10 + mxy * b01 - a10).xyz;
+	float discrepancy0 = dot(v, v);
+
+	v = (myx * b10 + myy * b01 - a01).xyz;
+	float discrepancy1 = dot(v, v);
+
+	v = (k * a00 - b00).xyz;
+	float discrepancy2 = dot(v, v);
+
+	discrepancy = max(discrepancy0 + discrepancy1, discrepancy2);
 }
 
 // return error
@@ -844,11 +810,14 @@ float fittingTransformByGradientDescent(
 	uint2 posInB,
 	uint sizeX,
 	uint sizeY,
-	inout float4 params
+	inout float4 params,
+	float k
 )
 {
+	uint maxSize = max(sizeX, sizeY);
+
 	float error = FLT_MAX;
-	for (int i = 0; i < 5; i++)
+	for (int i = 1; i < maxSize + 1; i++)
 	{
 		float4 gradient;
 		float4 gradientOfGradientSquaredLength;
@@ -864,8 +833,9 @@ float fittingTransformByGradientDescent(
 			Ba,
 			posInB - posInA,
 			params, // {angle0,scale0,angle1,scale1}
-			sizeX,
-			sizeY,
+			k,
+			min(i, sizeX),
+			min(i, sizeY),
 			gradient,
 			gradientOfGradientSquaredLength
 		);
@@ -905,8 +875,25 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float sizeX = SIZE;
 	float sizeY = SIZE;
 	float4 params = 0;
-	float2 translation = 0;
-	uint typeOfMapping = calculateCoarseTransformParams_NetMethod(
+	float k = 0;
+	float discrepancy = 0;
+	calculateInitialTransformParams(
+		Ar,
+		Ag,
+		Ab,
+		Aa,
+		posInA,
+		Br,
+		Bg,
+		Bb,
+		Ba,
+		posInB,
+		params,
+		k,
+		discrepancy
+	);
+
+	uint err = 1000000 * fittingTransformByGradientDescent(
 		Ar,
 		Ag,
 		Ab,
@@ -920,46 +907,8 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		sizeX,
 		sizeY,
 		params,
-		translation
+		k
 	);
-
-	uint err = UINT_MAX;
-	if (typeOfMapping == MAP_A_TO_B)
-	{
-		err = 1000000 * fittingTransformByGradientDescent(
-			Ar,
-			Ag,
-			Ab,
-			Aa,
-			posInA,
-			Br,
-			Bg,
-			Bb,
-			Ba,
-			posInB,
-			sizeX,
-			sizeY,
-			params
-		);
-	}
-	if (typeOfMapping == MAP_B_TO_A)
-	{
-		err = 1000000 * fittingTransformByGradientDescent(
-			Br,
-			Bg,
-			Bb,
-			Ba,
-			posInB,
-			Ar,
-			Ag,
-			Ab,
-			Aa,
-			posInA,
-			sizeX,
-			sizeY,
-			params
-		);
-	}
 
 	InterlockedMin(error[posInA], err);
 
@@ -989,8 +938,25 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float sizeX = SIZE;
 	float sizeY = SIZE;
 	float4 params = 0;
-	float2 translation = 0;
-	uint typeOfMapping = calculateCoarseTransformParams_NetMethod(
+	float k = 0;
+	float discrepancy = 0;
+	calculateInitialTransformParams(
+		Ar,
+		Ag,
+		Ab,
+		Aa,
+		posInA,
+		Br,
+		Bg,
+		Bb,
+		Ba,
+		posInB,
+		params,
+		k,
+		discrepancy
+	);
+
+	uint err = 1000000 * fittingTransformByGradientDescent(
 		Ar,
 		Ag,
 		Ab,
@@ -1004,46 +970,8 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		sizeX,
 		sizeY,
 		params,
-		translation
+		k
 	);
-
-	uint err = UINT_MAX;
-	if (typeOfMapping == MAP_A_TO_B)
-	{
-		err = 1000000 * fittingTransformByGradientDescent(
-			Ar,
-			Ag,
-			Ab,
-			Aa,
-			posInA,
-			Br,
-			Bg,
-			Bb,
-			Ba,
-			posInB,
-			sizeX,
-			sizeY,
-			params
-		);
-	}
-	if (typeOfMapping == MAP_B_TO_A)
-	{
-		err = 1000000 * fittingTransformByGradientDescent(
-			Br,
-			Bg,
-			Bb,
-			Ba,
-			posInB,
-			Ar,
-			Ag,
-			Ab,
-			Aa,
-			posInA,
-			sizeX,
-			sizeY,
-			params
-		);
-	}
 
 	if (err == error[posInA])
 	{
