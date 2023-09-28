@@ -24,10 +24,10 @@ float4 get(
 )
 {
 	float4 res;
-	res.r = r[pos];
-	res.g = g[pos];
-	res.b = b[pos];
-	res.a = a[pos];
+	res.r = r[pos].r;
+	res.g = g[pos].r;
+	res.b = b[pos].r;
+	res.a = a[pos].r;
 	return res;
 }
 
@@ -717,8 +717,6 @@ void calculateGradients(
 			gradientOfGradientSquaredLength += gradientOfGradientSquaredLength_cell;
 		}
 	}
-	gradient /= (2 * sizeX + 1) * (2 * sizeY + 1);
-	gradientOfGradientSquaredLength /= (2 * sizeX + 1) * (2 * sizeY + 1);
 }
 
 void calculateInitialTransformParams(
@@ -816,7 +814,7 @@ float fittingTransformByGradientDescent(
 {
 	uint maxSize = max(sizeX, sizeY);
 
-	float error = FLT_MAX;
+	float err = FLT_MAX;
 	for (int i = 1; i < maxSize + 1; i++)
 	{
 		float4 gradient;
@@ -841,16 +839,33 @@ float fittingTransformByGradientDescent(
 		);
 		
 		float gradient2 = dot(gradient, gradient);
-		error = min(error, gradient2);
+		err = gradient2;
 
 		float gradientOfGradientSquaredLength2 = dot(gradientOfGradientSquaredLength, gradientOfGradientSquaredLength);
 		if (gradientOfGradientSquaredLength2 == 0)
-			return error;
+			continue;
 
 		float c = -gradient2 / gradientOfGradientSquaredLength2;
 		params += c * gradientOfGradientSquaredLength;
 	}
-	return error;
+	return err;
+}
+
+[numthreads(32, 32, 1)]
+void CS_initialize_error(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint2 ij = dispatchThreadID.xy;
+
+	uint width = 0;
+	uint height = 0;
+	error.GetDimensions(width, height);
+
+	if (ij.x > width - 1)
+		return;
+	if (ij.y > height - 1)
+		return;
+	
+	error[ij].r = UINT_MAX;
 }
 
 [numthreads(32,32,1)]
@@ -910,10 +925,10 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k
 	);
 
-	InterlockedMin(error[posInA], err);
+	InterlockedMin(error[posInA].r, err);
 
 	uint original_value;
-	InterlockedExchange(mapAtoB[posInA], UINT_MAX, original_value);
+	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 }
 
 [numthreads(32, 32, 1)]
@@ -973,15 +988,21 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k
 	);
 
-	if (err == error[posInA])
+	if (err == error[posInA].r)
 	{
 		uint original_value;
-		InterlockedExchange(mapAtoB[posInA], dispatchThreadID.y, original_value);
+		InterlockedExchange(mapAtoB[posInA].r, dispatchThreadID.y, original_value);
 	}
 }
 
 technique11 DefineTheSamePointsOnTwoImages
 {
+	pass InitializeError
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_initialize_error()));
+	}
 	pass CalculateError
 	{
 		SetVertexShader(NULL);

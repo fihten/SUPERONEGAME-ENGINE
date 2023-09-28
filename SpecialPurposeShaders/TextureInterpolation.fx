@@ -1,6 +1,6 @@
 #define COLUMNS 6
 
-Texture2D tex;
+Texture2D<float4> tex;
 
 RWTexture2DArray<float> r;
 RWTexture2DArray<float> g;
@@ -16,10 +16,10 @@ void set(
 	float4 value
 	)
 {
-	coeffs_r[pos] = value.r;
-	coeffs_g[pos] = value.g;
-	coeffs_b[pos] = value.b;
-	coeffs_a[pos] = value.a;
+	coeffs_r[pos].r = value.r;
+	coeffs_g[pos].r = value.g;
+	coeffs_b[pos].r = value.b;
+	coeffs_a[pos].r = value.a;
 }
 
 float4 get(
@@ -31,10 +31,10 @@ float4 get(
 )
 {
 	float4 res;
-	res.r = coeffs_r[pos];
-	res.g = coeffs_g[pos];
-	res.b = coeffs_b[pos];
-	res.a = coeffs_a[pos];
+	res.r = coeffs_r[pos].r;
+	res.g = coeffs_g[pos].r;
+	res.b = coeffs_b[pos].r;
+	res.a = coeffs_a[pos].r;
 	return res;
 }
 

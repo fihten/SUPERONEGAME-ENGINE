@@ -1939,7 +1939,6 @@ void GraphicsCore::interpolateTextureA()
 	uint32_t groups_y = std::ceil((float)(heightOfA) / 32.0f);
 	uint32_t groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
-	context->CSSetShader(0, 0, 0);
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
 
@@ -1947,6 +1946,10 @@ void GraphicsCore::interpolateTextureA()
 	groups_y = std::ceil((float)(heightOfA) / 16.0f);
 	groups_z = 2;
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	ID3D11UnorderedAccessView* nullUAVs[4] = { nullptr,nullptr,nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 4, nullUAVs, 0);
+
 	context->CSSetShader(0, 0, 0);
 }
 
@@ -1964,7 +1967,6 @@ void GraphicsCore::interpolateTextureB()
 	uint32_t groups_y = std::ceil((float)(heightOfB) / 32.0f);
 	uint32_t groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
-	context->CSSetShader(0, 0, 0);
 
 	mTextureInterpolationTech->GetPassByName("AlongAxisV")->Apply(0, context);
 
@@ -1972,6 +1974,10 @@ void GraphicsCore::interpolateTextureB()
 	groups_y = std::ceil((float)(heightOfB) / 16.0f);
 	groups_z = 2;
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	ID3D11UnorderedAccessView* nullUAVs[4] = { nullptr,nullptr,nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 4, nullUAVs, 0);
+
 	context->CSSetShader(0, 0, 0);
 }
 
@@ -2055,13 +2061,19 @@ void GraphicsCore::defineTheSamePoints()
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("InitializeError")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
-	uint32_t groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfA) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA) / 32.0f);
 	uint32_t groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
-	context->CSSetShader(0, 0, 0);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
+
+	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
+	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
 
