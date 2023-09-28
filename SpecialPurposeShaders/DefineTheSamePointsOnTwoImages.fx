@@ -437,7 +437,9 @@ float3x3 calculateTransform_ds1_ds1(float2 t, float a0, float s0, float a1, floa
 		);
 }
 
-void calculateGradientsOfCell(
+#define GRADIENTS_ARE_FOUND 0
+#define POSITION_IN_B_IS_OUT_OF_BOUNDARY 1
+uint calculateGradientsOfCell(
 	Texture2DArray<float> Ar,
 	Texture2DArray<float> Ag,
 	Texture2DArray<float> Ab,
@@ -452,7 +454,7 @@ void calculateGradientsOfCell(
 	float4 paramsOfTransform, // {angle0,scale0,angle1,scale1}
 	float kl,
 	out float4 gradient,
-	out float4 gradientOfGradientSquaredLength
+	out float4 gradientOfGradientSquaredLength[4]
 )
 {
 	uint2 posInA = originInA + relativePosInA;
@@ -466,6 +468,21 @@ void calculateGradientsOfCell(
 		paramsOfTransform[3]
 	);
 	float2 posInB = originInA + mul(float3(relativePosInA, 1), transform).xy;
+
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	Br.GetDimensions(mip, width, height, elements, mips);
+	if (posInB.x < 0)
+		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
+	if (posInB.y < 0)
+		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
+	if (posInB.x > (float)(width)-1)
+		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
+	if (posInB.y > (float)(height)-1)
+		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
 
 	float3 B;
 	float2 grad_B[3];
@@ -516,15 +533,6 @@ void calculateGradientsOfCell(
 	)
 	};
 
-	float2 pos_dParam[4];
-	for (int j = 0; j < 4; j++)
-	{
-		pos_dParam[j] = mul(float3(relativePosInA, 1), transform_dParam[j]).xy;
-		gradient[j] = 0;
-		for (int i = 0; i < 3; i++)
-			gradient[j] += 2 * (B[i] - A[i]) * dot(grad_B[i], pos_dParam[j]);
-	}
-	
 	float3x3 transform_dParam2[16] = {
 // Row0
 		calculateTransform_da0_da0(
@@ -646,25 +654,32 @@ void calculateGradientsOfCell(
 
 	for (int k = 0; k < 4; k++)
 	{
-		gradientOfGradientSquaredLength[k] = 0;
+		float2 pos_dParam_k = mul(float3(relativePosInA, 1), transform_dParam[k]).xy;
+		gradient[k] = 0;
+		for (int l = 0; l < 3; l++)
+			gradient[k] += 2 * (B[l] - A[l]) * dot(grad_B[l], pos_dParam_k);
+
 		for (int j = 0; j < 4; j++)
 		{
+			float2 pos_dParam_j = mul(float3(relativePosInA, 1), transform_dParam[j]).xy;
+
+			gradientOfGradientSquaredLength[k][j] = 0;
 			float x = 0;
 			for (int i = 0; i < 3; i++)
 			{
-				x += dot(mul(pos_dParam[k], hessian_B[i]), pos_dParam[j]);
+				x += dot(mul(pos_dParam_k, hessian_B[i]), pos_dParam_j);
 
 				float2 pos_dParam_j_k = mul(float3(relativePosInA, 1), transform_dParam2[j * 4 + k]).xy;
 				x += dot(grad_B[i], pos_dParam_j_k);
 
 				x *= B[i] - A[i];
 
-				x += dot(grad_B[i], pos_dParam[k]) * dot(grad_B[i], pos_dParam[j]);
+				x += dot(grad_B[i], pos_dParam_k) * dot(grad_B[i], pos_dParam_j);
 			}
-			x *= 4 * gradient[j];
-			gradientOfGradientSquaredLength[k] += x;
+			gradientOfGradientSquaredLength[j][k] += x;
 		}
 	}
+	return GRADIENTS_ARE_FOUND;
 }
 
 void calculateGradients(
@@ -687,15 +702,25 @@ void calculateGradients(
 )
 {
 	gradient = 0;
-	gradientOfGradientSquaredLength = 0;
+	float4 gradientOfGradientSquaredLength_[4] = { 
+		float4(0,0,0,0),
+		float4(0,0,0,0),
+		float4(0,0,0,0),
+		float4(0,0,0,0)
+	};
 	for (int i = -sizeX; i <= sizeX; i += sizeX)
 	{
 		for (int j = -sizeY; j <= sizeY; j += sizeY)
 		{
 			int2 relativePosInA = int2(i, j);
 			float4 gradient_cell = 0;
-			float4 gradientOfGradientSquaredLength_cell = 0;
-			calculateGradientsOfCell(
+			float4 gradientOfGradientSquaredLength_cell[4] = {
+				float4(0,0,0,0),
+				float4(0,0,0,0),
+				float4(0,0,0,0),
+				float4(0,0,0,0)
+			};
+			uint res = calculateGradientsOfCell(
 				Ar,
 				Ag,
 				Ab,
@@ -712,11 +737,20 @@ void calculateGradients(
 				gradient_cell,
 				gradientOfGradientSquaredLength_cell
 			);
+			if (res == POSITION_IN_B_IS_OUT_OF_BOUNDARY)
+				continue;
 
 			gradient += gradient_cell;
-			gradientOfGradientSquaredLength += gradientOfGradientSquaredLength_cell;
+			gradientOfGradientSquaredLength_[0] += gradientOfGradientSquaredLength_cell[0];
+			gradientOfGradientSquaredLength_[1] += gradientOfGradientSquaredLength_cell[1];
+			gradientOfGradientSquaredLength_[2] += gradientOfGradientSquaredLength_cell[2];
+			gradientOfGradientSquaredLength_[3] += gradientOfGradientSquaredLength_cell[3];
 		}
 	}
+	gradientOfGradientSquaredLength.x = dot(gradient, gradientOfGradientSquaredLength_[0]);
+	gradientOfGradientSquaredLength.y = dot(gradient, gradientOfGradientSquaredLength_[1]);
+	gradientOfGradientSquaredLength.z = dot(gradient, gradientOfGradientSquaredLength_[2]);
+	gradientOfGradientSquaredLength.w = dot(gradient, gradientOfGradientSquaredLength_[3]);
 }
 
 void calculateInitialTransformParams(
