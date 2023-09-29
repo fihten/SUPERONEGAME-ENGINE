@@ -444,7 +444,7 @@ uint calculateGradientsOfCell(
 	Texture2DArray<float> Ag,
 	Texture2DArray<float> Ab,
 	Texture2DArray<float> Aa,
-	uint2 originInA,
+	int2 originInA,
 	int2 relativePosInA,
 	Texture2DArray<float> Br,
 	Texture2DArray<float> Bg,
@@ -457,7 +457,7 @@ uint calculateGradientsOfCell(
 	out float4 gradientOfGradientSquaredLength[4]
 )
 {
-	uint2 posInA = originInA + relativePosInA;
+	int2 posInA = originInA + relativePosInA;
 	float3 A = kl * get(Ar, Ag, Ab, Aa, uint3(posInA, 0)).xyz;
 
 	float3x3 transform = calculateTransform(
@@ -479,9 +479,9 @@ uint calculateGradientsOfCell(
 		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
 	if (posInB.y < 0)
 		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
-	if (posInB.x > (float)(width)-1)
+	if (posInB.x > width - 1)
 		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
-	if (posInB.y > (float)(height)-1)
+	if (posInB.y > height - 1)
 		return POSITION_IN_B_IS_OUT_OF_BOUNDARY;
 
 	float3 B;
@@ -662,8 +662,6 @@ uint calculateGradientsOfCell(
 		for (int j = 0; j < 4; j++)
 		{
 			float2 pos_dParam_j = mul(float3(relativePosInA, 1), transform_dParam[j]).xy;
-
-			gradientOfGradientSquaredLength[k][j] = 0;
 			float x = 0;
 			for (int i = 0; i < 3; i++)
 			{
@@ -676,7 +674,7 @@ uint calculateGradientsOfCell(
 
 				x += dot(grad_B[i], pos_dParam_k) * dot(grad_B[i], pos_dParam_j);
 			}
-			gradientOfGradientSquaredLength[j][k] += x;
+			gradientOfGradientSquaredLength[k][j] = x;
 		}
 	}
 	return GRADIENTS_ARE_FOUND;
@@ -687,7 +685,7 @@ void calculateGradients(
 	Texture2DArray<float> Ag,
 	Texture2DArray<float> Ab,
 	Texture2DArray<float> Aa,
-	uint2 originInA,
+	int2 originInA,
 	Texture2DArray<float> Br,
 	Texture2DArray<float> Bg,
 	Texture2DArray<float> Bb,
@@ -747,10 +745,10 @@ void calculateGradients(
 			gradientOfGradientSquaredLength_[3] += gradientOfGradientSquaredLength_cell[3];
 		}
 	}
-	gradientOfGradientSquaredLength.x = dot(gradient, gradientOfGradientSquaredLength_[0]);
-	gradientOfGradientSquaredLength.y = dot(gradient, gradientOfGradientSquaredLength_[1]);
-	gradientOfGradientSquaredLength.z = dot(gradient, gradientOfGradientSquaredLength_[2]);
-	gradientOfGradientSquaredLength.w = dot(gradient, gradientOfGradientSquaredLength_[3]);
+	gradientOfGradientSquaredLength.x = 4 * dot(gradient, gradientOfGradientSquaredLength_[0]);
+	gradientOfGradientSquaredLength.y = 4 * dot(gradient, gradientOfGradientSquaredLength_[1]);
+	gradientOfGradientSquaredLength.z = 4 * dot(gradient, gradientOfGradientSquaredLength_[2]);
+	gradientOfGradientSquaredLength.w = 4 * dot(gradient, gradientOfGradientSquaredLength_[3]);
 }
 
 void calculateInitialTransformParams(
@@ -834,14 +832,14 @@ float fittingTransformByGradientDescent(
 	Texture2DArray<float> Ag,
 	Texture2DArray<float> Ab,
 	Texture2DArray<float> Aa,
-	uint2 posInA,
+	int2 posInA,
 	Texture2DArray<float> Br,
 	Texture2DArray<float> Bg,
 	Texture2DArray<float> Bb,
 	Texture2DArray<float> Ba,
-	uint2 posInB,
-	uint sizeX,
-	uint sizeY,
+	int2 posInB,
+	int sizeX,
+	int sizeY,
 	inout float4 params,
 	float k
 )
@@ -941,8 +939,10 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k,
 		discrepancy
 	);
+	if (discrepancy > 0.001)
+		return;
 
-	uint err = 1000000 * fittingTransformByGradientDescent(
+	float ferr = fittingTransformByGradientDescent(
 		Ar,
 		Ag,
 		Ab,
@@ -959,8 +959,11 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k
 	);
 
-	InterlockedMin(error[posInA].r, err);
-
+	if (ferr < 100.0f)
+	{
+		uint err = 1000000 * ferr;
+		InterlockedMin(error[posInA].r, err);
+	}
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 }
@@ -981,8 +984,8 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (dispatchThreadID.y >= wXh)
 		return;
 
-	uint2 posInA = uint2(dispatchThreadID.x % width, dispatchThreadID.x / width);
-	uint2 posInB = uint2(dispatchThreadID.y % width, dispatchThreadID.y / width);
+	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
+	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
 
 	float sizeX = SIZE;
 	float sizeY = SIZE;
@@ -1004,8 +1007,10 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k,
 		discrepancy
 	);
+	if (discrepancy > 0.001)
+		return;
 
-	uint err = 1000000 * fittingTransformByGradientDescent(
+	float ferr = fittingTransformByGradientDescent(
 		Ar,
 		Ag,
 		Ab,
@@ -1022,6 +1027,10 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		k
 	);
 
+	if (ferr > 100)
+		return;
+
+	uint err = 1000000 * ferr;
 	if (err == error[posInA].r)
 	{
 		uint original_value;
