@@ -824,8 +824,16 @@ void calculateInitialTransformParams(
 	params.z = atan2(-myx, myy);
 	params.w = sqrt(myx * myx + myy * myy);
 
-	float3 v = (k * a00 - b00).xyz;
-	discrepancy = dot(v, v);
+	float3 v = (mxx * b10 + mxy * b01 - a10).xyz;
+	float discrepancy0 = dot(v, v);
+
+	v = (myx * b10 + myy * b01 - a01).xyz;
+	float discrepancy1 = dot(v, v);
+
+	v = (k * a00 - b00).xyz;
+	float discrepancy2 = dot(v, v);
+
+	discrepancy = max(discrepancy0, max(discrepancy1, discrepancy2));
 }
 
 // return error
@@ -944,7 +952,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	);
 	if (discrepancy > 0.001)
 		return;
-	if (params.y == 0 || params.w == 0)
+	if (abs(params.y * size) < 0.5 * size || abs(params.w * size) < 0.5 * size)
 		return;
 
 	float ferr = fittingTransformByGradientDescent(
@@ -963,7 +971,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		params,
 		k
 	);
-	if (params.y == 0 || params.w == 0)
+	if (abs(params.y * size) < 0.5 * size || abs(params.w * size) < 0.5 * size)
 		return;
 	if (ferr > 100.0f)
 		return;
@@ -1013,7 +1021,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	);
 	if (discrepancy > 0.001)
 		return;
-	if (params.y == 0 || params.w == 0)
+	if (abs(params.y * size) < 0.5 * size || abs(params.w * size) < 0.5 * size)
 		return;
 
 	float ferr = fittingTransformByGradientDescent(
@@ -1032,7 +1040,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		params,
 		k
 	);
-	if (params.y == 0 || params.w == 0)
+	if (abs(params.y * size) < 0.5 * size || abs(params.w * size) < 0.5 * size)
 		return;
 	if (ferr > 100)
 		return;
