@@ -223,22 +223,22 @@ public:
 	void openTextureA(const std::string& path);
 	void openTextureB(const std::string& path);
 
-	void interpolateTextureA();
-	void interpolateTextureB();
+	void calculateDerivativesOfTextureA();
+	void calculateDerivativesOfTextureB();
 
 private:
-	void initTextureInterpolation();
-	ID3DX11Effect* mTextureInterpolationFX = nullptr;
-	ID3DX11EffectTechnique* mTextureInterpolationTech = nullptr;
+	void initCalculationOfTextureDerivatives();
+	ID3DX11Effect* mCalculateTextureDerivativeFX = nullptr;
+	ID3DX11EffectTechnique* mCalculateTextureDerivativeTech = nullptr;
 
-	ID3DX11EffectShaderResourceVariable* mTextureBeforeInterpolating = nullptr;
+	ID3DX11EffectShaderResourceVariable* mTextureToDerivative = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mR = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mG = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mB = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mA = nullptr;
 
-	ID3D11ShaderResourceView* mTextureBeforeInterpolatingAsrv = nullptr;
-	ID3D11ShaderResourceView* mTextureBeforeInterpolatingBsrv = nullptr;
+	ID3D11ShaderResourceView* mTextureToDerivativeAsrv = nullptr;
+	ID3D11ShaderResourceView* mTextureToDerivativeBsrv = nullptr;
 
 	ID3D11UnorderedAccessView* mARuav = nullptr;
 	ID3D11UnorderedAccessView* mAGuav = nullptr;
