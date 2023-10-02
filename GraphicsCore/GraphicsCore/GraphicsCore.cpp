@@ -2033,6 +2033,8 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
 	mSize = mDefinitionOfTheSamePointsFX->GetVariableByName("size");
+	mThreshold0 = mDefinitionOfTheSamePointsFX->GetVariableByName("threshold0");
+	mThreshold1 = mDefinitionOfTheSamePointsFX->GetVariableByName("threshold1");
 
 	mAr = mDefinitionOfTheSamePointsFX->GetVariableByName("Ar")->AsShaderResource();
 	mAg = mDefinitionOfTheSamePointsFX->GetVariableByName("Ag")->AsShaderResource();
@@ -2050,8 +2052,14 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 void GraphicsCore::defineTheSamePoints()
 {
-	uint32_t size = 5;
+	uint32_t size = 10;
 	mSize->SetRawValue(&size, 0, sizeof size);
+
+	float threshold0 = 0.1;
+	mThreshold0->SetRawValue(&threshold0, 0, sizeof threshold0);
+
+	float threshold1 = 0.1;
+	mThreshold0->SetRawValue(&threshold1, 0, sizeof threshold1);
 
 	mAr->SetResource(mARsrv);
 	mAg->SetResource(mAGsrv);

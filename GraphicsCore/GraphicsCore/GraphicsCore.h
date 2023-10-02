@@ -286,6 +286,8 @@ private:
 	ID3DX11EffectTechnique* mDefineTheSamePointsOnTwoImagesTech = nullptr;
 
 	ID3DX11EffectVariable* mSize = nullptr;
+	ID3DX11EffectVariable* mThreshold0 = nullptr;
+	ID3DX11EffectVariable* mThreshold1 = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mAr = nullptr;
 	ID3DX11EffectShaderResourceVariable* mAg = nullptr;
