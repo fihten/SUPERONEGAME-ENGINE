@@ -231,6 +231,8 @@ private:
 	ID3DX11Effect* mCalculateTextureDerivativeFX = nullptr;
 	ID3DX11EffectTechnique* mCalculateTextureDerivativeTech = nullptr;
 
+	ID3DX11EffectVariable* mMaxOrderOfDerivatives = nullptr;
+	ID3DX11EffectVariable* mOrderOfDerivative = nullptr;
 	ID3DX11EffectShaderResourceVariable* mTextureToDerivative = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mR = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mG = nullptr;
@@ -275,6 +277,8 @@ private:
 
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
+
+	int maxOrderOfDerivatives = 10;
 
 public:
 	void defineTheSamePoints();
