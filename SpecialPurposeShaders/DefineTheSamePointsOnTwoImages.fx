@@ -48,13 +48,22 @@ void calculateInitialTransformParams(
 	out float specCoeff
 )
 {
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	r.GetDimensions(mip, width, height, elements, mips);
+
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
+
 	float4 a00 = get(Ar, Ag, Ab, Aa, uint3(posInA, 0));
 	float4 a10 = get(Ar, Ag, Ab, Aa, uint3(posInA, 1));
-	float4 a01 = get(Ar, Ag, Ab, Aa, uint3(posInA, 6));
+	float4 a01 = get(Ar, Ag, Ab, Aa, uint3(posInA, maxOrderOfDerivatives + 1));
 
 	float4 b00 = get(Br, Bg, Bb, Ba, uint3(posInB, 0));
 	float4 b10 = get(Br, Bg, Bb, Ba, uint3(posInB, 1));
-	float4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, 6));
+	float4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, maxOrderOfDerivatives + 1));
 
 	k = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
 	a10 *= k;
@@ -85,10 +94,10 @@ void calculateInitialTransformParams(
 	float myx = d != 0 ? d0 / d : 0;
 	float myy = d != 0 ? d1 / d : 1;
 
-	params.x = atan2(mxy, mxx);
-	params.y = sqrt(mxy * mxy + mxx * mxx);
-	params.z = atan2(-myx, myy);
-	params.w = sqrt(myx * myx + myy * myy);
+	transform = float2x2(
+		mxx, mxy,
+		myx, myy
+		);
 }
 
 int binomial_coefficient(int n, int k)
@@ -107,10 +116,13 @@ float4 differential(
 	Texture2DArray<float> r,
 	Texture2DArray<float> g,
 	Texture2DArray<float> b,
-	int ij,
+	Texture2DArray<float> a,
+	int ij, float specCoeff,
 	int order, float dx, float dy
 )
 {
+	float4 ret = 0;
+
 	uint mip = 0;
 	uint width = 0;
 	uint height = 0;
@@ -118,13 +130,20 @@ float4 differential(
 	uint mips = 0;
 	r.GetDimensions(mip, width, height, elements, mips);
 
-	int maxOrderOfDerivatives = sqrt(elements);
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
+
+	int b = 1;
 	for (int k = 0; k <= order; k++)
 	{
 		int l = order - k;
-		int index = l * maxOrderOfDerivatives + k;
+		int index = l * (maxOrderOfDerivatives + 1) + k;
 
+		float4 derivative_k_l = specCoeff * get(r, g, b, a, uint3(ij, index));
+		ret += b * derivative_k_l * pow(dx, k) * pow(dy, l);
+
+		b *= (order - k) / (k + 1);
 	}
+	return ret;
 }
 
 [numthreads(32, 32, 1)]
