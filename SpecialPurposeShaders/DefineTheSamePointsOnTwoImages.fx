@@ -199,7 +199,7 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 
 #define max_count_of_derivatives 20
 void findDerivativesOfSpecifiedOrderInNewBasis(
-	float4 oldDerivatives[max_count_of_derivatives], int order, float2 transformToNewBasis,
+	float4 oldDerivatives[max_count_of_derivatives], int order, float2x2 transformToNewBasis,
 	out float4 newDerivatives[max_count_of_derivatives]
 )
 {
@@ -229,6 +229,59 @@ void findDerivativesOfSpecifiedOrderInNewBasis(
 		b_new *= degreeOfYinNewBasis;
 		b_new /= degreeOfXinNewBasis + 1;
 	}
+}
+
+float calculateDiscrepancyOfSpecifiedOrder(
+	Texture2DArray<float> Ar,
+	Texture2DArray<float> Ag,
+	Texture2DArray<float> Ab,
+	Texture2DArray<float> Aa,
+	int2 posInA,
+	Texture2DArray<float> Br,
+	Texture2DArray<float> Bg,
+	Texture2DArray<float> Bb,
+	Texture2DArray<float> Ba,
+	int2 posInB,
+	float2x2 transformAtoB,
+	float specCoeffA,
+	int order
+)
+{
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	Ar.GetDimensions(mip, width, height, elements, mips);
+
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
+
+	float4 derivativesA[max_count_of_derivatives];
+	float4 derivativesB[max_count_of_derivatives];
+	float4 derivativesBtheoretical[max_count_of_derivatives];
+	for (int i = 0; i <= order; i++)
+	{
+		int j = order - i;
+		int index = j * maxOrderOfDerivatives + i;
+
+		derivativesA[i] = specCoeffA * get(Ar, Ag, Ab, Aa, uint3(posInA, index));
+		derivativesB[i] = get(Br, Bg, Bb, Ba, uint3(posInB, index));
+		derivativesBtheoretical[i] = float4(0, 0, 0, 0);
+	}
+
+	findDerivativesOfSpecifiedOrderInNewBasis(
+		derivativesA, order, transformAtoB,
+		derivativesBtheoretical
+	);
+
+	float maxDiscrepancy = 0;
+	for (int i = 0; i <= order; i++)
+	{
+		float4 d = abs(derivativesBtheoretical[i] - derivativesB[i]);
+		maxDiscrepancy = max(maxDiscrepancy, max(d.r, max(d.g, d.b)));
+	}
+
+	return maxDiscrepancy;
 }
 
 [numthreads(32, 32, 1)]
