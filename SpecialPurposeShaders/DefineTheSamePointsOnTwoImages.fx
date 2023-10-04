@@ -141,9 +141,60 @@ float4 differential(
 		float4 derivative_k_l = specCoeff * get(r, g, b, a, uint3(ij, index));
 		ret += b * derivative_k_l * pow(dx, k) * pow(dy, l);
 
-		b *= (order - k) / (k + 1);
+		b *= l;
+		b /= k + 1;
 	}
 	return ret;
+}
+
+// c*(mxx*x+myx*y)^k*(mxy*x+myy*y)^l
+float4 findCoefficientsNearXofSomeDegree(
+	float4 c, 
+	float mxx, float myx, 
+	float mxy, float myy, 
+	int k, int l, 
+	int degree
+)
+{
+	float4 coefficients = float4(0, 0, 0, 0);
+
+	// i <= k && degree - i <= l && degree - i >= 0
+	// ->
+	// degree - l <= i <= min(k, degree)
+	int i0 = max(0, degree - l);
+	int i1 = min(k, degree);
+
+	int k_factorial = 1;
+	int i = k - i0 + 1;
+	for (; i <= k; i++)
+		k_factorial *= i;
+
+	int l_factorial = 1;
+	i = l - degree + i0 + 1;
+	for (; i <= l; i++)
+		l_factorial *= i;
+
+	int b = 1;
+	i = 0;
+	for (; i < i0; i++)
+	{
+		b *= degree - i;
+		b /= i + 1;
+	}
+
+	for (; i <= i1; i++)
+	{
+		int j = degree - i;
+		float4 coeffsToAdd = b * k_factorial * l_factorial * pow(myx, k - i) * pow(myy, l - j) * pow(mxx, i) * pow(mxy, j);
+		coefficients += coeffsToAdd;
+
+		b *= j;
+		b /= i + 1;
+
+		k_factorial *= k - i;
+		l_factorial /= l - j + 1;
+	}
+	return c * coefficients;
 }
 
 [numthreads(32, 32, 1)]
