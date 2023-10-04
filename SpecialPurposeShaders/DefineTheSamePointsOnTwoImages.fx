@@ -65,9 +65,9 @@ void calculateInitialTransformParams(
 	float4 b10 = get(Br, Bg, Bb, Ba, uint3(posInB, 1));
 	float4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, maxOrderOfDerivatives + 1));
 
-	k = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
-	a10 *= k;
-	a01 *= k;
+	specCoeff = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
+	a10 *= specCoeff;
+	a01 *= specCoeff;
 
 	float l00 = dot(b10.xyz, b10.xyz);
 	float l01 = dot(b10.xyz, b01.xyz);
@@ -148,7 +148,7 @@ float4 differential(
 }
 
 // c*(mxx*x+myx*y)^k*(mxy*x+myy*y)^l
-float4 findCoefficientsNearXofSomeDegree(
+float4 findCoefficientsNearXofSpecifiedDegree(
 	float4 c, 
 	float mxx, float myx, 
 	float mxy, float myy, 
@@ -195,6 +195,40 @@ float4 findCoefficientsNearXofSomeDegree(
 		l_factorial /= l - j + 1;
 	}
 	return c * coefficients;
+}
+
+#define max_count_of_derivatives 20
+void findDerivativesOfSpecifiedOrderInNewBasis(
+	float4 oldDerivatives[max_count_of_derivatives], int order, float2 transformToNewBasis,
+	out float4 newDerivatives[max_count_of_derivatives]
+)
+{
+	int b_new = 1;
+	for (int degreeOfXinNewBasis = 0; degreeOfXinNewBasis <= order; degreeOfXinNewBasis++)
+	{
+		int b_old = 1;
+		for (int degreeOfXinOldBasis = 0; degreeOfXinOldBasis <= order; degreeOfXinOldBasis++)
+		{
+			int degreeOfYinOldBasis = order - degreeOfXinOldBasis;
+
+			newDerivatives[degreeOfXinNewBasis] += findCoefficientsNearXofSpecifiedDegree(
+				b_old * oldDerivatives[degreeOfXinOldBasis],
+				transformToNewBasis[0][0], transformToNewBasis[1][0],
+				transformToNewBasis[0][1], transformToNewBasis[1][1],
+				degreeOfXinOldBasis, degreeOfYinOldBasis,
+				degreeOfXinNewBasis
+			);
+
+			b_old *= degreeOfYinOldBasis;
+			b_old /= degreeOfXinOldBasis + 1;
+		}
+
+		newDerivatives[degreeOfXinNewBasis] /= b_new;
+
+		int degreeOfYinNewBasis = order - degreeOfXinNewBasis;
+		b_new *= degreeOfYinNewBasis;
+		b_new /= degreeOfXinNewBasis + 1;
+	}
 }
 
 [numthreads(32, 32, 1)]
