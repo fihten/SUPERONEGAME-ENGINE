@@ -88,23 +88,26 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint elements = 0;
 	r.GetDimensions(width, height, elements);
 
-	if (ijk.x > width - 2 * orderOfDerivative - 1)
+	if (ij.x > width - 2 * orderOfDerivative - 1)
 		return;
-	if (ijk.y > height - 2 * orderOfDerivative - 1)
+	if (ij.y > height - 2 * orderOfDerivative - 1)
 		return;
 	if (col > maxOrderOfDerivatives)
 		return;
 
+	ij.x += orderOfDerivative;
+	ij.y += orderOfDerivative;
+
 	uint2 ij_prev = ij;
 	ij_prev.y -= 1;
-	float4 c_prev = get(r, g, b, a, uint3(ij_prev, maxOrderOfDerivatives * (orderOfDerivative - 1) + col));
+	float4 c_prev = get(r, g, b, a, uint3(ij_prev, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col));
 
 	uint2 ij_next = ij;
 	ij_next.y += 1;
-	float4 c_next = get(r, g, b, a, uint3(ij_next, maxOrderOfDerivatives * (orderOfDerivative - 1) + col));
+	float4 c_next = get(r, g, b, a, uint3(ij_next, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col));
 
 	float4 derivative = 0.5 * (c_next - c_prev);
-	set(r, g, b, a, uint3(ij, maxOrderOfDerivatives * orderOfDerivative + col), derivative);
+	set(r, g, b, a, uint3(ij, (maxOrderOfDerivatives + 1) * orderOfDerivative + col), derivative);
 }
 
 technique11 CalculateTextureDerivative

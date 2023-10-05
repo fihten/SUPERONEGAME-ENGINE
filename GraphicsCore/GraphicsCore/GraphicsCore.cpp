@@ -174,7 +174,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initFineObjectsSelectionBySegments();
 
 	// 12. Init photogrammetry
-	initTextureInterpolation();
+	initCalculationOfTextureDerivatives();
 	initDefinitionOfTheSamePoints();
 }
 
@@ -1786,7 +1786,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex->GetDesc(&tex_desc);
 
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	tex_desc.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
@@ -1804,7 +1804,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	uav_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	device->CreateUnorderedAccessView(mARtex, &uav_desc, &mARuav);
 	device->CreateUnorderedAccessView(mAGtex, &uav_desc, &mAGuav);
 	device->CreateUnorderedAccessView(mABtex, &uav_desc, &mABuav);
@@ -1816,7 +1816,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	srv_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	device->CreateShaderResourceView(mARtex, &srv_desc, &mARsrv);
 	device->CreateShaderResourceView(mAGtex, &srv_desc, &mAGsrv);
 	device->CreateShaderResourceView(mABtex, &srv_desc, &mABsrv);
@@ -1888,7 +1888,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	tex->GetDesc(&tex_desc);
 
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	tex_desc.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
@@ -1906,7 +1906,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	uav_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	device->CreateUnorderedAccessView(mBRtex, &uav_desc, &mBRuav);
 	device->CreateUnorderedAccessView(mBGtex, &uav_desc, &mBGuav);
 	device->CreateUnorderedAccessView(mBBtex, &uav_desc, &mBBuav);
@@ -1918,7 +1918,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = maxOrderOfDerivatives * maxOrderOfDerivatives;
+	srv_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
 	device->CreateShaderResourceView(mBRtex, &srv_desc, &mBRsrv);
 	device->CreateShaderResourceView(mBGtex, &srv_desc, &mBGsrv);
 	device->CreateShaderResourceView(mBBtex, &srv_desc, &mBBsrv);

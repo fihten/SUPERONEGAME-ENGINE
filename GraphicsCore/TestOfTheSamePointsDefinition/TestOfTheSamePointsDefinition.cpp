@@ -50,10 +50,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
 	GraphicsCore::instance()->openTextureA("imageA.bmp");
-	GraphicsCore::instance()->interpolateTextureA();
+	GraphicsCore::instance()->calculateDerivativesOfTextureA();
 
 	GraphicsCore::instance()->openTextureB("imageB.bmp");
-	GraphicsCore::instance()->interpolateTextureB();
+	GraphicsCore::instance()->calculateDerivativesOfTextureB();
 
 	GraphicsCore::instance()->defineTheSamePoints();
 

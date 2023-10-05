@@ -44,8 +44,8 @@ void calculateInitialTransformParams(
 	Texture2DArray<float> Bb,
 	Texture2DArray<float> Ba,
 	int2 posInB,
-	out float2x2 transform,
-	out float specCoeff
+	out float2x2 transformBtoA,
+	out float specCoeffA
 )
 {
 	uint mip = 0;
@@ -53,7 +53,7 @@ void calculateInitialTransformParams(
 	uint height = 0;
 	uint elements = 0;
 	uint mips = 0;
-	r.GetDimensions(mip, width, height, elements, mips);
+	Ar.GetDimensions(mip, width, height, elements, mips);
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
@@ -65,9 +65,9 @@ void calculateInitialTransformParams(
 	float4 b10 = get(Br, Bg, Bb, Ba, uint3(posInB, 1));
 	float4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, maxOrderOfDerivatives + 1));
 
-	specCoeff = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
-	a10 *= specCoeff;
-	a01 *= specCoeff;
+	specCoeffA = dot(a00.xyz, b00.xyz) / dot(a00.xyz, a00.xyz);
+	a10 *= specCoeffA;
+	a01 *= specCoeffA;
 
 	float l00 = dot(b10.xyz, b10.xyz);
 	float l01 = dot(b10.xyz, b01.xyz);
@@ -94,7 +94,7 @@ void calculateInitialTransformParams(
 	float myx = d != 0 ? d0 / d : 0;
 	float myy = d != 0 ? d1 / d : 1;
 
-	transform = float2x2(
+	transformBtoA = float2x2(
 		mxx, mxy,
 		myx, myy
 		);
@@ -117,7 +117,7 @@ float4 differential(
 	Texture2DArray<float> g,
 	Texture2DArray<float> b,
 	Texture2DArray<float> a,
-	int ij, float specCoeff,
+	int2 ij, float specCoeff,
 	int order, float dx, float dy
 )
 {
@@ -132,17 +132,17 @@ float4 differential(
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
-	int b = 1;
+	int binomial = 1;
 	for (int k = 0; k <= order; k++)
 	{
 		int l = order - k;
 		int index = l * (maxOrderOfDerivatives + 1) + k;
 
 		float4 derivative_k_l = specCoeff * get(r, g, b, a, uint3(ij, index));
-		ret += b * derivative_k_l * pow(dx, k) * pow(dy, l);
+		ret += binomial * derivative_k_l * pow(dx, k) * pow(dy, l);
 
-		b *= l;
-		b /= k + 1;
+		binomial *= l;
+		binomial /= k + 1;
 	}
 	return ret;
 }
@@ -243,7 +243,7 @@ float calculateDiscrepancyOfSpecifiedOrder(
 	Texture2DArray<float> Ba,
 	int2 posInB,
 	float2x2 transformAtoB,
-	float specCoeffA,
+	float specCoeffB,
 	int order
 )
 {
@@ -262,10 +262,10 @@ float calculateDiscrepancyOfSpecifiedOrder(
 	for (int i = 0; i <= order; i++)
 	{
 		int j = order - i;
-		int index = j * maxOrderOfDerivatives + i;
+		int index = j * (maxOrderOfDerivatives + 1) + i;
 
-		derivativesA[i] = specCoeffA * get(Ar, Ag, Ab, Aa, uint3(posInA, index));
-		derivativesB[i] = get(Br, Bg, Bb, Ba, uint3(posInB, index));
+		derivativesA[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, index));
+		derivativesB[i] = specCoeffB * get(Br, Bg, Bb, Ba, uint3(posInB, index));
 		derivativesBtheoretical[i] = float4(0, 0, 0, 0);
 	}
 
@@ -281,6 +281,43 @@ float calculateDiscrepancyOfSpecifiedOrder(
 		maxDiscrepancy = max(maxDiscrepancy, max(d.r, max(d.g, d.b)));
 	}
 
+	return maxDiscrepancy;
+}
+
+float calculateDiscrepancy(
+	Texture2DArray<float> Ar,
+	Texture2DArray<float> Ag,
+	Texture2DArray<float> Ab,
+	Texture2DArray<float> Aa,
+	int2 posInA,
+	Texture2DArray<float> Br,
+	Texture2DArray<float> Bg,
+	Texture2DArray<float> Bb,
+	Texture2DArray<float> Ba,
+	int2 posInB,
+	float2x2 transformAtoB,
+	float specCoeffB
+)
+{
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	Ar.GetDimensions(mip, width, height, elements, mips);
+
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
+	float maxDiscrepancy = 0;
+	for (int order = 0; order <= maxOrderOfDerivatives; order++)
+	{
+		float d = calculateDiscrepancyOfSpecifiedOrder(
+			Ar, Ag, Ab, Aa, posInA,
+			Br, Bg, Bb, Ba, posInB,
+			transformAtoB, specCoeffB,
+			order
+		);
+		maxDiscrepancy = max(d, maxDiscrepancy);
+	}
 	return maxDiscrepancy;
 }
 
@@ -311,40 +348,41 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mips = 0;
 	Ar.GetDimensions(mip, width, height, elements, mips);
 
-	uint wXh = width * height;
-	if (dispatchThreadID.x >= wXh)
-		return;
-	if (dispatchThreadID.y >= wXh)
-		return;
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
 	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
+	if (posInA.x > width - 2 * maxOrderOfDerivatives - 1)
+		return;
+	if (posInA.y > height - 2 * maxOrderOfDerivatives - 1)
+		return;
+	posInA.x += maxOrderOfDerivatives;
+	posInA.y += maxOrderOfDerivatives;
+
 	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
-	
+	if (posInB.x > width - 2 * maxOrderOfDerivatives - 1)
+		return;
+	if (posInB.y > height - 2 * maxOrderOfDerivatives - 1)
+		return;
+	posInB.x += maxOrderOfDerivatives;
+	posInB.y += maxOrderOfDerivatives;
+
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 
-	float sizeX = size;
-	float sizeY = size;
-	float4 params = 0;
-	float k = 0;
-	float discrepancy = 0;
+	float2x2 transformAtoB;
+	float specCoeffB;
 	calculateInitialTransformParams(
-		Ar,
-		Ag,
-		Ab,
-		Aa,
-		posInA,
-		Br,
-		Bg,
-		Bb,
-		Ba,
-		posInB,
-		params,
-		k,
-		discrepancy
+		Br, Bg, Bb, Ba, posInB,
+		Ar, Ag, Ab, Aa, posInA,
+		transformAtoB, specCoeffB
 	);
 
-	uint err = 1000000 * discrepancy;
+	uint err = 1000000 * calculateDiscrepancy(
+		Ar, Ag, Ab, Aa, posInA,
+		Br, Bg, Bb, Ba, posInB,
+		transformAtoB, specCoeffB
+	);
+
 	InterlockedMin(error[posInA].r, err);
 }
 
@@ -358,37 +396,38 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mips = 0;
 	Ar.GetDimensions(mip, width, height, elements, mips);
 
-	uint wXh = width * height;
-	if (dispatchThreadID.x >= wXh)
-		return;
-	if (dispatchThreadID.y >= wXh)
-		return;
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
 	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
-	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
+	if (posInA.x > width - 2 * maxOrderOfDerivatives - 1)
+		return;
+	if (posInA.y > height - 2 * maxOrderOfDerivatives - 1)
+		return;
+	posInA.x += maxOrderOfDerivatives;
+	posInA.y += maxOrderOfDerivatives;
 
-	float sizeX = size;
-	float sizeY = size;
-	float4 params = 0;
-	float k = 0;
-	float discrepancy = 0;
+	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
+	if (posInB.x > width - 2 * maxOrderOfDerivatives - 1)
+		return;
+	if (posInB.y > height - 2 * maxOrderOfDerivatives - 1)
+		return;
+	posInB.x += maxOrderOfDerivatives;
+	posInB.y += maxOrderOfDerivatives;
+
+	float2x2 transformAtoB;
+	float specCoeffB;
 	calculateInitialTransformParams(
-		Ar,
-		Ag,
-		Ab,
-		Aa,
-		posInA,
-		Br,
-		Bg,
-		Bb,
-		Ba,
-		posInB,
-		params,
-		k,
-		discrepancy
+		Br, Bg, Bb, Ba, posInB,
+		Ar, Ag, Ab, Aa, posInA,
+		transformAtoB, specCoeffB
 	);
 
-	uint err = 1000000 * discrepancy;
+	uint err = 1000000 * calculateDiscrepancy(
+		Ar, Ag, Ab, Aa, posInA,
+		Br, Bg, Bb, Ba, posInB,
+		transformAtoB, specCoeffB
+	);
+
 	if (err == error[posInA].r)
 	{
 		uint original_value;
