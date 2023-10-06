@@ -278,7 +278,7 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int maxOrderOfDerivatives = 6;
+	int maxOrderOfDerivatives = 10;
 
 public:
 	void defineTheSamePoints();
