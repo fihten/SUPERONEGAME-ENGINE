@@ -13,6 +13,43 @@ RWTexture2DArray<float> g_tmp;
 RWTexture2DArray<float> b_tmp;
 RWTexture2DArray<float> a_tmp;
 
+// x - d Surf(x0, y0) / dx
+// y - d Surf(x0, y0) / dy
+// z - Surf(x0, y0)
+float3 lsm(float values[9])
+{
+	float x[9] = { -1,0,1,-1,0,1,-1,0,1 };
+	float y[9] = { -1,-1,-1,0,0,0,1,1,1 };
+
+	float3 L[3] = { float3(0,0,0),float3(0,0,0),float3(0,0,0) };
+	float3 R = float3(0, 0, 0);
+	for (int i = 0; i < 9; i++)
+	{
+		L[0].x += x[i] * x[i];
+		L[0].y += x[i] * y[i];
+		L[0].z += x[i];
+
+		L[1].x += x[i] * y[i];
+		L[1].y += y[i] * y[i];
+		L[1].z += y[i];
+
+		L[2].x += x[i];
+		L[2].y += y[i];
+		L[2].z += 1;
+
+		R.x += value[i] * x[i];
+		R.y += value[i] * y[i];
+		R.z += value[i];
+	}
+
+	float d = dot(L[0], cross(L[1], L[2]));
+	float d0 = dot(R, cross(L[1], L[2]));
+	float d1 = dot(L[0], cross(R, L[2]));
+	float d2 = dot(L[0], cross(L[1], R));
+
+	return float3(d0 / d, d1 / d, d2 / d);
+}
+
 void set(
 	RWTexture2DArray<float> coeffs_r,
 	RWTexture2DArray<float> coeffs_g,
@@ -55,12 +92,13 @@ void CS_U_AXIS_at_first(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mips = 0;
 	tex.GetDimensions(mip, width, height, mips);
 
-	if (ij.x > width - 2 * orderOfDerivative - 1)
+	if (ij.x > width - 2 * max(orderOfDerivative, 1) - 1)
 		return;
-	if (ij.y > height - 1)
+	if (ij.y > height - 2 * max(orderOfDerivative, 1) - 1)
 		return;
 
-	ij.x += orderOfDerivative;
+	ij.x += max(orderOfDerivative, 1);
+	ij.y += max(orderOfDerivative, 1);
 
 	float4 c = tex[ij];
 	if (orderOfDerivative == 0)
