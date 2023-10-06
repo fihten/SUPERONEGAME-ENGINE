@@ -52,11 +52,10 @@ void CS_U_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (ij.x > width - 2 * orderOfDerivative - 1)
 		return;
-	if (ij.y > height - 2 * orderOfDerivative - 1)
+	if (ij.y > height - 1)
 		return;
 
 	ij.x += orderOfDerivative;
-	ij.y += orderOfDerivative;
 
 	float4 c = tex[ij];
 	if (orderOfDerivative == 0)
@@ -88,14 +87,13 @@ void CS_V_AXIS(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint elements = 0;
 	r.GetDimensions(width, height, elements);
 
-	if (ij.x > width - 2 * orderOfDerivative - 1)
+	if (ij.x > width - 1)
 		return;
 	if (ij.y > height - 2 * orderOfDerivative - 1)
 		return;
 	if (col > maxOrderOfDerivatives)
 		return;
 
-	ij.x += orderOfDerivative;
 	ij.y += orderOfDerivative;
 
 	uint2 ij_prev = ij;

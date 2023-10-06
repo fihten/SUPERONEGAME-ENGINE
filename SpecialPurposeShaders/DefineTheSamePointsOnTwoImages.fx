@@ -165,19 +165,33 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 	int i1 = min(k, degree);
 
 	int k_factorial = 1;
-	int i = k - i0 + 1;
+	float pow_myx = 1;
+	int i = 1;
+	for (; i < k - i0 + 1; i++)
+		pow_myx *= myx;
+	float div_myx = myx != 0 ? 1 / myx : 0;
 	for (; i <= k; i++)
 		k_factorial *= i;
 
 	int l_factorial = 1;
-	i = l - degree + i0 + 1;
+	float pow_myy = 1;
+	i = 1;
+	for (; i < l - degree + i0 + 1; i++)
+		pow_myy *= myy;
+	float pow_mxy = 1;
 	for (; i <= l; i++)
+	{
+		pow_mxy *= mxy;
 		l_factorial *= i;
+	}
+	float div_mxy = mxy != 0 ? 1 / mxy : 0;
 
 	int b = 1;
+	float pow_mxx = 1;
 	i = 0;
 	for (; i < i0; i++)
 	{
+		pow_mxx *= mxx;
 		b *= degree - i;
 		b /= i + 1;
 	}
@@ -185,7 +199,13 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 	for (; i <= i1; i++)
 	{
 		int j = degree - i;
-		float4 coeffsToAdd = b * k_factorial * l_factorial * pow(myx, k - i) * pow(myy, l - j) * pow(mxx, i) * pow(mxy, j);
+
+		if (k - i == 0)
+			pow_myx = 1;
+		if (j == 0)
+			pow_mxy = 1;
+		
+		float4 coeffsToAdd = b * k_factorial * l_factorial * pow_myx * pow_myy * pow_mxx * pow_mxy;
 		coefficients += coeffsToAdd;
 
 		b *= j;
@@ -193,6 +213,11 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 
 		k_factorial *= k - i;
 		l_factorial /= l - j + 1;
+
+		pow_myx *= div_myx;
+		pow_myy *= myy;
+		pow_mxx *= mxx;
+		pow_mxy *= div_mxy;
 	}
 	return c * coefficients;
 }
@@ -207,6 +232,7 @@ void findDerivativesOfSpecifiedOrderInNewBasis(
 	for (int degreeOfXinNewBasis = 0; degreeOfXinNewBasis <= order; degreeOfXinNewBasis++)
 	{
 		int b_old = 1;
+		newDerivatives[degreeOfXinNewBasis] = float4(0, 0, 0, 0);
 		for (int degreeOfXinOldBasis = 0; degreeOfXinOldBasis <= order; degreeOfXinOldBasis++)
 		{
 			int degreeOfYinOldBasis = order - degreeOfXinOldBasis;
