@@ -182,6 +182,29 @@ void CS_V_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 	set(r_tmp, g_tmp, b_tmp, a_tmp, uint3(ij, (maxOrderOfDerivatives + 1) * orderOfDerivative), derivative);
 }
 
+[numthreads(16, 16, 4)]
+void CS_AVERAGE_DERIVATIVES_OF_THE_SAME_ORDER(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint3 ijk = dispatchThreadID.xyz;
+
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	r.GetDimensions(width, height, elements);
+
+	if (ijk.x > width - 1)
+		return;
+	if (ijk.y > height - 1)
+		return;
+	if (ijk.z > (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1))
+		return;
+
+	float4 c = get(r, g, b, a, ijk);
+	float4 c_tmp = get(r_tmp, g_tmp, b_tmp, a_tmp, ijk);
+	float4 c_avg = 0.5f * (c + c_tmp);
+	set(r, g, b, a, ijk, c_avg);
+}
+
 technique11 CalculateTextureDerivative
 {
 	pass AlongAxisU_atFirst
