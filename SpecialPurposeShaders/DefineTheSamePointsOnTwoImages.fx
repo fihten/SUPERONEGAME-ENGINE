@@ -303,7 +303,7 @@ float calculateDiscrepancyOfSpecifiedOrder(
 	float maxDiscrepancy = 0;
 	for (int i = 0; i <= order; i++)
 	{
-		float4 d = abs(derivativesBtheoretical[i] - derivativesB[i]);
+		float4 d = abs((derivativesBtheoretical[i] - derivativesB[i]) / derivativesBtheoretical[i]);
 		maxDiscrepancy = max(maxDiscrepancy, max(d.r, max(d.g, d.b)));
 	}
 

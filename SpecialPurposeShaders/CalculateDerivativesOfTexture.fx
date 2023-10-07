@@ -16,7 +16,7 @@ RWTexture2DArray<float> a_tmp;
 // x - d Surf(x0, y0) / dx
 // y - d Surf(x0, y0) / dy
 // z - Surf(x0, y0)
-float3 lsm(float values[9])
+float3 lsm(float value[9])
 {
 	float x[9] = { -1,0,1,-1,0,1,-1,0,1 };
 	float y[9] = { -1,-1,-1,0,0,0,1,1,1 };
@@ -317,7 +317,7 @@ void CS_AVERAGE_DERIVATIVES_OF_THE_SAME_ORDER(uint3 dispatchThreadID : SV_Dispat
 		return;
 	if (ijk.y > height - 1)
 		return;
-	if (ijk.z > (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1))
+	if (ijk.z > (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1) - 1)
 		return;
 
 	float4 c = get(r, g, b, a, ijk);
