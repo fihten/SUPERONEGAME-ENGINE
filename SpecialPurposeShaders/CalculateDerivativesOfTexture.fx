@@ -177,7 +177,7 @@ void CS_U_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float cbs[9];
 	for (int i = 0; i < 9; i++)
 	{
-		float4 color = get(r, g, b, a, ij_s[i]);
+		float4 color = get(r_tmp, g_tmp, b_tmp, a_tmp, ij_s[i]);
 		crs[i] = color.r;
 		cgs[i] = color.g;
 		cbs[i] = color.b;
@@ -189,7 +189,7 @@ void CS_U_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 	derivative.z = lsm(cbs).x;
 	derivative.w = 0;
 
-	set(r, g, b, a, uint3(ij, (maxOrderOfDerivatives + 1) * row + orderOfDerivative), derivative);
+	set(r_tmp, g_tmp, b_tmp, a_tmp, uint3(ij, (maxOrderOfDerivatives + 1) * row + orderOfDerivative), derivative);
 }
 
 [numthreads(16, 16, 4)]
@@ -203,24 +203,45 @@ void CS_V_AXIS_at_first(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint elements = 0;
 	r.GetDimensions(width, height, elements);
 
-	if (ij.x > width - 1)
+	if (ij.x > width - 2 * orderOfDerivative - 1)
 		return;
 	if (ij.y > height - 2 * orderOfDerivative - 1)
 		return;
 	if (col > maxOrderOfDerivatives)
 		return;
 
+	ij.x += orderOfDerivative;
 	ij.y += orderOfDerivative;
 
-	uint2 ij_prev = ij;
-	ij_prev.y -= 1;
-	float4 c_prev = get(r, g, b, a, uint3(ij_prev, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col));
+	uint3 ij_s[9] = {
+		uint3(ij.x - 1, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x + 1, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x - 1, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x + 1, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x - 1, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
+		uint3(ij.x + 1, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col)
+	};
 
-	uint2 ij_next = ij;
-	ij_next.y += 1;
-	float4 c_next = get(r, g, b, a, uint3(ij_next, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col));
+	float crs[9];
+	float cgs[9];
+	float cbs[9];
+	for (int i = 0; i < 9; i++)
+	{
+		float4 color = get(r, g, b, a, ij_s[i]);
+		crs[i] = color.r;
+		cgs[i] = color.g;
+		cbs[i] = color.b;
+	}
 
-	float4 derivative = 0.5 * (c_next - c_prev);
+	float4 derivative;
+	derivative.x = lsm(crs).y;
+	derivative.y = lsm(cgs).y;
+	derivative.z = lsm(cbs).y;
+	derivative.w = 0;
+
 	set(r, g, b, a, uint3(ij, (maxOrderOfDerivatives + 1) * orderOfDerivative + col), derivative);
 }
 
@@ -235,11 +256,12 @@ void CS_V_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mips = 0;
 	tex.GetDimensions(mip, width, height, mips);
 
-	if (ij.x > width - 1)
+	if (ij.x > width - 2 * orderOfDerivative - 1)
 		return;
 	if (ij.y > height - 2 * orderOfDerivative - 1)
 		return;
 
+	ij.x += orderOfDerivative;
 	ij.y += orderOfDerivative;
 
 	float4 c = tex[ij];
@@ -249,15 +271,35 @@ void CS_V_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 	}
 
-	uint2 ij_prev = ij;
-	ij_prev.y -= 1;
-	float4 c_prev = get(r_tmp, g_tmp, b_tmp, a_tmp, uint3(ij_prev, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)));
+	uint3 ij_s[9] = {
+		uint3(ij.x - 1, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x + 1, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x - 1, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x + 1, ij.y, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x - 1, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)),
+		uint3(ij.x + 1, ij.y + 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1))
+	};
 
-	uint2 ij_next = ij;
-	ij_next.y += 1;
-	float4 c_next = get(r_tmp, g_tmp, b_tmp, a_tmp, uint3(ij_next, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1)));
+	float crs[9];
+	float cgs[9];
+	float cbs[9];
+	for (int i = 0; i < 9; i++)
+	{
+		float4 color = get(r_tmp, g_tmp, b_tmp, a_tmp, ij_s[i]);
+		crs[i] = color.r;
+		cgs[i] = color.g;
+		cbs[i] = color.b;
+	}
 
-	float4 derivative = 0.5 * (c_next - c_prev);
+	float4 derivative;
+	derivative.x = lsm(crs).y;
+	derivative.y = lsm(cgs).y;
+	derivative.z = lsm(cbs).y;
+	derivative.w = 0;
+
 	set(r_tmp, g_tmp, b_tmp, a_tmp, uint3(ij, (maxOrderOfDerivatives + 1) * orderOfDerivative), derivative);
 }
 
