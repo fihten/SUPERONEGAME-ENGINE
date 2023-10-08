@@ -21,33 +21,15 @@ float3 lsm(float value[9])
 	float x[9] = { -1,0,1,-1,0,1,-1,0,1 };
 	float y[9] = { -1,-1,-1,0,0,0,1,1,1 };
 
-	float3 L[3] = { float3(0,0,0),float3(0,0,0),float3(0,0,0) };
 	float3 R = float3(0, 0, 0);
 	for (int i = 0; i < 9; i++)
 	{
-		L[0].x += x[i] * x[i];
-		L[0].y += x[i] * y[i];
-		L[0].z += x[i];
-
-		L[1].x += x[i] * y[i];
-		L[1].y += y[i] * y[i];
-		L[1].z += y[i];
-
-		L[2].x += x[i];
-		L[2].y += y[i];
-		L[2].z += 1;
-
 		R.x += value[i] * x[i];
 		R.y += value[i] * y[i];
 		R.z += value[i];
 	}
 
-	float d = dot(L[0], cross(L[1], L[2]));
-	float d0 = dot(R, cross(L[1], L[2]));
-	float d1 = dot(L[0], cross(R, L[2]));
-	float d2 = dot(L[0], cross(L[1], R));
-
-	return float3(d0 / d, d1 / d, d2 / d);
+	return float3(R.x / 6.0f, R.y / 6.0f, R.z / 9.0f);
 }
 
 void set(
@@ -139,7 +121,7 @@ void CS_U_AXIS_at_first(uint3 dispatchThreadID : SV_DispatchThreadID)
 	set(r, g, b, a, uint3(ij, orderOfDerivative), derivative);
 }
 
-[numthreads(16, 16, 2)]
+[numthreads(16, 16, 4)]
 void CS_U_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	uint2 ij = dispatchThreadID.xy;
