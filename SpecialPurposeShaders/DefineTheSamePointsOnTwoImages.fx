@@ -148,25 +148,30 @@ float4 differential(
 }
 
 // c*(mxx*x+myx*y)^k*(mxy*x+myy*y)^l
-float4 findCoefficientsNearXofSpecifiedDegree(
-	float4 c, 
+float findCoefficientsNearXofSpecifiedDegree(
+	int numerator, int denominator, 
 	float mxx, float myx, 
 	float mxy, float myy, 
 	int k, int l, 
 	int degree
 )
 {
-	float4 coefficients = float4(0, 0, 0, 0);
+	int degree_factorial = 1;
+	int i = 1;
+	for (; i <= degree; i++)
+		degree_factorial *= i;
 
-	// i <= k && degree - i <= l && degree - i >= 0
+	float coefficient = 0;
+
+	// i <= k && i >= 0 && degree - i <= l && degree - i >= 0
 	// ->
-	// degree - l <= i <= min(k, degree)
+	// max(0, degree - l) <= i <= min(k, degree)
 	int i0 = max(0, degree - l);
 	int i1 = min(k, degree);
 
 	int k_factorial = 1;
 	float pow_myx = 1;
-	int i = 1;
+	i = 1;
 	for (; i < k - i0 + 1; i++)
 		pow_myx *= myx;
 	float div_myx = myx != 0 ? 1 / myx : 0;
@@ -205,8 +210,9 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 		if (j == 0)
 			pow_mxy = 1;
 		
-		float4 coeffsToAdd = b * k_factorial * l_factorial * pow_myx * pow_myy * pow_mxx * pow_mxy;
-		coefficients += coeffsToAdd;
+		float fc = pow_myx * pow_myy * pow_mxx * pow_mxy;
+		int ic = (b * k_factorial * l_factorial * numerator) / denominator / degree_factorial;
+		coefficient += ic * fc;
 
 		b *= j;
 		b /= i + 1;
@@ -219,7 +225,7 @@ float4 findCoefficientsNearXofSpecifiedDegree(
 		pow_mxx *= mxx;
 		pow_mxy *= div_mxy;
 	}
-	return c * coefficients;
+	return coefficient;
 }
 
 #define max_count_of_derivatives 20
@@ -236,20 +242,18 @@ void findDerivativesOfSpecifiedOrderInNewBasis(
 		for (int degreeOfXinOldBasis = 0; degreeOfXinOldBasis <= order; degreeOfXinOldBasis++)
 		{
 			int degreeOfYinOldBasis = order - degreeOfXinOldBasis;
-
-			newDerivatives[degreeOfXinNewBasis] += findCoefficientsNearXofSpecifiedDegree(
-				b_old * oldDerivatives[degreeOfXinOldBasis],
-				transformToNewBasis[0][0], transformToNewBasis[1][0],
-				transformToNewBasis[0][1], transformToNewBasis[1][1],
-				degreeOfXinOldBasis, degreeOfYinOldBasis,
-				degreeOfXinNewBasis
-			);
+			float coeff = findCoefficientsNearXofSpecifiedDegree(
+					b_old, b_new,
+					transformToNewBasis[0][0], transformToNewBasis[1][0],
+					transformToNewBasis[0][1], transformToNewBasis[1][1],
+					degreeOfXinOldBasis, degreeOfYinOldBasis,
+					degreeOfXinNewBasis
+				);
+			newDerivatives[degreeOfXinNewBasis] += coeff * oldDerivatives[degreeOfXinOldBasis];
 
 			b_old *= degreeOfYinOldBasis;
 			b_old /= degreeOfXinOldBasis + 1;
 		}
-
-		newDerivatives[degreeOfXinNewBasis] /= b_new;
 
 		int degreeOfYinNewBasis = order - degreeOfXinNewBasis;
 		b_new *= degreeOfYinNewBasis;
