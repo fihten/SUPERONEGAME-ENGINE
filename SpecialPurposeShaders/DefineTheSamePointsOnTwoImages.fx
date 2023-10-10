@@ -100,56 +100,8 @@ void calculateInitialTransformParams(
 		);
 }
 
-int binomial_coefficient(int n, int k)
-{
-	int a = 1;
-	int b = 1;
-	for (int i = 1; i <= k; i++)
-	{
-		a *= n + 1 - i;
-		b *= i;
-	}
-	return a / b;
-}
-
-float4 differential(
-	Texture2DArray<float> r,
-	Texture2DArray<float> g,
-	Texture2DArray<float> b,
-	Texture2DArray<float> a,
-	int2 ij, float specCoeff,
-	int order, float dx, float dy
-)
-{
-	float4 ret = 0;
-
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	r.GetDimensions(mip, width, height, elements, mips);
-
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-
-	int binomial = 1;
-	for (int k = 0; k <= order; k++)
-	{
-		int l = order - k;
-		int index = l * (maxOrderOfDerivatives + 1) + k;
-
-		float4 derivative_k_l = specCoeff * get(r, g, b, a, uint3(ij, index));
-		ret += binomial * derivative_k_l * pow(dx, k) * pow(dy, l);
-
-		binomial *= l;
-		binomial /= k + 1;
-	}
-	return ret;
-}
-
-// c*(mxx*x+myx*y)^k*(mxy*x+myy*y)^l
+// (mxx*x+myx*y)^k*(mxy*x+myy*y)^l
 float findCoefficientsNearXofSpecifiedDegree(
-	int numerator, int denominator, 
 	float mxx, float myx, 
 	float mxy, float myy, 
 	int k, int l, 
@@ -211,7 +163,7 @@ float findCoefficientsNearXofSpecifiedDegree(
 			pow_mxy = 1;
 		
 		float fc = pow_myx * pow_myy * pow_mxx * pow_mxy;
-		int ic = (b * k_factorial * l_factorial * numerator) / denominator / degree_factorial;
+		int ic = (b * k_factorial * l_factorial) / degree_factorial;
 		coefficient += ic * fc;
 
 		b *= j;
@@ -242,8 +194,7 @@ void findDerivativesOfSpecifiedOrderInNewBasis(
 		for (int degreeOfXinOldBasis = 0; degreeOfXinOldBasis <= order; degreeOfXinOldBasis++)
 		{
 			int degreeOfYinOldBasis = order - degreeOfXinOldBasis;
-			float coeff = findCoefficientsNearXofSpecifiedDegree(
-					b_old, b_new,
+			float coeff = b_old*findCoefficientsNearXofSpecifiedDegree(
 					transformToNewBasis[0][0], transformToNewBasis[1][0],
 					transformToNewBasis[0][1], transformToNewBasis[1][1],
 					degreeOfXinOldBasis, degreeOfYinOldBasis,
@@ -254,6 +205,7 @@ void findDerivativesOfSpecifiedOrderInNewBasis(
 			b_old *= degreeOfYinOldBasis;
 			b_old /= degreeOfXinOldBasis + 1;
 		}
+		newDerivatives[degreeOfXinNewBasis] /= b_new;
 
 		int degreeOfYinNewBasis = order - degreeOfXinNewBasis;
 		b_new *= degreeOfYinNewBasis;
