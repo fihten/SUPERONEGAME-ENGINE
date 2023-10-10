@@ -1,5 +1,7 @@
 #include "constants.hlsl"
 
+#define max_count_of_derivatives 121
+
 uint size;
 float threshold0;
 float threshold1;
@@ -33,17 +35,9 @@ float4 get(
 	return res;
 }
 
-void calculateInitialTransformParams(
-	Texture2DArray<float> Ar,
-	Texture2DArray<float> Ag,
-	Texture2DArray<float> Ab,
-	Texture2DArray<float> Aa,
-	int2 posInA,
-	Texture2DArray<float> Br,
-	Texture2DArray<float> Bg,
-	Texture2DArray<float> Bb,
-	Texture2DArray<float> Ba,
-	int2 posInB,
+void calculateTransform(
+	double4 Aderivatives[max_count_of_derivatives],
+	double4 Bderivatives[max_count_of_derivatives],
 	out double2x2 transformBtoA,
 	out double specCoeffA
 )
@@ -57,39 +51,52 @@ void calculateInitialTransformParams(
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
-	double4 a00 = get(Ar, Ag, Ab, Aa, uint3(posInA, 0));
-	double4 a10 = get(Ar, Ag, Ab, Aa, uint3(posInA, 1));
-	double4 a01 = get(Ar, Ag, Ab, Aa, uint3(posInA, maxOrderOfDerivatives + 1));
-
-	double4 b00 = get(Br, Bg, Bb, Ba, uint3(posInB, 0));
-	double4 b10 = get(Br, Bg, Bb, Ba, uint3(posInB, 1));
-	double4 b01 = get(Br, Bg, Bb, Ba, uint3(posInB, maxOrderOfDerivatives + 1));
-
+	double4 a00 = Aderivatives[0];
+	double4 b00 = Bderivatives[0];
 	specCoeffA = (float)(dot(a00.xyz, b00.xyz)) / (float)(dot(a00.xyz, a00.xyz));
-	a10 *= specCoeffA;
-	a01 *= specCoeffA;
 
-	double l00 = dot(b10.xyz, b10.xyz);
-	double l01 = dot(b10.xyz, b01.xyz);
+	double l00 = 0;
+	double l01 = 0;
+	double l11 = 0;
+
+	double r00 = 0;
+	double r10 = 0;
+
+	double r01 = 0;
+	double r11 = 0;
+
+	for (int i = 0; i < maxOrderOfDerivatives; i++)
+	{
+		for (int j = 0; j < maxOrderOfDerivatives; j++)
+		{
+			double4 a10 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
+			double4 a01 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
+
+			double4 b10 = Bderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
+			double4 b01 = Bderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
+
+			l00 += dot(b10.xyz, b10.xyz);
+			l01 += dot(b10.xyz, b01.xyz);
+			l11 += dot(b01.xyz, b01.xyz);
+
+			r00 += dot(a10.xyz, b10.xyz);
+			r10 += dot(a10.xyz, b01.xyz);
+
+			r01 += dot(b10.xyz, a01.xyz);
+			r11 += dot(a01.xyz, b01.xyz);
+		}
+	}
 	double l10 = l01;
-	double l11 = dot(b01.xyz, b01.xyz);
-
-	double r0 = dot(a10.xyz, b10.xyz);
-	double r1 = dot(a10.xyz, b01.xyz);
 
 	double d = l00 * l11 - l01 * l10;
-	double d0 = r0 * l11 - l01 * r1;
-	double d1 = l00 * r1 - r0 * l10;
+	double d0 = r00 * l11 - l01 * r10;
+	double d1 = l00 * r10 - r00 * l10;
 
 	double mxx = d != 0 ? (float)(d0) / (float)(d) : 1;
 	double mxy = d != 0 ? (float)(d1) / (float)(d) : 0;
 
-	r0 = dot(b10.xyz, a01.xyz);
-	r1 = dot(a01.xyz, b01.xyz);
-
-	d = l00 * l11 - l01 * l10;
-	d0 = r0 * l11 - l01 * r1;
-	d1 = l00 * r1 - r0 * l10;
+	d0 = r01 * l11 - l01 * r11;
+	d1 = l00 * r11 - r01 * l10;
 
 	double myx = d != 0 ? (float)(d0) / (float)(d) : 0;
 	double myy = d != 0 ? (float)(d1) / (float)(d) : 1;
@@ -100,205 +107,50 @@ void calculateInitialTransformParams(
 		);
 }
 
-// (mxx*x+myx*y)^k*(mxy*x+myy*y)^l
-double findCoefficientsNearXofSpecifiedDegree(
-	double mxx, double myx, 
-	double mxy, double myy, 
-	int k, int l, 
-	int degree
+double calculateError(
+	double4 Aderivatives[max_count_of_derivatives],
+	double4 Bderivatives[max_count_of_derivatives],
+	double2x2 transformBtoA,
+	double specCoeffA
 )
 {
-	int degree_factorial = 1;
-	int i = 1;
-	for (; i <= degree; i++)
-		degree_factorial *= i;
+	double maxError = 0;
 
-	double coefficient = 0;
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	Ar.GetDimensions(mip, width, height, elements, mips);
 
-	// i <= k && i >= 0 && degree - i <= l && degree - i >= 0
-	// ->
-	// max(0, degree - l) <= i <= min(k, degree)
-	int i0 = max(0, degree - l);
-	int i1 = min(k, degree);
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
-	int k_factorial = 1;
-	double pow_myx = 1;
-	i = 1;
-	for (; i < k - i0 + 1; i++)
-		pow_myx *= myx;
-	for (; i <= k; i++)
-		k_factorial *= i;
+	double4 a00 = Aderivatives[0];
+	double4 b00 = Bderivatives[0];
 
-	int l_factorial = 1;
-	double pow_myy = 1;
-	i = 1;
-	for (; i < l - degree + i0 + 1; i++)
-		pow_myy *= myy;
-	double pow_mxy = 1;
-	for (; i <= l; i++)
+	double4 e = abs(float4(b00 - specCoeffA * a00) / float4(b00));
+	maxError = max(maxError, max(e.x, max(e.y, e.z)));
+
+	for (int i = 0; i < maxOrderOfDerivatives; i++)
 	{
-		pow_mxy *= mxy;
-		l_factorial *= i;
-	}
-
-	int b = 1;
-	double pow_mxx = 1;
-	i = 0;
-	for (; i < i0; i++)
-	{
-		pow_mxx *= mxx;
-		b *= degree - i;
-		b /= i + 1;
-	}
-
-	for (; i <= i1; i++)
-	{
-		int j = degree - i;
-
-		if (k - i == 0)
-			pow_myx = 1;
-		if (j == 0)
-			pow_mxy = 1;
-		
-		double fc = pow_myx * pow_myy * pow_mxx * pow_mxy;
-		int ic = (b * k_factorial * l_factorial) / degree_factorial;
-		coefficient += ic * fc;
-
-		b *= j;
-		b /= i + 1;
-
-		k_factorial *= k - i;
-		l_factorial /= l - j + 1;
-
-		pow_myx = myx != 0 ? (float)(pow_myx) / (float)(myx) : pow_myx;
-		pow_myy *= myy;
-		pow_mxx *= mxx;
-		pow_mxy = mxy != 0 ? (float)(pow_mxy) / (float)(mxy) : pow_mxy;
-	}
-	return coefficient;
-}
-
-#define max_count_of_derivatives 20
-void findDerivativesOfSpecifiedOrderInNewBasis(
-	double4 oldDerivatives[max_count_of_derivatives], int order, double2x2 transformToNewBasis,
-	out double4 newDerivatives[max_count_of_derivatives]
-)
-{
-	int b_new = 1;
-	for (int degreeOfXinNewBasis = 0; degreeOfXinNewBasis <= order; degreeOfXinNewBasis++)
-	{
-		int b_old = 1;
-		newDerivatives[degreeOfXinNewBasis] = double4(0, 0, 0, 0);
-		for (int degreeOfXinOldBasis = 0; degreeOfXinOldBasis <= order; degreeOfXinOldBasis++)
+		for (int j = 0; j < maxOrderOfDerivatives; j++)
 		{
-			int degreeOfYinOldBasis = order - degreeOfXinOldBasis;
-			double coeff = b_old*findCoefficientsNearXofSpecifiedDegree(
-					transformToNewBasis[0][0], transformToNewBasis[1][0],
-					transformToNewBasis[0][1], transformToNewBasis[1][1],
-					degreeOfXinOldBasis, degreeOfYinOldBasis,
-					degreeOfXinNewBasis
-				);
-			newDerivatives[degreeOfXinNewBasis] += coeff * oldDerivatives[degreeOfXinOldBasis];
+			double4 a10 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
+			double4 a01 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
 
-			b_old *= degreeOfYinOldBasis;
-			b_old /= degreeOfXinOldBasis + 1;
+			double4 b10 = Bderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
+			double4 b01 = Bderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
+
+			double4 a10theoretical = transformBtoA[0][0] * b10 + transformBtoA[0][1] * b01;
+			e = abs(float4(a10theoretical - a10) / float4(a10theoretical));
+			maxError = max(maxError, max(e.x, max(e.y, e.z)));
+
+			double4 a01theoretical = transformBtoA[1][0] * b10 + transformBtoA[1][1] * b01;
+			e = abs(float4(a01theoretical - a10) / float4(a01theoretical));
+			maxError = max(maxError, max(e.x, max(e.y, e.z)));
 		}
-		newDerivatives[degreeOfXinNewBasis] = float4(newDerivatives[degreeOfXinNewBasis]) / (float)(b_new);
-
-		int degreeOfYinNewBasis = order - degreeOfXinNewBasis;
-		b_new *= degreeOfYinNewBasis;
-		b_new /= degreeOfXinNewBasis + 1;
 	}
-}
-
-double calculateDiscrepancyOfSpecifiedOrder(
-	Texture2DArray<float> Ar,
-	Texture2DArray<float> Ag,
-	Texture2DArray<float> Ab,
-	Texture2DArray<float> Aa,
-	int2 posInA,
-	Texture2DArray<float> Br,
-	Texture2DArray<float> Bg,
-	Texture2DArray<float> Bb,
-	Texture2DArray<float> Ba,
-	int2 posInB,
-	double2x2 transformAtoB,
-	double specCoeffB,
-	int order
-)
-{
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
-
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-
-	double4 derivativesA[max_count_of_derivatives];
-	double4 derivativesB[max_count_of_derivatives];
-	double4 derivativesBtheoretical[max_count_of_derivatives];
-	for (int i = 0; i <= order; i++)
-	{
-		int j = order - i;
-		int index = j * (maxOrderOfDerivatives + 1) + i;
-
-		derivativesA[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, index));
-		derivativesB[i] = specCoeffB * get(Br, Bg, Bb, Ba, uint3(posInB, index));
-		derivativesBtheoretical[i] = double4(0, 0, 0, 0);
-	}
-
-	findDerivativesOfSpecifiedOrderInNewBasis(
-		derivativesA, order, transformAtoB,
-		derivativesBtheoretical
-	);
-
-	double maxDiscrepancy = 0;
-	for (int i = 0; i <= order; i++)
-	{
-		double4 d = abs(float4(derivativesBtheoretical[i] - derivativesB[i]) / float4(derivativesBtheoretical[i]));
-		maxDiscrepancy = max(maxDiscrepancy, max(d.r, max(d.g, d.b)));
-	}
-
-	return maxDiscrepancy;
-}
-
-double calculateDiscrepancy(
-	Texture2DArray<float> Ar,
-	Texture2DArray<float> Ag,
-	Texture2DArray<float> Ab,
-	Texture2DArray<float> Aa,
-	int2 posInA,
-	Texture2DArray<float> Br,
-	Texture2DArray<float> Bg,
-	Texture2DArray<float> Bb,
-	Texture2DArray<float> Ba,
-	int2 posInB,
-	double2x2 transformAtoB,
-	double specCoeffB
-)
-{
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
-
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-	double maxDiscrepancy = 0;
-	for (int order = 0; order <= maxOrderOfDerivatives; order++)
-	{
-		double d = calculateDiscrepancyOfSpecifiedOrder(
-			Ar, Ag, Ab, Aa, posInA,
-			Br, Bg, Bb, Ba, posInB,
-			transformAtoB, specCoeffB,
-			order
-		);
-		maxDiscrepancy = max(d, maxDiscrepancy);
-	}
-	return maxDiscrepancy;
+	return maxError;
 }
 
 [numthreads(32, 32, 1)]
@@ -347,18 +199,29 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 
-	double2x2 transformAtoB;
-	double specCoeffB;
-	calculateInitialTransformParams(
-		Br, Bg, Bb, Ba, posInB,
-		Ar, Ag, Ab, Aa, posInA,
-		transformAtoB, specCoeffB
+	double4 Aderivatives[max_count_of_derivatives];
+	double4 Bderivatives[max_count_of_derivatives];
+
+	for (int i = 0; i < (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1); i++)
+	{
+		Aderivatives[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, i));
+		Bderivatives[i] = get(Br, Bg, Bb, Ba, uint3(posInB, i));
+	}
+
+	double2x2 transformBtoA;
+	double specCoeffA;
+	calculateTransform(
+		Aderivatives,
+		Bderivatives,
+		transformBtoA,
+		specCoeffA
 	);
 
-	uint err = 1000000 * calculateDiscrepancy(
-		Ar, Ag, Ab, Aa, posInA,
-		Br, Bg, Bb, Ba, posInB,
-		transformAtoB, specCoeffB
+	uint err = 1000000 * calculateError(
+		Aderivatives,
+		Bderivatives,
+		transformBtoA,
+		specCoeffA
 	);
 
 	InterlockedMin(error[posInA].r, err);
@@ -390,18 +253,29 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	posInB.x += maxOrderOfDerivatives;
 	posInB.y += maxOrderOfDerivatives;
 
-	float2x2 transformAtoB;
-	float specCoeffB;
-	calculateInitialTransformParams(
-		Br, Bg, Bb, Ba, posInB,
-		Ar, Ag, Ab, Aa, posInA,
-		transformAtoB, specCoeffB
+	double4 Aderivatives[max_count_of_derivatives];
+	double4 Bderivatives[max_count_of_derivatives];
+
+	for (int i = 0; i < (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1); i++)
+	{
+		Aderivatives[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, i));
+		Bderivatives[i] = get(Br, Bg, Bb, Ba, uint3(posInB, i));
+	}
+
+	double2x2 transformBtoA;
+	double specCoeffA;
+	calculateTransform(
+		Aderivatives,
+		Bderivatives,
+		transformBtoA,
+		specCoeffA
 	);
 
-	uint err = 1000000 * calculateDiscrepancy(
-		Ar, Ag, Ab, Aa, posInA,
-		Br, Bg, Bb, Ba, posInB,
-		transformAtoB, specCoeffB
+	uint err = 1000000 * calculateError(
+		Aderivatives,
+		Bderivatives,
+		transformBtoA,
+		specCoeffA
 	);
 
 	if (err == error[posInA].r)

@@ -49,10 +49,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	StringManager::init();
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
-	GraphicsCore::instance()->openTextureA("imageA.bmp");
+	GraphicsCore::instance()->openTextureA("imageA.jpg");
 	GraphicsCore::instance()->calculateDerivativesOfTextureA();
 
-	GraphicsCore::instance()->openTextureB("imageB.bmp");
+	GraphicsCore::instance()->openTextureB("imageB.jpg");
 	GraphicsCore::instance()->calculateDerivativesOfTextureB();
 
 	GraphicsCore::instance()->defineTheSamePoints();
