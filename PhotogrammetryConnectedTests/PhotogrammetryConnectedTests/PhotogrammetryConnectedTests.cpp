@@ -42,7 +42,30 @@ void discretizeFunction(Function function, float a, float b, float y[], int N)
 	}
 }
 
+float function(float x)
+{
+	return sqrt(1 - x * x);
+}
+
 int main()
 {
-    std::cout << "Hello World!\n";
+	float y[100];
+	int N = sizeof y / sizeof * y;
+	float a = -1.0f;
+	float b = 1.0f;
+	discretizeFunction(function, a, b, y, N);
+
+	float step = (b - a) / N;
+	int n = 21;
+	int m = 10;
+
+	float fourierCoefficientsA[100];
+	float fourierCoefficientsB[100];
+
+	findFourierCoefficients(
+		y, n, step,
+		fourierCoefficientsA,
+		fourierCoefficientsB,
+		m
+	);
 }
