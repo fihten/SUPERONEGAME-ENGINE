@@ -44,7 +44,12 @@ void discretizeFunction(Function function, float a, float b, float y[], int N)
 
 float function(float x)
 {
-	return sqrt(1 - x * x);
+	return sin(x - 1);
+}
+
+float DfunctionDx(float x, int n)
+{
+	return sin(x - 1 + n * M_PI_2);
 }
 
 int main()
@@ -68,4 +73,20 @@ int main()
 		fourierCoefficientsB,
 		m
 	);
+
+	float x10 = a + 10.5f * step;
+
+	int maxOrderOfDerivative = 10;
+	for (int order = 0; order <= maxOrderOfDerivative; order++)
+	{
+		float theoreticalDerivative = DfunctionDx(x10, order);
+		float calculatedDerivative = order == 0 ? fourierCoefficientsA[0] / 2 : 0;
+		for (int ci = 1; ci < m; ci++)
+		{
+			float L = b - a;
+			float f = (2 * ci * M_PI) / L;
+			calculatedDerivative += pow(f, order) * fourierCoefficientsA[ci] * cos(f * x10 + order * M_PI_2);
+			calculatedDerivative += pow(f, order) * fourierCoefficientsB[ci] * sin(f * x10 + order * M_PI_2);
+		}
+	}
 }
