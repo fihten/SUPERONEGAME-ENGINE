@@ -3,90 +3,81 @@
 #define _USE_MATH_DEFINES 
 #include <math.h>
 
-void findFourierCoefficients(
-	float y[], int N, float step, 
-	float fourierCoefficientsA[],
-	float fourierCoefficientsB[],
+void findFourierCoefficientsOfDerivative(
+	double y[], int N, double step, 
+	double fourierCoefficientsNearCos[],
 	int M
 )
 {
-	float L = N * step;
-	for (int ci = 0; ci < M; ci++)
+	double L = N * step;
+	fourierCoefficientsNearCos[0] = 2.0f * (y[N - 1] - y[0]) / L;
+	double s = -1;
+	for (int ci = 1; ci < M; ci++)
 	{
-		fourierCoefficientsA[ci] = 0;
-		fourierCoefficientsB[ci] = 0;
-		for (int ei = 0; ei < N; ei++)
+		fourierCoefficientsNearCos[ci] = (y[N - 1] - y[0]) * s;
+		s *= -1;
+		double f = (ci * M_PI) / L;
+		for (int ei = 1; ei < N; ei++)
 		{
-			float xi = ((float)ei + 0.5f) * step;
-
-			fourierCoefficientsA[ci] += y[ei] * cos((2 * ci * M_PI * xi) / L) * step;
-			
-			if (ci == 0)
-				continue;
-
-			fourierCoefficientsB[ci] += y[ei] * cos((2 * ci * M_PI * xi) / L) * step;
+			double xi = ((double)ei + 0.5f) * step;
+			fourierCoefficientsNearCos[ci] += f * (y[ei] - y[0]) * sin(f * xi) * step;
 		}
-		fourierCoefficientsA[ci] *= (2.0f / L);
-		fourierCoefficientsB[ci] *= (2.0f / L);
+		fourierCoefficientsNearCos[ci] *= (2.0f / L);
 	}
 }
 
 template<class Function>
-void discretizeFunction(Function function, float a, float b, float y[], int N)
+void discretizeFunction(Function function, double a, double b, double y[], int N)
 {
-	float step = (b - a) / N;
+	double step = (b - a) / N;
 	for (int ei = 0; ei < N; ei++)
 	{
-		float xi = a + ((float)ei + 0.5f) * step;
+		double xi = a + ((double)ei + 0.5f) * step;
 		y[ei] = function(xi);
 	}
 }
 
-float function(float x)
+double function(double x)
 {
 	return sin(x - 1);
 }
 
-float DfunctionDx(float x, int n)
+double DfunctionDx(double x, int n)
 {
 	return sin(x - 1 + n * M_PI_2);
 }
 
 int main()
 {
-	float y[100];
+	double y[1000];
 	int N = sizeof y / sizeof * y;
-	float a = -1.0f;
-	float b = 1.0f;
+	double a = -1.0f;
+	double b = 1.0f;
 	discretizeFunction(function, a, b, y, N);
 
-	float step = (b - a) / N;
-	int n = 21;
-	int m = 10;
+	double step = (b - a) / N;
+	int n = 201;
+	int m = 100;
 
-	float fourierCoefficientsA[100];
-	float fourierCoefficientsB[100];
-
-	findFourierCoefficients(
+	double fourierCoefficientsNearCos[400];
+	findFourierCoefficientsOfDerivative(
 		y, n, step,
-		fourierCoefficientsA,
-		fourierCoefficientsB,
+		fourierCoefficientsNearCos,
 		m
 	);
 
-	float x10 = a + 10.5f * step;
+	double x = a;
 
-	int maxOrderOfDerivative = 10;
-	for (int order = 0; order <= maxOrderOfDerivative; order++)
+	double theoreticalDerivative = DfunctionDx(x, 1);
+	double calculatedDerivative = fourierCoefficientsNearCos[0] / 2;
+	for (int ci = 1; ci < m; ci++)
 	{
-		float theoreticalDerivative = DfunctionDx(x10, order);
-		float calculatedDerivative = order == 0 ? fourierCoefficientsA[0] / 2 : 0;
-		for (int ci = 1; ci < m; ci++)
-		{
-			float L = b - a;
-			float f = (2 * ci * M_PI) / L;
-			calculatedDerivative += pow(f, order) * fourierCoefficientsA[ci] * cos(f * x10 + order * M_PI_2);
-			calculatedDerivative += pow(f, order) * fourierCoefficientsB[ci] * sin(f * x10 + order * M_PI_2);
-		}
+		double L = step * (float)(n);
+		double f = (ci * M_PI) / L;
+		calculatedDerivative += fourierCoefficientsNearCos[ci] * cos(f *x);
 	}
+	std::cout << "----------------------" << std::endl;
+	std::cout << "theoretical derivative " << theoreticalDerivative << std::endl;
+	std::cout << "calculated derivative " << calculatedDerivative << std::endl;
+	std::cout << "error " << abs(theoreticalDerivative - calculatedDerivative) << std::endl;
 }

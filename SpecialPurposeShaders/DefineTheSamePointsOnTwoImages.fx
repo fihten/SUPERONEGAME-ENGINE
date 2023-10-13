@@ -181,8 +181,8 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	Ar.GetDimensions(mip, width, height, elements, mips);
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
-	int width_ = width - 2 * maxOrderOfDerivatives;
-	int height_ = height - 2 * maxOrderOfDerivatives;
+	int width_ = width - 2 * maxOrderOfDerivatives - 2;
+	int height_ = height - 2 * maxOrderOfDerivatives - 2;
 
 	int2 posInA = int2(dispatchThreadID.x % width_, dispatchThreadID.x / width_);
 	if (posInA.y > height_ - 1)
@@ -193,8 +193,8 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int2 posInB = int2(dispatchThreadID.y % width_, dispatchThreadID.y / width_);
 	if (posInB.y > height_ - 1)
 		return;
-	posInB.x += maxOrderOfDerivatives;
-	posInB.y += maxOrderOfDerivatives;
+	posInB.x += maxOrderOfDerivatives + 1;
+	posInB.y += maxOrderOfDerivatives + 1;
 
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
@@ -238,14 +238,14 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	Ar.GetDimensions(mip, width, height, elements, mips);
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
-	int width_ = width - 2 * maxOrderOfDerivatives;
-	int height_ = height - 2 * maxOrderOfDerivatives;
+	int width_ = width - 2 * maxOrderOfDerivatives - 2;
+	int height_ = height - 2 * maxOrderOfDerivatives - 2;
 
 	int2 posInA = int2(dispatchThreadID.x % width_, dispatchThreadID.x / width_);
 	if (posInA.y > height_ - 1)
 		return;
-	posInA.x += maxOrderOfDerivatives;
-	posInA.y += maxOrderOfDerivatives;
+	posInA.x += maxOrderOfDerivatives + 1;
+	posInA.y += maxOrderOfDerivatives + 1;
 
 	int2 posInB = int2(dispatchThreadID.y % width_, dispatchThreadID.y / width_);
 	if (posInB.y > height_ - 1)

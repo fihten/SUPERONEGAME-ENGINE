@@ -1983,7 +1983,7 @@ void GraphicsCore::calculateDerivativesOfTextureA()
 		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atFirst")->Apply(0, context);
 
 		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative) / 16.0f);
+		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative - 2) / 16.0f);
 		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
 		context->Dispatch(groups_x, groups_y, groups_z);
 	}
@@ -2009,7 +2009,7 @@ void GraphicsCore::calculateDerivativesOfTextureA()
 		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
 		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atTheSecond")->Apply(0, context);
 
-		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative) / 16.0f);
+		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative - 2) / 16.0f);
 		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative) / 16.0f);
 		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
 		context->Dispatch(groups_x, groups_y, groups_z);
@@ -2055,7 +2055,7 @@ void GraphicsCore::calculateDerivativesOfTextureB()
 		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atFirst")->Apply(0, context);
 
 		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative) / 16.0f);
+		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative - 2) / 16.0f);
 		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
 		context->Dispatch(groups_x, groups_y, groups_z);
 	}
@@ -2081,7 +2081,7 @@ void GraphicsCore::calculateDerivativesOfTextureB()
 		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
 		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atTheSecond")->Apply(0, context);
 
-		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative) / 16.0f);
+		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative - 2) / 16.0f);
 		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative) / 16.0f);
 		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
 		context->Dispatch(groups_x, groups_y, groups_z);

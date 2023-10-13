@@ -132,14 +132,14 @@ void CS_U_AXIS_at_the_second(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint elements = 0;
 	r.GetDimensions(width, height, elements);
 
-	if (ij.x > width - 2 * orderOfDerivative - 1)
+	if (ij.x > width - 2 * orderOfDerivative - 3)
 		return;
 	if (ij.y > height - 2 * orderOfDerivative - 1)
 		return;
 	if (row > maxOrderOfDerivatives)
 		return;
 
-	ij.x += orderOfDerivative;
+	ij.x += orderOfDerivative + 1;
 	ij.y += orderOfDerivative;
 
 	uint3 ij_s[9] = {
@@ -187,13 +187,13 @@ void CS_V_AXIS_at_first(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (ij.x > width - 2 * orderOfDerivative - 1)
 		return;
-	if (ij.y > height - 2 * orderOfDerivative - 1)
+	if (ij.y > height - 2 * orderOfDerivative - 3)
 		return;
 	if (col > maxOrderOfDerivatives)
 		return;
 
 	ij.x += orderOfDerivative;
-	ij.y += orderOfDerivative;
+	ij.y += orderOfDerivative + 1;
 
 	uint3 ij_s[9] = {
 		uint3(ij.x - 1, ij.y - 1, (maxOrderOfDerivatives + 1) * (orderOfDerivative - 1) + col),
