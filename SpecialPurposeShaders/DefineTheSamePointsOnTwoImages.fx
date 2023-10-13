@@ -35,6 +35,55 @@ float4 get(
 	return res;
 }
 
+void updateCoefficientsOfLinearSystemForCalculationOfTransform(
+	Texture2DArray<float> chanelOfA,
+	int2 posInA,
+	Texture2DArray<float> chanelOfB,
+	int2 posInB,
+	bool positiveDirection,
+	out float a00a00, out float a00b00,
+	out float l00, out float l01,
+	out float l10, out float l11,
+	out float r00, out float r10,
+	out float r01, out float r11,
+	out int2 nextPosInA, out int2 nextPosInB
+)
+{
+	uint mip = 0;
+	uint width = 0;
+	uint height = 0;
+	uint elements = 0;
+	uint mips = 0;
+	chanelOfA.GetDimensions(mip, width, height, elements, mips);
+
+	int maxOrderOfDerivatives = sqrt(elements) - 1;
+
+	float a00 = chanelOfA[int3(posInA, 0)].r;
+	float b00 = chanelOfB[int3(posInB, 0)].r;
+
+	float a10 = chanelOfA[int3(posInA, 1)].r;
+	float a01 = chanelOfA[int3(posInA, maxOrderOfDerivatives + 1)].r;
+
+	float b10 = chanelOfB[int3(posInB, 1)].r;
+	float b01 = chanelOfB[int3(posInB, maxOrderOfDerivatives + 1)].r;
+
+	a00a00 += a00 * a00;
+	a00b00 += a00 * b00;
+
+	l00 += b10 * b10;
+	l01 += b10 * b01;
+	l11 += b01 * b01;
+
+	r00 += a10 * b10;
+	r10 += a10 * b01;
+
+	r01 += b10 * a01;
+	r11 += a01 * b01;
+
+	float2 gradA = float2(a10, a01);
+	float2 gradB = float2(b10, b01);
+}
+
 void calculateTransform(
 	double4 Aderivatives[max_count_of_derivatives],
 	double4 Bderivatives[max_count_of_derivatives],
