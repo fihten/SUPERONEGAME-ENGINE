@@ -80,8 +80,19 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	r01 += b10 * a01;
 	r11 += a01 * b01;
 
-	float2 gradA = float2(a10, a01);
-	float2 gradB = float2(b10, b01);
+	double2 gradA = double2(a10, a01);
+	double2 gradB = double2(b10, b01);
+
+	double hAmin = 0.501f / (float)(max(abs(gradA.x), abs(gradA.y)));
+	double hBmin = 0.501f / (float)(max(abs(gradB.x), abs(gradB.y)));
+
+	double hA = hAmin;
+	double Da00 = hA * length(gradA);
+	double hB = (float)((b00 / a00) * Da00) / (float)(length(gradB));
+
+	double coeff = max((float)(hBmin) / (float)(hB), 1);
+	hA *= coeff;
+	hB *= coeff;
 }
 
 void calculateTransform(
