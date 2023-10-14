@@ -40,14 +40,15 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	int2 posInA,
 	Texture2DArray<float> chanelOfB,
 	int2 posInB,
-	bool positiveDirection,
-	out float a00a00, out float a00b00,
-	out float l00, out float l01,
-	out float l10, out float l11,
-	out float r00, out float r10,
-	out float r01, out float r11,
-	out float c,
-	out int2 nextPosInA, out int2 nextPosInB
+	out double a00a00, out double a00b00,
+	out double l00, out double l01,
+	out double l10, out double l11,
+	out double r00, out double r10,
+	out double r01, out double r11,
+	out double c,
+	out int2 nextPosInA, out int2 nextPosInB,
+	out int2 prevPosInA, out int2 prevPosInB,
+	out double2 gradA, out double2 gradB
 )
 {
 	uint mip = 0;
@@ -77,14 +78,14 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
-	float a00 = chanelOfA[int3(posInA, 0)].r;
-	float b00 = chanelOfB[int3(posInB, 0)].r;
+	double a00 = chanelOfA[int3(posInA, 0)].r;
+	double b00 = chanelOfB[int3(posInB, 0)].r;
 
-	float a10 = chanelOfA[int3(posInA, 1)].r;
-	float a01 = chanelOfA[int3(posInA, maxOrderOfDerivatives + 1)].r;
+	double a10 = chanelOfA[int3(posInA, 1)].r;
+	double a01 = chanelOfA[int3(posInA, maxOrderOfDerivatives + 1)].r;
 
-	float b10 = chanelOfB[int3(posInB, 1)].r;
-	float b01 = chanelOfB[int3(posInB, maxOrderOfDerivatives + 1)].r;
+	double b10 = chanelOfB[int3(posInB, 1)].r;
+	double b01 = chanelOfB[int3(posInB, maxOrderOfDerivatives + 1)].r;
 
 	a00a00 += a00 * a00;
 	a00b00 += a00 * b00;
@@ -99,10 +100,10 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	r01 += b10 * a01;
 	r11 += a01 * b01;
 
-	double2 gradA = double2(a10, a01);
+	gradA = double2(a10, a01);
 	c += dot(gradA, gradA);
 
-	double2 gradB = double2(b10, b01);
+	gradB = double2(b10, b01);
 
 	double hAmin = 0.501f / (float)(max(abs(gradA.x), abs(gradA.y)));
 	double hBmin = 0.501f / (float)(max(abs(gradB.x), abs(gradB.y)));
@@ -117,11 +118,14 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 
 	nextPosInA = round(posInA + hA * gradA);
 	nextPosInB = round(posInB + hB * gradB);
+
+	prevPosInA = round(posInA - hA * gradA);
+	prevPosInB = round(posInB - hB * gradB);
 }
 
 void calculateTransform(
-	double4 Aderivatives[max_count_of_derivatives],
-	double4 Bderivatives[max_count_of_derivatives],
+	int2 posInA,
+	int2 posInB,
 	out double2x2 transformBtoA,
 	out double specCoeffA
 )
@@ -135,9 +139,8 @@ void calculateTransform(
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
-	double4 a00 = Aderivatives[0];
-	double4 b00 = Bderivatives[0];
-	specCoeffA = (float)(dot(a00.xyz, b00.xyz)) / (float)(dot(a00.xyz, a00.xyz));
+	double a00a00 = 0;
+	double a00b00 = 0;
 
 	double l00 = 0;
 	double l01 = 0;
@@ -149,27 +152,18 @@ void calculateTransform(
 	double r01 = 0;
 	double r11 = 0;
 
-	for (int i = 0; i < maxOrderOfDerivatives; i++)
-	{
-		for (int j = 0; j < maxOrderOfDerivatives; j++)
-		{
-			double4 a10 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
-			double4 a01 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
+	double c = 0;
 
-			double4 b10 = Bderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
-			double4 b01 = Bderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
+	double2 positiveDirectionRchanel = 0;
+	double2 positiveDirectionGchanel = 0;
+	double2 positiveDirectionBchanel = 0;
 
-			l00 += dot(b10.xyz, b10.xyz);
-			l01 += dot(b10.xyz, b01.xyz);
-			l11 += dot(b01.xyz, b01.xyz);
+	int2 prevPosInA = 0;
+	int2 nextPosInA = 0;
 
-			r00 += dot(a10.xyz, b10.xyz);
-			r10 += dot(a10.xyz, b01.xyz);
-
-			r01 += dot(b10.xyz, a01.xyz);
-			r11 += dot(a01.xyz, b01.xyz);
-		}
-	}
+	int2 prevPosInB = 0;
+	int2 nextPosInB = 0;
+	
 	double l10 = l01;
 
 	double d = l00 * l11 - l01 * l10;
@@ -189,52 +183,6 @@ void calculateTransform(
 		mxx, mxy,
 		myx, myy
 		);
-}
-
-double calculateError(
-	double4 Aderivatives[max_count_of_derivatives],
-	double4 Bderivatives[max_count_of_derivatives],
-	double2x2 transformBtoA,
-	double specCoeffA
-)
-{
-	double maxError = 0;
-
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
-
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-
-	double4 a00 = Aderivatives[0];
-	double4 b00 = Bderivatives[0];
-
-	double4 e = abs(float4(b00 - specCoeffA * a00) / float4(b00));
-	maxError = max(maxError, max(e.x, max(e.y, e.z)));
-
-	for (int i = 0; i < maxOrderOfDerivatives; i++)
-	{
-		for (int j = 0; j < maxOrderOfDerivatives; j++)
-		{
-			double4 a10 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
-			double4 a01 = specCoeffA * Aderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
-
-			double4 b10 = Bderivatives[(maxOrderOfDerivatives + 1) * j + i + 1];
-			double4 b01 = Bderivatives[(maxOrderOfDerivatives + 1) * (j + 1) + i];
-
-			double4 a10theoretical = transformBtoA[0][0] * b10 + transformBtoA[0][1] * b01;
-			e = abs(float4(a10theoretical - a10) / float4(a10theoretical));
-			maxError = max(maxError, max(e.x, max(e.y, e.z)));
-
-			double4 a01theoretical = transformBtoA[1][0] * b10 + transformBtoA[1][1] * b01;
-			e = abs(float4(a01theoretical - a10) / float4(a01theoretical));
-			maxError = max(maxError, max(e.x, max(e.y, e.z)));
-		}
-	}
-	return maxError;
 }
 
 [numthreads(32, 32, 1)]
