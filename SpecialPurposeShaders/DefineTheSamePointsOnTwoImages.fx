@@ -195,6 +195,28 @@ void calculateTransform(
 			prevPosInA, prevPosInB,
 			gradA, gradB
 		);
+
+		if (dot(gradA, positiveDirectionA) > 0)
+		{
+			posInAtmp0 = nextPosInA;
+			positiveDirectionA = gradA;
+		}
+		else
+		{
+			posInAtmp0 = prevPosInA;
+			positiveDirectionA = -gradA;
+		}
+
+		if (dot(gradB, positiveDirectionB) > 0)
+		{
+			posInBtmp0 = nextPosInB;
+			positiveDirectionB = gradB;
+		}
+		else
+		{
+			posInBtmp0 = prevPosInB;
+			positiveDirectionB = -gradB;
+		}
 	}
 
 	double d = l00 * l11 - l01 * l10;
