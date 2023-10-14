@@ -40,12 +40,12 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	int2 posInA,
 	Texture2DArray<float> chanelOfB,
 	int2 posInB,
-	out double a00a00, out double a00b00,
-	out double l00, out double l01,
-	out double l10, out double l11,
-	out double r00, out double r10,
-	out double r01, out double r11,
-	out double c,
+	inout double a00a00, inout double a00b00,
+	inout double l00, inout double l01,
+	inout double l10, inout double l11,
+	inout double r00, inout double r10,
+	inout double r01, inout double r11,
+	inout double c,
 	out int2 nextPosInA, out int2 nextPosInB,
 	out int2 prevPosInA, out int2 prevPosInB,
 	out double2 gradA, out double2 gradB
@@ -92,6 +92,7 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 
 	l00 += b10 * b10;
 	l01 += b10 * b01;
+	l10 += b10 * b01;
 	l11 += b01 * b01;
 
 	r00 += a10 * b10;
@@ -123,6 +124,7 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	prevPosInB = round(posInB - hB * gradB);
 }
 
+#define FETCHING_NUMBER 1
 void calculateTransform(
 	int2 posInA,
 	int2 posInB,
@@ -144,6 +146,7 @@ void calculateTransform(
 
 	double l00 = 0;
 	double l01 = 0;
+	double l10 = 0;
 	double l11 = 0;
 
 	double r00 = 0;
@@ -154,9 +157,8 @@ void calculateTransform(
 
 	double c = 0;
 
-	double2 positiveDirectionRchanel = 0;
-	double2 positiveDirectionGchanel = 0;
-	double2 positiveDirectionBchanel = 0;
+	double2 positiveDirectionA = 0;
+	double2 positiveDirectionB = 0;
 
 	int2 prevPosInA = 0;
 	int2 nextPosInA = 0;
@@ -164,7 +166,36 @@ void calculateTransform(
 	int2 prevPosInB = 0;
 	int2 nextPosInB = 0;
 	
-	double l10 = l01;
+	updateCoefficientsOfLinearSystemForCalculationOfTransform(
+		Ar, posInA, Br, posInB,
+		a00a00, a00b00,
+		l00, l01, l10, l11,
+		r00, r10, r01, r11,
+		c,
+		nextPosInA, nextPosInB,
+		prevPosInA, prevPosInB,
+		positiveDirectionA, positiveDirectionB
+	);
+
+	int2 posInAtmp0 = nextPosInA;
+	int2 posInAtmp1 = prevPosInA;
+	int2 posInBtmp0 = nextPosInB;
+	int2 posInBtmp1 = prevPosInB;
+	double2 gradA = 0;
+	double2 gradB = 0;
+	for (int i = 0; i < FETCHING_NUMBER; i++)
+	{
+		updateCoefficientsOfLinearSystemForCalculationOfTransform(
+			Ar, posInAtmp0, Br, posInBtmp0,
+			a00a00, a00b00,
+			l00, l01, l10, l11,
+			r00, r10, r01, r11,
+			c,
+			nextPosInA, nextPosInB,
+			prevPosInA, prevPosInB,
+			gradA, gradB
+		);
+	}
 
 	double d = l00 * l11 - l01 * l10;
 	double d0 = r00 * l11 - l01 * r10;
