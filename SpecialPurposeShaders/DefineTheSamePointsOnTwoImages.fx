@@ -46,6 +46,7 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	out float l10, out float l11,
 	out float r00, out float r10,
 	out float r01, out float r11,
+	out float c,
 	out int2 nextPosInA, out int2 nextPosInB
 )
 {
@@ -55,6 +56,24 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	uint elements = 0;
 	uint mips = 0;
 	chanelOfA.GetDimensions(mip, width, height, elements, mips);
+
+	if (posInA.x < 0)
+		return;
+	if (posInA.x > width - 1)
+		return;
+	if (posInA.y < 0)
+		return;
+	if (posInA.y > height - 1)
+		return;
+
+	if (posInB.x < 0)
+		return;
+	if (posInB.x > width - 1)
+		return;
+	if (posInB.y < 0)
+		return;
+	if (posInB.y > height - 1)
+		return;
 
 	int maxOrderOfDerivatives = sqrt(elements) - 1;
 
@@ -81,6 +100,8 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	r11 += a01 * b01;
 
 	double2 gradA = double2(a10, a01);
+	c += dot(gradA, gradA);
+
 	double2 gradB = double2(b10, b01);
 
 	double hAmin = 0.501f / (float)(max(abs(gradA.x), abs(gradA.y)));
@@ -93,6 +114,9 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	double coeff = max((float)(hBmin) / (float)(hB), 1);
 	hA *= coeff;
 	hB *= coeff;
+
+	nextPosInA = round(posInA + hA * gradA);
+	nextPosInB = round(posInB + hB * gradB);
 }
 
 void calculateTransform(
