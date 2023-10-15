@@ -35,7 +35,7 @@ float4 get(
 	return res;
 }
 
-void updateCoefficientsOfLinearSystemForCalculationOfTransform(
+void updateCoefficientsOfLinearSystemForCalculationOfTransform_oneIteration(
 	Texture2DArray<float> chanelOfA,
 	int2 posInA,
 	Texture2DArray<float> chanelOfB,
@@ -111,7 +111,7 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 
 	double hA = hAmin;
 	double Da00 = hA * length(gradA);
-	double hB = (float)((b00 / a00) * Da00) / (float)(length(gradB));
+	double hB = (float)(((float)(b00) / (float)(a00)) * Da00) / (float)(length(gradB));
 
 	double coeff = max((float)(hBmin) / (float)(hB), 1);
 	hA *= coeff;
@@ -124,39 +124,20 @@ void updateCoefficientsOfLinearSystemForCalculationOfTransform(
 	prevPosInB = round(posInB - hB * gradB);
 }
 
-#define FETCHING_NUMBER 1
-void calculateTransform(
+#define FETCHING_NUMBER 20
+void updateCoefficientsOfLinearSystemForCalculationOfTransform(
+	Texture2DArray<float> chanelOfA,
 	int2 posInA,
+	Texture2DArray<float> chanelOfB,
 	int2 posInB,
-	out double2x2 transformBtoA,
-	out double specCoeffA
+	inout double a00a00, inout double a00b00,
+	inout double l00, inout double l01,
+	inout double l10, inout double l11,
+	inout double r00, inout double r10,
+	inout double r01, inout double r11,
+	inout double c
 )
 {
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
-	uint elements = 0;
-	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
-
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-
-	double a00a00 = 0;
-	double a00b00 = 0;
-
-	double l00 = 0;
-	double l01 = 0;
-	double l10 = 0;
-	double l11 = 0;
-
-	double r00 = 0;
-	double r10 = 0;
-
-	double r01 = 0;
-	double r11 = 0;
-
-	double c = 0;
-
 	double2 positiveDirectionA = 0;
 	double2 positiveDirectionB = 0;
 
@@ -165,9 +146,9 @@ void calculateTransform(
 
 	int2 prevPosInB = 0;
 	int2 nextPosInB = 0;
-	
-	updateCoefficientsOfLinearSystemForCalculationOfTransform(
-		Ar, posInA, Br, posInB,
+
+	updateCoefficientsOfLinearSystemForCalculationOfTransform_oneIteration(
+		chanelOfA, posInA, chanelOfB, posInB,
 		a00a00, a00b00,
 		l00, l01, l10, l11,
 		r00, r10, r01, r11,
@@ -185,8 +166,8 @@ void calculateTransform(
 	double2 gradB = 0;
 	for (int i = 0; i < FETCHING_NUMBER; i++)
 	{
-		updateCoefficientsOfLinearSystemForCalculationOfTransform(
-			Ar, posInAtmp0, Br, posInBtmp0,
+		updateCoefficientsOfLinearSystemForCalculationOfTransform_oneIteration(
+			chanelOfA, posInAtmp0, chanelOfB, posInBtmp0,
 			a00a00, a00b00,
 			l00, l01, l10, l11,
 			r00, r10, r01, r11,
@@ -218,6 +199,101 @@ void calculateTransform(
 			positiveDirectionB = -gradB;
 		}
 	}
+	for (int i = 0; i < FETCHING_NUMBER; i++)
+	{
+		updateCoefficientsOfLinearSystemForCalculationOfTransform_oneIteration(
+			chanelOfA, posInAtmp1, chanelOfB, posInBtmp1,
+			a00a00, a00b00,
+			l00, l01, l10, l11,
+			r00, r10, r01, r11,
+			c,
+			nextPosInA, nextPosInB,
+			prevPosInA, prevPosInB,
+			gradA, gradB
+		);
+
+		if (dot(gradA, positiveDirectionA) > 0)
+		{
+			posInAtmp1 = prevPosInA;
+			positiveDirectionA = gradA;
+		}
+		else
+		{
+			posInAtmp1 = nextPosInA;
+			positiveDirectionA = -gradA;
+		}
+
+		if (dot(gradB, positiveDirectionB) > 0)
+		{
+			posInBtmp1 = prevPosInB;
+			positiveDirectionB = gradB;
+		}
+		else
+		{
+			posInBtmp1 = nextPosInB;
+			positiveDirectionB = -gradB;
+		}
+	}
+}
+
+void calculateTransform(
+	int2 posInA,
+	int2 posInB,
+	out double2x2 transformBtoA,
+	out double specCoeffA,
+	out double err
+)
+{
+	double a00a00 = 0;
+	double a00b00 = 0;
+
+	double l00 = 0;
+	double l01 = 0;
+	double l10 = 0;
+	double l11 = 0;
+
+	double r00 = 0;
+	double r10 = 0;
+
+	double r01 = 0;
+	double r11 = 0;
+
+	double c = 0;
+
+	updateCoefficientsOfLinearSystemForCalculationOfTransform(
+		Ar, posInA, Br, posInB,
+		a00a00, a00b00,
+		l00, l01,
+		l10, l11,
+		r00, r10,
+		r01, r11,
+		c
+	);
+	updateCoefficientsOfLinearSystemForCalculationOfTransform(
+		Ag, posInA, Bg, posInB,
+		a00a00, a00b00,
+		l00, l01,
+		l10, l11,
+		r00, r10,
+		r01, r11,
+		c
+	);
+	updateCoefficientsOfLinearSystemForCalculationOfTransform(
+		Ab, posInA, Bb, posInB,
+		a00a00, a00b00,
+		l00, l01,
+		l10, l11,
+		r00, r10,
+		r01, r11,
+		c
+	);
+
+	specCoeffA = (float)(a00b00) / (float)(a00a00);
+	c *= specCoeffA * specCoeffA;
+	r00 *= specCoeffA;
+	r01 *= specCoeffA;
+	r10 *= specCoeffA;
+	r11 *= specCoeffA;
 
 	double d = l00 * l11 - l01 * l10;
 	double d0 = r00 * l11 - l01 * r10;
@@ -236,6 +312,14 @@ void calculateTransform(
 		mxx, mxy,
 		myx, myy
 		);
+
+	err = l00 * (mxx * mxx + myx * myx) +
+		2 * l01 * (mxx * mxy + myx * myy) +
+		l11 * (mxy * mxy + myy * myy) -
+		2 * r00 * mxx - 2 * r10 * mxy -
+		2 * r01 * myx - 2 * r11 * myy + c;
+	err = (float)(err) / (3 * (FETCHING_NUMBER + 1));
+	err = sqrt(err);
 }
 
 [numthreads(32, 32, 1)]
@@ -284,30 +368,18 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 
-	double4 Aderivatives[max_count_of_derivatives];
-	double4 Bderivatives[max_count_of_derivatives];
-
-	for (int i = 0; i < (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1); i++)
-	{
-		Aderivatives[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, i));
-		Bderivatives[i] = get(Br, Bg, Bb, Ba, uint3(posInB, i));
-	}
-
 	double2x2 transformBtoA;
 	double specCoeffA;
+	double derr;
 	calculateTransform(
-		Aderivatives,
-		Bderivatives,
+		posInA,
+		posInB,
 		transformBtoA,
-		specCoeffA
+		specCoeffA,
+		derr
 	);
 
-	uint err = 1000000 * calculateError(
-		Aderivatives,
-		Bderivatives,
-		transformBtoA,
-		specCoeffA
-	);
+	uint err = 1000000 * derr;
 
 	InterlockedMin(error[posInA].r, err);
 }
@@ -338,31 +410,18 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	posInB.x += maxOrderOfDerivatives;
 	posInB.y += maxOrderOfDerivatives;
 
-	double4 Aderivatives[max_count_of_derivatives];
-	double4 Bderivatives[max_count_of_derivatives];
-
-	for (int i = 0; i < (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1); i++)
-	{
-		Aderivatives[i] = get(Ar, Ag, Ab, Aa, uint3(posInA, i));
-		Bderivatives[i] = get(Br, Bg, Bb, Ba, uint3(posInB, i));
-	}
-
 	double2x2 transformBtoA;
 	double specCoeffA;
+	double derr;
 	calculateTransform(
-		Aderivatives,
-		Bderivatives,
+		posInA,
+		posInB,
 		transformBtoA,
-		specCoeffA
+		specCoeffA,
+		derr
 	);
 
-	uint err = 1000000 * calculateError(
-		Aderivatives,
-		Bderivatives,
-		transformBtoA,
-		specCoeffA
-	);
-
+	uint err = 1000000 * derr;
 	if (err == error[posInA].r)
 	{
 		uint original_value;
