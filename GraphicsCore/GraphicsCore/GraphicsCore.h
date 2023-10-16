@@ -223,89 +223,41 @@ public:
 	void openTextureA(const std::string& path);
 	void openTextureB(const std::string& path);
 
-	void calculateDerivativesOfTextureA();
-	void calculateDerivativesOfTextureB();
+	void calculateIntegralsOfTextureA();
+	void calculateIntegralsOfTextureB();
 
 private:
-	void initCalculationOfTextureDerivatives();
-	ID3DX11Effect* mCalculateTextureDerivativeFX = nullptr;
-	ID3DX11EffectTechnique* mCalculateTextureDerivativeTech = nullptr;
+	void initCalculationOfTextureIntegrals();
+	ID3DX11Effect* mCalculationOfTextureIntegralsFX = nullptr;
+	ID3DX11EffectTechnique* mCalculationOfTextureIntegralsTech = nullptr;
 
-	ID3DX11EffectVariable* mMaxOrderOfDerivatives = nullptr;
-	ID3DX11EffectVariable* mOrderOfDerivative = nullptr;
-	
-	ID3DX11EffectShaderResourceVariable* mTextureToDerivative = nullptr;
-	
-	ID3DX11EffectUnorderedAccessViewVariable* mR = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mG = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mB = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mA = nullptr;
+	ID3DX11EffectShaderResourceVariable* mTextureToIntegrate = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mHorisontalIntegrals = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mVerticalIntegrals = nullptr;
 
-	ID3DX11EffectUnorderedAccessViewVariable* mRtmp = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mGtmp = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mBtmp = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mAtmp = nullptr;
+	ID3D11ShaderResourceView* mTextureToIntegrateAsrv = nullptr;
+	ID3D11ShaderResourceView* mTextureToIntegrateBsrv = nullptr;
 
-	ID3D11ShaderResourceView* mTextureToDerivativeAsrv = nullptr;
-	ID3D11ShaderResourceView* mTextureToDerivativeBsrv = nullptr;
+	ID3D11UnorderedAccessView* mHorisontalIntegralsAuav = nullptr;
+	ID3D11UnorderedAccessView* mHorisontalIntegralsBuav = nullptr;
 
-	ID3D11UnorderedAccessView* mARuav = nullptr;
-	ID3D11UnorderedAccessView* mAGuav = nullptr;
-	ID3D11UnorderedAccessView* mABuav = nullptr;
-	ID3D11UnorderedAccessView* mAAuav = nullptr;
+	ID3D11UnorderedAccessView* mVerticalIntegralsAuav = nullptr;
+	ID3D11UnorderedAccessView* mVerticalIntegralsBuav = nullptr;
 
-	ID3D11UnorderedAccessView* mBRuav = nullptr;
-	ID3D11UnorderedAccessView* mBGuav = nullptr;
-	ID3D11UnorderedAccessView* mBBuav = nullptr;
-	ID3D11UnorderedAccessView* mBAuav = nullptr;
+	ID3D11ShaderResourceView* mIntegralsAsrv = nullptr;
+	ID3D11ShaderResourceView* mIntegralsBsrv = nullptr;
 
-	ID3D11UnorderedAccessView* mARtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mAGtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mABtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mAAtmp_uav = nullptr;
+	ID3D11Texture2D* mHorisontalIntegralsAtex = nullptr;
+	ID3D11Texture2D* mHorisontalIntegralsBtex = nullptr;
 
-	ID3D11UnorderedAccessView* mBRtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mBGtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mBBtmp_uav = nullptr;
-	ID3D11UnorderedAccessView* mBAtmp_uav = nullptr;
-
-	ID3D11ShaderResourceView* mARsrv = nullptr;
-	ID3D11ShaderResourceView* mAGsrv = nullptr;
-	ID3D11ShaderResourceView* mABsrv = nullptr;
-	ID3D11ShaderResourceView* mAAsrv = nullptr;
-
-	ID3D11ShaderResourceView* mBRsrv = nullptr;
-	ID3D11ShaderResourceView* mBGsrv = nullptr;
-	ID3D11ShaderResourceView* mBBsrv = nullptr;
-	ID3D11ShaderResourceView* mBAsrv = nullptr;
-
-	ID3D11Texture2D* mARtex = nullptr;
-	ID3D11Texture2D* mAGtex = nullptr;
-	ID3D11Texture2D* mABtex = nullptr;
-	ID3D11Texture2D* mAAtex = nullptr;
-
-	ID3D11Texture2D* mBRtex = nullptr;
-	ID3D11Texture2D* mBGtex = nullptr;
-	ID3D11Texture2D* mBBtex = nullptr;
-	ID3D11Texture2D* mBAtex = nullptr;
-
-	ID3D11Texture2D* mARtmp_tex = nullptr;
-	ID3D11Texture2D* mAGtmp_tex = nullptr;
-	ID3D11Texture2D* mABtmp_tex = nullptr;
-	ID3D11Texture2D* mAAtmp_tex = nullptr;
-
-	ID3D11Texture2D* mBRtmp_tex = nullptr;
-	ID3D11Texture2D* mBGtmp_tex = nullptr;
-	ID3D11Texture2D* mBBtmp_tex = nullptr;
-	ID3D11Texture2D* mBAtmp_tex = nullptr;
+	ID3D11Texture2D* mVerticalIntegralsAtex = nullptr;
+	ID3D11Texture2D* mVerticalIntegralsBtex = nullptr;
 
 	uint32_t widthOfA = 0;
 	uint32_t heightOfA = 0;
 
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
-
-	int maxOrderOfDerivatives = 10;
 
 public:
 	void defineTheSamePoints();

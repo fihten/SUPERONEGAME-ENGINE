@@ -174,7 +174,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initFineObjectsSelectionBySegments();
 
 	// 12. Init photogrammetry
-	initCalculationOfTextureDerivatives();
+	initCalculationOfTextureIntegrals();
 	initDefinitionOfTheSamePoints();
 }
 
@@ -1730,13 +1730,13 @@ void GraphicsCore::getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t
 	context->Unmap(mOutputClosestObjectsBuffer, 0);
 }
 
-void GraphicsCore::initCalculationOfTextureDerivatives()
+void GraphicsCore::initCalculationOfTextureIntegrals()
 {
 	char shadersFolder[200];
 	int sz = sizeof shadersFolder / sizeof * shadersFolder;
 	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
 
-	std::string sCalculateDerivativesOfTexture = std::string(shadersFolder) + "\\CalculateDerivativesOfTexture.fx";
+	std::string sCalculationOfTextureIntegrals = std::string(shadersFolder) + "\\CalculationOfTextureIntegrals.fx";
 
 	DWORD shaderFlags = 0;
 #if defined(DEBUG) || defined(_DEBUG)
@@ -1746,13 +1746,13 @@ void GraphicsCore::initCalculationOfTextureDerivatives()
 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
-	HRESULT res = D3DX11CompileFromFileA(sCalculateDerivativesOfTexture.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	HRESULT res = D3DX11CompileFromFileA(sCalculationOfTextureIntegrals.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
 	if (res != S_OK)
 	{
 		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
 		return;
 	}
-	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mCalculateTextureDerivativeFX);
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mCalculationOfTextureIntegralsFX);
 
 	mCalculateTextureDerivativeTech = mCalculateTextureDerivativeFX->GetTechniqueByName("CalculateTextureDerivative");
 
