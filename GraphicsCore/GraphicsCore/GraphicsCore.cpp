@@ -1780,6 +1780,10 @@ void GraphicsCore::openTextureA(const std::string& path)
 	D3D11_TEXTURE2D_DESC tex_desc;
 	tex->GetDesc(&tex_desc);
 
+	widthOfA = tex_desc.Width;
+	heightOfA = tex_desc.Height;
+
+	tex_desc.Width -= RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1791,25 +1795,19 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsAtex);
 
+	tex_desc.Height -= RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
+	uav_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
 	
-	device->CreateUnorderedAccessView(mARtex, &uav_desc, &mARuav);
-	device->CreateUnorderedAccessView(mAGtex, &uav_desc, &mAGuav);
-	device->CreateUnorderedAccessView(mABtex, &uav_desc, &mABuav);
-	device->CreateUnorderedAccessView(mAAtex, &uav_desc, &mAAuav);
-
-	device->CreateUnorderedAccessView(mARtmp_tex, &uav_desc, &mARtmp_uav);
-	device->CreateUnorderedAccessView(mAGtmp_tex, &uav_desc, &mAGtmp_uav);
-	device->CreateUnorderedAccessView(mABtmp_tex, &uav_desc, &mABtmp_uav);
-	device->CreateUnorderedAccessView(mAAtmp_tex, &uav_desc, &mAAtmp_uav);
+	device->CreateUnorderedAccessView(mHorisontalIntegralsAtex, &uav_desc, &mHorisontalIntegralsAuav);
+	device->CreateUnorderedAccessView(mVerticalIntegralsAtex, &uav_desc, &mVerticalIntegralsAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
 	srv_desc.Format = DXGI_FORMAT_R32_FLOAT;
@@ -1823,8 +1821,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	device->CreateShaderResourceView(mABtex, &srv_desc, &mABsrv);
 	device->CreateShaderResourceView(mAAtex, &srv_desc, &mAAsrv);
 
-	widthOfA = tex_desc.Width;
-	heightOfA = tex_desc.Height;
+	
 
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
