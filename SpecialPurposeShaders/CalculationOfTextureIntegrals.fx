@@ -68,3 +68,19 @@ void cs_integrate_along_v_axis(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ij.y -= RADIUS_OF_AREA_IN_TEXELS;
 	verticalIntegrals[int3(ij, integralType)] = integral;
 }
+
+technique11 CalculationOfTextureIntegrals
+{
+	pass AlongUaxis
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_integrate_along_u_axis()));
+	}
+	pass AlongVaxis
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_integrate_along_v_axis()));
+	}
+};
