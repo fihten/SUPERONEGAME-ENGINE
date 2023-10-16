@@ -1754,22 +1754,12 @@ void GraphicsCore::initCalculationOfTextureIntegrals()
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mCalculationOfTextureIntegralsFX);
 
-	mCalculateTextureDerivativeTech = mCalculateTextureDerivativeFX->GetTechniqueByName("CalculateTextureDerivative");
+	mCalculationOfTextureIntegralsTech = mCalculationOfTextureIntegralsFX->GetTechniqueByName("CalculationOfTextureIntegrals");
 
-	mMaxOrderOfDerivatives = mCalculateTextureDerivativeFX->GetVariableByName("maxOrderOfDerivatives");
-	mOrderOfDerivative = mCalculateTextureDerivativeFX->GetVariableByName("orderOfDerivative");
-
-	mTextureToDerivative = mCalculateTextureDerivativeFX->GetVariableByName("tex")->AsShaderResource();
+	mTextureToIntegrate = mCalculationOfTextureIntegralsFX->GetVariableByName("tex")->AsShaderResource();
 	
-	mR = mCalculateTextureDerivativeFX->GetVariableByName("r")->AsUnorderedAccessView();
-	mG = mCalculateTextureDerivativeFX->GetVariableByName("g")->AsUnorderedAccessView();
-	mB = mCalculateTextureDerivativeFX->GetVariableByName("b")->AsUnorderedAccessView();
-	mA = mCalculateTextureDerivativeFX->GetVariableByName("a")->AsUnorderedAccessView();
-
-	mRtmp = mCalculateTextureDerivativeFX->GetVariableByName("r_tmp")->AsUnorderedAccessView();
-	mGtmp = mCalculateTextureDerivativeFX->GetVariableByName("g_tmp")->AsUnorderedAccessView();
-	mBtmp = mCalculateTextureDerivativeFX->GetVariableByName("b_tmp")->AsUnorderedAccessView();
-	mAtmp = mCalculateTextureDerivativeFX->GetVariableByName("a_tmp")->AsUnorderedAccessView();
+	mHorisontalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("horisontalIntegrals")->AsUnorderedAccessView();
+	mVerticalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("verticalIntegrals")->AsUnorderedAccessView();
 }
 
 void GraphicsCore::openTextureA(const std::string& path)
@@ -1781,34 +1771,28 @@ void GraphicsCore::openTextureA(const std::string& path)
 	std::string texturePath = std::string(texturesFolder) + '\\' + path;
 
 	D3DX11CreateShaderResourceViewFromFileA(
-		device, texturePath.c_str(), 0, 0, &mTextureToDerivativeAsrv, 0
+		device, texturePath.c_str(), 0, 0, &mTextureToIntegrateAsrv, 0
 	);
 
 	ID3D11Texture2D* tex;
-	mTextureToDerivativeAsrv->GetResource((ID3D11Resource * *)& tex);
+	mTextureToIntegrateAsrv->GetResource((ID3D11Resource * *)& tex);
 
 	D3D11_TEXTURE2D_DESC tex_desc;
 	tex->GetDesc(&tex_desc);
 
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
-	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	tex_desc.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsAtex);
 
-	device->CreateTexture2D(&tex_desc, nullptr, &mARtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mAGtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mABtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mAAtex);
-
-	device->CreateTexture2D(&tex_desc, nullptr, &mARtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mAGtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mABtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mAAtmp_tex);
+	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
