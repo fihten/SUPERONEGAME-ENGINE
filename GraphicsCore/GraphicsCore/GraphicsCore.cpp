@@ -1783,7 +1783,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	widthOfA = tex_desc.Width;
 	heightOfA = tex_desc.Height;
 
-	tex_desc.Width -= RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.Width -= 2 * RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1795,7 +1795,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsAtex);
 
-	tex_desc.Height -= RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsAtex);
 
@@ -1810,18 +1810,13 @@ void GraphicsCore::openTextureA(const std::string& path)
 	device->CreateUnorderedAccessView(mVerticalIntegralsAtex, &uav_desc, &mVerticalIntegralsAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
-	device->CreateShaderResourceView(mARtex, &srv_desc, &mARsrv);
-	device->CreateShaderResourceView(mAGtex, &srv_desc, &mAGsrv);
-	device->CreateShaderResourceView(mABtex, &srv_desc, &mABsrv);
-	device->CreateShaderResourceView(mAAtex, &srv_desc, &mAAsrv);
-
-	
+	srv_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	device->CreateShaderResourceView(mVerticalIntegralsAtex, &srv_desc, &mIntegralsAsrv);
 
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
@@ -1876,208 +1871,106 @@ void GraphicsCore::openTextureB(const std::string& path)
 	std::string texturePath = std::string(texturesFolder) + '\\' + path;
 
 	D3DX11CreateShaderResourceViewFromFileA(
-		device, texturePath.c_str(), 0, 0, &mTextureToDerivativeBsrv, 0
+		device, texturePath.c_str(), 0, 0, &mTextureToIntegrateBsrv, 0
 	);
 
 	ID3D11Texture2D* tex;
-	mTextureToDerivativeBsrv->GetResource((ID3D11Resource * *)& tex);
+	mTextureToIntegrateBsrv->GetResource((ID3D11Resource * *)& tex);
 
 	D3D11_TEXTURE2D_DESC tex_desc;
 	tex->GetDesc(&tex_desc);
 
+	widthOfB = tex_desc.Width;
+	heightOfB = tex_desc.Height;
+
+	tex_desc.Width -= 2 * RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
-	tex_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	tex_desc.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsBtex);
 
-	device->CreateTexture2D(&tex_desc, nullptr, &mBRtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBGtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBBtex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBAtex);
-
-	device->CreateTexture2D(&tex_desc, nullptr, &mBRtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBGtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBBtmp_tex);
-	device->CreateTexture2D(&tex_desc, nullptr, &mBAtmp_tex);
+	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsBtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
-	
-	device->CreateUnorderedAccessView(mBRtex, &uav_desc, &mBRuav);
-	device->CreateUnorderedAccessView(mBGtex, &uav_desc, &mBGuav);
-	device->CreateUnorderedAccessView(mBBtex, &uav_desc, &mBBuav);
-	device->CreateUnorderedAccessView(mBAtex, &uav_desc, &mBAuav);
+	uav_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
 
-	device->CreateUnorderedAccessView(mBRtmp_tex, &uav_desc, &mBRtmp_uav);
-	device->CreateUnorderedAccessView(mBGtmp_tex, &uav_desc, &mBGtmp_uav);
-	device->CreateUnorderedAccessView(mBBtmp_tex, &uav_desc, &mBBtmp_uav);
-	device->CreateUnorderedAccessView(mBAtmp_tex, &uav_desc, &mBAtmp_uav);
+	device->CreateUnorderedAccessView(mHorisontalIntegralsBtex, &uav_desc, &mHorisontalIntegralsBuav);
+	device->CreateUnorderedAccessView(mVerticalIntegralsBtex, &uav_desc, &mVerticalIntegralsBuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = (maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1);
-	device->CreateShaderResourceView(mBRtex, &srv_desc, &mBRsrv);
-	device->CreateShaderResourceView(mBGtex, &srv_desc, &mBGsrv);
-	device->CreateShaderResourceView(mBBtex, &srv_desc, &mBBsrv);
-	device->CreateShaderResourceView(mBAtex, &srv_desc, &mBAsrv);
-
-	widthOfB = tex_desc.Width;
-	heightOfB = tex_desc.Height;
+	srv_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	device->CreateShaderResourceView(mVerticalIntegralsBtex, &srv_desc, &mIntegralsBsrv);
 }
 
-void GraphicsCore::calculateDerivativesOfTextureA()
+void GraphicsCore::calculateIntegralsOfTextureA()
 {
-	mMaxOrderOfDerivatives->SetRawValue(&maxOrderOfDerivatives, 0, sizeof maxOrderOfDerivatives);
-	mTextureToDerivative->SetResource(mTextureToDerivativeAsrv);
-	mR->SetUnorderedAccessView(mARuav);
-	mG->SetUnorderedAccessView(mAGuav);
-	mB->SetUnorderedAccessView(mABuav);
-	mA->SetUnorderedAccessView(mAAuav);
+	mTextureToIntegrate->SetResource(mTextureToIntegrateAsrv);
+	mHorisontalIntegrals->SetUnorderedAccessView(mHorisontalIntegralsAuav);
 
-	for (int orderOfDerivative = 0; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atFirst")->Apply(0, context);
+	mCalculationOfTextureIntegralsTech->GetPassByName("AlongUaxis")->Apply(0, context);
 
-		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_z = 1;
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	for (int orderOfDerivative = 1; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atFirst")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative - 2) / 16.0f);
-		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	mRtmp->SetUnorderedAccessView(mARtmp_uav);
-	mGtmp->SetUnorderedAccessView(mAGtmp_uav);
-	mBtmp->SetUnorderedAccessView(mABtmp_uav);
-	mAtmp->SetUnorderedAccessView(mAAtmp_uav);
-
-	for (int orderOfDerivative = 0; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atTheSecond")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_z = 1;
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	for (int orderOfDerivative = 1; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atTheSecond")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfA - 2 * orderOfDerivative - 2) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfA - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	mCalculateTextureDerivativeTech->GetPassByName("AveragingDerivativesOfTheSameOrder")->Apply(0, context);
-
-	uint32_t groups_x = std::ceil((float)(widthOfA) / 16.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
 	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
-	uint32_t groups_z = std::ceil((float)((maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1)) / 4);
+	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[8] = {
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	context->CSSetUnorderedAccessViews(0, 8, nullUAVs, 0);
+	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsAuav);
+
+	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	ID3D11UnorderedAccessView* nullUAVs[2] = {
+		nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
 }
 
-void GraphicsCore::calculateDerivativesOfTextureB()
+void GraphicsCore::calculateIntegralsOfTextureB()
 {
-	mMaxOrderOfDerivatives->SetRawValue(&maxOrderOfDerivatives, 0, sizeof maxOrderOfDerivatives);
-	mTextureToDerivative->SetResource(mTextureToDerivativeBsrv);
-	mR->SetUnorderedAccessView(mBRuav);
-	mG->SetUnorderedAccessView(mBGuav);
-	mB->SetUnorderedAccessView(mBBuav);
-	mA->SetUnorderedAccessView(mBAuav);
+	mTextureToIntegrate->SetResource(mTextureToIntegrateBsrv);
+	mHorisontalIntegrals->SetUnorderedAccessView(mHorisontalIntegralsBuav);
 
-	for (int orderOfDerivative = 0; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atFirst")->Apply(0, context);
+	mCalculationOfTextureIntegralsTech->GetPassByName("AlongUaxis")->Apply(0, context);
 
-		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_z = 1;
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	for (int orderOfDerivative = 1; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atFirst")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative - 2) / 16.0f);
-		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	mRtmp->SetUnorderedAccessView(mBRtmp_uav);
-	mGtmp->SetUnorderedAccessView(mBGtmp_uav);
-	mBtmp->SetUnorderedAccessView(mBBtmp_uav);
-	mAtmp->SetUnorderedAccessView(mBAtmp_uav);
-
-	for (int orderOfDerivative = 0; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisV_atTheSecond")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative) / 32.0f);
-		uint32_t groups_z = 1;
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	for (int orderOfDerivative = 1; orderOfDerivative <= maxOrderOfDerivatives; orderOfDerivative++)
-	{
-		mOrderOfDerivative->SetRawValue(&orderOfDerivative, 0, sizeof orderOfDerivative);
-		mCalculateTextureDerivativeTech->GetPassByName("AlongAxisU_atTheSecond")->Apply(0, context);
-
-		uint32_t groups_x = std::ceil((float)(widthOfB - 2 * orderOfDerivative - 2) / 16.0f);
-		uint32_t groups_y = std::ceil((float)(heightOfB - 2 * orderOfDerivative) / 16.0f);
-		uint32_t groups_z = std::ceil((float)(maxOrderOfDerivatives + 1) / 4);
-		context->Dispatch(groups_x, groups_y, groups_z);
-	}
-
-	mCalculateTextureDerivativeTech->GetPassByName("AveragingDerivativesOfTheSameOrder")->Apply(0, context);
-
-	uint32_t groups_x = std::ceil((float)(widthOfB) / 16.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
 	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
-	uint32_t groups_z = std::ceil((float)((maxOrderOfDerivatives + 1) * (maxOrderOfDerivatives + 1)) / 4);
+	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[8] = {
-		nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr };
-	context->CSSetUnorderedAccessViews(0, 8, nullUAVs, 0);
+	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsBuav);
+
+	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	ID3D11UnorderedAccessView* nullUAVs[2] = {
+		nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
 }
