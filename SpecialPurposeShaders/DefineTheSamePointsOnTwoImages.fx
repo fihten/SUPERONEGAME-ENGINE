@@ -57,6 +57,8 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	}
 	float JacobianDeterminant = b / a;
 	float ferr = (a * c - b * b) / a;
+	ferr /= 3 * integralsNumber;
+	ferr = sqrt(ferr);
 
 	uint err = 1000000 * derr;
 
@@ -69,36 +71,33 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mip = 0;
 	uint width = 0;
 	uint height = 0;
-	uint elements = 0;
+	uint integralsNumber = 0;
 	uint mips = 0;
-	Ar.GetDimensions(mip, width, height, elements, mips);
+	integralsOfA.GetDimensions(mip, width, height, integralsNumber, mips);
 
-	int maxOrderOfDerivatives = sqrt(elements) - 1;
-	int width_ = width - 2 * maxOrderOfDerivatives - 2;
-	int height_ = height - 2 * maxOrderOfDerivatives - 2;
-
-	int2 posInA = int2(dispatchThreadID.x % width_, dispatchThreadID.x / width_);
-	if (posInA.y > height_ - 1)
+	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
+	if (posInA.y > height - 1)
 		return;
-	posInA.x += maxOrderOfDerivatives + 1;
-	posInA.y += maxOrderOfDerivatives + 1;
-
-	int2 posInB = int2(dispatchThreadID.y % width_, dispatchThreadID.y / width_);
-	if (posInB.y > height_ - 1)
+	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
+	if (posInB.y > height - 1)
 		return;
-	posInB.x += maxOrderOfDerivatives;
-	posInB.y += maxOrderOfDerivatives;
 
-	double2x2 transformBtoA;
-	double specCoeffA;
-	double derr;
-	calculateTransform(
-		posInA,
-		posInB,
-		transformBtoA,
-		specCoeffA,
-		derr
-	);
+	float a = 0;
+	float b = 0;
+	float c = 0;
+	for (int i = 0; i < integralsNumber; i++)
+	{
+		float4 integralsA = integralsOfA[int3(posInA, i)];
+		float4 integralsB = integralsOfB[int3(posInB, i)];
+
+		a += dot(integralsA.xyz, integralsA.xyz);
+		b += dot(integralsA.xyz, integralsB.xyz);
+		c += dot(integralsB.xyz, integralsB.xyz);
+	}
+	float JacobianDeterminant = b / a;
+	float ferr = (a * c - b * b) / a;
+	ferr /= 3 * integralsNumber;
+	ferr = sqrt(ferr);
 
 	uint err = 1000000 * derr;
 	if (err == error[posInA].r)
