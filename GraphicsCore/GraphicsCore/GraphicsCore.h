@@ -270,19 +270,8 @@ private:
 	ID3DX11Effect* mDefinitionOfTheSamePointsFX = nullptr;
 	ID3DX11EffectTechnique* mDefineTheSamePointsOnTwoImagesTech = nullptr;
 
-	ID3DX11EffectVariable* mSize = nullptr;
-	ID3DX11EffectVariable* mThreshold0 = nullptr;
-	ID3DX11EffectVariable* mThreshold1 = nullptr;
-
-	ID3DX11EffectShaderResourceVariable* mAr = nullptr;
-	ID3DX11EffectShaderResourceVariable* mAg = nullptr;
-	ID3DX11EffectShaderResourceVariable* mAb = nullptr;
-	ID3DX11EffectShaderResourceVariable* mAa = nullptr;
-
-	ID3DX11EffectShaderResourceVariable* mBr = nullptr;
-	ID3DX11EffectShaderResourceVariable* mBg = nullptr;
-	ID3DX11EffectShaderResourceVariable* mBb = nullptr;
-	ID3DX11EffectShaderResourceVariable* mBa = nullptr;
+	ID3DX11EffectShaderResourceVariable* mIntegralsOfA = nullptr;
+	ID3DX11EffectShaderResourceVariable* mIntegralsOfB = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* mMapAtoB = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;

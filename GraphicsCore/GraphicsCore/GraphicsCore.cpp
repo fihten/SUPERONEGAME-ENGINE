@@ -1983,7 +1983,7 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 	char* buffer = nullptr;
 	uint32_t bufferSize = 0;
-
+#ifdef SAVE_COMPILED_SHADER
 	std::string sObjectFile = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fxo";
 	std::ifstream objectFile_in(sObjectFile.c_str(), std::ifstream::binary);
 	if (objectFile_in)
@@ -2022,23 +2022,33 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 		objectFile_out.write(buffer, bufferSize);
 		objectFile_out.close();
 	}
+#else
+	std::string sDefinitionOfTheSamePoints = std::string(shadersFolder) + "\\DefineTheSamePointsOnTwoImages.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sDefinitionOfTheSamePoints.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+
+	buffer = (char*)compiledShader->GetBufferPointer();
+	bufferSize = compiledShader->GetBufferSize();
+#endif
 	auto res = D3DX11CreateEffectFromMemory((LPVOID)buffer, bufferSize, 0, device, &mDefinitionOfTheSamePointsFX);
 
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
-	mSize = mDefinitionOfTheSamePointsFX->GetVariableByName("size");
-	mThreshold0 = mDefinitionOfTheSamePointsFX->GetVariableByName("threshold0");
-	mThreshold1 = mDefinitionOfTheSamePointsFX->GetVariableByName("threshold1");
-
-	mAr = mDefinitionOfTheSamePointsFX->GetVariableByName("Ar")->AsShaderResource();
-	mAg = mDefinitionOfTheSamePointsFX->GetVariableByName("Ag")->AsShaderResource();
-	mAb = mDefinitionOfTheSamePointsFX->GetVariableByName("Ab")->AsShaderResource();
-	mAa = mDefinitionOfTheSamePointsFX->GetVariableByName("Aa")->AsShaderResource();
-
-	mBr = mDefinitionOfTheSamePointsFX->GetVariableByName("Br")->AsShaderResource();
-	mBg = mDefinitionOfTheSamePointsFX->GetVariableByName("Bg")->AsShaderResource();
-	mBb = mDefinitionOfTheSamePointsFX->GetVariableByName("Bb")->AsShaderResource();
-	mBa = mDefinitionOfTheSamePointsFX->GetVariableByName("Ba")->AsShaderResource();
+	mIntegralsOfA = mDefinitionOfTheSamePointsFX->GetVariableByName("integralsOfA")->AsShaderResource();
+	mIntegralsOfB = mDefinitionOfTheSamePointsFX->GetVariableByName("integralsOfB")->AsShaderResource();
 
 	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
 	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
