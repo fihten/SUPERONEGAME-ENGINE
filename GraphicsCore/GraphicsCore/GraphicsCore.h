@@ -235,6 +235,7 @@ private:
 
 	ID3DX11EffectShaderResourceVariable* mTextureToIntegrate = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mHorisontalIntegrals = nullptr;
+	ID3DX11EffectShaderResourceVariable* mHorisontalIntegralsInput = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mVerticalIntegrals = nullptr;
 
 	ID3D11ShaderResourceView* mTextureToIntegrateAsrv = nullptr;

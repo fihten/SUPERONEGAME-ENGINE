@@ -1759,6 +1759,7 @@ void GraphicsCore::initCalculationOfTextureIntegrals()
 	mTextureToIntegrate = mCalculationOfTextureIntegralsFX->GetVariableByName("tex")->AsShaderResource();
 	
 	mHorisontalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("horisontalIntegrals")->AsUnorderedAccessView();
+	mHorisontalIntegralsInput = mCalculationOfTextureIntegralsFX->GetVariableByName("horisontalIntegralsInput")->AsShaderResource();
 	mVerticalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("verticalIntegrals")->AsUnorderedAccessView();
 }
 
@@ -1935,9 +1936,9 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	ID3D11UnorderedAccessView* nullUAVs[2] = {
@@ -1963,9 +1964,9 @@ void GraphicsCore::calculateIntegralsOfTextureB()
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	groups_y = std::ceil((float)(heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	ID3D11UnorderedAccessView* nullUAVs[2] = {
@@ -2043,7 +2044,7 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 	buffer = (char*)compiledShader->GetBufferPointer();
 	bufferSize = compiledShader->GetBufferSize();
 #endif
-	auto res = D3DX11CreateEffectFromMemory((LPVOID)buffer, bufferSize, 0, device, &mDefinitionOfTheSamePointsFX);
+	auto res1 = D3DX11CreateEffectFromMemory((LPVOID)buffer, bufferSize, 0, device, &mDefinitionOfTheSamePointsFX);
 
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
@@ -2092,19 +2093,19 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	D3D11_MAPPED_SUBRESOURCE texData;
 	context->Map(mMapAtoBtexCopy, 0, D3D11_MAP_READ, 0, &texData);
 
-	float posInAx = widthOfA * uvA.x() - 0.5f;
-	float posInAy = heightOfA * uvA.y() - 0.5f;
+	float posInAx = (widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (uvA.x() - RADIUS_OF_AREA_IN_TEXELS) - 0.5f;
+	float posInAy = (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (uvA.y() - RADIUS_OF_AREA_IN_TEXELS) - 0.5f;
 
-	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 1);
-	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 1);
+	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
+	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
 
 	char* pRow = (char*)texData.pData + uiPosInAy * texData.RowPitch;
 	uint32_t mappedPixel = *((uint32_t*)pRow + uiPosInAx);
 
-	uint32_t uiPosInBx = mappedPixel % widthOfB;
-	uint32_t uiPosInBy = mappedPixel / widthOfB;
+	uint32_t uiPosInBx = mappedPixel % (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
+	uint32_t uiPosInBy = mappedPixel / (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
 
-	flt2 uvB(((float)(uiPosInBx)+0.5f) / widthOfB, ((float)(uiPosInBy)+0.5f) / heightOfB);
+	flt2 uvB(((float)(uiPosInBx)+0.5f) / (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS), ((float)(uiPosInBy)+0.5f) / (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS));
 
 	context->Unmap(mMapAtoBtexCopy, 0);
 
