@@ -2056,46 +2056,30 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 void GraphicsCore::defineTheSamePoints()
 {
-	uint32_t size = 10;
-	mSize->SetRawValue(&size, 0, sizeof size);
-
-	float threshold0 = 0.1;
-	mThreshold0->SetRawValue(&threshold0, 0, sizeof threshold0);
-
-	float threshold1 = 0.1;
-	mThreshold0->SetRawValue(&threshold1, 0, sizeof threshold1);
-
-	mAr->SetResource(mARsrv);
-	mAg->SetResource(mAGsrv);
-	mAb->SetResource(mABsrv);
-	mAa->SetResource(mAAsrv);
-
-	mBr->SetResource(mBRsrv);
-	mBg->SetResource(mBGsrv);
-	mBb->SetResource(mBBsrv);
-	mBa->SetResource(mBAsrv);
+	mIntegralsOfA->SetResource(mIntegralsAsrv);
+	mIntegralsOfB->SetResource(mIntegralsBsrv);
 
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("InitializeError")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfA) / 32.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA) / 32.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 32.0f);
 	uint32_t groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
 
-	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
-	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
+	groups_y = std::ceil((float)((widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
 	groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
 
-	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
-	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
+	groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
+	groups_y = std::ceil((float)((widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
 	groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 	context->CSSetShader(0, 0, 0);
