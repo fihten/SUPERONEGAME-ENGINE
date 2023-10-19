@@ -1791,13 +1791,12 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsAtex);
 
 	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
-	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
@@ -1817,6 +1816,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	device->CreateShaderResourceView(mHorisontalIntegralsAtex, &srv_desc, &mHorisontalIntegralsAsrv);
 	device->CreateShaderResourceView(mVerticalIntegralsAtex, &srv_desc, &mIntegralsAsrv);
 
 	tex_desc.MipLevels = 1;
@@ -1891,13 +1891,12 @@ void GraphicsCore::openTextureB(const std::string& path)
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
 	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
 	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsBtex);
 
 	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
-	tex_desc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
 	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsBtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
@@ -1917,6 +1916,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	device->CreateShaderResourceView(mHorisontalIntegralsBtex, &srv_desc, &mHorisontalIntegralsBsrv);
 	device->CreateShaderResourceView(mVerticalIntegralsBtex, &srv_desc, &mIntegralsBsrv);
 }
 
@@ -1932,6 +1932,11 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
+	ID3D11UnorderedAccessView* nullUAVs[2] = {
+		nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
+
+	mHorisontalIntegralsInput->SetResource(mHorisontalIntegralsAsrv);
 	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsAuav);
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
@@ -1941,8 +1946,6 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[2] = {
-		nullptr, nullptr };
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
@@ -1960,6 +1963,11 @@ void GraphicsCore::calculateIntegralsOfTextureB()
 	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
+	ID3D11UnorderedAccessView* nullUAVs[2] = {
+		nullptr, nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
+
+	mHorisontalIntegralsInput->SetResource(mHorisontalIntegralsBsrv);
 	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsBuav);
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
@@ -1969,8 +1977,6 @@ void GraphicsCore::calculateIntegralsOfTextureB()
 	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[2] = {
-		nullptr, nullptr };
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
@@ -2093,8 +2099,11 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	D3D11_MAPPED_SUBRESOURCE texData;
 	context->Map(mMapAtoBtexCopy, 0, D3D11_MAP_READ, 0, &texData);
 
-	float posInAx = (widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (uvA.x() - RADIUS_OF_AREA_IN_TEXELS) - 0.5f;
-	float posInAy = (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (uvA.y() - RADIUS_OF_AREA_IN_TEXELS) - 0.5f;
+	float posInAx = widthOfA * uvA.x() - 0.5f;
+	float posInAy = heightOfA * uvA.y() - 0.5f;
+
+	posInAx -= RADIUS_OF_AREA_IN_TEXELS;
+	posInAy -= RADIUS_OF_AREA_IN_TEXELS;
 
 	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
 	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
@@ -2105,7 +2114,10 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	uint32_t uiPosInBx = mappedPixel % (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
 	uint32_t uiPosInBy = mappedPixel / (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
 
-	flt2 uvB(((float)(uiPosInBx)+0.5f) / (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS), ((float)(uiPosInBy)+0.5f) / (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS));
+	uiPosInBx += RADIUS_OF_AREA_IN_TEXELS;
+	uiPosInBy += RADIUS_OF_AREA_IN_TEXELS;
+
+	flt2 uvB(((float)(uiPosInBx)+0.5f) / widthOfB, ((float)(uiPosInBy)+0.5f) / heightOfB);
 
 	context->Unmap(mMapAtoBtexCopy, 0);
 

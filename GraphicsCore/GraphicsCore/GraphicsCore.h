@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define NUMBER_OF_TEXTURE_INTEGRALS 1
+#define NUMBER_OF_TEXTURE_INTEGRALS 2
 #define RADIUS_OF_AREA_IN_TEXELS 10
 
 class GraphicsCore;
@@ -246,6 +246,9 @@ private:
 
 	ID3D11UnorderedAccessView* mVerticalIntegralsAuav = nullptr;
 	ID3D11UnorderedAccessView* mVerticalIntegralsBuav = nullptr;
+
+	ID3D11ShaderResourceView* mHorisontalIntegralsAsrv = nullptr;
+	ID3D11ShaderResourceView* mHorisontalIntegralsBsrv = nullptr;
 
 	ID3D11ShaderResourceView* mIntegralsAsrv = nullptr;
 	ID3D11ShaderResourceView* mIntegralsBsrv = nullptr;

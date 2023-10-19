@@ -1,4 +1,5 @@
 #define CHANEL_INTENSITY 0
+#define RADIUS_OF_AREA_IN_TEXELS 10
 
 Texture2D<float4> tex;
 
@@ -14,27 +15,26 @@ void cs_integrate_along_u_axis(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint width = 0;
 	uint height = 0;
-	uint radiusOfArea = 0;
-	horisontalIntegrals.GetDimensions(width, height, radiusOfArea);
+	uint elements = 0;
+	horisontalIntegrals.GetDimensions(width, height, elements);
 
 	if (ij.x > width - 1)
 		return;
 	if (ij.y > height - 1)
 		return;
 
-	ij.x += radiusOfArea;
+	ij.x += RADIUS_OF_AREA_IN_TEXELS;
 	float4 integral = float4(0, 0, 0, 0);
-	for (int i = -radiusOfArea; i <= radiusOfArea; i++)
+	for (int i = -RADIUS_OF_AREA_IN_TEXELS; i <= RADIUS_OF_AREA_IN_TEXELS; i++)
 	{
 		int2 ij_ = ij;
 		ij_.x += i;
-		float4 color = tex[ij_];
-		if (integralType == CHANEL_INTENSITY)
-			integral += exp(-i * i) * color;
+		float4 color = tex[ij_].xyzw;
+		integral += color;
 	}
 
-	ij.x -= radiusOfArea;
-	horisontalIntegrals[int3(ij, integralType)] = integral;
+	ij.x -= RADIUS_OF_AREA_IN_TEXELS;
+	horisontalIntegrals[int3(ij, integralType)].xyzw = integral;
 }
 
 [numthreads(16, 16, 4)]
@@ -45,28 +45,27 @@ void cs_integrate_along_v_axis(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint width = 0;
 	uint height = 0;
-	uint radiusOfArea = 0;
-	verticalIntegrals.GetDimensions(width, height, radiusOfArea);
+	uint elements = 0;
+	verticalIntegrals.GetDimensions(width, height, elements);
 
 	if (ij.x > width - 1)
 		return;
 	if (ij.y > height - 1)
 		return;
 
-	ij.y += radiusOfArea;
+	ij.y += RADIUS_OF_AREA_IN_TEXELS;
 	float4 integral = float4(0, 0, 0, 0);
-	for (int i = -radiusOfArea; i <= radiusOfArea; i++)
+	for (int i = -RADIUS_OF_AREA_IN_TEXELS; i <= RADIUS_OF_AREA_IN_TEXELS; i++)
 	{
 		int2 ij_ = ij;
 		ij_.y += i;
 		float4 color;
-		color = horisontalIntegralsInput[int3(ij_, integralType)];
-		if (integralType == CHANEL_INTENSITY)
-			integral += exp(-i * i) * color;
+		color = horisontalIntegralsInput[int3(ij_, integralType)].xyzw;
+		integral += color;
 	}
 
-	ij.y -= radiusOfArea;
-	verticalIntegrals[int3(ij, integralType)] = integral;
+	ij.y -= RADIUS_OF_AREA_IN_TEXELS;
+	verticalIntegrals[int3(ij, integralType)].xyzw = integral;
 }
 
 technique11 CalculationOfTextureIntegrals

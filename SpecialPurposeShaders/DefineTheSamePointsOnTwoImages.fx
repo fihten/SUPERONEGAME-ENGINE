@@ -60,7 +60,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr /= 3 * integralsNumber;
 	ferr = sqrt(ferr);
 
-	uint err = 1000000 * derr;
+	uint err = 1000000 * ferr;
 
 	InterlockedMin(error[posInA].r, err);
 }
@@ -99,7 +99,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr /= 3 * integralsNumber;
 	ferr = sqrt(ferr);
 
-	uint err = 1000000 * derr;
+	uint err = 1000000 * ferr;
 	if (err == error[posInA].r)
 	{
 		uint original_value;
