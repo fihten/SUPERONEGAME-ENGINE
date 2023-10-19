@@ -56,10 +56,14 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		c += dot(integralsB.xyz, integralsB.xyz);
 	}
 	float JacobianDeterminant = b / a;
-	float ferr = (a * c - b * b) / a;
-	ferr /= 3 * integralsNumber;
-	ferr = sqrt(ferr);
-
+	float ferr = 0;
+	for (int i = 0; i < integralsNumber; i++)
+	{
+		float4 integralsA = integralsOfA[int3(posInA, i)];
+		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 e = abs((integralsB - JacobianDeterminant * integralsA) / (JacobianDeterminant * integralsA));
+		ferr = max(ferr, max(e.x, max(e.y, e.z)));
+	}
 	uint err = 1000000 * ferr;
 
 	InterlockedMin(error[posInA].r, err);
@@ -95,9 +99,14 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		c += dot(integralsB.xyz, integralsB.xyz);
 	}
 	float JacobianDeterminant = b / a;
-	float ferr = (a * c - b * b) / a;
-	ferr /= 3 * integralsNumber;
-	ferr = sqrt(ferr);
+	float ferr = 0;
+	for (int i = 0; i < integralsNumber; i++)
+	{
+		float4 integralsA = integralsOfA[int3(posInA, i)];
+		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 e = abs((integralsB - JacobianDeterminant * integralsA) / (JacobianDeterminant * integralsA));
+		ferr = max(ferr, max(e.x, max(e.y, e.z)));
+	}
 
 	uint err = 1000000 * ferr;
 	if (err == error[posInA].r)
