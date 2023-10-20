@@ -1,5 +1,8 @@
 #include "JacobianDeterminantTest.h"
 
+#define _USE_MATH_DEFINES // for C++
+#include <cmath>
+
 float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
 	float z = 1;
@@ -41,4 +44,30 @@ void JacobianDeterminantTest()
 		0.3,0.65,0.23,0.96,0.54,0.453,0.876,0.925,0.165,0.472
 	};
 	int ny0_b = sizeof(y0_b) / sizeof(*y0_b);
+
+	int width = 640;
+	int height = 480;
+
+	float* textureAr = new float[width * height];
+	float* textureAg = new float[width * height];
+	float* textureAb = new float[width * height];
+
+	float* textureBr = new float[width * height];
+	float* textureBg = new float[width * height];
+	float* textureBb = new float[width * height];
+
+	float angle0 = 20 * M_PI / 180;
+	float scale0 = 0.8;
+
+	float angle1 = -10 * M_PI / 180;
+	float scale1 = 1.2;
+
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float det = m00 * m11 - m01 * m10;
+	float mInv00 = m11 / det; float mInv01 = -m01 / det;
+	float mInv10 = -m10 / det; float mInv11 = m00 / det;
+
+
 }
