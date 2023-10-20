@@ -1,4 +1,4 @@
-#define RADIUS_OF_AREA_IN_TEXELS 20
+#define RADIUS_OF_AREA_IN_TEXELS 30
 
 Texture2D<float4> tex;
 

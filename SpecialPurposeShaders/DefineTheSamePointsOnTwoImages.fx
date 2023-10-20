@@ -46,10 +46,12 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float a = 0;
 	float b = 0;
 	float c = 0;
+	float4 integralA0 = integralsOfA[int3(posInA, 0)].r;
+	float4 integralB0 = integralsOfB[int3(posInB, 0)].r;
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
+		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
 
 		a += dot(integralsA.xyz, integralsA.xyz);
 		b += dot(integralsA.xyz, integralsB.xyz);
@@ -59,8 +61,8 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float ferr = 0;
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
+		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
 		float4 e = abs((integralsB - JacobianDeterminant * integralsA) / (JacobianDeterminant * integralsA));
 		ferr = max(ferr, max(e.x, max(e.y, e.z)));
 	}
@@ -89,10 +91,12 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float a = 0;
 	float b = 0;
 	float c = 0;
+	float4 integralA0 = integralsOfA[int3(posInA, 0)].r;
+	float4 integralB0 = integralsOfB[int3(posInB, 0)].r;
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
+		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
 
 		a += dot(integralsA.xyz, integralsA.xyz);
 		b += dot(integralsA.xyz, integralsB.xyz);
@@ -102,12 +106,11 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float ferr = 0;
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
+		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
 		float4 e = abs((integralsB - JacobianDeterminant * integralsA) / (JacobianDeterminant * integralsA));
 		ferr = max(ferr, max(e.x, max(e.y, e.z)));
 	}
-
 	uint err = 1000000 * ferr;
 	if (err == error[posInA].r)
 	{
