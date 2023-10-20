@@ -13,6 +13,20 @@ float function(float x0[], int nx, float y0[], int ny, float x, float y)
 	return z;
 }
 
+void fillOutTexture(
+	float r[], float g[], float b[], 
+	int width, int height, int n,
+	float m00, float m01,
+	float m10, float m11
+	)
+{
+	float hx = 1.0f / width;
+	float hy = 1.0f / height;
+
+	float dx = hx / n;
+	float dy = hy / n;
+}
+
 void JacobianDeterminantTest()
 {
 	float x0_r[] = {
@@ -69,5 +83,9 @@ void JacobianDeterminantTest()
 	float mInv00 = m11 / det; float mInv01 = -m01 / det;
 	float mInv10 = -m10 / det; float mInv11 = m00 / det;
 
+	
+
+	int r0 = 10;
+	int r1 = 20;
 
 }
