@@ -1,5 +1,4 @@
-#define CHANEL_INTENSITY 0
-#define RADIUS_OF_AREA_IN_TEXELS 10
+#define RADIUS_OF_AREA_IN_TEXELS 20
 
 Texture2D<float4> tex;
 
@@ -25,7 +24,8 @@ void cs_integrate_along_u_axis(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	ij.x += RADIUS_OF_AREA_IN_TEXELS;
 	float4 integral = float4(0, 0, 0, 0);
-	for (int i = -RADIUS_OF_AREA_IN_TEXELS; i <= RADIUS_OF_AREA_IN_TEXELS; i++)
+	int r = RADIUS_OF_AREA_IN_TEXELS - integralType;
+	for (int i = -r; i <= r; i++)
 	{
 		int2 ij_ = ij;
 		ij_.x += i;
@@ -55,7 +55,8 @@ void cs_integrate_along_v_axis(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	ij.y += RADIUS_OF_AREA_IN_TEXELS;
 	float4 integral = float4(0, 0, 0, 0);
-	for (int i = -RADIUS_OF_AREA_IN_TEXELS; i <= RADIUS_OF_AREA_IN_TEXELS; i++)
+	int r = RADIUS_OF_AREA_IN_TEXELS - integralType;
+	for (int i = -r; i <= r; i++)
 	{
 		int2 ij_ = ij;
 		ij_.y += i;
