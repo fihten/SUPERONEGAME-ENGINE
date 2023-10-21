@@ -27,11 +27,32 @@ void fillOutTexture(
 	float dx = hx / n;
 	float dy = hy / n;
 
+	// fill out cells
 	for (int i = 0; i < width; i++)
 	{
 		for (int j = 0; j < height; j++)
 		{
+			float x = i * hx;
+			float y = j * hy;
 
+			float I = 0;
+			// integrate within cell
+			for (int k = 0; k < n; k++)
+			{
+				for (int l = 0; l < n; l++)
+				{
+					float x_ = x + k * dx;
+					float y_ = y + l * dy;
+
+					float xOfFunctionSpace = x_ * m00 + y_ * m10;
+					float yOfFunctionSpace = x_ * m01 + y_ * m11;
+
+					float z = function(x0, nx, y0, ny, xOfFunctionSpace, yOfFunctionSpace);
+					I += z;
+				}
+			}
+			I /= n * n;
+			chanel[j * width + i] = I;
 		}
 	}
 }
@@ -92,7 +113,51 @@ void JacobianDeterminantTest()
 	float mInv00 = m11 / det; float mInv01 = -m01 / det;
 	float mInv10 = -m10 / det; float mInv11 = m00 / det;
 
-	
+	int n = 10;
+
+	fillOutTexture(
+		textureAr,
+		width, height, n,
+		1, 0,
+		0, 1,
+		x0_r, nx0_r, y0_r, ny0_r
+	);
+	fillOutTexture(
+		textureAg,
+		width, height, n,
+		1, 0,
+		0, 1,
+		x0_g, nx0_g, y0_g, ny0_g
+	);
+	fillOutTexture(
+		textureAb,
+		width, height, n,
+		1, 0,
+		0, 1,
+		x0_b, nx0_b, y0_b, ny0_b
+	);
+
+	fillOutTexture(
+		textureBr,
+		width, height, n,
+		m00, m01,
+		m10, m11,
+		x0_r, nx0_r, y0_r, ny0_r
+	);
+	fillOutTexture(
+		textureBg,
+		width, height, n,
+		m00, m01,
+		m10, m11,
+		x0_g, nx0_g, y0_g, ny0_g
+	);
+	fillOutTexture(
+		textureBb,
+		width, height, n,
+		m00, m01,
+		m10, m11,
+		x0_b, nx0_b, y0_b, ny0_b
+	);
 
 	int r0 = 10;
 	int r1 = 20;
