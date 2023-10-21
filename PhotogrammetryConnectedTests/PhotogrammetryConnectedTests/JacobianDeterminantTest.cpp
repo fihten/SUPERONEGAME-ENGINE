@@ -220,4 +220,83 @@ void JacobianDeterminantTest()
 	int r0 = 10;
 	int r1 = 20;
 
+	int x = 320;
+	int y = 240;
+
+	m01 *= (float)(height) / (float)(width);
+	m10 *= (float)(width) / (float)(height);
+
+	mInv01 *= (float)(height) / (float)(width);
+	mInv10 *= (float)(width) / (float)(height);
+
+	float* IA = new float[3 * (r1 - r0 + 1)];
+	float* IB = new float[3 * (r1 - r0 + 1)];
+	for (int r = r0; r <= r1; r++)
+	{
+		IA[3 * r + 0] = calculateIntegral(
+			textureAr,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+		IA[3 * r + 1] = calculateIntegral(
+			textureAg,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+		IA[3 * r + 2] = calculateIntegral(
+			textureAb,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+
+		IB[3 * r + 0] = calculateIntegral(
+			textureBr,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+		IB[3 * r + 1] = calculateIntegral(
+			textureBg,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+		IB[3 * r + 2] = calculateIntegral(
+			textureBb,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			x, y, r
+		);
+	}
+	delete[]IA;
+	delete[]IB;
+
+	delete[]textureAr;
+	delete[]textureAg;
+	delete[]textureAb;
+	
+	delete[]textureBr;
+	delete[]textureBg;
+	delete[]textureBb;
 }
