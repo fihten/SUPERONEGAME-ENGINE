@@ -4,6 +4,7 @@
 #include <cmath>
 
 #include <algorithm>
+#include <fstream>
 
 float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
@@ -233,7 +234,8 @@ void JacobianDeterminantTest()
 	float* IB = new float[3 * (r1 - r0 + 1)];
 	for (int r = r0; r <= r1; r++)
 	{
-		IA[3 * r + 0] = calculateIntegral(
+		int i = r - r0;
+		IA[3 * i + 0] = calculateIntegral(
 			textureAr,
 			width, height,
 			mInv00, mInv01,
@@ -242,7 +244,7 @@ void JacobianDeterminantTest()
 			m10, m11,
 			x, y, r
 		);
-		IA[3 * r + 1] = calculateIntegral(
+		IA[3 * i + 1] = calculateIntegral(
 			textureAg,
 			width, height,
 			mInv00, mInv01,
@@ -251,7 +253,7 @@ void JacobianDeterminantTest()
 			m10, m11,
 			x, y, r
 		);
-		IA[3 * r + 2] = calculateIntegral(
+		IA[3 * i + 2] = calculateIntegral(
 			textureAb,
 			width, height,
 			mInv00, mInv01,
@@ -261,7 +263,7 @@ void JacobianDeterminantTest()
 			x, y, r
 		);
 
-		IB[3 * r + 0] = calculateIntegral(
+		IB[3 * i + 0] = calculateIntegral(
 			textureBr,
 			width, height,
 			mInv00, mInv01,
@@ -270,7 +272,7 @@ void JacobianDeterminantTest()
 			m10, m11,
 			x, y, r
 		);
-		IB[3 * r + 1] = calculateIntegral(
+		IB[3 * i + 1] = calculateIntegral(
 			textureBg,
 			width, height,
 			mInv00, mInv01,
@@ -279,7 +281,7 @@ void JacobianDeterminantTest()
 			m10, m11,
 			x, y, r
 		);
-		IB[3 * r + 2] = calculateIntegral(
+		IB[3 * i + 2] = calculateIntegral(
 			textureBb,
 			width, height,
 			mInv00, mInv01,
@@ -289,6 +291,16 @@ void JacobianDeterminantTest()
 			x, y, r
 		);
 	}
+
+	std::ofstream fileOfX("x.txt");
+	std::ofstream fileOfY("y.txt");
+	for (int r = r0; r <= r1; r++)
+	{
+		int i = r - r0;
+		fileOfX << IA[3 * i + 0] << std::endl << IA[3 * i + 1] << std::endl << IA[3 * i + 2] << std::endl;
+		fileOfY << IB[3 * i + 0] << std::endl << IB[3 * i + 1] << std::endl << IB[3 * i + 2] << std::endl;
+	}
+
 	delete[]IA;
 	delete[]IB;
 

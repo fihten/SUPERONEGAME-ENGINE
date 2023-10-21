@@ -3,6 +3,7 @@
 #define _USE_MATH_DEFINES 
 #include <math.h>
 #include <algorithm>
+#include "JacobianDeterminantTest.h"
 
 void findFourierCoefficientsOfDerivative(
 	double y[], int N, double step, 
@@ -172,4 +173,5 @@ int main()
 		);
 		std::cout << c << " * " << "x^" << i << (i < degree ? " + " : "\n");
 	}
+	JacobianDeterminantTest();
 }
