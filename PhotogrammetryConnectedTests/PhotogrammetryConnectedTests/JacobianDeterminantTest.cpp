@@ -57,6 +57,23 @@ void fillOutTexture(
 	}
 }
 
+float calculateIntegral(
+	float chanel[],
+	int width, int height,
+	float m00, float m01,
+	float m10, float m11,
+	float mInv00, float mInv01,
+	float mInv10, float mInv11,
+	int x, int y, int radius
+)
+{
+	int xl = x - radius;
+	int xr = x + radius;
+
+	int yb = y - radius;
+	int yt = y + radius;
+}
+
 void JacobianDeterminantTest()
 {
 	float x0_r[] = {
