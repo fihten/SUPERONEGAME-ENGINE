@@ -3,6 +3,8 @@
 #define _USE_MATH_DEFINES // for C++
 #include <cmath>
 
+#include <algorithm>
+
 float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
 	float z = 1;
@@ -67,11 +69,50 @@ float calculateIntegral(
 	int x, int y, int radius
 )
 {
-	int xl = x - radius;
-	int xr = x + radius;
+	int x_corners[4] = { x - radius, x + radius, x - radius, x + radius };
+	int y_corners[4] = { y - radius, y - radius, y + radius, y + radius };
 
-	int yb = y - radius;
-	int yt = y + radius;
+	int xl = INT_MAX;
+	int xr = -INT_MAX;
+
+	int yb = INT_MAX;
+	int yt = -INT_MAX;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float x = x_corners[i] * m00 + y_corners[i] * m10;
+		float y = x_corners[i] * m01 + y_corners[i] * m11;
+
+		xl = std::min<int>(xl, std::floor(x));
+		xr = std::max<int>(xr, std::ceil(x));
+
+		yb = std::min<int>(yb, std::floor(y));
+		yt = std::max<int>(yt, std::ceil(y));
+	}
+
+	float I = 0;
+	for (int i = xl; i <= xr; i++)
+	{
+		for (int j = yb; j <= yt; j++)
+		{
+			float x = i * mInv00 + j * mInv10;
+			float y = i * mInv01 + j * mInv11;
+
+			if (x < x_corners[0])
+				continue;
+			if (x > x_corners[1])
+				continue;
+			if (y < y_corners[0])
+				continue;
+			if (y > y_corners[2])
+				continue;
+
+			float z = chanel[j * width + i];
+			I += z;
+		}
+	}
+
+	return I;
 }
 
 void JacobianDeterminantTest()
