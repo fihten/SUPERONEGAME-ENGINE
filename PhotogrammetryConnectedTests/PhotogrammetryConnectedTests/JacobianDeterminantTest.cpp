@@ -10,10 +10,10 @@ float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
 	float z = 1;
 	for (int i = 0; i < nx; i++)
-		z *= (x - x0[i]);
+		z += 0.5 * (1 + cos(5 * (x - x0[i]) / M_PI));
 	for (int i = 0; i < ny; i++)
-		z *= (y - y0[i]);
-	return z;
+		z += 0.5 * (1 + cos(5 * (y - y0[i]) / M_PI));
+	return z /= nx + ny;
 }
 
 void fillOutTexture(
@@ -148,8 +148,8 @@ void JacobianDeterminantTest()
 	};
 	int ny0_b = sizeof(y0_b) / sizeof(*y0_b);
 
-	int width = 640;
-	int height = 480;
+	int width = 1280;
+	int height = 960;
 
 	float* textureAr = new float[width * height];
 	float* textureAg = new float[width * height];
@@ -221,8 +221,8 @@ void JacobianDeterminantTest()
 	int r0 = 10;
 	int r1 = 20;
 
-	int x = 320;
-	int y = 240;
+	int x = 640;
+	int y = 480;
 
 	m01 *= (float)(height) / (float)(width);
 	m10 *= (float)(width) / (float)(height);
