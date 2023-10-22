@@ -4,15 +4,17 @@
 #include <cmath>
 
 #include <algorithm>
+#include <string>
 #include <fstream>
+#include <locale>
 
 float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
 	float z = 1;
 	for (int i = 0; i < nx; i++)
-		z += 0.5 * (1 + cos(5 * (x - x0[i]) / M_PI));
+		z += 0.25 * (1 + cos(5 * (x - x0[i]) / M_PI));
 	for (int i = 0; i < ny; i++)
-		z += 0.5 * (1 + cos(5 * (y - y0[i]) / M_PI));
+		z += 0.25 * (1 + cos(5 * (y - y0[i]) / M_PI));
 	return z /= nx + ny;
 }
 
@@ -90,6 +92,15 @@ float calculateIntegral(
 		yb = std::min<int>(yb, std::floor(y));
 		yt = std::max<int>(yt, std::ceil(y));
 	}
+
+	if (xl < 0)
+		return 0;
+	if (xr > width - 1)
+		return 0;
+	if (yb < 0)
+		return 0;
+	if (yt > height - 1)
+		return 0;
 
 	float I = 0;
 	for (int i = xl; i <= xr; i++)
@@ -218,11 +229,14 @@ void JacobianDeterminantTest()
 		x0_b, nx0_b, y0_b, ny0_b
 	);
 
-	int r0 = 10;
-	int r1 = 20;
+	int r0 = 1;
+	int r1 = 100;
 
-	int x = 640;
-	int y = 480;
+	int xa = 400;
+	int ya = 480;
+
+	int xb = 400;
+	int yb = 480;
 
 	m01 *= (float)(height) / (float)(width);
 	m10 *= (float)(width) / (float)(height);
@@ -238,29 +252,29 @@ void JacobianDeterminantTest()
 		IA[3 * i + 0] = calculateIntegral(
 			textureAr,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
-			m00, m01,
-			m10, m11,
-			x, y, r
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xa, ya, r
 		);
 		IA[3 * i + 1] = calculateIntegral(
 			textureAg,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
-			m00, m01,
-			m10, m11,
-			x, y, r
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xa, ya, r
 		);
 		IA[3 * i + 2] = calculateIntegral(
 			textureAb,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
-			m00, m01,
-			m10, m11,
-			x, y, r
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xa, ya, r
 		);
 
 		IB[3 * i + 0] = calculateIntegral(
@@ -270,7 +284,7 @@ void JacobianDeterminantTest()
 			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
-			x, y, r
+			xb, yb, r
 		);
 		IB[3 * i + 1] = calculateIntegral(
 			textureBg,
@@ -279,7 +293,7 @@ void JacobianDeterminantTest()
 			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
-			x, y, r
+			xb, yb, r
 		);
 		IB[3 * i + 2] = calculateIntegral(
 			textureBb,
@@ -288,12 +302,19 @@ void JacobianDeterminantTest()
 			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
-			x, y, r
+			xb, yb, r
 		);
 	}
 
+	struct Comma final : std::numpunct<char>
+	{
+		char do_decimal_point() const override { return ','; }
+	};
 	std::ofstream fileOfX("x.txt");
 	std::ofstream fileOfY("y.txt");
+	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
+	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
+	
 	for (int r = r0; r <= r1; r++)
 	{
 		int i = r - r0;
