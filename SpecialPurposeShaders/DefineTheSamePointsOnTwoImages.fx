@@ -43,29 +43,24 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint original_value;
 	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
 	
-	float a = 0;
-	float b = 0;
-	float c = 0;
-	float4 integralA0 = integralsOfA[int3(posInA, 0)].r;
-	float4 integralB0 = integralsOfB[int3(posInB, 0)].r;
+	float l00 = 0; float l01 = 0; float r0 = 0;
+	float l10 = 0; float l11 = 0; float r1 = 0;
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
-		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
+		float4 integralsA = integralsOfA[int3(posInA, i)];
+		float4 integralsB = integralsOfB[int3(posInB, i)];
 
-		a += dot(integralsA.xyz, integralsA.xyz);
-		b += dot(integralsA.xyz, integralsB.xyz);
-		c += dot(integralsB.xyz, integralsB.xyz);
+		l00 += dot(integralsA.xyz, integralsA.xyz);
+		l01 += dot(float4(1, 1, 1, 0), integralsA);
+		l10 += dot(float4(1, 1, 1, 0), integralsA);
+		l11 += 3;
+
+		r0 += dot(integralsA.xyz, integralsB.xyz);
+		r1 += dot(float4(1, 1, 1, 0), integralsB);
 	}
 	float JacobianDeterminant = b / a;
 	float ferr = 0;
-	for (int i = 0; i < integralsNumber; i++)
-	{
-		float4 integralsA = integralsOfA[int3(posInA, i)] - integralA0;
-		float4 integralsB = integralsOfB[int3(posInB, i)] - integralB0;
-		float4 e = abs((integralsB - JacobianDeterminant * integralsA) / (JacobianDeterminant * integralsA));
-		ferr = max(ferr, max(e.x, max(e.y, e.z)));
-	}
+	
 	uint err = 1000000 * ferr;
 
 	InterlockedMin(error[posInA].r, err);
