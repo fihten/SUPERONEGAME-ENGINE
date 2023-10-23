@@ -22,6 +22,44 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	int2 xy0 = dispatchThreadID.xy;
 	int radius = dispatchThreadID.z + 1;
+
+	int width = 0;
+	int height = 0;
+	int maxRadius = 0;
+	integrals.GetDimensions(width, height, maxRadius);
+
+	if (xy0.x > width - 1)
+		return;
+	if (xy0.y > height - 1)
+		return;
+	if (radius > maxRadius)
+		return;
+
+	float4 integral = float4(0, 0, 0, 0);
+	for (int x = x_left; x <= x_right; x++)
+	{
+		for (int y = y_bottom; y <= y_top; y++)
+		{
+			int2 xy = int2(x, y);
+			float2 xy_ = mul(xy, m);
+			if (xy_.x < -radius)
+				continue;
+			if (xy_.x > radius)
+				continue;
+			if (xy_.y < -radius)
+				continue;
+			if (xy_.y > radius)
+				continue;
+			xy += xy0;
+
+			xy.x -= x_left;
+			xy.y -= y_bottom;
+
+			integral += tex[xy];
+		}
+	}
+
+	integrals[uint3(xy0, radius - 1)] = integral;
 }
 
 technique11 CalculationOfTextureIntegrals
@@ -30,6 +68,6 @@ technique11 CalculationOfTextureIntegrals
 	{
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, cs_integrate_along_u_axis()));
+		SetComputeShader(CompileShader(cs_5_0, cs()));
 	}
 };
