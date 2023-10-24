@@ -1929,31 +1929,33 @@ void GraphicsCore::openTextureB(const std::string& path)
 void GraphicsCore::calculateIntegralsOfTextureA()
 {
 	mTextureToIntegrate->SetResource(mTextureToIntegrateAsrv);
-	mHorisontalIntegrals->SetUnorderedAccessView(mHorisontalIntegralsAuav);
+	mIntegrals->SetUnorderedAccessView(mIntegralsAuav);
 
-	mCalculationOfTextureIntegralsTech->GetPassByName("AlongUaxis")->Apply(0, context);
+	int radius = -RADIUS_OF_AREA_IN_TEXELS;
+	mXleft->SetRawValue(&radius, 0, sizeof radius);
+	mYbottom->SetRawValue(&radius, 0, sizeof radius);
+
+	radius = RADIUS_OF_AREA_IN_TEXELS;
+	mXright->SetRawValue(&radius, 0, sizeof radius);
+	mYtop->SetRawValue(&radius, 0, sizeof radius);
+
+	float angle = 0;
+	float scale = 1;
+	mAngle0->SetRawValue(&angle, 0, sizeof angle);
+	mScale0->SetRawValue(&scale, 0, sizeof scale);
+	mAngle1->SetRawValue(&angle, 0, sizeof angle);
+	mScale1->SetRawValue(&scale, 0, sizeof scale);
+
+	mCalculationOfTextureIntegralsTech->GetPassByName("P0")->Apply(0, context);
 
 	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[2] = {
-		nullptr, nullptr };
-	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
-
-	mHorisontalIntegralsInput->SetResource(mHorisontalIntegralsAsrv);
-	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsAuav);
-
-	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
-
-	groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
-	context->Dispatch(groups_x, groups_y, groups_z);
-
-	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
-
+	ID3D11UnorderedAccessView* nullUAV = nullptr;
+	context->CSSetUnorderedAccessViews(0, 1, &nullUAV, 0);
+	
 	context->CSSetShader(0, 0, 0);
 }
 
