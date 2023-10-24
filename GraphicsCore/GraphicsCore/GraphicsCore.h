@@ -225,7 +225,7 @@ public:
 	void openTextureB(const std::string& path);
 
 	void calculateIntegralsOfTextureA();
-	void calculateIntegralsOfTextureB();
+	void calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1);
 
 private:
 	void initCalculationOfTextureIntegrals();

@@ -1959,10 +1959,26 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 	context->CSSetShader(0, 0, 0);
 }
 
-void GraphicsCore::calculateIntegralsOfTextureB()
+void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1)
 {
 	mTextureToIntegrate->SetResource(mTextureToIntegrateBsrv);
-	mHorisontalIntegrals->SetUnorderedAccessView(mHorisontalIntegralsBuav);
+	mIntegrals->SetUnorderedAccessView(mIntegralsBuav);
+
+	int r = RADIUS_OF_AREA_IN_TEXELS;
+	int x_corners[4] = { -r,+r,-r,+r };
+	int y_corners[4] = { -r,-r,+r,+r };
+	
+	int x_left = INT_MAX;
+	int x_right = -INT_MAX;
+
+	int y_bottom = INT_MAX;
+	int y_top = -INT_MAX;
+
+	mAngle0->SetRawValue(&angle0, 0, sizeof angle0);
+	mScale0->SetRawValue(&scale0, 0, sizeof scale0);
+
+	mAngle1->SetRawValue(&angle1, 0, sizeof angle1);
+	mScale1->SetRawValue(&scale1, 0, sizeof scale1);
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("AlongUaxis")->Apply(0, context);
 
