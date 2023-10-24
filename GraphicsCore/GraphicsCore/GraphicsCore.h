@@ -18,7 +18,6 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define NUMBER_OF_TEXTURE_INTEGRALS 9
 #define RADIUS_OF_AREA_IN_TEXELS 10
 
 class GraphicsCore;
@@ -234,30 +233,31 @@ private:
 	ID3DX11EffectTechnique* mCalculationOfTextureIntegralsTech = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mTextureToIntegrate = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mHorisontalIntegrals = nullptr;
-	ID3DX11EffectShaderResourceVariable* mHorisontalIntegralsInput = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mVerticalIntegrals = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mIntegrals = nullptr;
+
+	ID3DX11EffectVariable* mXleft = nullptr;
+	ID3DX11EffectVariable* mXright = nullptr;
+
+	ID3DX11EffectVariable* mYbottom = nullptr;
+	ID3DX11EffectVariable* mYtop = nullptr;
+
+	ID3DX11EffectVariable* mAngle0 = nullptr;
+	ID3DX11EffectVariable* mScale0 = nullptr;
+
+	ID3DX11EffectVariable* mAngle1 = nullptr;
+	ID3DX11EffectVariable* mScale1 = nullptr;
 
 	ID3D11ShaderResourceView* mTextureToIntegrateAsrv = nullptr;
 	ID3D11ShaderResourceView* mTextureToIntegrateBsrv = nullptr;
 
-	ID3D11UnorderedAccessView* mHorisontalIntegralsAuav = nullptr;
-	ID3D11UnorderedAccessView* mHorisontalIntegralsBuav = nullptr;
-
-	ID3D11UnorderedAccessView* mVerticalIntegralsAuav = nullptr;
-	ID3D11UnorderedAccessView* mVerticalIntegralsBuav = nullptr;
-
-	ID3D11ShaderResourceView* mHorisontalIntegralsAsrv = nullptr;
-	ID3D11ShaderResourceView* mHorisontalIntegralsBsrv = nullptr;
+	ID3D11UnorderedAccessView* mIntegralsAuav = nullptr;
+	ID3D11UnorderedAccessView* mIntegralsBuav = nullptr;
 
 	ID3D11ShaderResourceView* mIntegralsAsrv = nullptr;
 	ID3D11ShaderResourceView* mIntegralsBsrv = nullptr;
 
-	ID3D11Texture2D* mHorisontalIntegralsAtex = nullptr;
-	ID3D11Texture2D* mHorisontalIntegralsBtex = nullptr;
-
-	ID3D11Texture2D* mVerticalIntegralsAtex = nullptr;
-	ID3D11Texture2D* mVerticalIntegralsBtex = nullptr;
+	ID3D11Texture2D* mIntegralsAtex = nullptr;
+	ID3D11Texture2D* mIntegralsBtex = nullptr;
 
 	uint32_t widthOfA = 0;
 	uint32_t heightOfA = 0;

@@ -1757,10 +1757,19 @@ void GraphicsCore::initCalculationOfTextureIntegrals()
 	mCalculationOfTextureIntegralsTech = mCalculationOfTextureIntegralsFX->GetTechniqueByName("CalculationOfTextureIntegrals");
 
 	mTextureToIntegrate = mCalculationOfTextureIntegralsFX->GetVariableByName("tex")->AsShaderResource();
-	
-	mHorisontalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("horisontalIntegrals")->AsUnorderedAccessView();
-	mHorisontalIntegralsInput = mCalculationOfTextureIntegralsFX->GetVariableByName("horisontalIntegralsInput")->AsShaderResource();
-	mVerticalIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("verticalIntegrals")->AsUnorderedAccessView();
+	mIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("integrals")->AsUnorderedAccessView();
+
+	mXleft = mCalculationOfTextureIntegralsFX->GetVariableByName("x_left");
+	mXright = mCalculationOfTextureIntegralsFX->GetVariableByName("x_right");
+
+	mYbottom = mCalculationOfTextureIntegralsFX->GetVariableByName("y_bottom");
+	mYtop = mCalculationOfTextureIntegralsFX->GetVariableByName("y_top");
+
+	mAngle0 = mCalculationOfTextureIntegralsFX->GetVariableByName("angle0");
+	mScale0 = mCalculationOfTextureIntegralsFX->GetVariableByName("scale0");
+
+	mAngle1 = mCalculationOfTextureIntegralsFX->GetVariableByName("angle1");
+	mScale1 = mCalculationOfTextureIntegralsFX->GetVariableByName("scale1");
 }
 
 void GraphicsCore::openTextureA(const std::string& path)
@@ -1785,8 +1794,9 @@ void GraphicsCore::openTextureA(const std::string& path)
 	heightOfA = tex_desc.Height;
 
 	tex_desc.Width -= 2 * RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
+	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
@@ -1794,20 +1804,15 @@ void GraphicsCore::openTextureA(const std::string& path)
 	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
 	tex_desc.CPUAccessFlags = 0;
 	tex_desc.MiscFlags = 0;
-	device->CreateTexture2D(&tex_desc, nullptr, &mHorisontalIntegralsAtex);
-
-	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
-	device->CreateTexture2D(&tex_desc, nullptr, &mVerticalIntegralsAtex);
+	device->CreateTexture2D(&tex_desc, nullptr, &mIntegralsAtex);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
-	
-	device->CreateUnorderedAccessView(mHorisontalIntegralsAtex, &uav_desc, &mHorisontalIntegralsAuav);
-	device->CreateUnorderedAccessView(mVerticalIntegralsAtex, &uav_desc, &mVerticalIntegralsAuav);
+	uav_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	device->CreateUnorderedAccessView(mIntegralsAtex, &uav_desc, &mIntegralsAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
 	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1815,10 +1820,11 @@ void GraphicsCore::openTextureA(const std::string& path)
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = NUMBER_OF_TEXTURE_INTEGRALS;
-	device->CreateShaderResourceView(mHorisontalIntegralsAtex, &srv_desc, &mHorisontalIntegralsAsrv);
-	device->CreateShaderResourceView(mVerticalIntegralsAtex, &srv_desc, &mIntegralsAsrv);
+	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	device->CreateShaderResourceView(mIntegralsAtex, &srv_desc, &mIntegralsAsrv);
 
+	tex_desc.Width = widthOfA;
+	tex_desc.Height = heightOfA;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
 	tex_desc.Format = DXGI_FORMAT_R32_UINT;
