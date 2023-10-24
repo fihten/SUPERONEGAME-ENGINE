@@ -1974,6 +1974,19 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	int y_bottom = INT_MAX;
 	int y_top = -INT_MAX;
 
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float det = m00 * m11 - m01 * m10;
+	float mInv00 = m11 / det; float mInv01 = -m01 / det;
+	float mInv10 = -m10 / det; float mInv11 = m00 / det;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float x = x_corners[i] * mInv00 + y_corners[i] * mInv10;
+		float y = x_corners[i] * mInv01 + y_corners[i] * mInv11;
+	}
+
 	mAngle0->SetRawValue(&angle0, 0, sizeof angle0);
 	mScale0->SetRawValue(&scale0, 0, sizeof scale0);
 
