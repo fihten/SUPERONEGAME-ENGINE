@@ -1985,7 +1985,19 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	{
 		float x = x_corners[i] * mInv00 + y_corners[i] * mInv10;
 		float y = x_corners[i] * mInv01 + y_corners[i] * mInv11;
+
+		x_left = std::min<int>(x_left, std::floor(x));
+		x_right = std::max<int>(x_right, std::ceil(x));
+
+		y_bottom = std::min<int>(y_bottom, std::floor(y));
+		y_top = std::max<int>(y_top, std::ceil(y));
 	}
+
+	mXleft->SetRawValue(&x_left, 0, sizeof x_left);
+	mXright->SetRawValue(&x_right, 0, sizeof x_right);
+
+	mYbottom->SetRawValue(&y_bottom, 0, sizeof y_bottom);
+	mYtop->SetRawValue(&y_top, 0, sizeof y_top);
 
 	mAngle0->SetRawValue(&angle0, 0, sizeof angle0);
 	mScale0->SetRawValue(&scale0, 0, sizeof scale0);
