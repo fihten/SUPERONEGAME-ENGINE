@@ -2113,6 +2113,43 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 void GraphicsCore::defineTheSamePoints()
 {
+	for (int axis0_x = 0; axis0_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_x++)
+	{
+		for (int axis0_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y++)
+		{
+			for (int axis1_x = -2 * RADIUS_OF_AREA_IN_TEXELS; axis1_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis1_x++)
+			{
+				for (int axis1_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis1_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis1_y++)
+				{
+					defineTheSamePoints(axis0_x, axis0_y, axis1_x, axis1_y);
+				}
+			}
+		}
+	}
+}
+
+void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y)
+{
+	float angle0 = atan2(axis0_y, axis0_x);
+	if (abs(angle0) > maxAngle * M_PI / 180)
+		return;
+
+	float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / RADIUS_OF_AREA_IN_TEXELS;
+	if (scale0 < minScale)
+		return;
+	if (scale0 > maxScale)
+		return;
+
+	float angle1 = -atan2(axis1_x, axis1_y);
+	if (abs(angle1 - angle0) > maxAngle * M_PI / 180)
+		return;
+	
+	float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / RADIUS_OF_AREA_IN_TEXELS;
+	if (scale1 < minScale)
+		return;
+	if (scale1 > maxScale)
+		return;
+
 	mIntegralsOfA->SetResource(mIntegralsAsrv);
 	mIntegralsOfB->SetResource(mIntegralsBsrv);
 

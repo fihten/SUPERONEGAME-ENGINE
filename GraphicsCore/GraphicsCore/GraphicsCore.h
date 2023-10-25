@@ -267,6 +267,7 @@ private:
 
 public:
 	void defineTheSamePoints();
+	void defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
 	flt2 mapAtoB(flt2& uvA);
 
 private:
@@ -286,6 +287,10 @@ private:
 
 	ID3D11Texture2D* mErrorOfTheSamePointsDefinitionTex = nullptr;
 	ID3D11UnorderedAccessView* mErrorOfTheSamePointsDefinitionUAV = nullptr;
+
+	float maxAngle = 60.0f;
+	float minScale = 0.5f;
+	float maxScale = 1.5f;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
