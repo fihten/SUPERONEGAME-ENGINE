@@ -2019,28 +2019,15 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	mAngle1->SetRawValue(&angle1, 0, sizeof angle1);
 	mScale1->SetRawValue(&scale1, 0, sizeof scale1);
 
-	mCalculationOfTextureIntegralsTech->GetPassByName("AlongUaxis")->Apply(0, context);
+	mCalculationOfTextureIntegralsTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfB - x_right + x_left) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfB - y_top + y_bottom) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	ID3D11UnorderedAccessView* nullUAVs[2] = {
-		nullptr, nullptr };
-	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
-
-	mHorisontalIntegralsInput->SetResource(mHorisontalIntegralsBsrv);
-	mVerticalIntegrals->SetUnorderedAccessView(mVerticalIntegralsBuav);
-
-	mCalculationOfTextureIntegralsTech->GetPassByName("AlongVaxis")->Apply(0, context);
-
-	groups_x = std::ceil((float)(widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	groups_y = std::ceil((float)(heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	groups_z = std::ceil((float)(NUMBER_OF_TEXTURE_INTEGRALS) / 4.0f);
-	context->Dispatch(groups_x, groups_y, groups_z);
-
-	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
+	ID3D11UnorderedAccessView* nullUAV = nullptr;
+	context->CSSetUnorderedAccessViews(0, 1, &nullUAV, 0);
 
 	context->CSSetShader(0, 0, 0);
 }
