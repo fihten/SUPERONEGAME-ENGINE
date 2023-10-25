@@ -2113,6 +2113,17 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 void GraphicsCore::defineTheSamePoints()
 {
+	calculateIntegralsOfTextureA();
+
+	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("InitializeError")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(widthOfA) / 32.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA) / 32.0f);
+	uint32_t groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+
 	for (int axis0_x = 0; axis0_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_x++)
 	{
 		for (int axis0_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y++)
@@ -2150,24 +2161,19 @@ void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	if (scale1 > maxScale)
 		return;
 
+	calculateIntegralsOfTextureB(angle0, scale0, angle1, scale1);
+
 	mIntegralsOfA->SetResource(mIntegralsAsrv);
 	mIntegralsOfB->SetResource(mIntegralsBsrv);
 
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("InitializeError")->Apply(0, context);
-
-	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 32.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 32.0f);
-	uint32_t groups_z = 1;
-	context->Dispatch(groups_x, groups_y, groups_z);
-
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
 
-	groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
-	groups_y = std::ceil((float)((widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
-	groups_z = 1;
+	int groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
+	int groups_y = std::ceil((float)((widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfB - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
+	int groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
