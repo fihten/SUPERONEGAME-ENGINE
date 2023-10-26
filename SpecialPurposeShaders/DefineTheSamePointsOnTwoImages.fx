@@ -104,12 +104,10 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
 		l00 * JacobianDeterminant * JacobianDeterminant +
 		l11 * JacobianDeterminant0 * JacobianDeterminant0;
-//	ferr /= 3 * integralsNumber;
-//	ferr = sqrt(ferr);
+	ferr /= 3 * integralsNumber;
+	ferr = sqrt(ferr);
 
-	uint err = 100000000*ferr;
-	if (ferr != 0)
-		return;
+	uint err = 1000 * ferr;
 
 	InterlockedMin(error[posInMap].r, err);
 }
@@ -176,14 +174,10 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
 		l00 * JacobianDeterminant * JacobianDeterminant +
 		l11 * JacobianDeterminant0 * JacobianDeterminant0;
-//	ferr /= 3 * integralsNumber;
-//	ferr = sqrt(ferr);
+	ferr /= 3 * integralsNumber;
+	ferr = sqrt(ferr);
 
-
-	uint err = 100000000 * ferr;
-	if (ferr != 0)
-		return;
-
+	uint err = 1000 * ferr;
 	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
 	if (err == error[posInMap].r)
 	{
