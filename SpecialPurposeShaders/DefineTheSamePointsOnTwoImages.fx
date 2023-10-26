@@ -23,6 +23,23 @@ void CS_initialize_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	error[ij].r = UINT_MAX;
 }
 
+[numthreads(32, 32, 1)]
+void CS_initialize_mapping_from_A_to_B(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint2 ij = dispatchThreadID.xy;
+
+	uint width = 0;
+	uint height = 0;
+	mapAtoB.GetDimensions(width, height);
+
+	if (ij.x > width - 1)
+		return;
+	if (ij.y > height - 1)
+		return;
+
+	mapAtoB[ij].r = UINT_MAX;
+}
+
 [numthreads(32,32,1)]
 void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -48,16 +65,21 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
-	uint original_value;
-	InterlockedExchange(mapAtoB[posInMap].r, UINT_MAX, original_value);
 	
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
 	float yy = 0;
+
+	float4 integralsA0 = integralsOfA[int3(posInA, integralsNumber - 1)];
+	float maxIntegralA = max(integralsA0.x, max(integralsA0.y, integralsA0.z));
+
+	float4 integralsB0 = integralsOfA[int3(posInB, integralsNumber - 1)];
+	float maxIntegralB = max(integralsB0.x, max(integralsB0.y, integralsB0.z));
+
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] / maxIntegralA;
+		float4 integralsB = integralsOfB[int3(posInB, i)] / maxIntegralB;
 
 		l00 += dot(integralsA.xyz, integralsA.xyz);
 		l01 += dot(float4(1, 1, 1, 0), integralsA);
@@ -82,10 +104,12 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
 		l00 * JacobianDeterminant * JacobianDeterminant +
 		l11 * JacobianDeterminant0 * JacobianDeterminant0;
-	ferr /= 3 * integralsNumber;
-	ferr = sqrt(ferr);
+//	ferr /= 3 * integralsNumber;
+//	ferr = sqrt(ferr);
 
-	uint err = 1000 * ferr;
+	uint err = 100000000*ferr;
+	if (ferr != 0)
+		return;
 
 	InterlockedMin(error[posInMap].r, err);
 }
@@ -117,10 +141,17 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
 	float yy = 0;
+
+	float4 integralsA0 = integralsOfA[int3(posInA, integralsNumber - 1)];
+	float maxIntegralA = max(integralsA0.x, max(integralsA0.y, integralsA0.z));
+
+	float4 integralsB0 = integralsOfA[int3(posInB, integralsNumber - 1)];
+	float maxIntegralB = max(integralsB0.x, max(integralsB0.y, integralsB0.z));
+
 	for (int i = 0; i < integralsNumber; i++)
 	{
-		float4 integralsA = integralsOfA[int3(posInA, i)];
-		float4 integralsB = integralsOfB[int3(posInB, i)];
+		float4 integralsA = integralsOfA[int3(posInA, i)] / maxIntegralA;
+		float4 integralsB = integralsOfB[int3(posInB, i)] / maxIntegralB;
 
 		l00 += dot(integralsA.xyz, integralsA.xyz);
 		l01 += dot(float4(1, 1, 1, 0), integralsA);
@@ -145,10 +176,14 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
 		l00 * JacobianDeterminant * JacobianDeterminant +
 		l11 * JacobianDeterminant0 * JacobianDeterminant0;
-	ferr /= 3 * integralsNumber;
-	ferr = sqrt(ferr);
+//	ferr /= 3 * integralsNumber;
+//	ferr = sqrt(ferr);
 
-	uint err = 1000 * ferr;
+
+	uint err = 100000000 * ferr;
+	if (ferr != 0)
+		return;
+
 	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
 	if (err == error[posInMap].r)
 	{
@@ -170,6 +205,12 @@ technique11 DefineTheSamePointsOnTwoImages
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, CS_initialize_error()));
+	}
+	pass InitializeMapping
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_initialize_mapping_from_A_to_B()));
 	}
 	pass CalculateError
 	{

@@ -1961,7 +1961,7 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	{
 		mIntegralsBtex->Release();
 		mIntegralsBtex = nullptr;
-
+		
 		mIntegralsBuav->Release();
 		mIntegralsBuav = nullptr;
 
@@ -2124,6 +2124,20 @@ void GraphicsCore::defineTheSamePoints()
 	uint32_t groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 
+	ID3D11UnorderedAccessView* nullUAVs[] = { nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
+
+	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("InitializeMapping")->Apply(0, context);
+
+	groups_x = std::ceil((float)(widthOfA) / 32.0f);
+	groups_y = std::ceil((float)(heightOfA) / 32.0f);
+	groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
+
 	for (int axis0_x = 0; axis0_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_x++)
 	{
 		for (int axis0_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y++)
@@ -2215,6 +2229,9 @@ void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 
 	ID3D11ShaderResourceView* nullSRVs[] = { nullptr,nullptr };
 	context->CSSetShaderResources(0, 2, nullSRVs);
+
+	ID3D11UnorderedAccessView* nullUAVs[] = { nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
 }
