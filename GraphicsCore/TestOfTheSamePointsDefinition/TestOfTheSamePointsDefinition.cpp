@@ -50,10 +50,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
 	GraphicsCore::instance()->openTextureA("imageA.jpg");
-	GraphicsCore::instance()->calculateIntegralsOfTextureA();
-
 	GraphicsCore::instance()->openTextureB("imageB.jpg");
-	GraphicsCore::instance()->calculateIntegralsOfTextureB();
 
 	GraphicsCore::instance()->defineTheSamePoints();
 

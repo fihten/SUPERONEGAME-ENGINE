@@ -2229,20 +2229,14 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	float posInAx = widthOfA * uvA.x() - 0.5f;
 	float posInAy = heightOfA * uvA.y() - 0.5f;
 
-	posInAx -= RADIUS_OF_AREA_IN_TEXELS;
-	posInAy -= RADIUS_OF_AREA_IN_TEXELS;
-
-	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
-	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS - 1);
+	uint32_t uiPosInAx = std::min<float>(std::max<float>(posInAx, 0.0f), widthOfA - 1);
+	uint32_t uiPosInAy = std::min<float>(std::max<float>(posInAy, 0.0f), heightOfA - 1);
 
 	char* pRow = (char*)texData.pData + uiPosInAy * texData.RowPitch;
 	uint32_t mappedPixel = *((uint32_t*)pRow + uiPosInAx);
 
-	uint32_t uiPosInBx = mappedPixel % (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
-	uint32_t uiPosInBy = mappedPixel / (widthOfB - 2 * RADIUS_OF_AREA_IN_TEXELS);
-
-	uiPosInBx += RADIUS_OF_AREA_IN_TEXELS;
-	uiPosInBy += RADIUS_OF_AREA_IN_TEXELS;
+	uint32_t uiPosInBx = mappedPixel % widthOfB;
+	uint32_t uiPosInBy = mappedPixel / widthOfB;
 
 	flt2 uvB(((float)(uiPosInBx)+0.5f) / widthOfB, ((float)(uiPosInBy)+0.5f) / heightOfB);
 
