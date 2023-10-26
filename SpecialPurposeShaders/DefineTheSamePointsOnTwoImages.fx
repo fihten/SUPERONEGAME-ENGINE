@@ -26,22 +26,30 @@ void CS_initialize_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(32,32,1)]
 void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
+	uint mipA = 0;
+	uint widthA = 0;
+	uint heightA = 0;
 	uint integralsNumber = 0;
-	uint mips = 0;
-	integralsOfA.GetDimensions(mip, width, height, integralsNumber, mips);
+	uint mipsA = 0;
+	integralsOfA.GetDimensions(mipA, widthA, heightA, integralsNumber, mipsA);
 
-	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
-	if (posInA.y > height - 1)
-		return;
-	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
-	if (posInB.y > height - 1)
+	int2 posInA = int2(dispatchThreadID.x % widthA, dispatchThreadID.x / widthA);
+	if (posInA.y > heightA - 1)
 		return;
 
+	uint mipB = 0;
+	uint widthB = 0;
+	uint heightB = 0;
+	uint mipsB = 0;
+	integralsOfB.GetDimensions(mipB, widthB, heightB, integralsNumber, mipsB);
+
+	int2 posInB = int2(dispatchThreadID.y % widthB, dispatchThreadID.y / widthB);
+	if (posInB.y > heightB - 1)
+		return;
+
+	int2 posInMap{ posInA.x + integralsNumber,posInA.y + integralsNumber };
 	uint original_value;
-	InterlockedExchange(mapAtoB[posInA].r, UINT_MAX, original_value);
+	InterlockedExchange(mapAtoB[posInMap].r, UINT_MAX, original_value);
 	
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
@@ -79,24 +87,31 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint err = 1000 * ferr;
 
-	InterlockedMin(error[posInA].r, err);
+	InterlockedMin(error[posInMap].r, err);
 }
 
 [numthreads(32, 32, 1)]
 void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint mip = 0;
-	uint width = 0;
-	uint height = 0;
+	uint mipA = 0;
+	uint widthA = 0;
+	uint heightA = 0;
 	uint integralsNumber = 0;
-	uint mips = 0;
-	integralsOfA.GetDimensions(mip, width, height, integralsNumber, mips);
+	uint mipsA = 0;
+	integralsOfA.GetDimensions(mipA, widthA, heightA, integralsNumber, mipsA);
 
-	int2 posInA = int2(dispatchThreadID.x % width, dispatchThreadID.x / width);
-	if (posInA.y > height - 1)
+	int2 posInA = int2(dispatchThreadID.x % widthA, dispatchThreadID.x / widthA);
+	if (posInA.y > heightA - 1)
 		return;
-	int2 posInB = int2(dispatchThreadID.y % width, dispatchThreadID.y / width);
-	if (posInB.y > height - 1)
+
+	uint mipB = 0;
+	uint widthB = 0;
+	uint heightB = 0;
+	uint mipsB = 0;
+	integralsOfB.GetDimensions(mipB, widthB, heightB, integralsNumber, mipsB);
+
+	int2 posInB = int2(dispatchThreadID.y % widthB, dispatchThreadID.y / widthB);
+	if (posInB.y > heightB - 1)
 		return;
 
 	float l00 = 0; float l01 = 0; float r0 = 0;
@@ -134,11 +149,17 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr = sqrt(ferr);
 
 	uint err = 1000 * ferr;
-	if (err == error[posInA].r)
+	int2 posInMap{ posInA.x + integralsNumber,posInA.y + integralsNumber };
+	if (err == error[posInMap].r)
 	{
 		uint original_value;
-		uint new_value = posInB.y * width + posInB.x;
-		InterlockedExchange(mapAtoB[posInA].r, new_value, original_value);
+		uint offsetX = (widthA + 2 * integralsNumber - widthB) / 2;
+		uint offestY = (heightA + 2 * integralsNumber - heightB) / 2;
+		uint x = posInB.x + offsetX;
+		uint y = posInB.y + offsetY;
+		uint width = widthA + 2 * integralsNumber;
+		uint new_value = y * width + x;
+		InterlockedExchange(mapAtoB[posInMap].r, new_value, original_value);
 	}
 }
 
