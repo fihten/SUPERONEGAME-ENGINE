@@ -1941,14 +1941,10 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
-	float det = m00 * m11 - m01 * m10;
-	float mInv00 = m11 / det; float mInv01 = -m01 / det;
-	float mInv10 = -m10 / det; float mInv11 = m00 / det;
-
 	for (int i = 0; i < 4; i++)
 	{
-		float x = x_corners[i] * mInv00 + y_corners[i] * mInv10;
-		float y = x_corners[i] * mInv01 + y_corners[i] * mInv11;
+		float x = x_corners[i] * m00 + y_corners[i] * m10;
+		float y = x_corners[i] * m01 + y_corners[i] * m11;
 
 		x_left = std::min<int>(x_left, std::floor(x));
 		x_right = std::max<int>(x_right, std::ceil(x));
@@ -2200,14 +2196,10 @@ void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
-	float det = m00 * m11 - m01 * m10;
-	float mInv00 = m11 / det; float mInv01 = -m01 / det;
-	float mInv10 = -m10 / det; float mInv11 = m00 / det;
-
 	for (int i = 0; i < 4; i++)
 	{
-		float x = x_corners[i] * mInv00 + y_corners[i] * mInv10;
-		float y = x_corners[i] * mInv01 + y_corners[i] * mInv11;
+		float x = x_corners[i] * m00 + y_corners[i] * m10;
+		float y = x_corners[i] * m01 + y_corners[i] * m11;
 
 		x_left = std::min<int>(x_left, std::floor(x));
 		x_right = std::max<int>(x_right, std::ceil(x));

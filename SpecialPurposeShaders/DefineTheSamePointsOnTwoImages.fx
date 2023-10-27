@@ -73,7 +73,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float4 integralsA0 = integralsOfA[int3(posInA, integralsNumber - 1)];
 	float maxIntegralA = max(integralsA0.x, max(integralsA0.y, integralsA0.z));
 
-	float4 integralsB0 = integralsOfA[int3(posInB, integralsNumber - 1)];
+	float4 integralsB0 = integralsOfB[int3(posInB, integralsNumber - 1)];
 	float maxIntegralB = max(integralsB0.x, max(integralsB0.y, integralsB0.z));
 
 	for (int i = 0; i < integralsNumber; i++)
@@ -107,7 +107,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr /= 3 * integralsNumber;
 	ferr = sqrt(ferr);
 
-	uint err = 1000 * ferr;
+	uint err = 1000000 * ferr;
 
 	InterlockedMin(error[posInMap].r, err);
 }
@@ -143,7 +143,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float4 integralsA0 = integralsOfA[int3(posInA, integralsNumber - 1)];
 	float maxIntegralA = max(integralsA0.x, max(integralsA0.y, integralsA0.z));
 
-	float4 integralsB0 = integralsOfA[int3(posInB, integralsNumber - 1)];
+	float4 integralsB0 = integralsOfB[int3(posInB, integralsNumber - 1)];
 	float maxIntegralB = max(integralsB0.x, max(integralsB0.y, integralsB0.z));
 
 	for (int i = 0; i < integralsNumber; i++)
@@ -177,7 +177,7 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr /= 3 * integralsNumber;
 	ferr = sqrt(ferr);
 
-	uint err = 1000 * ferr;
+	uint err = 1000000 * ferr;
 	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
 	if (err == error[posInMap].r)
 	{

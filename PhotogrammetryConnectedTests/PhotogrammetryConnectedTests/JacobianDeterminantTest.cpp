@@ -230,7 +230,7 @@ void JacobianDeterminantTest()
 	);
 
 	int r0 = 1;
-	int r1 = 100;
+	int r1 = 5;
 
 	int xa = 400;
 	int ya = 480;
@@ -238,11 +238,48 @@ void JacobianDeterminantTest()
 	int xb = 400;
 	int yb = 480;
 
+	angle0 = 20 * M_PI / 180;
+	scale0 = 0.8;
+
+	angle1 = -10 * M_PI / 180;
+	scale1 = 1.2;
+
+	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
+	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
+
+	det = m00 * m11 - m01 * m10;
+	mInv00 = m11 / det; mInv01 = -m01 / det;
+	mInv10 = -m10 / det; mInv11 = m00 / det;
+
 	m01 *= (float)(height) / (float)(width);
 	m10 *= (float)(width) / (float)(height);
 
 	mInv01 *= (float)(height) / (float)(width);
 	mInv10 *= (float)(width) / (float)(height);
+
+	float x0 = 5;
+	float y0 = 0;
+	float x1 = 0;
+	float y1 = 5;
+
+	float x0_ = std::round(x0 * m00 + y0 * m10);
+	float y0_ = std::round(x0 * m01 + y0 * m11);
+
+	float x1_ = std::round(x1 * m00 + y1 * m10);
+	float y1_ = std::round(x1 * m01 + y1 * m11);
+
+	angle0 = std::atan2(y0_, x0_);
+	scale0 = std::sqrt(x0_ * x0_ + y0_ * y0_) / 5;
+
+	angle1 = -std::atan2(x1_, y1_);
+	scale1 = std::sqrt(x1_ * x1_ + y1_ * y1_) / 5;
+
+	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
+	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
+
+	det = m00 * m11 - m01 * m10;
+	mInv00 = m11 / det; mInv01 = -m01 / det;
+	mInv10 = -m10 / det; mInv11 = m00 / det;
 
 	float* IA = new float[3 * (r1 - r0 + 1)];
 	float* IB = new float[3 * (r1 - r0 + 1)];

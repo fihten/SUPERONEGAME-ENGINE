@@ -15,10 +15,15 @@ float scale1;
 [numthreads(16, 16, 4)]
 void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	float2x2 m = float2x2(
-		scale0 * cos(angle0), scale0 * sin(angle0),
-		-scale1 * sin(angle1), scale1 * cos(angle1)
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float det = m00 * m11 - m01 * m10;
+	float2x2 mInv = float2x2(
+		m11, -m01,
+		-m10, m00
 		);
+	mInv /= det;
 
 	int2 xy0 = dispatchThreadID.xy;
 	int radius = dispatchThreadID.z + 1;
@@ -41,7 +46,7 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 		for (int y = y_bottom; y <= y_top; y++)
 		{
 			int2 xy = int2(x, y);
-			float2 xy_ = mul(xy, m);
+			float2 xy_ = mul(xy, mInv);
 			if (xy_.x < -radius)
 				continue;
 			if (xy_.x > radius)
