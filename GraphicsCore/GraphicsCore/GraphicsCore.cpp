@@ -1793,8 +1793,6 @@ void GraphicsCore::openTextureA(const std::string& path)
 	widthOfA = tex_desc.Width;
 	heightOfA = tex_desc.Height;
 
-	tex_desc.Width -= 2 * RADIUS_OF_AREA_IN_TEXELS;
-	tex_desc.Height -= 2 * RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -1823,8 +1821,6 @@ void GraphicsCore::openTextureA(const std::string& path)
 	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
 	device->CreateShaderResourceView(mIntegralsAtex, &srv_desc, &mIntegralsAsrv);
 
-	tex_desc.Width = widthOfA;
-	tex_desc.Height = heightOfA;
 	tex_desc.MipLevels = 1;
 	tex_desc.ArraySize = 1;
 	tex_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1889,6 +1885,34 @@ void GraphicsCore::openTextureB(const std::string& path)
 
 	widthOfB = tex_desc.Width;
 	heightOfB = tex_desc.Height;
+
+	tex_desc.MipLevels = 1;
+	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.SampleDesc.Count = 1;
+	tex_desc.SampleDesc.Quality = 0;
+	tex_desc.Usage = D3D11_USAGE_DEFAULT;
+	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
+	tex_desc.CPUAccessFlags = 0;
+	tex_desc.MiscFlags = 0;
+	device->CreateTexture2D(&tex_desc, nullptr, &mIntegralsBtex);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	device->CreateUnorderedAccessView(mIntegralsBtex, &uav_desc, &mIntegralsBuav);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	device->CreateShaderResourceView(mIntegralsBtex, &srv_desc, &mIntegralsBsrv);
 }
 
 void GraphicsCore::calculateIntegralsOfTextureA()
@@ -1927,6 +1951,7 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1)
 {
 	mTextureToIntegrate->SetResource(mTextureToIntegrateBsrv);
+	mIntegrals->SetUnorderedAccessView(mIntegralsBuav);
 
 	int r = RADIUS_OF_AREA_IN_TEXELS;
 	int x_corners[4] = { -r,+r,-r,+r };
@@ -1952,56 +1977,6 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 		y_bottom = std::min<int>(y_bottom, std::floor(y));
 		y_top = std::max<int>(y_top, std::ceil(y));
 	}
-
-	if (mIntegralsBtex)
-	{
-		mIntegralsBtex->Release();
-		mIntegralsBtex = nullptr;
-		
-		mIntegralsBuav->Release();
-		mIntegralsBuav = nullptr;
-
-		mIntegralsBsrv->Release();
-		mIntegralsBsrv = nullptr;
-	}
-
-	ID3D11Texture2D* tex;
-	mTextureToIntegrateBsrv->GetResource((ID3D11Resource * *)& tex);
-
-	D3D11_TEXTURE2D_DESC tex_desc;
-	tex->GetDesc(&tex_desc);
-
-	tex_desc.Width -= x_right - x_left;
-	tex_desc.Height -= y_top - y_bottom;
-	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	tex_desc.SampleDesc.Count = 1;
-	tex_desc.SampleDesc.Quality = 0;
-	tex_desc.Usage = D3D11_USAGE_DEFAULT;
-	tex_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS | D3D11_BIND_SHADER_RESOURCE;
-	tex_desc.CPUAccessFlags = 0;
-	tex_desc.MiscFlags = 0;
-	device->CreateTexture2D(&tex_desc, nullptr, &mIntegralsBtex);
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-	uav_desc.Texture2DArray.MipSlice = 0;
-	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
-	device->CreateUnorderedAccessView(mIntegralsBtex, &uav_desc, &mIntegralsBuav);
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	srv_desc.Texture2DArray.MostDetailedMip = 0;
-	srv_desc.Texture2DArray.MipLevels = 1;
-	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
-	device->CreateShaderResourceView(mIntegralsBtex, &srv_desc, &mIntegralsBsrv);
-
-	mIntegrals->SetUnorderedAccessView(mIntegralsBuav);
 
 	mXleft->SetRawValue(&x_left, 0, sizeof x_left);
 	mXright->SetRawValue(&x_right, 0, sizeof x_right);
