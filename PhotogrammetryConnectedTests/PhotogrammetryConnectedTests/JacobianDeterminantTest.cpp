@@ -11,16 +11,74 @@
 float function(float x0[], int nx, float y0[], int ny, float x, float y)
 {
 	float z = 1;
+	float f = 10.0f / M_PI;
 	for (int i = 0; i < nx; i++)
-		z += 0.25 * (1 + cos(5 * (x - x0[i]) / M_PI));
+		z += 0.25 * (1 + cos(f * (x - x0[i])));
 	for (int i = 0; i < ny; i++)
-		z += 0.25 * (1 + cos(5 * (y - y0[i]) / M_PI));
+		z += 0.25 * (1 + cos(f * (y - y0[i])));
 	return z /= nx + ny;
+}
+
+float functionIntegral(
+	float x0[], int nx, 
+	float y0[], int ny, 
+	float x, float hx,
+	float y, float hy,
+	float m00, float m01,
+	float m10, float m11
+	)
+{
+	float I = 0;
+	float f = 100.0f / M_PI;
+	for (int i = 0; i < nx; i++)
+	{
+		float I0 = 0;
+		I0 += hx * hy;
+		if (m00 != 0 && m10 != 0)
+		{
+			I0 += (-1.0f / (f * f * m00 * m10)) * cos(f * ((x + hx) * m00 + (y + hy) * m10 - x0[i]));
+			I0 += (1.0f / (f * f * m00 * m10)) * cos(f * ((x + hx) * m00 + y * m10 - x0[i]));
+			I0 += (1.0f / (f * f * m00 * m10)) * cos(f * (x * m00 + (y + hy) * m10 - x0[i]));
+			I0 += (-1.0f / (f * f * m00 * m10)) * cos(f * (x * m00 + y * m10 - x0[i]));
+		}
+		else if (m00 != 0)
+		{
+			I0 += (hy / (f * m00)) * (sin(f * ((x + hx) * m00 - x0[i])) - sin(f * (x * m00 - x0[i])));
+		}
+		else if (m10 != 0)
+		{
+			I0 += (hx / (f * m10)) * (sin(f * ((y + hy) * m10 - x0[i])) - sin(f * (y * m10 - x0[i])));
+		}
+		I += 0.25 * I0;
+	}
+	for (int i = 0; i < ny; i++)
+	{
+		float I0 = 0;
+		I0 += hx * hy;
+		if (m01 != 0 && m11 != 0)
+		{
+			I0 += (-1.0f / (f * f * m01 * m11)) * cos(f * ((x + hx) * m01 + (y + hy) * m11 - y0[i]));
+			I0 += (1.0f / (f * f * m01 * m11)) * cos(f * ((x + hx) * m01 + y * m11 - y0[i]));
+			I0 += (1.0f / (f * f * m01 * m11)) * cos(f * (x * m01 + (y + hy) * m11 - y0[i]));
+			I0 += (-1.0f / (f * f * m01 * m11)) * cos(f * (x * m01 + y * m11 - y0[i]));
+		}
+		else if (m01 != 0)
+		{
+			I0 += (hy / (f * m01)) * (sin(f * ((x + hx) * m01 - y0[i])) - sin(f * (x * m01 - y0[i])));
+		}
+		else if (m11 != 0)
+		{
+			I0 += (hx / (f * m11)) * (sin(f * ((y + hy) * m11 - y0[i])) - sin(f * (y * m11 - y0[i])));
+		}
+		I += 0.25 * I0;
+	}
+	I /= nx + ny;
+	return I;
 }
 
 void fillOutTexture(
 	float chanel[], 
-	int width, int height, int n,
+	int width, int height,
 	float m00, float m01,
 	float m10, float m11,
 	float x0[], int nx, float y0[], int ny
@@ -28,9 +86,6 @@ void fillOutTexture(
 {
 	float hx = 1.0f / width;
 	float hy = 1.0f / height;
-
-	float dx = hx / n;
-	float dy = hy / n;
 
 	// fill out cells
 	for (int i = 0; i < width; i++)
@@ -40,23 +95,15 @@ void fillOutTexture(
 			float x = i * hx;
 			float y = j * hy;
 
-			float I = 0;
-			// integrate within cell
-			for (int k = 0; k < n; k++)
-			{
-				for (int l = 0; l < n; l++)
-				{
-					float x_ = x + k * dx;
-					float y_ = y + l * dy;
-
-					float xOfFunctionSpace = x_ * m00 + y_ * m10;
-					float yOfFunctionSpace = x_ * m01 + y_ * m11;
-
-					float z = function(x0, nx, y0, ny, xOfFunctionSpace, yOfFunctionSpace);
-					I += z;
-				}
-			}
-			I /= n * n;
+			float I = functionIntegral(
+				x0, nx,
+				y0, ny,
+				x, hx,
+				y, hy,
+				m00, m01,
+				m10, m11
+			);
+			I /= hx * hy;
 			chanel[j * width + i] = I;
 		}
 	}
@@ -159,8 +206,8 @@ void JacobianDeterminantTest()
 	};
 	int ny0_b = sizeof(y0_b) / sizeof(*y0_b);
 
-	int width = 1280;
-	int height = 960;
+	int width = 1000;
+	int height = 1000;
 
 	float* textureAr = new float[width * height];
 	float* textureAg = new float[width * height];
@@ -170,11 +217,11 @@ void JacobianDeterminantTest()
 	float* textureBg = new float[width * height];
 	float* textureBb = new float[width * height];
 
-	float angle0 = 20 * M_PI / 180;
-	float scale0 = 0.8;
+	float angle0 = 30 * M_PI / 180;
+	float scale0 = 1;
 
-	float angle1 = -10 * M_PI / 180;
-	float scale1 = 1.2;
+	float angle1 = 30 * M_PI / 180;
+	float scale1 = 1;
 
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
@@ -183,25 +230,23 @@ void JacobianDeterminantTest()
 	float mInv00 = m11 / det; float mInv01 = -m01 / det;
 	float mInv10 = -m10 / det; float mInv11 = m00 / det;
 
-	int n = 10;
-
 	fillOutTexture(
 		textureAr,
-		width, height, n,
+		width, height,
 		1, 0,
 		0, 1,
 		x0_r, nx0_r, y0_r, ny0_r
 	);
 	fillOutTexture(
 		textureAg,
-		width, height, n,
+		width, height,
 		1, 0,
 		0, 1,
 		x0_g, nx0_g, y0_g, ny0_g
 	);
 	fillOutTexture(
 		textureAb,
-		width, height, n,
+		width, height,
 		1, 0,
 		0, 1,
 		x0_b, nx0_b, y0_b, ny0_b
@@ -209,40 +254,40 @@ void JacobianDeterminantTest()
 
 	fillOutTexture(
 		textureBr,
-		width, height, n,
-		m00, m01,
-		m10, m11,
+		width, height,
+		mInv00, mInv01,
+		mInv10, mInv11,
 		x0_r, nx0_r, y0_r, ny0_r
 	);
 	fillOutTexture(
 		textureBg,
-		width, height, n,
-		m00, m01,
-		m10, m11,
+		width, height,
+		mInv00, mInv01,
+		mInv10, mInv11,
 		x0_g, nx0_g, y0_g, ny0_g
 	);
 	fillOutTexture(
 		textureBb,
-		width, height, n,
-		m00, m01,
-		m10, m11,
+		width, height,
+		mInv00, mInv01,
+		mInv10, mInv11,
 		x0_b, nx0_b, y0_b, ny0_b
 	);
 
 	int r0 = 1;
 	int r1 = 100;
 
-	int xa = 400;
-	int ya = 480;
+	int xa = 500;
+	int ya = 500;
 
-	int xb = 500;
-	int yb = 480;
+	int xb = 600;
+	int yb = 500;
 
 	angle0 = 30 * M_PI / 180;
-	scale0 = 0.8;
+	scale0 = 1;
 
-	angle1 = -10 * M_PI / 180;
-	scale1 = 1.2;
+	angle1 = 40 * M_PI / 180;
+	scale1 = 1;
 
 	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
 	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
@@ -257,10 +302,10 @@ void JacobianDeterminantTest()
 	mInv01 *= (float)(height) / (float)(width);
 	mInv10 *= (float)(width) / (float)(height);
 
-	float x0 = 5;
+	float x0 = 1000;
 	float y0 = 0;
 	float x1 = 0;
-	float y1 = 5;
+	float y1 = 1000;
 
 	float x0_ = std::round(x0 * m00 + y0 * m10);
 	float y0_ = std::round(x0 * m01 + y0 * m11);
@@ -269,10 +314,10 @@ void JacobianDeterminantTest()
 	float y1_ = std::round(x1 * m01 + y1 * m11);
 
 	angle0 = std::atan2(y0_, x0_);
-	scale0 = std::sqrt(x0_ * x0_ + y0_ * y0_) / 5;
+	scale0 = std::sqrt(x0_ * x0_ + y0_ * y0_) / 1000;
 
 	angle1 = -std::atan2(x1_, y1_);
-	scale1 = std::sqrt(x1_ * x1_ + y1_ * y1_) / 5;
+	scale1 = std::sqrt(x1_ * x1_ + y1_ * y1_) / 1000;
 
 	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
 	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
@@ -317,28 +362,28 @@ void JacobianDeterminantTest()
 		IB[3 * i + 0] = calculateIntegral(
 			textureBr,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
+			mInv00, mInv01,
+			mInv10, mInv11,
 			xb, yb, r
 		);
 		IB[3 * i + 1] = calculateIntegral(
 			textureBg,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
+			mInv00, mInv01,
+			mInv10, mInv11,
 			xb, yb, r
 		);
 		IB[3 * i + 2] = calculateIntegral(
 			textureBb,
 			width, height,
-			mInv00, mInv01,
-			mInv10, mInv11,
 			m00, m01,
 			m10, m11,
+			mInv00, mInv01,
+			mInv10, mInv11,
 			xb, yb, r
 		);
 	}
