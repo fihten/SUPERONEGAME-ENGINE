@@ -57,8 +57,14 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 				continue;
 			xy += xy0;
 
-			xy.x -= x_left;
-			xy.y -= y_bottom;
+			if (xy.x < 0)
+				continue;
+			if (xy.x > width - 1)
+				continue;
+			if (xy.y < 0)
+				continue;
+			if (xy.y > height - 1)
+				continue;
 
 			integral += tex[xy];
 		}
