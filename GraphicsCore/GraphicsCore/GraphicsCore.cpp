@@ -1937,8 +1937,8 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) / 16.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfA) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
 	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -1992,8 +1992,8 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 
 	mCalculationOfTextureIntegralsTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)(widthOfB - x_right + x_left) / 16.0f);
-	uint32_t groups_y = std::ceil((float)(heightOfB - y_top + y_bottom) / 16.0f);
+	uint32_t groups_x = std::ceil((float)(widthOfB) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
 	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -2156,41 +2156,15 @@ void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
 
-	int groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
-	
-	int r = RADIUS_OF_AREA_IN_TEXELS;
-	int x_corners[4] = { -r,+r,-r,+r };
-	int y_corners[4] = { -r,-r,+r,+r };
-
-	int x_left = INT_MAX;
-	int x_right = -INT_MAX;
-
-	int y_bottom = INT_MAX;
-	int y_top = -INT_MAX;
-
-	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
-	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
-
-	for (int i = 0; i < 4; i++)
-	{
-		float x = x_corners[i] * m00 + y_corners[i] * m10;
-		float y = x_corners[i] * m01 + y_corners[i] * m11;
-
-		x_left = std::min<int>(x_left, std::floor(x));
-		x_right = std::max<int>(x_right, std::ceil(x));
-
-		y_bottom = std::min<int>(y_bottom, std::floor(y));
-		y_top = std::max<int>(y_top, std::ceil(y));
-	}
-	
-	int groups_y = std::ceil((float)((widthOfB - x_right + x_left) * (heightOfB - y_top + y_bottom)) / 32.0f);
+	int groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
+	int groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
 	int groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
 
-	groups_x = std::ceil((float)((widthOfA - 2 * RADIUS_OF_AREA_IN_TEXELS) * (heightOfA - 2 * RADIUS_OF_AREA_IN_TEXELS)) / 32.0f);
-	groups_y = std::ceil((float)((float)((widthOfB - x_right + x_left) * (heightOfB - y_top + y_bottom)) / 32.0f));
+	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
+	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
 	groups_z = 1;
 	context->Dispatch(groups_x, groups_y, groups_z);
 

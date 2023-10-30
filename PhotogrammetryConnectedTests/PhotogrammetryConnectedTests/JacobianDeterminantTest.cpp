@@ -404,6 +404,82 @@ void JacobianDeterminantTest()
 		fileOfY << IB[3 * i + 0] << std::endl << IB[3 * i + 1] << std::endl << IB[3 * i + 2] << std::endl;
 	}
 
+	float xa_tmp = xa * m00 + ya * m10;
+	float ya_tmp = xa * m01 + ya * m11;
+
+	float xb_tmp = xb * m00 + yb * m10;
+	float yb_tmp = xb * m01 + yb * m11;
+
+	xa = xa_tmp; ya = ya_tmp;
+	xb = xb_tmp; yb = yb_tmp;
+
+	for (int r = r0; r <= r1; r++)
+	{
+		int i = r - r0;
+		IA[3 * i + 0] = calculateIntegral(
+			textureAr,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			xa, ya, r
+		);
+		IA[3 * i + 1] = calculateIntegral(
+			textureAg,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			xa, ya, r
+		);
+		IA[3 * i + 2] = calculateIntegral(
+			textureAb,
+			width, height,
+			mInv00, mInv01,
+			mInv10, mInv11,
+			m00, m01,
+			m10, m11,
+			xa, ya, r
+		);
+
+		IB[3 * i + 0] = calculateIntegral(
+			textureBr,
+			width, height,
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xb, yb, r
+		);
+		IB[3 * i + 1] = calculateIntegral(
+			textureBg,
+			width, height,
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xb, yb, r
+		);
+		IB[3 * i + 2] = calculateIntegral(
+			textureBb,
+			width, height,
+			1, 0,
+			0, 1,
+			1, 0,
+			0, 1,
+			xb, yb, r
+		);
+	}
+	
+	for (int r = r0; r <= r1; r++)
+	{
+		int i = r - r0;
+		fileOfX << IA[3 * i + 0] << std::endl << IA[3 * i + 1] << std::endl << IA[3 * i + 2] << std::endl;
+		fileOfY << IB[3 * i + 0] << std::endl << IB[3 * i + 1] << std::endl << IB[3 * i + 2] << std::endl;
+	}
+
 	delete[]IA;
 	delete[]IB;
 
