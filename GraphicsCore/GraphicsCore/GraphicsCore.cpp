@@ -2145,6 +2145,7 @@ void GraphicsCore::defineTheSamePoints()
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	int elapsed_positions = 0;
+	int elapsed_percent = 0;
 	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
 	{
 		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
@@ -2156,7 +2157,14 @@ void GraphicsCore::defineTheSamePoints()
 					if (defineTheSamePoints(axis0_x, axis0_y, axis1_x, axis1_y))
 					{
 						elapsed_positions++;
-						OutputDebugStringA(std::to_string(elapsed_positions).c_str());
+						float percent = (float)(elapsed_positions * 100) / (float)(positions_number);
+						if (elapsed_percent != std::floor(percent))
+						{
+							elapsed_percent = std::floor(percent);
+							char buffer[256];
+							sprintf(buffer, "%d % \n", elapsed_percent);
+							OutputDebugStringA(buffer);
+						}
 					}
 				}
 			}

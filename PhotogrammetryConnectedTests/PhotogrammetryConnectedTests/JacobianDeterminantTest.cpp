@@ -154,16 +154,19 @@ float calculateIntegral(
 	{
 		for (int j = yb; j <= yt; j++)
 		{
-			float x = i * mInv00 + j * mInv10;
-			float y = i * mInv01 + j * mInv11;
+			float x_ = i * mInv00 + j * mInv10;
+			float y_ = i * mInv01 + j * mInv11;
 
-			if (x < x_corners[0])
+/*			if (x < x_corners[0])
 				continue;
 			if (x > x_corners[1])
 				continue;
 			if (y < y_corners[0])
 				continue;
 			if (y > y_corners[2])
+				continue;*/
+			float distSqr = (x - x_) * (x - x_) + (y - y_) * (y - y_);
+			if (distSqr > radius * radius)
 				continue;
 
 			float z = chanel[j * width + i];
@@ -218,10 +221,10 @@ void JacobianDeterminantTest()
 	float* textureBb = new float[width * height];
 
 	float angle0 = 30 * M_PI / 180;
-	float scale0 = 1;
+	float scale0 = 1.2;
 
-	float angle1 = 30 * M_PI / 180;
-	float scale1 = 1;
+	float angle1 = 40 * M_PI / 180;
+	float scale1 = 0.8;
 
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
@@ -275,7 +278,7 @@ void JacobianDeterminantTest()
 	);
 
 	int r0 = 1;
-	int r1 = 100;
+	int r1 = 10;
 
 	int xa = 500;
 	int ya = 500;
@@ -283,11 +286,11 @@ void JacobianDeterminantTest()
 	int xb = 600;
 	int yb = 500;
 
-	angle0 = 30 * M_PI / 180;
-	scale0 = 1;
+	angle0 = 50 * M_PI / 180;
+	scale0 = 1.2;
 
 	angle1 = 40 * M_PI / 180;
-	scale1 = 1;
+	scale1 = 0.8;
 
 	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
 	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
@@ -302,10 +305,10 @@ void JacobianDeterminantTest()
 	mInv01 *= (float)(height) / (float)(width);
 	mInv10 *= (float)(width) / (float)(height);
 
-	float x0 = 1000;
+	float x0 = 10;
 	float y0 = 0;
 	float x1 = 0;
-	float y1 = 1000;
+	float y1 = 10;
 
 	float x0_ = std::round(x0 * m00 + y0 * m10);
 	float y0_ = std::round(x0 * m01 + y0 * m11);
@@ -314,10 +317,10 @@ void JacobianDeterminantTest()
 	float y1_ = std::round(x1 * m01 + y1 * m11);
 
 	angle0 = std::atan2(y0_, x0_);
-	scale0 = std::sqrt(x0_ * x0_ + y0_ * y0_) / 1000;
+	scale0 = std::sqrt(x0_ * x0_ + y0_ * y0_) / 10;
 
 	angle1 = -std::atan2(x1_, y1_);
-	scale1 = std::sqrt(x1_ * x1_ + y1_ * y1_) / 1000;
+	scale1 = std::sqrt(x1_ * x1_ + y1_ * y1_) / 10;
 
 	m00 = scale0 * cos(angle0); m01 = scale0 * sin(angle0);
 	m10 = -scale1 * sin(angle1); m11 = scale1 * cos(angle1);
@@ -476,8 +479,8 @@ void JacobianDeterminantTest()
 	for (int r = r0; r <= r1; r++)
 	{
 		int i = r - r0;
-		fileOfX << IA[3 * i + 0] << std::endl << IA[3 * i + 1] << std::endl << IA[3 * i + 2] << std::endl;
-		fileOfY << IB[3 * i + 0] << std::endl << IB[3 * i + 1] << std::endl << IB[3 * i + 2] << std::endl;
+//		fileOfX << IA[3 * i + 0] << std::endl << IA[3 * i + 1] << std::endl << IA[3 * i + 2] << std::endl;
+//		fileOfY << IB[3 * i + 0] << std::endl << IB[3 * i + 1] << std::endl << IB[3 * i + 2] << std::endl;
 	}
 
 	delete[]IA;
