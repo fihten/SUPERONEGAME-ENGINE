@@ -64,8 +64,6 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (posInB.y > heightB - 1)
 		return;
 
-	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
-	
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
 	float yy = 0;
@@ -109,7 +107,7 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint err = 1000000 * ferr;
 
-	InterlockedMin(error[posInMap].r, err);
+	InterlockedMin(error[posInA].r, err);
 }
 
 [numthreads(32, 32, 1)]
@@ -178,17 +176,11 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	ferr = sqrt(ferr);
 
 	uint err = 1000000 * ferr;
-	int2 posInMap = { posInA.x + integralsNumber,posInA.y + integralsNumber };
-	if (err == error[posInMap].r)
+	if (err == error[posInA].r)
 	{
 		uint original_value;
-		uint offsetX = (widthA + 2 * integralsNumber - widthB) / 2;
-		uint offsetY = (heightA + 2 * integralsNumber - heightB) / 2;
-		uint x = posInB.x + offsetX;
-		uint y = posInB.y + offsetY;
-		uint width = widthA + 2 * integralsNumber;
-		uint new_value = y * width + x;
-		InterlockedExchange(mapAtoB[posInMap].r, new_value, original_value);
+		uint new_value = posInB.y * widthB + posInB.x;
+		InterlockedExchange(mapAtoB[posInA].r, new_value, original_value);
 	}
 }
 

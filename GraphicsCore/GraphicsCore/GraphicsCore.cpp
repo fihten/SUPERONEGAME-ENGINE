@@ -8,6 +8,7 @@
 #include <sstream>
 #include <D3DX11tex.h>
 #include <fstream>
+#include <Windows.h>
 
 GraphicsCore* GraphicsCore::pGraphicsCore = nullptr;
 
@@ -2080,6 +2081,40 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 
 	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
 	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
+
+	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
+	{
+		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
+		{
+			for (int axis1_x = -2 * discrete_radius; axis1_x <= 2 * discrete_radius; axis1_x++)
+			{
+				for (int axis1_y = -2 * discrete_radius; axis1_y <= 2 * discrete_radius; axis1_y++)
+				{
+					float angle0 = atan2(axis0_y, axis0_x);
+					if (abs(angle0) > maxAngle * M_PI / 180)
+						continue;
+
+					float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / discrete_radius;
+					if (scale0 < minScale)
+						continue;
+					if (scale0 > maxScale)
+						continue;
+
+					float angle1 = -atan2(axis1_x, axis1_y);
+					if (abs(angle1 - angle0) > maxAngle * M_PI / 180)
+						continue;
+
+					float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / discrete_radius;
+					if (scale1 < minScale)
+						continue;
+					if (scale1 > maxScale)
+						continue;
+
+					positions_number++;
+				}
+			}
+		}
+	}
 }
 
 void GraphicsCore::defineTheSamePoints()
@@ -2109,42 +2144,47 @@ void GraphicsCore::defineTheSamePoints()
 
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
-	for (int axis0_x = 0; axis0_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_x++)
+	int elapsed_positions = 0;
+	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
 	{
-		for (int axis0_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis0_y++)
+		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
 		{
-			for (int axis1_x = -2 * RADIUS_OF_AREA_IN_TEXELS; axis1_x <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis1_x++)
+			for (int axis1_x = -2 * discrete_radius; axis1_x <= 2 * discrete_radius; axis1_x++)
 			{
-				for (int axis1_y = -2 * RADIUS_OF_AREA_IN_TEXELS; axis1_y <= 2 * RADIUS_OF_AREA_IN_TEXELS; axis1_y++)
+				for (int axis1_y = -2 * discrete_radius; axis1_y <= 2 * discrete_radius; axis1_y++)
 				{
-					defineTheSamePoints(axis0_x, axis0_y, axis1_x, axis1_y);
+					if (defineTheSamePoints(axis0_x, axis0_y, axis1_x, axis1_y))
+					{
+						elapsed_positions++;
+						OutputDebugStringA(std::to_string(elapsed_positions).c_str());
+					}
 				}
 			}
 		}
 	}
 }
 
-void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y)
+bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y)
 {
 	float angle0 = atan2(axis0_y, axis0_x);
 	if (abs(angle0) > maxAngle * M_PI / 180)
-		return;
+		return false;
 
-	float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / RADIUS_OF_AREA_IN_TEXELS;
+	float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / discrete_radius;
 	if (scale0 < minScale)
-		return;
+		return false;
 	if (scale0 > maxScale)
-		return;
+		return false;
 
 	float angle1 = -atan2(axis1_x, axis1_y);
 	if (abs(angle1 - angle0) > maxAngle * M_PI / 180)
-		return;
+		return false;
 	
-	float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / RADIUS_OF_AREA_IN_TEXELS;
+	float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / discrete_radius;
 	if (scale1 < minScale)
-		return;
+		return false;
 	if (scale1 > maxScale)
-		return;
+		return false;
 
 	calculateIntegralsOfTextureB(angle0, scale0, angle1, scale1);
 
@@ -2175,6 +2215,8 @@ void GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
+
+	return true;
 }
 
 flt2 GraphicsCore::mapAtoB(flt2& uvA)

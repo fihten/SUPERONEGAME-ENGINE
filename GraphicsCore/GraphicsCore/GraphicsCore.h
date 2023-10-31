@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define RADIUS_OF_AREA_IN_TEXELS 10
+#define RADIUS_OF_AREA_IN_TEXELS 5
 
 class GraphicsCore;
 
@@ -267,7 +267,7 @@ private:
 
 public:
 	void defineTheSamePoints();
-	void defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
+	bool defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
 	flt2 mapAtoB(flt2& uvA);
 
 private:
@@ -291,6 +291,8 @@ private:
 	float maxAngle = 60.0f;
 	float minScale = 0.5f;
 	float maxScale = 1.5f;
+	int positions_number = 0;
+	int discrete_radius = 10;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
