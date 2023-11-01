@@ -2207,7 +2207,13 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-	
+	for (int x = 0; x < widthOfA; x += domainSizeInA.x())
+	{
+		for (int y = 0; y < heightOfA; y += domainSizeInA.y())
+		{
+
+		}
+	}
 
 	ID3D11ShaderResourceView* nullSRVs[] = { nullptr,nullptr };
 	context->CSSetShaderResources(0, 2, nullSRVs);
@@ -2221,8 +2227,8 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 }
 
 void GraphicsCore::defineTheSamePoints(
-	const Vec2d<int>& originInA, const Vec2d<int>& domainSizeInA,
-	const Vec2d<int>& originInB, const Vec2d<int>& domainSizeInB
+	Vec2d<int>& originInA, Vec2d<int>& domainSizeInA,
+	Vec2d<int>& originInB, Vec2d<int>& domainSizeInB
 )
 {
 	mOriginInA->SetRawValue(&originInA, 0, sizeof originInA);
@@ -2233,8 +2239,8 @@ void GraphicsCore::defineTheSamePoints(
 
 	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
 
-	int wXhA = domainSizeInA.x * domainSizeInA.y;
-	int wXhB = domainSizeInB.x * domainSizeInB.y;
+	int wXhA = domainSizeInA.x() * domainSizeInA.y();
+	int wXhB = domainSizeInB.x() * domainSizeInB.y();
 
 	int groups_x = std::ceil((float)(wXhA) / 32.0f);
 	int groups_y = std::ceil((float)(wXhB) / 32.0f);

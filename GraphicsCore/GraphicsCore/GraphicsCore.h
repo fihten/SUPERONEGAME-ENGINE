@@ -269,8 +269,8 @@ public:
 	void defineTheSamePoints();
 	bool defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
 	void defineTheSamePoints(
-		const Vec2d<int>& originInA, const Vec2d<int>& domainSizeInA,
-		const Vec2d<int>& originInB, const Vec2d<int>& domainSizeInB
+		Vec2d<int>& originInA, Vec2d<int>& domainSizeInA,
+		Vec2d<int>& originInB, Vec2d<int>& domainSizeInB
 	);
 	flt2 mapAtoB(flt2& uvA);
 
@@ -302,6 +302,9 @@ private:
 	float maxScale = 1.5f;
 	int positions_number = 0;
 	int discrete_radius = 10;
+	
+	Vec2d<int> domainSizeInA = Vec2d<int>(64, 64);
+	Vec2d<int> domainSizeInB = Vec2d<int>(64, 64);
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
