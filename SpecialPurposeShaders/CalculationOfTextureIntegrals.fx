@@ -47,14 +47,9 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 		{
 			int2 xy = int2(x, y);
 			float2 xy_ = mul(xy, mInv);
-			if (xy_.x < -radius)
+			if (length(xy_) > radius)
 				continue;
-			if (xy_.x > radius)
-				continue;
-			if (xy_.y < -radius)
-				continue;
-			if (xy_.y > radius)
-				continue;
+
 			xy += xy0;
 
 			if (xy.x < 0)
