@@ -278,7 +278,7 @@ void JacobianDeterminantTest()
 	);
 
 	int r0 = 1;
-	int r1 = 10;
+	int r1 = 100;
 
 	int xa = 500;
 	int ya = 500;
@@ -286,7 +286,7 @@ void JacobianDeterminantTest()
 	int xb = 600;
 	int yb = 500;
 
-	angle0 = 50 * M_PI / 180;
+	angle0 = 5 * M_PI / 180;
 	scale0 = 1.2;
 
 	angle1 = 40 * M_PI / 180;

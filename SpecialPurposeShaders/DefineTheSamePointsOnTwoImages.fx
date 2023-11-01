@@ -1,7 +1,12 @@
 #include "constants.hlsl"
 
 Texture2DArray<float4> integralsOfA;
+int2 originInA;
+int2 domainSizeInA;
+
 Texture2DArray<float4> integralsOfB;
+int2 originInB;
+int2 domainSizeInB;
 
 RWTexture2D<uint> mapAtoB;
 RWTexture2D<uint> error;
@@ -50,9 +55,10 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mipsA = 0;
 	integralsOfA.GetDimensions(mipA, widthA, heightA, integralsNumber, mipsA);
 
-	int2 posInA = int2(dispatchThreadID.x % widthA, dispatchThreadID.x / widthA);
-	if (posInA.y > heightA - 1)
+	int2 posInA = int2(dispatchThreadID.x % domainSizeInA.x, dispatchThreadID.x / domainSizeInA.x);
+	if (posInA.y > domainSizeInA.y - 1)
 		return;
+	posInA += originInA;
 
 	uint mipB = 0;
 	uint widthB = 0;
@@ -60,9 +66,10 @@ void CS_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mipsB = 0;
 	integralsOfB.GetDimensions(mipB, widthB, heightB, integralsNumber, mipsB);
 
-	int2 posInB = int2(dispatchThreadID.y % widthB, dispatchThreadID.y / widthB);
-	if (posInB.y > heightB - 1)
+	int2 posInB = int2(dispatchThreadID.y % domainSizeInB.x, dispatchThreadID.y / domainSizeInB.x);
+	if (posInB.y > domainSizeInB.y - 1)
 		return;
+	posInB += originInB;
 
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
@@ -120,9 +127,10 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mipsA = 0;
 	integralsOfA.GetDimensions(mipA, widthA, heightA, integralsNumber, mipsA);
 
-	int2 posInA = int2(dispatchThreadID.x % widthA, dispatchThreadID.x / widthA);
-	if (posInA.y > heightA - 1)
+	int2 posInA = int2(dispatchThreadID.x % domainSizeInA.x, dispatchThreadID.x / domainSizeInA.x);
+	if (posInA.y > domainSizeInA.y - 1)
 		return;
+	posInA += originInA;
 
 	uint mipB = 0;
 	uint widthB = 0;
@@ -130,9 +138,10 @@ void CS_map_A_onto_B(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint mipsB = 0;
 	integralsOfB.GetDimensions(mipB, widthB, heightB, integralsNumber, mipsB);
 
-	int2 posInB = int2(dispatchThreadID.y % widthB, dispatchThreadID.y / widthB);
-	if (posInB.y > heightB - 1)
+	int2 posInB = int2(dispatchThreadID.y % domainSizeInB.x, dispatchThreadID.y / domainSizeInB.x);
+	if (posInB.y > domainSizeInB.y - 1)
 		return;
+	posInB += originInB;
 
 	float l00 = 0; float l01 = 0; float r0 = 0;
 	float l10 = 0; float l11 = 0; float r1 = 0;
