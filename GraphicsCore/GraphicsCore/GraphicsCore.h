@@ -268,6 +268,10 @@ private:
 public:
 	void defineTheSamePoints();
 	bool defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
+	void defineTheSamePoints(
+		const Vec2d<int>& originInA, const Vec2d<int>& domainSizeInA,
+		const Vec2d<int>& originInB, const Vec2d<int>& domainSizeInB
+	);
 	flt2 mapAtoB(flt2& uvA);
 
 private:
@@ -276,7 +280,12 @@ private:
 	ID3DX11EffectTechnique* mDefineTheSamePointsOnTwoImagesTech = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mIntegralsOfA = nullptr;
+	ID3DX11EffectVariable* mOriginInA = nullptr;
+	ID3DX11EffectVariable* mDomainSizeInA = nullptr;
+
 	ID3DX11EffectShaderResourceVariable* mIntegralsOfB = nullptr;
+	ID3DX11EffectVariable* mOriginInB = nullptr;
+	ID3DX11EffectVariable* mDomainSizeInB = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* mMapAtoB = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mErrorOfTheSamePointsDefinition = nullptr;

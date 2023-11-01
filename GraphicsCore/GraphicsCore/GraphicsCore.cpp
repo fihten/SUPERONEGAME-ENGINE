@@ -2077,7 +2077,12 @@ void GraphicsCore::initDefinitionOfTheSamePoints()
 	mDefineTheSamePointsOnTwoImagesTech = mDefinitionOfTheSamePointsFX->GetTechniqueByName("DefineTheSamePointsOnTwoImages");
 
 	mIntegralsOfA = mDefinitionOfTheSamePointsFX->GetVariableByName("integralsOfA")->AsShaderResource();
+	mOriginInA = mDefinitionOfTheSamePointsFX->GetVariableByName("originInA");
+	mDomainSizeInA = mDefinitionOfTheSamePointsFX->GetVariableByName("domainSizeInA");
+	
 	mIntegralsOfB = mDefinitionOfTheSamePointsFX->GetVariableByName("integralsOfB")->AsShaderResource();
+	mOriginInB = mDefinitionOfTheSamePointsFX->GetVariableByName("originInB");
+	mDomainSizeInB = mDefinitionOfTheSamePointsFX->GetVariableByName("domainSizeInB");
 
 	mMapAtoB = mDefinitionOfTheSamePointsFX->GetVariableByName("mapAtoB")->AsUnorderedAccessView();
 	mErrorOfTheSamePointsDefinition = mDefinitionOfTheSamePointsFX->GetVariableByName("error")->AsUnorderedAccessView();
@@ -2202,19 +2207,7 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
-
-	int groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
-	int groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
-	int groups_z = 1;
-	context->Dispatch(groups_x, groups_y, groups_z);
-
-	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
-
-	groups_x = std::ceil((float)(widthOfA * heightOfA) / 32.0f);
-	groups_y = std::ceil((float)(widthOfB * heightOfB) / 32.0f);
-	groups_z = 1;
-	context->Dispatch(groups_x, groups_y, groups_z);
+	
 
 	ID3D11ShaderResourceView* nullSRVs[] = { nullptr,nullptr };
 	context->CSSetShaderResources(0, 2, nullSRVs);
@@ -2225,6 +2218,35 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	context->CSSetShader(0, 0, 0);
 
 	return true;
+}
+
+void GraphicsCore::defineTheSamePoints(
+	const Vec2d<int>& originInA, const Vec2d<int>& domainSizeInA,
+	const Vec2d<int>& originInB, const Vec2d<int>& domainSizeInB
+)
+{
+	mOriginInA->SetRawValue(&originInA, 0, sizeof originInA);
+	mDomainSizeInA->SetRawValue(&domainSizeInA, 0, sizeof domainSizeInA);
+
+	mOriginInB->SetRawValue(&originInB, 0, sizeof originInB);
+	mDomainSizeInB->SetRawValue(&domainSizeInB, 0, sizeof domainSizeInB);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("CalculateError")->Apply(0, context);
+
+	int wXhA = domainSizeInA.x * domainSizeInA.y;
+	int wXhB = domainSizeInB.x * domainSizeInB.y;
+
+	int groups_x = std::ceil((float)(wXhA) / 32.0f);
+	int groups_y = std::ceil((float)(wXhB) / 32.0f);
+	int groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	mDefineTheSamePointsOnTwoImagesTech->GetPassByName("MapAontoB")->Apply(0, context);
+
+	groups_x = std::ceil((float)(wXhA) / 32.0f);
+	groups_y = std::ceil((float)(wXhB) / 32.0f);
+	groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
 }
 
 flt2 GraphicsCore::mapAtoB(flt2& uvA)
