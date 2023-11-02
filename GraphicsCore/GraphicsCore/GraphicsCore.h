@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define RADIUS_OF_AREA_IN_TEXELS 50
+#define INTEGRALS 20
 
 class GraphicsCore;
 
@@ -235,6 +235,9 @@ private:
 	ID3DX11EffectShaderResourceVariable* mTextureToIntegrate = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mIntegrals = nullptr;
 
+	ID3DX11EffectVariable* mRadius0 = nullptr;
+	ID3DX11EffectVariable* mRadius1 = nullptr;
+
 	ID3DX11EffectVariable* mXleft = nullptr;
 	ID3DX11EffectVariable* mXright = nullptr;
 
@@ -264,6 +267,9 @@ private:
 
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
+
+	int radius0 = 20;
+	int radius1 = radius0 + INTEGRALS - 1;
 
 public:
 	void defineTheSamePoints();

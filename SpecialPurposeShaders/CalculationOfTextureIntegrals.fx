@@ -1,6 +1,9 @@
 Texture2D<float4> tex;
 RWTexture2DArray<float4> integrals;
 
+int radius0;
+int radius1;
+
 int x_left;
 int x_right;
 int y_bottom;
@@ -26,7 +29,9 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	mInv /= det;
 
 	int2 xy0 = dispatchThreadID.xy;
-	int radius = dispatchThreadID.z + 1;
+	int radius = radius0 + dispatchThreadID.z;
+	if (radius > radius1)
+		return;
 
 	int width = 0;
 	int height = 0;
@@ -65,7 +70,7 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 		}
 	}
 
-	integrals[uint3(xy0, radius - 1)] = integral;
+	integrals[uint3(xy0, radius - radius0)] = integral;
 }
 
 technique11 CalculationOfTextureIntegrals

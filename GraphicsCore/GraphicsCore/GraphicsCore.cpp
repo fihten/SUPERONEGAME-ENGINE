@@ -1760,6 +1760,9 @@ void GraphicsCore::initCalculationOfTextureIntegrals()
 	mTextureToIntegrate = mCalculationOfTextureIntegralsFX->GetVariableByName("tex")->AsShaderResource();
 	mIntegrals = mCalculationOfTextureIntegralsFX->GetVariableByName("integrals")->AsUnorderedAccessView();
 
+	mRadius0 = mCalculationOfTextureIntegralsFX->GetVariableByName("radius0");
+	mRadius1 = mCalculationOfTextureIntegralsFX->GetVariableByName("radius1");
+
 	mXleft = mCalculationOfTextureIntegralsFX->GetVariableByName("x_left");
 	mXright = mCalculationOfTextureIntegralsFX->GetVariableByName("x_right");
 
@@ -1795,7 +1798,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	heightOfA = tex_desc.Height;
 
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.ArraySize = INTEGRALS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
@@ -1810,7 +1813,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	uav_desc.Texture2DArray.ArraySize = INTEGRALS;
 	device->CreateUnorderedAccessView(mIntegralsAtex, &uav_desc, &mIntegralsAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
@@ -1819,7 +1822,7 @@ void GraphicsCore::openTextureA(const std::string& path)
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	srv_desc.Texture2DArray.ArraySize = INTEGRALS;
 	device->CreateShaderResourceView(mIntegralsAtex, &srv_desc, &mIntegralsAsrv);
 
 	tex_desc.MipLevels = 1;
@@ -1888,7 +1891,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	heightOfB = tex_desc.Height;
 
 	tex_desc.MipLevels = 1;
-	tex_desc.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	tex_desc.ArraySize = INTEGRALS;
 	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.SampleDesc.Count = 1;
 	tex_desc.SampleDesc.Quality = 0;
@@ -1903,7 +1906,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	uav_desc.Texture2DArray.ArraySize = INTEGRALS;
 	device->CreateUnorderedAccessView(mIntegralsBtex, &uav_desc, &mIntegralsBuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
@@ -1912,7 +1915,7 @@ void GraphicsCore::openTextureB(const std::string& path)
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = RADIUS_OF_AREA_IN_TEXELS;
+	srv_desc.Texture2DArray.ArraySize = INTEGRALS;
 	device->CreateShaderResourceView(mIntegralsBtex, &srv_desc, &mIntegralsBsrv);
 }
 
@@ -1921,11 +1924,14 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 	mTextureToIntegrate->SetResource(mTextureToIntegrateAsrv);
 	mIntegrals->SetUnorderedAccessView(mIntegralsAuav);
 
-	int radius = -RADIUS_OF_AREA_IN_TEXELS;
+	mRadius0->SetRawValue(&radius0, 0, sizeof radius0);
+	mRadius1->SetRawValue(&radius1, 0, sizeof radius1);
+
+	int radius = -radius1;
 	mXleft->SetRawValue(&radius, 0, sizeof radius);
 	mYbottom->SetRawValue(&radius, 0, sizeof radius);
 
-	radius = RADIUS_OF_AREA_IN_TEXELS;
+	radius = radius1;
 	mXright->SetRawValue(&radius, 0, sizeof radius);
 	mYtop->SetRawValue(&radius, 0, sizeof radius);
 
@@ -1940,7 +1946,7 @@ void GraphicsCore::calculateIntegralsOfTextureA()
 
 	uint32_t groups_x = std::ceil((float)(widthOfA) / 16.0f);
 	uint32_t groups_y = std::ceil((float)(heightOfA) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
+	uint32_t groups_z = std::ceil((float)(INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -1954,7 +1960,10 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 	mTextureToIntegrate->SetResource(mTextureToIntegrateBsrv);
 	mIntegrals->SetUnorderedAccessView(mIntegralsBuav);
 
-	int r = RADIUS_OF_AREA_IN_TEXELS;
+	mRadius0->SetRawValue(&radius0, 0, sizeof radius0);
+	mRadius1->SetRawValue(&radius1, 0, sizeof radius1);
+
+	int r = radius1;
 	int x_corners[4] = { -r,+r,-r,+r };
 	int y_corners[4] = { -r,-r,+r,+r };
 	
@@ -1995,7 +2004,7 @@ void GraphicsCore::calculateIntegralsOfTextureB(float angle0, float scale0, floa
 
 	uint32_t groups_x = std::ceil((float)(widthOfB) / 16.0f);
 	uint32_t groups_y = std::ceil((float)(heightOfB) / 16.0f);
-	uint32_t groups_z = std::ceil((float)(RADIUS_OF_AREA_IN_TEXELS) / 4.0f);
+	uint32_t groups_z = std::ceil((float)(INTEGRALS) / 4.0f);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
 	ID3D11UnorderedAccessView* nullUAV = nullptr;
@@ -2200,9 +2209,9 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 		return false;
 
 	calculateIntegralsOfTextureB(angle0, scale0, angle1, scale1);
-	for (int x = 0; x < widthOfA; x += domainSizeInA.x())
+//	for (int x = 0; x < widthOfA; x += domainSizeInA.x())
 	{
-		for (int y = 0; y < heightOfA; y += domainSizeInA.y())
+//		for (int y = 0; y < heightOfA; y += domainSizeInA.y())
 		{
 			mIntegralsOfA->SetResource(mIntegralsAsrv);
 			mIntegralsOfB->SetResource(mIntegralsBsrv);
@@ -2210,16 +2219,16 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 			mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 			mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-			Vec2d<int> originInA(x, y);
-			Vec2d<int> originInB(x, y);
+			Vec2d<int> originInA(1166, 1372);
+			Vec2d<int> originInB(1370, 1297);
 
-			Vec2d<int> domainSizeInA;
-			domainSizeInA.x() = std::min<int>(widthOfA - x, this->domainSizeInA.x());
-			domainSizeInA.y() = std::min<int>(heightOfA - y, this->domainSizeInA.y());
+//			Vec2d<int> domainSizeInA;
+//			domainSizeInA.x() = std::min<int>(widthOfA - x, this->domainSizeInA.x());
+//			domainSizeInA.y() = std::min<int>(heightOfA - y, this->domainSizeInA.y());
 
-			Vec2d<int> domainSizeInB;
-			domainSizeInB.x() = std::min<int>(widthOfB - x, this->domainSizeInB.x());
-			domainSizeInB.y() = std::min<int>(heightOfB - y, this->domainSizeInB.y());
+//			Vec2d<int> domainSizeInB;
+//			domainSizeInB.x() = std::min<int>(widthOfB - x, this->domainSizeInB.x());
+//			domainSizeInB.y() = std::min<int>(heightOfB - y, this->domainSizeInB.y());
 
 			defineTheSamePoints(originInA, domainSizeInA, originInB, domainSizeInB);
 
