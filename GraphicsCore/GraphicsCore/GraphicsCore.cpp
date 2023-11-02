@@ -2200,17 +2200,16 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 		return false;
 
 	calculateIntegralsOfTextureB(angle0, scale0, angle1, scale1);
-
-	mIntegralsOfA->SetResource(mIntegralsAsrv);
-	mIntegralsOfB->SetResource(mIntegralsBsrv);
-
-	mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
-	mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
-
 	for (int x = 0; x < widthOfA; x += domainSizeInA.x())
 	{
 		for (int y = 0; y < heightOfA; y += domainSizeInA.y())
 		{
+			mIntegralsOfA->SetResource(mIntegralsAsrv);
+			mIntegralsOfB->SetResource(mIntegralsBsrv);
+
+			mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
+			mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
+
 			Vec2d<int> originInA(x, y);
 			Vec2d<int> originInB(x, y);
 
@@ -2223,14 +2222,14 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 			domainSizeInB.y() = std::min<int>(heightOfB - y, this->domainSizeInB.y());
 
 			defineTheSamePoints(originInA, domainSizeInA, originInB, domainSizeInB);
+
+			ID3D11ShaderResourceView* nullSRVs[] = { nullptr,nullptr };
+			context->CSSetShaderResources(0, 2, nullSRVs);
+
+			ID3D11UnorderedAccessView* nullUAVs[] = { nullptr,nullptr };
+			context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 		}
 	}
-
-	ID3D11ShaderResourceView* nullSRVs[] = { nullptr,nullptr };
-	context->CSSetShaderResources(0, 2, nullSRVs);
-
-	ID3D11UnorderedAccessView* nullUAVs[] = { nullptr,nullptr };
-	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, 0);
 
 	context->CSSetShader(0, 0, 0);
 
