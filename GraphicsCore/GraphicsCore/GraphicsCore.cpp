@@ -2211,7 +2211,18 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 	{
 		for (int y = 0; y < heightOfA; y += domainSizeInA.y())
 		{
+			Vec2d<int> originInA(x, y);
+			Vec2d<int> originInB(x, y);
 
+			Vec2d<int> domainSizeInA;
+			domainSizeInA.x() = std::min<int>(widthOfA - x, this->domainSizeInA.x());
+			domainSizeInA.y() = std::min<int>(heightOfA - y, this->domainSizeInA.y());
+
+			Vec2d<int> domainSizeInB;
+			domainSizeInB.x() = std::min<int>(widthOfB - x, this->domainSizeInB.x());
+			domainSizeInB.y() = std::min<int>(heightOfB - y, this->domainSizeInB.y());
+
+			defineTheSamePoints(originInA, domainSizeInA, originInB, domainSizeInB);
 		}
 	}
 
