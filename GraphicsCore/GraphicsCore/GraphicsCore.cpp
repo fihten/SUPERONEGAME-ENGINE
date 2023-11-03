@@ -2305,6 +2305,7 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	int x, int y,
 	float angle0, float scale0,
 	float angle1, float scale1,
+	int radius,
 	flt4 integrals[]
 )
 {
@@ -2326,8 +2327,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
-	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
-	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+	float xs[4] = { -radius,+radius,-radius,+radius };
+	float ys[4] = { -radius,-radius,+radius,+radius };
 
 	int x_left = INT_MAX;
 	int x_right = -INT_MAX;
@@ -2347,11 +2348,26 @@ void GraphicsCore::calculateIntegralsOnCpu(
 		y_top = std::max<int>(y_top, std::ceil(y_corner));
 	}
 
+	float det = m00 * m11 - m01 * m10;
+	float mInv00 = m11 / det; float mInv01 = -m01 / det;
+	float mInv10 = -m10 / det; float mInv11 = m00 / det;
+
+	int integralIndex = radius - radius0;
+	integrals[integralIndex] = flt4(0, 0, 0, 0);
 	for (int i = x_left; i <= x_right; i++)
 	{
 		for (int j = y_bottom; j <= y_top; j++)
 		{
+			float x_ = i * mInv00 + j * mInv10;
+			float y_ = i * mInv01 + j * mInv11;
 
+			float rSq = x_ * x_ + y_ * y_;
+			if (rSq > radius * radius)
+				continue;
+
+			char* row = (char*)(data.pData) + (j + y) * data.RowPitch;
+			flt4 color = *((flt4*)(row)+i + x);
+			integrals[integralIndex] = integrals[integralIndex] + color;
 		}
 	}
 

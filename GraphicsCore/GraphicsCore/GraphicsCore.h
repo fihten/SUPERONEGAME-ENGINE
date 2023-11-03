@@ -276,6 +276,7 @@ private:
 		int x, int y,
 		float angle0, float scale0,
 		float angle1, float scale1,
+		int radius,
 		flt4 integrals[]
 	);
 
