@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define INTEGRALS 20
+#define INTEGRALS 5
 
 class GraphicsCore;
 
@@ -268,8 +268,16 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 20;
+	int radius0 = 30;
 	int radius1 = radius0 + INTEGRALS - 1;
+
+	void calculateIntegralsOnCpu(
+		ID3D11Texture2D* texture,
+		int x, int y,
+		float angle0, float scale0,
+		float angle1, float scale1,
+		flt4 integrals[]
+	);
 
 public:
 	void defineTheSamePoints();

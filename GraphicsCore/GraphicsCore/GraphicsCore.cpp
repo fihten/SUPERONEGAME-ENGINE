@@ -2219,8 +2219,8 @@ bool GraphicsCore::defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, in
 			mMapAtoB->SetUnorderedAccessView(mMapAtoBuav);
 			mErrorOfTheSamePointsDefinition->SetUnorderedAccessView(mErrorOfTheSamePointsDefinitionUAV);
 
-			Vec2d<int> originInA(1166, 1372);
-			Vec2d<int> originInB(1370, 1297);
+			Vec2d<int> originInA(43, 38);
+			Vec2d<int> originInB(44, 41);
 
 //			Vec2d<int> domainSizeInA;
 //			domainSizeInA.x() = std::min<int>(widthOfA - x, this->domainSizeInA.x());
@@ -2298,4 +2298,63 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	context->Unmap(mMapAtoBtexCopy, 0);
 
 	return uvB;
+}
+
+void GraphicsCore::calculateIntegralsOnCpu(
+	ID3D11Texture2D* texture,
+	int x, int y,
+	float angle0, float scale0,
+	float angle1, float scale1,
+	flt4 integrals[]
+)
+{
+	D3D11_TEXTURE2D_DESC tex_desc;
+	texture->GetDesc(&tex_desc);
+
+	tex_desc.Usage = D3D11_USAGE_STAGING;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	
+	ID3D11Texture2D* textureCopy = nullptr;
+	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
+
+	context->CopyResource(textureCopy, texture);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
+	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+
+	int x_left = INT_MAX;
+	int x_right = -INT_MAX;
+
+	int y_bottom = INT_MAX;
+	int y_top = -INT_MAX;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float x_corner = xs[i] * m00 + ys[i] * m10;
+		float y_corner = xs[i] * m01 + ys[i] * m11;
+
+		x_left = std::min<int>(x_left, std::floor(x_corner));
+		x_right = std::max<int>(x_right, std::ceil(x_corner));
+
+		y_bottom = std::min<int>(y_bottom, std::floor(y_corner));
+		y_top = std::max<int>(y_top, std::ceil(y_corner));
+	}
+
+	for (int i = x_left; i <= x_right; i++)
+	{
+		for (int j = y_bottom; j <= y_top; j++)
+		{
+
+		}
+	}
+
+	context->Unmap(textureCopy, 0);
+	textureCopy->Release();
 }
