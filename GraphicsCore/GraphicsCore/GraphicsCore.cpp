@@ -2410,6 +2410,11 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
 
 	flt4* integralsB = new flt4[INTEGRALS];
+	float minAngle0;
+	float minScale0;
+	float minAngle1;
+	float minScale1;
+	float minError = FLT_MAX;
 	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
 	{
 		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
@@ -2448,14 +2453,60 @@ void GraphicsCore::calculateIntegralsOnCpu(
 							radius,
 							integralsB
 						);
+						float error = calculateErrorOfLeastSquaresMethode(
+							integralsA,
+							integralsB
+						);
+						if (error < minError)
+						{
+							minError = error;
+							minAngle0 = angle0;
+							minScale0 = scale0;
+							minAngle1 = angle1;
+							minScale1 = scale1;
+						}
 					}
 				}
 			}
 		}
 	}
 
+	for (int radius = radius0; radius <= radius1; radius++)
+	{
+		calculateIntegralsOnCpu(
+			data,
+			xB, yB,
+			minAngle0, minScale0,
+			minAngle1, minScale1,
+			radius,
+			integralsB
+		);
+	}
+
 	context->Unmap(textureCopy, 0);
 	textureCopy->Release();
+
+	struct Comma final : std::numpunct<char>
+	{
+		char do_decimal_point() const override { return ','; }
+	};
+	std::ofstream fileOfX("x.txt");
+	std::ofstream fileOfY("y.txt");
+	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
+	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
+
+	for (int i = 0; i < INTEGRALS; i++)
+	{
+		fileOfX << integralsA[i].x() << std::endl;
+		fileOfX << integralsA[i].y() << std::endl;
+		fileOfX << integralsA[i].z() << std::endl;
+
+		fileOfY << integralsB[i].x() << std::endl;
+		fileOfY << integralsB[i].y() << std::endl;
+		fileOfY << integralsB[i].z() << std::endl;
+	}
+	delete[]integralsA;
+	delete[]integralsB;
 }
 
 float GraphicsCore::calculateErrorOfLeastSquaresMethode(
