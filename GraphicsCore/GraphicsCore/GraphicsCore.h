@@ -272,12 +272,22 @@ private:
 	int radius1 = radius0 + INTEGRALS - 1;
 
 	void calculateIntegralsOnCpu(
-		ID3D11Texture2D* texture,
+		D3D11_MAPPED_SUBRESOURCE& data,
 		int x, int y,
 		float angle0, float scale0,
 		float angle1, float scale1,
 		int radius,
 		flt4 integrals[]
+	);
+
+	void calculateIntegralsOnCpu(
+		int xA, int yA,
+		int xB, int yB
+	);
+
+	float calculateErrorOfLeastSquaresMethode(
+		flt4 integralsA[],
+		flt4 integralsB[]
 	);
 
 public:

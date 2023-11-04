@@ -2301,7 +2301,7 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 }
 
 void GraphicsCore::calculateIntegralsOnCpu(
-	ID3D11Texture2D* texture,
+	D3D11_MAPPED_SUBRESOURCE& data,
 	int x, int y,
 	float angle0, float scale0,
 	float angle1, float scale1,
@@ -2309,21 +2309,6 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	flt4 integrals[]
 )
 {
-	D3D11_TEXTURE2D_DESC tex_desc;
-	texture->GetDesc(&tex_desc);
-
-	tex_desc.Usage = D3D11_USAGE_STAGING;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
-	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	
-	ID3D11Texture2D* textureCopy = nullptr;
-	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
-
-	context->CopyResource(textureCopy, texture);
-
-	D3D11_MAPPED_SUBRESOURCE data;
-	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
-
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
@@ -2370,7 +2355,152 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			integrals[integralIndex] = integrals[integralIndex] + color;
 		}
 	}
+}
+
+void GraphicsCore::calculateIntegralsOnCpu(
+	int xA, int yA,
+	int xB, int yB
+)
+{
+	ID3D11Texture2D* textureA = nullptr;
+	mTextureToIntegrateAsrv->GetResource((ID3D11Resource * *)(&textureA));
+
+	D3D11_TEXTURE2D_DESC tex_desc;
+	textureA->GetDesc(&tex_desc);
+
+	tex_desc.Usage = D3D11_USAGE_STAGING;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	ID3D11Texture2D* textureCopy = nullptr;
+	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
+
+	context->CopyResource(textureCopy, textureA);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	flt4* integralsA = new flt4[INTEGRALS];
+	for (int radius = radius0; radius <= radius1; radius++)
+	{
+		calculateIntegralsOnCpu(
+			data,
+			xA, yA,
+			0, 1,
+			0, 1,
+			radius,
+			integralsA
+		);
+	}
 
 	context->Unmap(textureCopy, 0);
 	textureCopy->Release();
+
+	ID3D11Texture2D* textureB = nullptr;
+	mTextureToIntegrateBsrv->GetResource((ID3D11Resource * *)(&textureB));
+	
+	textureB->GetDesc(&tex_desc);
+
+	tex_desc.Usage = D3D11_USAGE_STAGING;
+	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	
+	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
+	context->CopyResource(textureCopy, textureB);
+	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	flt4* integralsB = new flt4[INTEGRALS];
+	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
+	{
+		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
+		{
+			for (int axis1_x = -2 * discrete_radius; axis1_x <= 2 * discrete_radius; axis1_x++)
+			{
+				for (int axis1_y = -2 * discrete_radius; axis1_y <= 2 * discrete_radius; axis1_y++)
+				{
+					float angle0 = atan2(axis0_y, axis0_x);
+					if (abs(angle0) > maxAngle * M_PI / 180)
+						continue;
+
+					float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / discrete_radius;
+					if (scale0 < minScale)
+						continue;
+					if (scale0 > maxScale)
+						continue;
+
+					float angle1 = -atan2(axis1_x, axis1_y);
+					if (abs(angle1 - angle0) > maxAngle * M_PI / 180)
+						continue;
+
+					float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / discrete_radius;
+					if (scale1 < minScale)
+						continue;
+					if (scale1 > maxScale)
+						continue;
+
+					for (int radius = radius0; radius <= radius1; radius++)
+					{
+						calculateIntegralsOnCpu(
+							data,
+							xB, yB,
+							angle0, scale0,
+							angle1, scale1,
+							radius,
+							integralsB
+						);
+					}
+				}
+			}
+		}
+	}
+
+	context->Unmap(textureCopy, 0);
+	textureCopy->Release();
+}
+
+float GraphicsCore::calculateErrorOfLeastSquaresMethode(
+	flt4 integralsA[],
+	flt4 integralsB[]
+)
+{
+	float l00 = 0; float l01 = 0; float r0 = 0;
+	float l10 = 0; float l11 = 0; float r1 = 0;
+	float yy = 0;
+
+	flt4 integralsA0 = integralsA[INTEGRALS - 1];
+	float maxIntegralA = max(integralsA0.x(), max(integralsA0.y(), integralsA0.z()));
+
+	flt4 integralsB0 = integralsB[INTEGRALS - 1];
+	float maxIntegralB = max(integralsB0.x(), max(integralsB0.y(), integralsB0.z()));
+
+	for (int i = 0; i < INTEGRALS; i++)
+	{
+		flt4 A = integralsA[i] / maxIntegralA;
+		flt4 B = integralsB[i] / maxIntegralB;
+
+		l00 += dot(A.xyz(), A.xyz());
+		l01 += dot(flt4(1, 1, 1, 0), A);
+		l10 += dot(flt4(1, 1, 1, 0), A);
+		l11 += 3;
+
+		r0 += dot(A.xyz(), B.xyz());
+		r1 += dot(flt4(1, 1, 1, 0), B);
+
+		yy += dot(B.xyz(), B.xyz());
+	}
+
+	float det = l00 * l11 - l01 * l10;
+	float det0 = r0 * l11 - r1 * l01;
+	float det1 = l00 * r1 - l10 * r0;
+
+	float JacobianDeterminant = det0 / det;
+	float JacobianDeterminant0 = det1 / det;
+
+	float ferr = yy - 2 * r0 * JacobianDeterminant -
+		2 * r1 * JacobianDeterminant0 +
+		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
+		l00 * JacobianDeterminant * JacobianDeterminant +
+		l11 * JacobianDeterminant0 * JacobianDeterminant0;
+
+	return ferr;
 }
