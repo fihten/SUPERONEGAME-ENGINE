@@ -2358,10 +2358,22 @@ void GraphicsCore::calculateIntegralsOnCpu(
 }
 
 void GraphicsCore::calculateIntegralsOnCpu(
-	int xA, int yA,
-	int xB, int yB
+	float uA, float vA,
+	float uB, float vB
 )
 {
+	float fxA = widthOfA * uA - 0.5f;
+	float fyA = heightOfA * vA - 0.5f;
+
+	int xA = std::min<float>(std::max<float>(fxA, 0.0f), widthOfA - 1);
+	int yA = std::min<float>(std::max<float>(fyA, 0.0f), heightOfA - 1);
+
+	float fxB = widthOfB * uB - 0.5f;
+	float fyB = heightOfA * vB - 0.5f;
+
+	int xB = std::min<float>(std::max<float>(fxB, 0.0f), widthOfB - 1);
+	int yB = std::min<float>(std::max<float>(fyB, 0.0f), heightOfB - 1);
+
 	ID3D11Texture2D* textureA = nullptr;
 	mTextureToIntegrateAsrv->GetResource((ID3D11Resource * *)(&textureA));
 

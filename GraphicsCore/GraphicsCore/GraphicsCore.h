@@ -227,6 +227,11 @@ public:
 	void calculateIntegralsOfTextureA();
 	void calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1);
 
+	void calculateIntegralsOnCpu(
+		float uA, float vA,
+		float uB, float vB
+	);
+
 private:
 	void initCalculationOfTextureIntegrals();
 	ID3DX11Effect* mCalculationOfTextureIntegralsFX = nullptr;
@@ -278,11 +283,6 @@ private:
 		float angle1, float scale1,
 		int radius,
 		flt4 integrals[]
-	);
-
-	void calculateIntegralsOnCpu(
-		int xA, int yA,
-		int xB, int yB
 	);
 
 	float calculateErrorOfLeastSquaresMethode(
