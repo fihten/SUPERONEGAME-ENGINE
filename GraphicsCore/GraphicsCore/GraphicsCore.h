@@ -273,7 +273,7 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 30;
+	int radius0 = 40;
 	int radius1 = radius0 + INTEGRALS - 1;
 
 	void calculateIntegralsOnCpu(

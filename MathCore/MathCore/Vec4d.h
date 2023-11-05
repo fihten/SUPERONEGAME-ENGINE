@@ -3,6 +3,12 @@
 #include "NumbersToString.h"
 #include "Vec3d.h"
 
+template<class value_type>
+class Vec4d;
+
+template<class value_type>
+value_type dot(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2);
+
 template<class value_type> 
 class Vec4d
 {
@@ -38,7 +44,7 @@ public:
 
 	Vec3d<value_type>& xyz() { return *((Vec3d<value_type>*)this); };
 
-	friend value_type dot(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2);
+	friend value_type dot<>(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2);
 };
 
 template<class value_type>

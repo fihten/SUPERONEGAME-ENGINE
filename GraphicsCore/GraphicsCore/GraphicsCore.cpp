@@ -2300,6 +2300,21 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	return uvB;
 }
 
+float extractChanel(uint32_t color, int index)
+{
+	return (float)((color >> (index * 8)) & 0xff) / 255;
+}
+
+flt4 toFlt4(uint32_t color)
+{
+	return flt4(
+		extractChanel(color, 0),
+		extractChanel(color, 1),
+		extractChanel(color, 2),
+		extractChanel(color, 3)
+	);
+}
+
 void GraphicsCore::calculateIntegralsOnCpu(
 	D3D11_MAPPED_SUBRESOURCE& data,
 	int x, int y,
@@ -2350,9 +2365,20 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			if (rSq > radius * radius)
 				continue;
 
+			if (i + x < 0)
+				continue;
+			if (i + x > widthOfA - 1)
+				continue;
+
+			if (j + y < 0)
+				continue;
+			if (j + y > heightOfA - 1)
+				continue;
+
 			char* row = (char*)(data.pData) + (j + y) * data.RowPitch;
-			flt4 color = *((flt4*)(row)+i + x);
-			integrals[integralIndex] = integrals[integralIndex] + color;
+			uint32_t color = *((uint32_t*)(row)+i + x);
+			flt4 colorF4 = toFlt4(color);
+			integrals[integralIndex] = integrals[integralIndex] + colorF4;
 		}
 	}
 }
@@ -2381,8 +2407,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	textureA->GetDesc(&tex_desc);
 
 	tex_desc.Usage = D3D11_USAGE_STAGING;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	tex_desc.BindFlags = 0;
 
 	ID3D11Texture2D* textureCopy = nullptr;
 	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
@@ -2414,9 +2440,9 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	textureB->GetDesc(&tex_desc);
 
 	tex_desc.Usage = D3D11_USAGE_STAGING;
-	tex_desc.Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	
+	tex_desc.BindFlags = 0;
+
 	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
 	context->CopyResource(textureCopy, textureB);
 	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);

@@ -19,6 +19,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
 	case WM_LBUTTONUP:
 #ifndef CALCULATE_INTEGRALS_ON_CPU
+	{
 		float mousePosX = LOWORD(lParam) + 0.5f;
 		float mousePosY = HIWORD(lParam) + 0.5f;
 
@@ -38,8 +39,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		testMesh.setParam(uvA_key, uvA);
 
 		ParamKey mappedPos_key{ StringManager::toStringId("mappedPos"), -1, string_id(-1) };
-		testMesh.setParam(mappedPos_key, uvB);
+		testMesh.setParam(mappedPos_key, uvB); 
+	}
 #else
+	{
 		float mousePosX = LOWORD(lParam) + 0.5f;
 		float mousePosY = HIWORD(lParam) + 0.5f;
 
@@ -49,10 +52,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		float width = rect.right - rect.left;
 		float height = std::floor(0.5f * (rect.bottom - rect.top));
 
-		mousePosX = std::min<float>(std::max<float>(0.0f, mousePosX), width - 1);
-		mousePosY = std::min<float>(std::max<float>(0.0f, mousePosY), height - 1);
-
-		height *= 0.5;
 		if (mousePosY < height)
 		{
 			uA = (mousePosX + 0.5f) / width;
@@ -64,6 +63,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			uB = (mousePosX + 0.5f) / width;
 			vB = (mousePosY + 0.5f) / height;
 		}
+
+		flt2 uvA(uA, vA);
+		ParamKey uvA_key{ StringManager::toStringId("posInA"), -1, string_id(-1) };
+		testMesh.setParam(uvA_key, uvA);
+
+		flt2 uvB(uB, vB);
+		ParamKey mappedPos_key{ StringManager::toStringId("mappedPos"), -1, string_id(-1) };
+		testMesh.setParam(mappedPos_key, uvB); 
+	}
 #endif
 		break;
 	case WM_KEYDOWN:
@@ -98,7 +106,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->openTextureA("imageA.jpg");
 	GraphicsCore::instance()->openTextureB("imageB.jpg");
 
-	GraphicsCore::instance()->defineTheSamePoints();
+//	GraphicsCore::instance()->defineTheSamePoints();
 
 	testMesh = createMeshForTestingDefinitionOfTheSamePoints();
 
