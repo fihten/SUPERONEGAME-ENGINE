@@ -2410,44 +2410,52 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	tex_desc.BindFlags = 0;
 
-	ID3D11Texture2D* textureCopy = nullptr;
-	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
+	ID3D11Texture2D* textureCopyA = nullptr;
+	device->CreateTexture2D(&tex_desc, nullptr, &textureCopyA);
 
-	context->CopyResource(textureCopy, textureA);
+	context->CopyResource(textureCopyA, textureA);
 
-	D3D11_MAPPED_SUBRESOURCE data;
-	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
-
-	flt4* integralsA = new flt4[INTEGRALS];
-	for (int radius = radius0; radius <= radius1; radius++)
-	{
-		calculateIntegralsOnCpu(
-			data,
-			xA, yA,
-			0, 1,
-			0, 1,
-			radius,
-			integralsA
-		);
-	}
-
-	context->Unmap(textureCopy, 0);
-	textureCopy->Release();
+	D3D11_MAPPED_SUBRESOURCE dataA;
+	context->Map(textureCopyA, 0, D3D11_MAP_READ, 0, &dataA);
 
 	ID3D11Texture2D* textureB = nullptr;
 	mTextureToIntegrateBsrv->GetResource((ID3D11Resource * *)(&textureB));
-	
+
 	textureB->GetDesc(&tex_desc);
 
 	tex_desc.Usage = D3D11_USAGE_STAGING;
 	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	tex_desc.BindFlags = 0;
 
-	device->CreateTexture2D(&tex_desc, nullptr, &textureCopy);
-	context->CopyResource(textureCopy, textureB);
-	context->Map(textureCopy, 0, D3D11_MAP_READ, 0, &data);
+	ID3D11Texture2D* textureCopyB = nullptr;
+	device->CreateTexture2D(&tex_desc, nullptr, &textureCopyB);
+	context->CopyResource(textureCopyB, textureB);
 
-	flt4* integralsB = new flt4[INTEGRALS];
+	D3D11_MAPPED_SUBRESOURCE dataB;
+	context->Map(textureCopyB, 0, D3D11_MAP_READ, 0, &dataB);
+
+	flt4* integralsA = new flt4[2 * INTEGRALS];
+	flt4* integralsB = new flt4[2 * INTEGRALS];
+	for (int radius = radius0; radius <= radius1; radius++)
+	{
+		calculateIntegralsOnCpu(
+			dataA,
+			xA, yA,
+			0, 1,
+			0, 1,
+			radius,
+			integralsA
+		);
+		calculateIntegralsOnCpu(
+			dataB,
+			xB, yB,
+			0, 1,
+			0, 1,
+			radius,
+			integralsB + INTEGRALS
+		);
+	}
+
 	float minAngle0;
 	float minScale0;
 	float minAngle1;
@@ -2481,15 +2489,42 @@ void GraphicsCore::calculateIntegralsOnCpu(
 					if (scale1 > maxScale)
 						continue;
 
+					float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+					float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+					float det = m00 * m11 - m01 * m10;
+					float mInv00 = m11 / det; float mInv01 = -m01 / det;
+					float mInv10 = -m10 / det; float mInv11 = m00 / det;
+
+					float scale0Inv = sqrt(mInv00 * mInv00 + mInv01 * mInv01);
+					float scale1Inv = sqrt(mInv10 * mInv10 + mInv11 * mInv11);
+
+					float cos0 = mInv00 / scale0Inv;
+					float sin0 = mInv01 / scale0Inv;
+
+					float cos1 = mInv11 / scale1Inv;
+					float sin1 = -mInv10 / scale1Inv;
+
+					float angle0Inv = std::atan2(sin0, cos0);
+					float angle1Inv = std::atan2(sin1, cos1);
+
 					for (int radius = radius0; radius <= radius1; radius++)
 					{
 						calculateIntegralsOnCpu(
-							data,
+							dataB,
 							xB, yB,
 							angle0, scale0,
 							angle1, scale1,
 							radius,
 							integralsB
+						);
+						calculateIntegralsOnCpu(
+							dataA,
+							xA, yA,
+							angle0Inv, scale0Inv,
+							angle1Inv, scale1Inv,
+							radius,
+							integralsA + INTEGRALS
 						);
 						float error = calculateErrorOfLeastSquaresMethode(
 							integralsA,
@@ -2509,20 +2544,50 @@ void GraphicsCore::calculateIntegralsOnCpu(
 		}
 	}
 
+	float m00 = minScale0 * cos(minAngle0); float m01 = minScale0 * sin(minAngle0);
+	float m10 = -minScale1 * sin(minAngle1); float m11 = minScale1 * cos(minAngle1);
+
+	float det = m00 * m11 - m01 * m10;
+	float mInv00 = m11 / det; float mInv01 = -m01 / det;
+	float mInv10 = -m10 / det; float mInv11 = m00 / det;
+
+	float scale0Inv = sqrt(mInv00 * mInv00 + mInv01 * mInv01);
+	float scale1Inv = sqrt(mInv10 * mInv10 + mInv11 * mInv11);
+
+	float cos0 = mInv00 / scale0Inv;
+	float sin0 = mInv01 / scale0Inv;
+
+	float cos1 = mInv11 / scale1Inv;
+	float sin1 = -mInv10 / scale1Inv;
+
+	float angle0Inv = std::atan2(sin0, cos0);
+	float angle1Inv = std::atan2(sin1, cos1);
+
 	for (int radius = radius0; radius <= radius1; radius++)
 	{
 		calculateIntegralsOnCpu(
-			data,
+			dataB,
 			xB, yB,
 			minAngle0, minScale0,
 			minAngle1, minScale1,
 			radius,
 			integralsB
 		);
+		calculateIntegralsOnCpu(
+			dataA,
+			xA, yA,
+			angle0Inv, scale0Inv,
+			angle1Inv, scale1Inv,
+			radius,
+			integralsA + INTEGRALS
+		);
 	}
 
-	context->Unmap(textureCopy, 0);
-	textureCopy->Release();
+	context->Unmap(textureCopyA, 0);
+	textureCopyA->Release();
+
+	context->Unmap(textureCopyB, 0);
+	textureCopyB->Release();
 
 	struct Comma final : std::numpunct<char>
 	{
@@ -2533,7 +2598,7 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
 	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
 
-	for (int i = 0; i < INTEGRALS; i++)
+	for (int i = 0; i < 2 * INTEGRALS; i++)
 	{
 		fileOfX << integralsA[i].x() << std::endl;
 		fileOfX << integralsA[i].y() << std::endl;
@@ -2562,7 +2627,7 @@ float GraphicsCore::calculateErrorOfLeastSquaresMethode(
 	flt4 integralsB0 = integralsB[INTEGRALS - 1];
 	float maxIntegralB = max(integralsB0.x(), max(integralsB0.y(), integralsB0.z()));
 
-	for (int i = 0; i < INTEGRALS; i++)
+	for (int i = 0; i < 2 * INTEGRALS; i++)
 	{
 		flt4 A = integralsA[i] / maxIntegralA;
 		flt4 B = integralsB[i] / maxIntegralB;
