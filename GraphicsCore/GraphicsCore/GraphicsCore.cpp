@@ -2434,8 +2434,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	D3D11_MAPPED_SUBRESOURCE dataB;
 	context->Map(textureCopyB, 0, D3D11_MAP_READ, 0, &dataB);
 
-	flt4* integralsA = new flt4[2 * INTEGRALS];
-	flt4* integralsB = new flt4[2 * INTEGRALS];
+	flt4* integralsA = new flt4[INTEGRALS];
+	flt4* integralsB = new flt4[INTEGRALS];
 	for (int radius = radius0; radius <= radius1; radius++)
 	{
 		calculateIntegralsOnCpu(
@@ -2446,20 +2446,14 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			radius,
 			integralsA
 		);
-		calculateIntegralsOnCpu(
-			dataB,
-			xB, yB,
-			0, 1,
-			0, 1,
-			radius,
-			integralsB + INTEGRALS
-		);
 	}
 
 	float minAngle0;
 	float minScale0;
 	float minAngle1;
 	float minScale1;
+	float minJ0;
+	float minJ;
 	float minError = FLT_MAX;
 	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
 	{
@@ -2489,25 +2483,6 @@ void GraphicsCore::calculateIntegralsOnCpu(
 					if (scale1 > maxScale)
 						continue;
 
-					float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
-					float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
-
-					float det = m00 * m11 - m01 * m10;
-					float mInv00 = m11 / det; float mInv01 = -m01 / det;
-					float mInv10 = -m10 / det; float mInv11 = m00 / det;
-
-					float scale0Inv = sqrt(mInv00 * mInv00 + mInv01 * mInv01);
-					float scale1Inv = sqrt(mInv10 * mInv10 + mInv11 * mInv11);
-
-					float cos0 = mInv00 / scale0Inv;
-					float sin0 = mInv01 / scale0Inv;
-
-					float cos1 = mInv11 / scale1Inv;
-					float sin1 = -mInv10 / scale1Inv;
-
-					float angle0Inv = std::atan2(sin0, cos0);
-					float angle1Inv = std::atan2(sin1, cos1);
-
 					for (int radius = radius0; radius <= radius1; radius++)
 					{
 						calculateIntegralsOnCpu(
@@ -2518,18 +2493,12 @@ void GraphicsCore::calculateIntegralsOnCpu(
 							radius,
 							integralsB
 						);
-						calculateIntegralsOnCpu(
-							dataA,
-							xA, yA,
-							angle0Inv, scale0Inv,
-							angle1Inv, scale1Inv,
-							radius,
-							integralsA + INTEGRALS
-						);
-						float error = calculateErrorOfLeastSquaresMethode(
+
+						flt3 J = leastSquaresMethode(
 							integralsA,
 							integralsB
 						);
+						float error = J.z();
 						if (error < minError)
 						{
 							minError = error;
@@ -2537,31 +2506,14 @@ void GraphicsCore::calculateIntegralsOnCpu(
 							minScale0 = scale0;
 							minAngle1 = angle1;
 							minScale1 = scale1;
+							minJ0 = J.x();
+							minJ = J.y();
 						}
 					}
 				}
 			}
 		}
 	}
-
-	float m00 = minScale0 * cos(minAngle0); float m01 = minScale0 * sin(minAngle0);
-	float m10 = -minScale1 * sin(minAngle1); float m11 = minScale1 * cos(minAngle1);
-
-	float det = m00 * m11 - m01 * m10;
-	float mInv00 = m11 / det; float mInv01 = -m01 / det;
-	float mInv10 = -m10 / det; float mInv11 = m00 / det;
-
-	float scale0Inv = sqrt(mInv00 * mInv00 + mInv01 * mInv01);
-	float scale1Inv = sqrt(mInv10 * mInv10 + mInv11 * mInv11);
-
-	float cos0 = mInv00 / scale0Inv;
-	float sin0 = mInv01 / scale0Inv;
-
-	float cos1 = mInv11 / scale1Inv;
-	float sin1 = -mInv10 / scale1Inv;
-
-	float angle0Inv = std::atan2(sin0, cos0);
-	float angle1Inv = std::atan2(sin1, cos1);
 
 	for (int radius = radius0; radius <= radius1; radius++)
 	{
@@ -2572,14 +2524,6 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			minAngle1, minScale1,
 			radius,
 			integralsB
-		);
-		calculateIntegralsOnCpu(
-			dataA,
-			xA, yA,
-			angle0Inv, scale0Inv,
-			angle1Inv, scale1Inv,
-			radius,
-			integralsA + INTEGRALS
 		);
 	}
 
@@ -2598,7 +2542,7 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
 	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
 
-	for (int i = 0; i < 2 * INTEGRALS; i++)
+	for (int i = 0; i < INTEGRALS; i++)
 	{
 		fileOfX << integralsA[i].x() << std::endl;
 		fileOfX << integralsA[i].y() << std::endl;
@@ -2610,9 +2554,14 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	}
 	delete[]integralsA;
 	delete[]integralsB;
+
+	char buffer[2048];
+	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j0 = %f, j = %f\n",
+		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ0, minJ);
+	OutputDebugStringA(buffer);
 }
 
-float GraphicsCore::calculateErrorOfLeastSquaresMethode(
+flt3 GraphicsCore::leastSquaresMethode(
 	flt4 integralsA[],
 	flt4 integralsB[]
 )
@@ -2627,7 +2576,7 @@ float GraphicsCore::calculateErrorOfLeastSquaresMethode(
 	flt4 integralsB0 = integralsB[INTEGRALS - 1];
 	float maxIntegralB = max(integralsB0.x(), max(integralsB0.y(), integralsB0.z()));
 
-	for (int i = 0; i < 2 * INTEGRALS; i++)
+	for (int i = 0; i < INTEGRALS; i++)
 	{
 		flt4 A = integralsA[i] / maxIntegralA;
 		flt4 B = integralsB[i] / maxIntegralB;
@@ -2656,5 +2605,5 @@ float GraphicsCore::calculateErrorOfLeastSquaresMethode(
 		l00 * JacobianDeterminant * JacobianDeterminant +
 		l11 * JacobianDeterminant0 * JacobianDeterminant0;
 
-	return ferr;
+	return flt3(JacobianDeterminant0, JacobianDeterminant, ferr);
 }

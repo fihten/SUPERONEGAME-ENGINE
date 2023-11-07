@@ -273,7 +273,7 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 40;
+	int radius0 = 50;
 	int radius1 = radius0 + INTEGRALS - 1;
 
 	void calculateIntegralsOnCpu(
@@ -285,7 +285,7 @@ private:
 		flt4 integrals[]
 	);
 
-	float calculateErrorOfLeastSquaresMethode(
+	flt3 leastSquaresMethode(
 		flt4 integralsA[],
 		flt4 integralsB[]
 	);

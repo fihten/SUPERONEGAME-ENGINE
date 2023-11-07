@@ -30,6 +30,7 @@ public:
 
 	Vec4d<value_type> operator+(const Vec4d<value_type>& v) const;
 	Vec4d<value_type> operator-(const Vec4d<value_type>& v) const;
+	Vec4d<value_type> operator*(const value_type& x) const;
 	Vec4d<value_type> operator/(const value_type& x) const;
 	operator std::string()const {
 		return numbersToString((float*)(v), sizeof v / sizeof * v);
@@ -63,6 +64,12 @@ template<class value_type>
 Vec4d<value_type> Vec4d<value_type>::operator/(const value_type& x) const
 {
 	return Vec4d<value_type>(this->v[0] / x, this->v[1] / x, this->v[2] / x, this->v[3] / x);
+}
+
+template<class value_type>
+Vec4d<value_type> Vec4d<value_type>::operator*(const value_type& x) const
+{
+	return Vec4d<value_type>(this->v[0] * x, this->v[1] * x, this->v[2] * x, this->v[3] * x);
 }
 
 template<class value_type>
