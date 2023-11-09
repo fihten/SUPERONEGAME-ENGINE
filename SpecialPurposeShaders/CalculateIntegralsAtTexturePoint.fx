@@ -142,3 +142,23 @@ void cs_variance(uint3 dispatchThreadID : SV_DispatchThreadID)
 	InterlockedAdd(Variances[4 * varianceIndex + 2], (value2 - meanValue2) * (value2 - meanValue2));
 	InterlockedAdd(Variances[4 * varianceIndex + 3], 1);
 }
+
+technique11 CalculateIntegralsAtTexturePoint
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_integral()));
+	}
+};
+
+technique11 CalculateVarianceWithinAreaOfIntegration
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_variance()));
+	}
+};

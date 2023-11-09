@@ -334,6 +334,34 @@ private:
 	Vec2d<int> domainSizeInB = Vec2d<int>(64, 64);
 
 private:
+	void initManualDefinitionOfTheSamePoint();
+	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
+
+	ID3DX11EffectTechnique* mCalculateIntegralsAtTexturePointTech = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mTextureMDSP = nullptr;
+	ID3DX11EffectShaderResourceVariable* mIntegralsMDSP = nullptr;
+	ID3DX11EffectShaderResourceVariable* mVariancesMDSP = nullptr;
+
+	ID3DX11EffectVariable* mRadius0MDSP = nullptr;
+	ID3DX11EffectVariable* mRadius1MDSP = nullptr;
+
+	ID3DX11EffectVariable* mLeftXMDSP = nullptr;
+	ID3DX11EffectVariable* mRightXMDSP = nullptr;
+
+	ID3DX11EffectVariable* mBottomYMDSP = nullptr;
+	ID3DX11EffectVariable* mTopYMDSP = nullptr;
+
+	ID3DX11EffectVariable* mX0MDSP = nullptr;
+	ID3DX11EffectVariable* mY0MDSP = nullptr;
+
+	ID3DX11EffectVariable* mAngle0MDSP = nullptr;
+	ID3DX11EffectVariable* mScale0MDSP = nullptr;
+
+	ID3DX11EffectVariable* mAngle1MDSP = nullptr;
+	ID3DX11EffectVariable* mScale1MDSP = nullptr;
+
+private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
