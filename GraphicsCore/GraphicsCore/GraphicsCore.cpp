@@ -2321,7 +2321,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	float angle0, float scale0,
 	float angle1, float scale1,
 	int radius,
-	flt4 integrals[]
+	flt4 integrals[],
+	flt4 errorRange[]
 )
 {
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
@@ -2354,6 +2355,9 @@ void GraphicsCore::calculateIntegralsOnCpu(
 
 	int integralIndex = radius - radius0;
 	integrals[integralIndex] = flt4(0, 0, 0, 0);
+	flt4 bottomBorder(FLT_MAX, FLT_MAX, FLT_MAX, 0);
+	flt4 topBorder(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0);
+	float area = 0;
 	for (int i = x_left; i <= x_right; i++)
 	{
 		for (int j = y_bottom; j <= y_top; j++)
@@ -2379,8 +2383,19 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			uint32_t color = *((uint32_t*)(row)+i + x);
 			flt4 colorF4 = toFlt4(color);
 			integrals[integralIndex] = integrals[integralIndex] + colorF4;
+
+			bottomBorder.x() = std::min<float>(bottomBorder.x(), colorF4.x());
+			bottomBorder.y() = std::min<float>(bottomBorder.y(), colorF4.y());
+			bottomBorder.z() = std::min<float>(bottomBorder.z(), colorF4.z());
+
+			topBorder.x() = std::max<float>(topBorder.x(), colorF4.x());
+			topBorder.y() = std::max<float>(topBorder.y(), colorF4.y());
+			topBorder.z() = std::max<float>(topBorder.z(), colorF4.z());
+
+			area++;
 		}
 	}
+	errorRange[integralIndex] = (topBorder - bottomBorder) * area;
 }
 
 void GraphicsCore::calculateIntegralsOnCpu(
@@ -2436,6 +2451,7 @@ void GraphicsCore::calculateIntegralsOnCpu(
 
 	flt4* integralsA = new flt4[INTEGRALS];
 	flt4* integralsB = new flt4[INTEGRALS];
+	flt4* errorRange = new flt4[INTEGRALS];
 	for (int radius = radius0; radius <= radius1; radius++)
 	{
 		calculateIntegralsOnCpu(
@@ -2444,7 +2460,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			0, 1,
 			0, 1,
 			radius,
-			integralsA
+			integralsA,
+			errorRange
 		);
 	}
 
@@ -2452,7 +2469,6 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	float minScale0;
 	float minAngle1;
 	float minScale1;
-	float minJ0;
 	float minJ;
 	float minError = FLT_MAX;
 	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
@@ -2491,24 +2507,24 @@ void GraphicsCore::calculateIntegralsOnCpu(
 							angle0, scale0,
 							angle1, scale1,
 							radius,
-							integralsB
+							integralsB,
+							errorRange
 						);
-
-						flt3 J = leastSquaresMethode(
-							integralsA,
-							integralsB
-						);
-						float error = J.z();
-						if (error < minError)
-						{
-							minError = error;
-							minAngle0 = angle0;
-							minScale0 = scale0;
-							minAngle1 = angle1;
-							minScale1 = scale1;
-							minJ0 = J.x();
-							minJ = J.y();
-						}
+					}
+					flt2 J = leastSquaresMethode(
+						integralsA,
+						integralsB,
+						errorRange
+					);
+					float error = J.y();
+					if (error < minError)
+					{
+						minError = error;
+						minAngle0 = angle0;
+						minScale0 = scale0;
+						minAngle1 = angle1;
+						minScale1 = scale1;
+						minJ = J.x();
 					}
 				}
 			}
@@ -2523,7 +2539,8 @@ void GraphicsCore::calculateIntegralsOnCpu(
 			minAngle0, minScale0,
 			minAngle1, minScale1,
 			radius,
-			integralsB
+			integralsB,
+			errorRange
 		);
 	}
 
@@ -2556,19 +2573,19 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	delete[]integralsB;
 
 	char buffer[2048];
-	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j0 = %f, j = %f\n",
-		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ0, minJ);
+	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f\n",
+		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ);
 	OutputDebugStringA(buffer);
 }
 
-flt3 GraphicsCore::leastSquaresMethode(
+flt2 GraphicsCore::leastSquaresMethode(
 	flt4 integralsA[],
-	flt4 integralsB[]
+	flt4 integralsB[],
+	flt4 errorRange[]
 )
 {
-	float l00 = 0; float l01 = 0; float r0 = 0;
-	float l10 = 0; float l11 = 0; float r1 = 0;
-	float yy = 0;
+	float xx = 0;
+	float xy = 0;
 
 	flt4 integralsA0 = integralsA[INTEGRALS - 1];
 	float maxIntegralA = max(integralsA0.x(), max(integralsA0.y(), integralsA0.z()));
@@ -2581,29 +2598,23 @@ flt3 GraphicsCore::leastSquaresMethode(
 		flt4 A = integralsA[i] / maxIntegralA;
 		flt4 B = integralsB[i] / maxIntegralB;
 
-		l00 += dot(A.xyz(), A.xyz());
-		l01 += dot(flt4(1, 1, 1, 0), A);
-		l10 += dot(flt4(1, 1, 1, 0), A);
-		l11 += 3;
-
-		r0 += dot(A.xyz(), B.xyz());
-		r1 += dot(flt4(1, 1, 1, 0), B);
-
-		yy += dot(B.xyz(), B.xyz());
+		xx += dot(A.xyz(), A.xyz());
+		xy += dot(A.xyz(), B.xyz());
 	}
 
-	float det = l00 * l11 - l01 * l10;
-	float det0 = r0 * l11 - r1 * l01;
-	float det1 = l00 * r1 - l10 * r0;
+	float JacobianDeterminant = xy / xx;
+	float ferr = 0;
+	for (int i = 0; i < INTEGRALS; i++)
+	{
+		flt4 A = integralsA[i] / maxIntegralA;
+		flt4 B = integralsB[i] / maxIntegralB;
 
-	float JacobianDeterminant = det0 / det;
-	float JacobianDeterminant0 = det1 / det;
+		flt4 d = B - A * JacobianDeterminant;
+		flt4 er = errorRange[i] / maxIntegralB;
 
-	float ferr = yy - 2 * r0 * JacobianDeterminant -
-		2 * r1 * JacobianDeterminant0 +
-		2 * l01 * JacobianDeterminant * JacobianDeterminant0 +
-		l00 * JacobianDeterminant * JacobianDeterminant +
-		l11 * JacobianDeterminant0 * JacobianDeterminant0;
+		ferr = std::max<float>(std::abs(d.x() / er.x()),
+			std::max<float>(std::abs(d.y() / er.y()), std::abs(d.z() / er.z())));
+	}
 
-	return flt3(JacobianDeterminant0, JacobianDeterminant, ferr);
+	return flt2(JacobianDeterminant, ferr);
 }

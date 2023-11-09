@@ -282,12 +282,14 @@ private:
 		float angle0, float scale0,
 		float angle1, float scale1,
 		int radius,
-		flt4 integrals[]
+		flt4 integrals[],
+		flt4 errorRange[]
 	);
 
-	flt3 leastSquaresMethode(
+	flt2 leastSquaresMethode(
 		flt4 integralsA[],
-		flt4 integralsB[]
+		flt4 integralsB[],
+		flt4 errorRange[]
 	);
 
 public:
