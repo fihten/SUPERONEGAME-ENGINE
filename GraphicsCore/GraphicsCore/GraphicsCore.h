@@ -338,10 +338,11 @@ private:
 	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
 
 	ID3DX11EffectTechnique* mCalculateIntegralsAtTexturePointTech = nullptr;
+	ID3DX11EffectTechnique* mCalculateVarianceWithinAreaOfIntegrationTech = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mTextureMDSP = nullptr;
-	ID3DX11EffectShaderResourceVariable* mIntegralsMDSP = nullptr;
-	ID3DX11EffectShaderResourceVariable* mVariancesMDSP = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mIntegralsMDSP = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mVariancesMDSP = nullptr;
 
 	ID3DX11EffectVariable* mRadius0MDSP = nullptr;
 	ID3DX11EffectVariable* mRadius1MDSP = nullptr;
@@ -360,6 +361,8 @@ private:
 
 	ID3DX11EffectVariable* mAngle1MDSP = nullptr;
 	ID3DX11EffectVariable* mScale1MDSP = nullptr;
+
+	ID3D11Buffer* mIntegralsBufferMDSP = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

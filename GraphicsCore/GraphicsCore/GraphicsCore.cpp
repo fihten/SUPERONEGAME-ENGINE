@@ -2642,4 +2642,32 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 		return;
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mCalculateIntegralsAtTexturePointFX);
+
+	mCalculateIntegralsAtTexturePointTech = mCalculateIntegralsAtTexturePointFX->GetTechniqueByName("CalculateIntegralsAtTexturePoint");
+	mCalculateVarianceWithinAreaOfIntegrationTech = mCalculateIntegralsAtTexturePointFX->GetTechniqueByName("CalculateVarianceWithinAreaOfIntegration");
+
+	mTextureMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("tex")->AsShaderResource();
+	mIntegralsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Integrals")->AsShaderResource();
+	mVariancesMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Variances")->AsShaderResource();
+
+	mRadius0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius0");
+	mRadius1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius1");
+
+	mLeftXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("leftX");
+	mRightXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("rightX");
+
+	mBottomYMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("bottomY");
+	mTopYMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("topY");
+
+	mX0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("x0");
+	mY0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("y0");
+
+	mAngle0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("angle0");
+	mScale0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("scale0");
+
+	mAngle1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("angle1");
+	mScale1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("scale1");
+
+	D3D11_BUFFER_DESC buffer_desc;
+
 }
