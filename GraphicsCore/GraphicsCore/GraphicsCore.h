@@ -364,9 +364,11 @@ private:
 
 	ID3D11Buffer* mIntegralsBufferMDSP = nullptr;
 	ID3D11Buffer* mIntegralsBufferCopyMDSP = nullptr;
+	ID3D11UnorderedAccessView* mIntegralsBufferMDSPuav = nullptr;
 
 	ID3D11Buffer* mVariancesBufferMDSP = nullptr;
 	ID3D11Buffer* mVariancesBufferCopyMDSP = nullptr;
+	ID3D11UnorderedAccessView* mVariancesBufferMDSPuav = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

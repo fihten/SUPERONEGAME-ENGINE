@@ -2647,8 +2647,8 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	mCalculateVarianceWithinAreaOfIntegrationTech = mCalculateIntegralsAtTexturePointFX->GetTechniqueByName("CalculateVarianceWithinAreaOfIntegration");
 
 	mTextureMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("tex")->AsShaderResource();
-	mIntegralsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Integrals")->AsShaderResource();
-	mVariancesMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Variances")->AsShaderResource();
+	mIntegralsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Integrals")->AsUnorderedAccessView();
+	mVariancesMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Variances")->AsUnorderedAccessView();
 
 	mRadius0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius0");
 	mRadius1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius1");
@@ -2687,4 +2687,13 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	device->CreateBuffer(&buffer_desc, 0, &mIntegralsBufferCopyMDSP);
 	device->CreateBuffer(&buffer_desc, 0, &mVariancesBufferCopyMDSP);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uav_desc.Buffer.FirstElement = 0;
+	uav_desc.Buffer.NumElements = 4 * INTEGRALS;
+	uav_desc.Buffer.Flags = 0;
+	device->CreateUnorderedAccessView(mIntegralsBufferMDSP, &uav_desc, &mIntegralsBufferMDSPuav);
+	device->CreateUnorderedAccessView(mVariancesBufferMDSP, &uav_desc, &mVariancesBufferMDSPuav);
 }
