@@ -2669,5 +2669,22 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	mScale1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("scale1");
 
 	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.ByteWidth = 4 * INTEGRALS * sizeof(uint32_t);
+	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	buffer_desc.CPUAccessFlags = 0;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	buffer_desc.StructureByteStride = sizeof(uint32_t);
+	
+	static uint32_t initArray[4 * INTEGRALS];
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = initArray;
+	device->CreateBuffer(&buffer_desc, &data, &mIntegralsBufferMDSP);
+	device->CreateBuffer(&buffer_desc, &data, &mVariancesBufferMDSP);
 
+	buffer_desc.Usage = D3D11_USAGE_STAGING;
+	buffer_desc.BindFlags = 0;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateBuffer(&buffer_desc, 0, &mIntegralsBufferCopyMDSP);
+	device->CreateBuffer(&buffer_desc, 0, &mVariancesBufferCopyMDSP);
 }

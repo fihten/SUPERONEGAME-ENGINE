@@ -363,6 +363,10 @@ private:
 	ID3DX11EffectVariable* mScale1MDSP = nullptr;
 
 	ID3D11Buffer* mIntegralsBufferMDSP = nullptr;
+	ID3D11Buffer* mIntegralsBufferCopyMDSP = nullptr;
+
+	ID3D11Buffer* mVariancesBufferMDSP = nullptr;
+	ID3D11Buffer* mVariancesBufferCopyMDSP = nullptr;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
