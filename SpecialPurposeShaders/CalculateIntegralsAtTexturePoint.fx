@@ -1,4 +1,4 @@
-Texture2D<float4> tex;
+Texture2D<uint4> tex;
 RWStructuredBuffer<uint> Integrals;
 RWStructuredBuffer<uint> Variances;
 
@@ -71,9 +71,9 @@ void cs_integral(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	float4 color = tex[int2(x, y)];
-	InterlockedAdd(Integrals[4 * integralIndex + 0], uint(255 * color.x));
-	InterlockedAdd(Integrals[4 * integralIndex + 1], uint(255 * color.y));
-	InterlockedAdd(Integrals[4 * integralIndex + 2], uint(255 * color.z));
+	InterlockedAdd(Integrals[4 * integralIndex + 0], color.x);
+	InterlockedAdd(Integrals[4 * integralIndex + 1], color.y);
+	InterlockedAdd(Integrals[4 * integralIndex + 2], color.z);
 	InterlockedAdd(Integrals[4 * integralIndex + 3]), 1);
 }
 
@@ -133,9 +133,9 @@ void cs_variance(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint meanValue2 = Integrals[4 * varianceIndex + 2] / area;
 
 	float4 color = tex[int2(x, y)];
-	uint value0 = 255 * color.x;
-	uint value1 = 255 * color.y;
-	uint value2 = 255 * color.z;
+	uint value0 = color.x;
+	uint value1 = color.y;
+	uint value2 = color.z;
 
 	InterlockedAdd(Variances[4 * varianceIndex + 0], (value0 - meanValue0) * (value0 - meanValue0));
 	InterlockedAdd(Variances[4 * varianceIndex + 1], (value1 - meanValue1) * (value1 - meanValue1));

@@ -370,6 +370,15 @@ private:
 	ID3D11Buffer* mVariancesBufferCopyMDSP = nullptr;
 	ID3D11UnorderedAccessView* mVariancesBufferMDSPuav = nullptr;
 
+	void calculateIntegralsAtTexturePoint(
+		ID3D11ShaderResourceView* texSRV,
+		int x, int y,
+		float angle0, float scale0,
+		float angle1, float scale1,
+		float integrals[],
+		float variances[]
+	);
+
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 

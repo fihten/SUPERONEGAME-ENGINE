@@ -2697,3 +2697,74 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	device->CreateUnorderedAccessView(mIntegralsBufferMDSP, &uav_desc, &mIntegralsBufferMDSPuav);
 	device->CreateUnorderedAccessView(mVariancesBufferMDSP, &uav_desc, &mVariancesBufferMDSPuav);
 }
+
+void GraphicsCore::calculateIntegralsAtTexturePoint(
+	ID3D11ShaderResourceView* texSRV,
+	int x, int y,
+	float angle0, float scale0,
+	float angle1, float scale1,
+	float integrals[],
+	float variances[]
+)
+{
+	mTextureMDSP->SetResource(texSRV);
+
+	static uint32_t initData[4 * INTEGRALS];
+	context->UpdateSubresource(mIntegralsBufferMDSP, 0, 0, initData, 0, 0);
+	context->UpdateSubresource(mVariancesBufferMDSP, 0, 0, initData, 0, 0);
+
+	mIntegralsMDSP->SetUnorderedAccessView(mIntegralsBufferMDSPuav);
+	mVariancesMDSP->SetUnorderedAccessView(mVariancesBufferMDSPuav);
+
+	mRadius0MDSP->SetRawValue(&radius0, 0, sizeof radius0);
+	mRadius1MDSP->SetRawValue(&radius1, 0, sizeof radius1);
+
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
+	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+
+	int x_left = INT_MAX;
+	int x_right = -INT_MAX;
+
+	int y_bottom = INT_MAX;
+	int y_top = -INT_MAX;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float x_corner = xs[i] * m00 + ys[i] * m10;
+		float y_corner = xs[i] * m01 + ys[i] * m11;
+
+		x_left = std::min<int>(x_left, std::floor(x_corner));
+		x_right = std::max<int>(x_right, std::ceil(x_corner));
+
+		y_bottom = std::min<int>(y_bottom, std::floor(y_corner));
+		y_top = std::max<int>(y_top, std::ceil(y_corner));
+	}
+
+	mLeftXMDSP->SetRawValue(&x_left, 0, sizeof x_left);
+	mRightXMDSP->SetRawValue(&x_right, 0, sizeof x_right);
+
+	mBottomYMDSP->SetRawValue(&y_bottom, 0, sizeof y_bottom);
+	mTopYMDSP->SetRawValue(&y_top, 0, sizeof y_top);
+
+	mX0MDSP->SetRawValue(&x, 0, sizeof x);
+	mY0MDSP->SetRawValue(&y, 0, sizeof y);
+
+	mAngle0MDSP->SetRawValue(&angle0, 0, sizeof angle0);
+	mScale0MDSP->SetRawValue(&scale0, 0, sizeof scale0);
+
+	mAngle1MDSP->SetRawValue(&angle1, 0, sizeof angle1);
+	mScale1MDSP->SetRawValue(&scale1, 0, sizeof scale1);
+
+	mCalculateIntegralsAtTexturePointTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 16.0f);
+	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 16.0f);
+	uint32_t z_groups = std::ceil((float)(INTEGRALS) / 4.0f);
+	context->Dispatch(x_groups, y_groups, z_groups);
+
+	mCalculateVarianceWithinAreaOfIntegrationTech->GetPassByName("P0")->Apply(0, context);
+	context->Dispatch(x_groups, y_groups, z_groups);
+}
