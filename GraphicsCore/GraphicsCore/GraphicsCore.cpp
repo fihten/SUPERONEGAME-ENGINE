@@ -2300,105 +2300,7 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 	return uvB;
 }
 
-float extractChanel(uint32_t color, int index)
-{
-	return (float)((color >> (index * 8)) & 0xff) / 255;
-}
-
-flt4 toFlt4(uint32_t color)
-{
-	return flt4(
-		extractChanel(color, 0),
-		extractChanel(color, 1),
-		extractChanel(color, 2),
-		extractChanel(color, 3)
-	);
-}
-
-void GraphicsCore::calculateIntegralsOnCpu(
-	D3D11_MAPPED_SUBRESOURCE& data,
-	int x, int y,
-	float angle0, float scale0,
-	float angle1, float scale1,
-	int radius,
-	flt4 integrals[],
-	flt4 errorRange[]
-)
-{
-	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
-	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
-
-	float xs[4] = { -radius,+radius,-radius,+radius };
-	float ys[4] = { -radius,-radius,+radius,+radius };
-
-	int x_left = INT_MAX;
-	int x_right = -INT_MAX;
-
-	int y_bottom = INT_MAX;
-	int y_top = -INT_MAX;
-
-	for (int i = 0; i < 4; i++)
-	{
-		float x_corner = xs[i] * m00 + ys[i] * m10;
-		float y_corner = xs[i] * m01 + ys[i] * m11;
-
-		x_left = std::min<int>(x_left, std::floor(x_corner));
-		x_right = std::max<int>(x_right, std::ceil(x_corner));
-
-		y_bottom = std::min<int>(y_bottom, std::floor(y_corner));
-		y_top = std::max<int>(y_top, std::ceil(y_corner));
-	}
-
-	float det = m00 * m11 - m01 * m10;
-	float mInv00 = m11 / det; float mInv01 = -m01 / det;
-	float mInv10 = -m10 / det; float mInv11 = m00 / det;
-
-	int integralIndex = radius - radius0;
-	integrals[integralIndex] = flt4(0, 0, 0, 0);
-	flt4 bottomBorder(FLT_MAX, FLT_MAX, FLT_MAX, 0);
-	flt4 topBorder(-FLT_MAX, -FLT_MAX, -FLT_MAX, 0);
-	float area = 0;
-	for (int i = x_left; i <= x_right; i++)
-	{
-		for (int j = y_bottom; j <= y_top; j++)
-		{
-			float x_ = i * mInv00 + j * mInv10;
-			float y_ = i * mInv01 + j * mInv11;
-
-			float rSq = x_ * x_ + y_ * y_;
-			if (rSq > radius * radius)
-				continue;
-
-			if (i + x < 0)
-				continue;
-			if (i + x > widthOfA - 1)
-				continue;
-
-			if (j + y < 0)
-				continue;
-			if (j + y > heightOfA - 1)
-				continue;
-
-			char* row = (char*)(data.pData) + (j + y) * data.RowPitch;
-			uint32_t color = *((uint32_t*)(row)+i + x);
-			flt4 colorF4 = toFlt4(color);
-			integrals[integralIndex] = integrals[integralIndex] + colorF4;
-
-			bottomBorder.x() = std::min<float>(bottomBorder.x(), colorF4.x());
-			bottomBorder.y() = std::min<float>(bottomBorder.y(), colorF4.y());
-			bottomBorder.z() = std::min<float>(bottomBorder.z(), colorF4.z());
-
-			topBorder.x() = std::max<float>(topBorder.x(), colorF4.x());
-			topBorder.y() = std::max<float>(topBorder.y(), colorF4.y());
-			topBorder.z() = std::max<float>(topBorder.z(), colorF4.z());
-
-			area++;
-		}
-	}
-	errorRange[integralIndex] = (topBorder - bottomBorder) * area;
-}
-
-void GraphicsCore::calculateIntegralsOnCpu(
+void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	float uA, float vA,
 	float uB, float vB
 )
@@ -2415,55 +2317,17 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	int xB = std::min<float>(std::max<float>(fxB, 0.0f), widthOfB - 1);
 	int yB = std::min<float>(std::max<float>(fyB, 0.0f), heightOfB - 1);
 
-	ID3D11Texture2D* textureA = nullptr;
-	mTextureToIntegrateAsrv->GetResource((ID3D11Resource * *)(&textureA));
-
-	D3D11_TEXTURE2D_DESC tex_desc;
-	textureA->GetDesc(&tex_desc);
-
-	tex_desc.Usage = D3D11_USAGE_STAGING;
-	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	tex_desc.BindFlags = 0;
-
-	ID3D11Texture2D* textureCopyA = nullptr;
-	device->CreateTexture2D(&tex_desc, nullptr, &textureCopyA);
-
-	context->CopyResource(textureCopyA, textureA);
-
-	D3D11_MAPPED_SUBRESOURCE dataA;
-	context->Map(textureCopyA, 0, D3D11_MAP_READ, 0, &dataA);
-
-	ID3D11Texture2D* textureB = nullptr;
-	mTextureToIntegrateBsrv->GetResource((ID3D11Resource * *)(&textureB));
-
-	textureB->GetDesc(&tex_desc);
-
-	tex_desc.Usage = D3D11_USAGE_STAGING;
-	tex_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	tex_desc.BindFlags = 0;
-
-	ID3D11Texture2D* textureCopyB = nullptr;
-	device->CreateTexture2D(&tex_desc, nullptr, &textureCopyB);
-	context->CopyResource(textureCopyB, textureB);
-
-	D3D11_MAPPED_SUBRESOURCE dataB;
-	context->Map(textureCopyB, 0, D3D11_MAP_READ, 0, &dataB);
-
-	flt4* integralsA = new flt4[INTEGRALS];
-	flt4* integralsB = new flt4[INTEGRALS];
-	flt4* errorRange = new flt4[INTEGRALS];
-	for (int radius = radius0; radius <= radius1; radius++)
-	{
-		calculateIntegralsOnCpu(
-			dataA,
-			xA, yA,
-			0, 1,
-			0, 1,
-			radius,
-			integralsA,
-			errorRange
-		);
-	}
+	float integralsA[3 * INTEGRALS];
+	float integralsB[3 * INTEGRALS];
+	float variances[3 * INTEGRALS];
+	calculateIntegralsAtTexturePoint(
+		mTextureToIntegrateAsrv,
+		xA, yA,
+		0, 1,
+		0, 1,
+		integralsA,
+		variances
+	);
 
 	float minAngle0;
 	float minScale0;
@@ -2499,22 +2363,18 @@ void GraphicsCore::calculateIntegralsOnCpu(
 					if (scale1 > maxScale)
 						continue;
 
-					for (int radius = radius0; radius <= radius1; radius++)
-					{
-						calculateIntegralsOnCpu(
-							dataB,
-							xB, yB,
-							angle0, scale0,
-							angle1, scale1,
-							radius,
-							integralsB,
-							errorRange
-						);
-					}
+					calculateIntegralsAtTexturePoint(
+						mTextureToIntegrateBsrv,
+						xB, yB,
+						angle0, scale0,
+						angle1, scale1,
+						integralsB,
+						variances
+					);
 					flt2 J = leastSquaresMethode(
 						integralsA,
 						integralsB,
-						errorRange
+						variances
 					);
 					float error = J.y();
 					if (error < minError)
@@ -2531,24 +2391,14 @@ void GraphicsCore::calculateIntegralsOnCpu(
 		}
 	}
 
-	for (int radius = radius0; radius <= radius1; radius++)
-	{
-		calculateIntegralsOnCpu(
-			dataB,
-			xB, yB,
-			minAngle0, minScale0,
-			minAngle1, minScale1,
-			radius,
-			integralsB,
-			errorRange
-		);
-	}
-
-	context->Unmap(textureCopyA, 0);
-	textureCopyA->Release();
-
-	context->Unmap(textureCopyB, 0);
-	textureCopyB->Release();
+	calculateIntegralsAtTexturePoint(
+		mTextureToIntegrateBsrv,
+		xB, yB,
+		minAngle0, minScale0,
+		minAngle1, minScale1,
+		integralsB,
+		variances
+	);
 
 	struct Comma final : std::numpunct<char>
 	{
@@ -2559,18 +2409,11 @@ void GraphicsCore::calculateIntegralsOnCpu(
 	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
 	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
 
-	for (int i = 0; i < INTEGRALS; i++)
+	for (int i = 0; i < 3 * INTEGRALS; i++)
 	{
-		fileOfX << integralsA[i].x() << std::endl;
-		fileOfX << integralsA[i].y() << std::endl;
-		fileOfX << integralsA[i].z() << std::endl;
-
-		fileOfY << integralsB[i].x() << std::endl;
-		fileOfY << integralsB[i].y() << std::endl;
-		fileOfY << integralsB[i].z() << std::endl;
+		fileOfX << integralsA[i] << std::endl;
+		fileOfY << integralsB[i] << std::endl;
 	}
-	delete[]integralsA;
-	delete[]integralsB;
 
 	char buffer[2048];
 	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f\n",
@@ -2579,41 +2422,44 @@ void GraphicsCore::calculateIntegralsOnCpu(
 }
 
 flt2 GraphicsCore::leastSquaresMethode(
-	flt4 integralsA[],
-	flt4 integralsB[],
-	flt4 errorRange[]
+	float integralsA[],
+	float integralsB[],
+	float variancesB[]
 )
 {
 	float xx = 0;
 	float xy = 0;
 
-	flt4 integralsA0 = integralsA[INTEGRALS - 1];
-	float maxIntegralA = max(integralsA0.x(), max(integralsA0.y(), integralsA0.z()));
+	float integralsA0 = integralsA[3 * (INTEGRALS - 1) + 0];
+	float integralsA1 = integralsA[3 * (INTEGRALS - 1) + 1];
+	float integralsA2 = integralsA[3 * (INTEGRALS - 1) + 2];
+	float maxIntegralA = max(integralsA0, max(integralsA1, integralsA2));
 
-	flt4 integralsB0 = integralsB[INTEGRALS - 1];
-	float maxIntegralB = max(integralsB0.x(), max(integralsB0.y(), integralsB0.z()));
+	float integralsB0 = integralsB[3 * (INTEGRALS - 1) + 0];
+	float integralsB1 = integralsB[3 * (INTEGRALS - 1) + 1];
+	float integralsB2 = integralsB[3 * (INTEGRALS - 1) + 2];
+	float maxIntegralB = max(integralsB0, max(integralsB1, integralsB2));
 
-	for (int i = 0; i < INTEGRALS; i++)
+	for (int i = 0; i < 3 * INTEGRALS; i++)
 	{
-		flt4 A = integralsA[i] / maxIntegralA;
-		flt4 B = integralsB[i] / maxIntegralB;
+		float A = integralsA[i] / maxIntegralA;
+		float B = integralsB[i] / maxIntegralB;
 
-		xx += dot(A.xyz(), A.xyz());
-		xy += dot(A.xyz(), B.xyz());
+		xx += A * A;
+		xy += A * B;
 	}
 
 	float JacobianDeterminant = xy / xx;
 	float ferr = 0;
-	for (int i = 0; i < INTEGRALS; i++)
+	for (int i = 0; i < 3 * INTEGRALS; i++)
 	{
-		flt4 A = integralsA[i] / maxIntegralA;
-		flt4 B = integralsB[i] / maxIntegralB;
+		float A = integralsA[i] / maxIntegralA;
+		float B = integralsB[i] / maxIntegralB;
 
-		flt4 d = B - A * JacobianDeterminant;
-		flt4 er = errorRange[i] / maxIntegralB;
+		float discrepancy = B - A * JacobianDeterminant;
+		float variance = variancesB[i] / maxIntegralB;
 
-		ferr = std::max<float>(std::abs(d.x() / er.x()),
-			std::max<float>(std::abs(d.y() / er.y()), std::abs(d.z() / er.z())));
+		ferr = std::max<float>(ferr, std::abs(discrepancy / variance));
 	}
 
 	return flt2(JacobianDeterminant, ferr);
@@ -2689,7 +2535,7 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	device->CreateBuffer(&buffer_desc, 0, &mVariancesBufferCopyMDSP);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.Format = DXGI_FORMAT_UNKNOWN;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uav_desc.Buffer.FirstElement = 0;
 	uav_desc.Buffer.NumElements = 4 * INTEGRALS;
@@ -2767,4 +2613,31 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 
 	mCalculateVarianceWithinAreaOfIntegrationTech->GetPassByName("P0")->Apply(0, context);
 	context->Dispatch(x_groups, y_groups, z_groups);
+
+	context->CopyResource(mIntegralsBufferCopyMDSP, mIntegralsBufferMDSP);
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mIntegralsBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	uint32_t* pIntegrals = (uint32_t*)data.pData;
+	for (int i = 0; i < INTEGRALS; ++i)
+	{
+		integrals[3 * i + 0] = (float)(pIntegrals[4 * i + 0]) / 255.0f;
+		integrals[3 * i + 1] = (float)(pIntegrals[4 * i + 1]) / 255.0f;
+		integrals[3 * i + 2] = (float)(pIntegrals[4 * i + 2]) / 255.0f;
+	}
+
+	context->Unmap(mIntegralsBufferCopyMDSP, 0);
+
+	context->CopyResource(mVariancesBufferCopyMDSP, mVariancesBufferMDSP);
+	context->Map(mVariancesBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	uint32_t* pVariances = (uint32_t*)data.pData;
+	for (int i = 0; i < INTEGRALS; ++i)
+	{
+		variances[3 * i + 0] = (float)(pVariances[4 * i + 0]) / (float)(pVariances[4 * i + 3] * 255);
+		variances[3 * i + 1] = (float)(pVariances[4 * i + 1]) / (float)(pVariances[4 * i + 3] * 255);
+		variances[3 * i + 2] = (float)(pVariances[4 * i + 2]) / (float)(pVariances[4 * i + 3] * 255);
+	}
+
+	context->Unmap(mVariancesBufferCopyMDSP, 0);
 }

@@ -227,11 +227,6 @@ public:
 	void calculateIntegralsOfTextureA();
 	void calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1);
 
-	void calculateIntegralsOnCpu(
-		float uA, float vA,
-		float uB, float vB
-	);
-
 private:
 	void initCalculationOfTextureIntegrals();
 	ID3DX11Effect* mCalculationOfTextureIntegralsFX = nullptr;
@@ -276,22 +271,6 @@ private:
 	int radius0 = 50;
 	int radius1 = radius0 + INTEGRALS - 1;
 
-	void calculateIntegralsOnCpu(
-		D3D11_MAPPED_SUBRESOURCE& data,
-		int x, int y,
-		float angle0, float scale0,
-		float angle1, float scale1,
-		int radius,
-		flt4 integrals[],
-		flt4 errorRange[]
-	);
-
-	flt2 leastSquaresMethode(
-		flt4 integralsA[],
-		flt4 integralsB[],
-		flt4 errorRange[]
-	);
-
 public:
 	void defineTheSamePoints();
 	bool defineTheSamePoints(int axis0_x, int axis0_y, int axis1_x, int axis1_y);
@@ -332,6 +311,12 @@ private:
 	
 	Vec2d<int> domainSizeInA = Vec2d<int>(64, 64);
 	Vec2d<int> domainSizeInB = Vec2d<int>(64, 64);
+
+public:
+	void calculateIntegralsAtTwoPointsOfAandB(
+		float uA, float vA,
+		float uB, float vB
+	);
 
 private:
 	void initManualDefinitionOfTheSamePoint();
@@ -379,6 +364,12 @@ private:
 		float variances[]
 	);
 
+	flt2 leastSquaresMethode(
+		float integralsA[],
+		float integralsB[],
+		float variancesB[]
+	);
+	
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
