@@ -2458,9 +2458,9 @@ flt2 GraphicsCore::leastSquaresMethode(
 		float B = integralsB[i] / maxIntegralB;
 
 		float discrepancy = B - A * JacobianDeterminant;
-		float variance = variancesB[i] / maxIntegralB;
+		float standardDeviation = std::sqrt(variancesB[i]) / maxIntegralB;
 
-		ferr = std::max<float>(ferr, std::abs(discrepancy / std::sqrt(variance)));
+		ferr = std::max<float>(ferr, std::abs(discrepancy / standardDeviation));
 	}
 
 	return flt2(JacobianDeterminant, ferr);
