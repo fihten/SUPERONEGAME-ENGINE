@@ -177,6 +177,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	// 12. Init photogrammetry
 	initCalculationOfTextureIntegrals();
 	initDefinitionOfTheSamePoints();
+	initManualDefinitionOfTheSamePoint();
 }
 
 void GraphicsCore::startFrame()

@@ -80,7 +80,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_SPACE:
 			OutputDebugStringA("integrals calculation starts\n");
-			GraphicsCore::instance()->calculateIntegralsOnCpu(
+			GraphicsCore::instance()->calculateIntegralsAtTwoPointsOfAandB(
 				uA, vA, uB, vB
 			);
 			OutputDebugStringA("integrals calculation finishes\n");
