@@ -2336,60 +2336,89 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	float minScale1;
 	float minJ;
 	float minError = FLT_MAX;
-	for (int axis0_x = 0; axis0_x <= 2 * discrete_radius; axis0_x++)
+
+	float a[4] = {
+		-maxAngle,
+		minScale,
+		-maxAngle,
+		minScale
+	};
+
+	float b[4] = {
+		maxAngle,
+		maxScale,
+		maxAngle,
+		maxScale
+	};
+
+	int numberOfSteps[4] = { 10,10,10,10 };
+	float step[4];
+	for (int i = 0; i < 4; ++i)
+		step[i] = (b[i] - a[i]) / numberOfSteps[i];
+
+	int index[4] = { 0,0,0,0 };
+
+	float h = FLT_MAX;
+	float threshold = 1e-6;
+
+	while (h > threshold)
 	{
-		for (int axis0_y = -2 * discrete_radius; axis0_y <= 2 * discrete_radius; axis0_y++)
+		float angle0 = a[0] + index[0] * step[0];
+		float scale0 = a[1] + index[1] * step[1];
+
+		float angle1 = a[2] + index[2] * step[2];
+		float scale1 = a[3] + index[3] * step[3];
+
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			integralsB,
+			variances
+		);
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB,
+			variances
+		);
+		float error = J.y();
+		if (error < minError)
 		{
-			for (int axis1_x = -2 * discrete_radius; axis1_x <= 2 * discrete_radius; axis1_x++)
-			{
-				for (int axis1_y = -2 * discrete_radius; axis1_y <= 2 * discrete_radius; axis1_y++)
-				{
-					float angle0 = atan2(axis0_y, axis0_x);
-					if (abs(angle0) > maxAngle * M_PI / 180)
-						continue;
-
-					float scale0 = sqrt(axis0_x * axis0_x + axis0_y * axis0_y) / discrete_radius;
-					if (scale0 < minScale)
-						continue;
-					if (scale0 > maxScale)
-						continue;
-
-					float angle1 = -atan2(axis1_x, axis1_y);
-					if (abs(angle1 - angle0) > maxAngle * M_PI / 180)
-						continue;
-
-					float scale1 = sqrt(axis1_x * axis1_x + axis1_y * axis1_y) / discrete_radius;
-					if (scale1 < minScale)
-						continue;
-					if (scale1 > maxScale)
-						continue;
-
-					calculateIntegralsAtTexturePoint(
-						mTextureToIntegrateBsrv,
-						xB, yB,
-						angle0, scale0,
-						angle1, scale1,
-						integralsB,
-						variances
-					);
-					flt2 J = leastSquaresMethode(
-						integralsA,
-						integralsB,
-						variances
-					);
-					float error = J.y();
-					if (error < minError)
-					{
-						minError = error;
-						minAngle0 = angle0;
-						minScale0 = scale0;
-						minAngle1 = angle1;
-						minScale1 = scale1;
-						minJ = J.x();
-					}
-				}
-			}
+			minError = error;
+			minAngle0 = angle0;
+			minScale0 = scale0;
+			minAngle1 = angle1;
+			minScale1 = scale1;
+			minJ = J.x();
 		}
+
+		index[0] = (index[0] + 1) % numberOfSteps[0];
+		int i = 1;
+		for (; i < 4 && index[i - 1] == 0; i++)
+			index[i] = (index[i] + 1) % numberOfSteps[i];
+		if (index[i - 1] == 0)
+		{
+			a[0] = minAngle0 - step[0];
+			b[0] = minAngle0 + step[0];
+			step[0] = 2 * step[0] / numberOfSteps[0];
+
+			a[1] = minScale0 - step[1];
+			b[1] = minScale0 + step[1];
+			step[1] = 2 * step[1] / numberOfSteps[1];
+
+			a[2] = minAngle1 - step[2];
+			b[2] = minAngle1 + step[2];
+			step[2] = 2 * step[2] / numberOfSteps[2];
+
+			a[3] = minScale1 - step[3];
+			b[3] = minScale1 + step[3];
+			step[3] = 2 * step[3] / numberOfSteps[3];
+		}
+
+		h = step[0];
+		for (int i = 1; i < 4; i++)
+			h = std::max<float>(h, step[i]);
 	}
 
 	calculateIntegralsAtTexturePoint(
