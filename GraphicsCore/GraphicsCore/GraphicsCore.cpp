@@ -2388,7 +2388,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 			minError = error;
 			minAngle0 = angle0;
 			minScale0 = scale0;
-			minAngle1 = angle1;
+			minAngle1 = angle0 + angle1;
 			minScale1 = scale1;
 			minJ = J.x();
 		}

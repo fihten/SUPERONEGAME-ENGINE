@@ -303,7 +303,7 @@ private:
 	ID3D11Texture2D* mErrorOfTheSamePointsDefinitionTex = nullptr;
 	ID3D11UnorderedAccessView* mErrorOfTheSamePointsDefinitionUAV = nullptr;
 
-	float maxAngle = 60.0f;
+	float maxAngle = 60.0f * M_PI / 180.0f;
 	float minScale = 0.5f;
 	float maxScale = 1.5f;
 	int positions_number = 0;
