@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define INTEGRALS 20
+#define INTEGRALS 50
 
 class GraphicsCore;
 

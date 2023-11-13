@@ -2459,6 +2459,7 @@ flt2 GraphicsCore::leastSquaresMethode(
 {
 	float xx = 0;
 	float xy = 0;
+	float yy = 0;
 
 	float integralsA0 = integralsA[3 * (INTEGRALS - 1) + 0];
 	float integralsA1 = integralsA[3 * (INTEGRALS - 1) + 1];
@@ -2477,20 +2478,12 @@ flt2 GraphicsCore::leastSquaresMethode(
 
 		xx += A * A;
 		xy += A * B;
+		yy += B * B;
 	}
 
 	float JacobianDeterminant = xy / xx;
-	float ferr = 0;
-	for (int i = 0; i < 3 * INTEGRALS; i++)
-	{
-		float A = integralsA[i] / maxIntegralA;
-		float B = integralsB[i] / maxIntegralB;
-
-		float discrepancy = B - A * JacobianDeterminant;
-		float standardDeviation = std::sqrt(variancesB[i]) / maxIntegralB;
-
-		ferr = std::max<float>(ferr, std::abs(discrepancy / standardDeviation));
-	}
+	float& k = JacobianDeterminant;
+	float ferr = k * k * xx + yy - 2 * k * xy;
 
 	return flt2(JacobianDeterminant, ferr);
 }
