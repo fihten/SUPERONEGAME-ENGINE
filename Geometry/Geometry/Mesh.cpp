@@ -881,8 +881,16 @@ Mesh createMeshVisualizingAreaOfIntegration()
 	inds.reserve(3 * (subdivDegree - 2));
 	for (int vi = 2; vi < subdivDegree; vi++)
 	{
-
+		inds.push_back(0);
+		inds.push_back(vi - 1);
+		inds.push_back(vi);
 	}
+
+	m.setTechnique(StringManager::toStringId("VisualizeAreaOfIntegration"));
+	m.setPass(StringManager::toStringId("P0"));
+
+	ParamKey arrow_key{ StringManager::toStringId("arrow"),-1,string_id(-1) };
+	m.setParam(arrow_key, StringManager::toStringId("Arrow.jpg"));
 }
 
 void Mesh::setTechnique(string_id technique_name_id)
