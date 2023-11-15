@@ -856,6 +856,35 @@ Mesh createMeshForTestingDefinitionOfTheSamePoints()
 	return m;
 }
 
+Mesh createMeshVisualizingAreaOfIntegration()
+{
+	Mesh m;
+
+	m.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("Position"),
+			std::vector<flt2>())
+	);
+	auto& positions = m.flt2_streams.back().second;
+
+	int subdivDegree = 12;
+	float dAngle = 2 * M_PI / subdivDegree;
+	
+	positions.resize(subdivDegree);
+	for (int vi = 0; vi < subdivDegree; vi++)
+	{
+		float angle = vi * dAngle;
+		positions[vi] = flt2(cos(angle), sin(angle));
+	}
+
+	auto& inds = m.indicies;
+	inds.reserve(3 * (subdivDegree - 2));
+	for (int vi = 2; vi < subdivDegree; vi++)
+	{
+
+	}
+}
+
 void Mesh::setTechnique(string_id technique_name_id)
 {
 	this->technique_name_id = technique_name_id;

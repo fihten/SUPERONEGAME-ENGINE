@@ -23,6 +23,7 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 Mesh createPlane(float width, float height, float m, float n);
 Mesh createAreaOfSelection();
 Mesh createMeshForTestingDefinitionOfTheSamePoints();
+Mesh createMeshVisualizingAreaOfIntegration();
 
 class Mesh
 {
@@ -214,6 +215,7 @@ public:
 	friend Mesh createPlane(float width, float height, float m, float n);
 	friend Mesh createAreaOfSelection();
 	friend Mesh createMeshForTestingDefinitionOfTheSamePoints();
+	friend Mesh createMeshVisualizingAreaOfIntegration();
 public:
 	uint32_t id;
 	void* scene = nullptr;
