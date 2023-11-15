@@ -1870,6 +1870,16 @@ void GraphicsCore::openTextureA(const std::string& path)
 	device->CreateUnorderedAccessView(mErrorOfTheSamePointsDefinitionTex, &uav_desc, &mErrorOfTheSamePointsDefinitionUAV);
 }
 
+int GraphicsCore::getWidthOfTextureA()
+{
+	return widthOfA;
+}
+
+int GraphicsCore::getHeightOfTextureA()
+{
+	return heightOfA;
+}
+
 void GraphicsCore::openTextureB(const std::string& path)
 {
 	char texturesFolder[200];
@@ -1918,6 +1928,21 @@ void GraphicsCore::openTextureB(const std::string& path)
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = INTEGRALS;
 	device->CreateShaderResourceView(mIntegralsBtex, &srv_desc, &mIntegralsBsrv);
+}
+
+int GraphicsCore::getWidthOfTextureB()
+{
+	return widthOfB;
+}
+
+int GraphicsCore::getHeightOfTextureB()
+{
+	return heightOfB;
+}
+
+int GraphicsCore::getRadiusOfBiggestAreaOfIntegration()
+{
+	return radius1;
 }
 
 void GraphicsCore::calculateIntegralsOfTextureA()

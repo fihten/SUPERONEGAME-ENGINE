@@ -222,7 +222,14 @@ private:
 
 public:
 	void openTextureA(const std::string& path);
+	int getWidthOfTextureA();
+	int getHeightOfTextureA();
+
 	void openTextureB(const std::string& path);
+	int getWidthOfTextureB();
+	int getHeightOfTextureB();
+
+	int getRadiusOfBiggestAreaOfIntegration();
 
 	void calculateIntegralsOfTextureA();
 	void calculateIntegralsOfTextureB(float angle0, float scale0, float angle1, float scale1);

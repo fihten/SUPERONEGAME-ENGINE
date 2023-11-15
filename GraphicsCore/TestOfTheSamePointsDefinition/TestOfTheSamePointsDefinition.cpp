@@ -6,12 +6,16 @@
 #define CALCULATE_INTEGRALS_ON_CPU
 
 Mesh testMesh;
+Mesh areaOfIntegrationInA;
+Mesh areaOfIntegrationInB;
 
 float uA;
 float vA;
 
 float uB;
 float vB;
+
+bool showAreasOfIntegration = false;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -87,6 +91,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 	}
+	case WM_CHAR:
+	{
+		switch (wParam)
+		{
+		case 's':
+			showAreasOfIntegration = !showAreasOfIntegration;
+			break;
+		}
+	}
 	}
 	return DefWindowProc(hwnd, message, wParam, lParam);
 }
@@ -95,6 +108,11 @@ void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
 	graphicsCore->draw(testMesh);
+	if (showAreasOfIntegration)
+	{
+		graphicsCore->draw(areaOfIntegrationInA);
+		graphicsCore->draw(areaOfIntegrationInB);
+	}
 	graphicsCore->endFrame();
 }
 
@@ -109,7 +127,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 //	GraphicsCore::instance()->defineTheSamePoints();
 
 	testMesh = createMeshForTestingDefinitionOfTheSamePoints();
-
+	areaOfIntegrationInA = createMeshVisualizingAreaOfIntegration();
+	areaOfIntegrationInB = createMeshVisualizingAreaOfIntegration();
 
 	return GraphicsCore::instance()->run();
 }
