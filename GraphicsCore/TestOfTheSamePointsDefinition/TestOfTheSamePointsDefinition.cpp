@@ -75,6 +75,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		flt2 uvB(uB, vB);
 		ParamKey mappedPos_key{ StringManager::toStringId("mappedPos"), -1, string_id(-1) };
 		testMesh.setParam(mappedPos_key, uvB); 
+
+		int radiusOfIntegrationArea = GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
+		ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
+		areaOfIntegrationInA.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
+
+		int wA = GraphicsCore::instance()->getWidthOfTextureA();
+		ParamKey width_key{ StringManager::toStringId("width"), -1, string_id(-1) };
+		areaOfIntegrationInA.setParam(width_key, wA);
+
+		int hA = GraphicsCore::instance()->getHeightOfTextureA();
+		ParamKey height_key{ StringManager::toStringId("height"), -1, string_id(-1) };
+		areaOfIntegrationInA.setParam(height_key, hA);
+
+		ParamKey ndcOffsetY_key{ StringManager::toStringId("ndcOffsetY"), -1, string_id(-1) };
+		areaOfIntegrationInA.setParam(ndcOffsetY_key, 0.0f);
 	}
 #endif
 		break;
