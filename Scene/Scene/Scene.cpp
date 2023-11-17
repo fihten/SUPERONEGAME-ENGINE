@@ -471,6 +471,20 @@ flt4x4* Scene::Node::getFlt4x4(int param_index)
 	return &params[param_index].second.f4x4;
 }
 
+int* Scene::Node::getInt(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.i;
+}
+
+Vec2d<int>* Scene::Node::getInt2(int param_index)
+{
+	if (!params[param_index].second.valid)
+		return nullptr;
+	return &params[param_index].second.i2;
+}
+
 bool Scene::Node::getParam(int param_index, string_id& s) const
 {
 	if (!params[param_index].second.valid)
@@ -516,6 +530,22 @@ bool Scene::Node::getParam(int param_index, flt4x4& f4x4) const
 	if (!params[param_index].second.valid)
 		return false;
 	f4x4 = params[param_index].second.f4x4;
+	return true;
+}
+
+bool Scene::Node::getParam(int param_index, int& i) const
+{
+	if (!params[param_index].second.valid)
+		return false;
+	i = params[param_index].second.i;
+	return true;
+}
+
+bool Scene::Node::getParam(int param_index, Vec2d<int>& i2) const
+{
+	if (!params[param_index].second.valid)
+		return false;
+	i2 = params[param_index].second.i2;
 	return true;
 }
 
@@ -627,6 +657,42 @@ bool Scene::Node::getParam(const ParamKey& paramName, flt4x4& f4x4) const
 	return it->second.valid;
 }
 
+bool Scene::Node::getParam(const ParamKey& paramName, int& i) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, i);
+
+	auto it = std::find_if(params.begin(), params.end(), [&paramName](auto& p)
+	{
+		return p.first == paramName;
+	}
+	);
+	if (it == params.end())
+		return false;
+
+	i = it->second.i;
+
+	return it->second.valid;
+}
+
+bool Scene::Node::getParam(const ParamKey& paramName, Vec2d<int>& i2) const
+{
+	if (scene)
+		return scene->getNodeParam(ID, paramName, i2);
+
+	auto it = std::find_if(params.begin(), params.end(), [&paramName](auto& p)
+	{
+		return p.first == paramName;
+	}
+	);
+	if (it == params.end())
+		return false;
+
+	i2 = it->second.i2;
+
+	return it->second.valid;
+}
+
 void Scene::Node::setParam(const ParamKey& paramName, const string_id& s)
 {
 	auto it = std::find_if(params.begin(), params.end(), [&paramName](auto& p)
@@ -726,6 +792,40 @@ void Scene::Node::setParam(const ParamKey& paramName, const flt4x4& f4x4)
 	}
 
 	it->second.f4x4 = f4x4;
+	it->second.valid = true;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const int& i)
+{
+	auto it = std::find_if(params.begin(), params.end(), [&paramName](auto& p)
+	{
+		return p.first == paramName;
+	}
+	);
+	if (it == params.end())
+	{
+		params.push_back({ paramName,ParamValue(i) });
+		return;
+	}
+
+	it->second.i = i;
+	it->second.valid = true;
+}
+
+void Scene::Node::setParam(const ParamKey& paramName, const Vec2d<int>& i2)
+{
+	auto it = std::find_if(params.begin(), params.end(), [&paramName](auto& p)
+	{
+		return p.first == paramName;
+	}
+	);
+	if (it == params.end())
+	{
+		params.push_back({ paramName,ParamValue(i2) });
+		return;
+	}
+
+	it->second.i2 = i2;
 	it->second.valid = true;
 }
 

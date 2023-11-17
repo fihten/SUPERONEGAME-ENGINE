@@ -45,6 +45,8 @@ public:
 		virtual flt3* getFlt3(int param_index);
 		virtual flt4* getFlt4(int param_index);
 		virtual flt4x4* getFlt4x4(int param_index);
+		virtual int* getInt(int param_index);
+		virtual Vec2d<int>* getInt2(int param_index);
 
 		virtual bool getParam(int param_index, string_id& s) const;
 		virtual bool getParam(int param_index, float& f) const;
@@ -52,6 +54,8 @@ public:
 		virtual bool getParam(int param_index, flt3& f3) const;
 		virtual bool getParam(int param_index, flt4& f4) const;
 		virtual bool getParam(int param_index, flt4x4& f4x4) const;
+		virtual bool getParam(int param_index, int& i) const;
+		virtual bool getParam(int param_index, Vec2d<int>& i2) const;
 
 		virtual bool getParam(const ParamKey& paramName, string_id& s) const;
 		virtual bool getParam(const ParamKey& paramName, float& f) const;
@@ -59,14 +63,18 @@ public:
 		virtual bool getParam(const ParamKey& paramName, flt3& f3) const;
 		virtual bool getParam(const ParamKey& paramName, flt4& f4) const;
 		virtual bool getParam(const ParamKey& paramName, flt4x4& f4x4) const;
-		
+		virtual bool getParam(const ParamKey& paramName, int& i) const;
+		virtual bool getParam(const ParamKey& paramName, Vec2d<int>& i2) const;
+
 		virtual void setParam(const ParamKey& paramName, const string_id& s);
 		virtual void setParam(const ParamKey& paramName, const float& f);
 		virtual void setParam(const ParamKey& paramName, const flt2& f2);
 		virtual void setParam(const ParamKey& paramName, const flt3& f3);
 		virtual void setParam(const ParamKey& paramName, const flt4& f4);
 		virtual void setParam(const ParamKey& paramName, const flt4x4& f4x4);
-		
+		virtual void setParam(const ParamKey& paramName, const int& i);
+		virtual void setParam(const ParamKey& paramName, const Vec2d<int>& i2);
+
 		virtual void accept(Visitor* visitor) const;
 
 	public:
