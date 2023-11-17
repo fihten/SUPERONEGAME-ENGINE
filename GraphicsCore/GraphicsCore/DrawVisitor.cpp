@@ -154,6 +154,34 @@ flt4x4* DrawVisitor::MeshInScene::getFlt4x4(int param_index)
 	return f4x4;
 }
 
+int* DrawVisitor::MeshInScene::getInt(int param_index)
+{
+	if (mesh == nullptr)
+		return nullptr;
+
+	int* i = mesh->getInt(param_index);
+	if (i)
+		return i;
+
+	i = static_cast<Scene*>(mesh->scene)->getInt(nodeID, param_index);
+
+	return i;
+}
+
+Vec2d<int>* DrawVisitor::MeshInScene::getInt2(int param_index)
+{
+	if (mesh == nullptr)
+		return nullptr;
+
+	Vec2d<int>* i2 = mesh->getInt2(param_index);
+	if (i2)
+		return i2;
+
+	i2 = static_cast<Scene*>(mesh->scene)->getInt2(nodeID, param_index);
+
+	return i2;
+}
+
 bool DrawVisitor::MeshInScene::getParam(int param_index, string_id& s) const
 {
 	s = string_id(-1);
@@ -224,6 +252,30 @@ bool DrawVisitor::MeshInScene::getParam(int param_index, flt4x4& f4x4) const
 		return true;
 
 	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, f4x4);
+}
+
+bool DrawVisitor::MeshInScene::getParam(int param_index, int& i) const
+{
+	i = 0;
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getParam(param_index, i))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, i);
+}
+
+bool DrawVisitor::MeshInScene::getParam(int param_index, Vec2d<int>& i2) const
+{
+	i2 = Vec2d<int>();
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getParam(param_index, i2))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param_index, i2);
 }
 
 bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, string_id& s) const
@@ -301,6 +353,32 @@ bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, flt4x4& f4x4) con
 		return true;
 
 	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param, f4x4);
+}
+
+bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, int& i) const
+{
+	i = 0;
+
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getParam(param, i))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param, i);
+}
+
+bool DrawVisitor::MeshInScene::getParam(const ParamKey& param, Vec2d<int>& i2) const
+{
+	i2 = Vec2d<int>();
+
+	if (mesh == nullptr)
+		return false;
+
+	if (mesh->getParam(param, i2))
+		return true;
+
+	return static_cast<Scene*>(mesh->scene)->getNodeParam(nodeID, param, i2);
 }
 
 flt4x4& DrawVisitor::MeshInScene::getPos4x4()

@@ -35,6 +35,8 @@ class DrawVisitor :public Scene::Visitor
 		virtual flt3* getFlt3(int param_index);
 		virtual flt4* getFlt4(int param_index);
 		virtual flt4x4* getFlt4x4(int param_index);
+		virtual int* getInt(int param_index);
+		virtual Vec2d<int>* getInt2(int param_index);
 
 		virtual bool getParam(int param_index, string_id& s) const;
 		virtual bool getParam(int param_index, float& f) const;
@@ -42,6 +44,8 @@ class DrawVisitor :public Scene::Visitor
 		virtual bool getParam(int param_index, flt3& f3) const;
 		virtual bool getParam(int param_index, flt4& f4) const;
 		virtual bool getParam(int param_index, flt4x4& f4x4) const;
+		virtual bool getParam(int param_index, int& i) const;
+		virtual bool getParam(int param_index, Vec2d<int>& i2) const;
 
 		virtual bool getParam(const ParamKey& param, string_id& s) const;
 		virtual bool getParam(const ParamKey& param, float& f) const;
@@ -49,7 +53,8 @@ class DrawVisitor :public Scene::Visitor
 		virtual bool getParam(const ParamKey& param, flt3& f3) const;
 		virtual bool getParam(const ParamKey& param, flt4& f4) const;
 		virtual bool getParam(const ParamKey& param, flt4x4& f4x4) const;
-
+		virtual bool getParam(const ParamKey& param, int& i) const;
+		virtual bool getParam(const ParamKey& param, Vec2d<int>& i2) const;
 
 		flt4x4& getPos4x4();
 		flt3& getPos3();

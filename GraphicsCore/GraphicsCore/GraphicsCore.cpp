@@ -2328,7 +2328,9 @@ flt2 GraphicsCore::mapAtoB(flt2& uvA)
 
 void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	float uA, float vA,
-	float uB, float vB
+	float uB, float vB,
+	float& angle0, float& scale0,
+	float& angle1, float& scale1
 )
 {
 	float fxA = widthOfA * uA - 0.5f;
@@ -2445,6 +2447,12 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		for (int i = 1; i < 4; i++)
 			h = std::max<float>(h, step[i]);
 	}
+
+	angle0 = minAngle0;
+	scale0 = minScale0;
+
+	angle1 = minAngle1;
+	scale1 = minScale1;
 
 	calculateIntegralsAtTexturePoint(
 		mTextureToIntegrateBsrv,

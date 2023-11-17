@@ -20,10 +20,12 @@ struct ParamValue
 	ParamValue() :valid(false) {}
 	ParamValue(string_id s) :s(s), valid(true) {}
 	ParamValue(float f) :f(f), valid(true) {}
-	ParamValue(flt2 f2) :f2(f2), valid(true) {}
-	ParamValue(flt3 f3) :f3(f3), valid(true) {}
-	ParamValue(flt4 f4) :f4(f4), valid(true) {}
-	ParamValue(flt4x4 f4x4) :f4x4(f4x4), valid(true) {}
+	ParamValue(const flt2& f2) :f2(f2), valid(true) {}
+	ParamValue(const flt3& f3) :f3(f3), valid(true) {}
+	ParamValue(const flt4& f4) :f4(f4), valid(true) {}
+	ParamValue(const flt4x4& f4x4) :f4x4(f4x4), valid(true) {}
+	ParamValue(int i) :i(i), valid(true) {}
+	ParamValue(const Vec2d<int>& i2) :i2(i2), valid(true) {}
 
 	string_id s = string_id(-1);
 	float f = 0;
@@ -31,6 +33,8 @@ struct ParamValue
 	flt3 f3;
 	flt4 f4;
 	flt4x4 f4x4;
+	int i = 0;
+	Vec2d<int> i2;
 
 	bool valid = false;
 };

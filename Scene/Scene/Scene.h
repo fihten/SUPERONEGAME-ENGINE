@@ -145,6 +145,8 @@ public:
 	flt3* getFlt3(NodeID id, int param_index);
 	flt4* getFlt4(NodeID id, int param_index);
 	flt4x4* getFlt4x4(NodeID id, int param_index);
+	int* getInt(NodeID id, int param_index);
+	Vec2d<int>* getInt2(NodeID id, int param_index);
 
 	bool getNodeParam(NodeID id, int param_index, string_id& s) const;
 	bool getNodeParam(NodeID id, int param_index, float& f) const;
@@ -152,6 +154,8 @@ public:
 	bool getNodeParam(NodeID id, int param_index, flt3& f3) const;
 	bool getNodeParam(NodeID id, int param_index, flt4& f4) const;
 	bool getNodeParam(NodeID id, int param_index, flt4x4& f4x4) const;
+	bool getNodeParam(NodeID id, int param_index, int& i) const;
+	bool getNodeParam(NodeID id, int param_index, Vec2d<int>& i2) const;
 
 	void setNodeParam(NodeID id, const ParamKey& paramName, const string_id& s);
 	void setNodeParam(NodeID id, const ParamKey& paramName, const float& f);

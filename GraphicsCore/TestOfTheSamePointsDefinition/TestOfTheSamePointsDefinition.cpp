@@ -131,9 +131,31 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case VK_SPACE:
 			OutputDebugStringA("integrals calculation starts\n");
+
+			float angle0 = 0;
+			float scale0 = 1;
+
+			float angle1 = 0;
+			float scale1 = 1;
+
 			GraphicsCore::instance()->calculateIntegralsAtTwoPointsOfAandB(
-				uA, vA, uB, vB
+				uA, vA, uB, vB,
+				angle0, scale0,
+				angle1, scale1
 			);
+
+			ParamKey angle0_key{ StringManager::toStringId("angle0"), -1, string_id(-1) };
+			areaOfIntegrationInB.setParam(angle0_key, angle0);
+
+			ParamKey scale0_key{ StringManager::toStringId("scale0"), -1, string_id(-1) };
+			areaOfIntegrationInB.setParam(scale0_key, scale0);
+
+			ParamKey angle1_key{ StringManager::toStringId("angle1"), -1, string_id(-1) };
+			areaOfIntegrationInB.setParam(angle1_key, angle1);
+
+			ParamKey scale1_key{ StringManager::toStringId("scale1"), -1, string_id(-1) };
+			areaOfIntegrationInB.setParam(scale1_key, scale1);
+
 			OutputDebugStringA("integrals calculation finishes\n");
 			break;
 		}

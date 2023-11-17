@@ -322,7 +322,9 @@ private:
 public:
 	void calculateIntegralsAtTwoPointsOfAandB(
 		float uA, float vA,
-		float uB, float vB
+		float uB, float vB,
+		float& angle0, float& scale0,
+		float& angle1, float& scale1
 	);
 
 private:
