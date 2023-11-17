@@ -44,6 +44,7 @@ class HLSLConverter :public ShaderConverter
 		VOID_,
 		BOOL1,
 		INT1,
+		INT2,
 		UINT1,
 		FLOAT1,
 		FLOAT2,
@@ -201,6 +202,7 @@ class HLSLConverter :public ShaderConverter
 	void voidState();
 	void boolState();
 	void intState();
+	void int2State();
 	void uintState();
 	void floatState();
 	void float2State();

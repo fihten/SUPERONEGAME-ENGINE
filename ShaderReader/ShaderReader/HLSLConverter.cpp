@@ -149,6 +149,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			intState();
 			break;
 
+		case State::INT2:
+			int2State();
+			break;
+
 		case State::UINT1:
 			uintState();
 			break;
@@ -704,6 +708,13 @@ void HLSLConverter::unknown()
 	{
 		words.pop();
 		currentState = State::INT1;
+
+		return;
+	}
+	if (word == std::string("int2"))
+	{
+		words.pop();
+		currentState = State::INT2;
 
 		return;
 	}
@@ -1276,6 +1287,8 @@ bool HLSLConverter::isType(const std::string& str) const
 	if (std::strcmp(str.c_str(), "bool") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "int") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "int2") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "uint") == 0)
 		return true;
@@ -1910,6 +1923,11 @@ void HLSLConverter::intState()
 		currentState = State::CUSTOM_NAME;
 		return;
 	}
+}
+
+void HLSLConverter::int2State()
+{
+
 }
 
 void HLSLConverter::uintState()
@@ -3330,6 +3348,13 @@ void HLSLConverter::cast()
 	{
 		words.pop();
 		currentState = State::INT1;
+
+		return;
+	}
+	if (word == std::string("int2"))
+	{
+		words.pop();
+		currentState = State::INT2;
 
 		return;
 	}
