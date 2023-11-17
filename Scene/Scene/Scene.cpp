@@ -1008,6 +1008,22 @@ void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const flt4x4& f4x
 	node->setParam(paramName, f4x4);
 }
 
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const int& i)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, i);
+}
+
+void Scene::setNodeParam(NodeID id, const ParamKey& paramName, const Vec2d<int>& i2)
+{
+	Node* node = nodes[id];
+	if (node == nullptr)
+		return;
+	node->setParam(paramName, i2);
+}
+
 void Scene::createNodeParamReference(NodeID reference, NodeID referenced, const ParamKey& param)
 {
 	auto& l = paramsLocations[reference].location;
@@ -1179,6 +1195,44 @@ bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) con
 		return false;
 
 	f4x4 = node->params[param_index].second.f4x4;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, int& i) const
+{
+	auto it = std::find_if(nodes[id]->params.begin(), nodes[id]->params.end(), [&paramName](auto& p)
+	{
+		return paramName == p.first;
+	});
+
+	int param_index = it - nodes[id]->params.begin();
+
+	id = paramsLocations[id].location[param_index].second;
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return false;
+
+	i = node->params[param_index].second.i;
+
+	return true;
+}
+
+bool Scene::getNodeParam(NodeID id, const ParamKey& paramName, Vec2d<int>& i2) const
+{
+	auto it = std::find_if(nodes[id]->params.begin(), nodes[id]->params.end(), [&paramName](auto& p)
+	{
+		return paramName == p.first;
+	});
+
+	int param_index = it - nodes[id]->params.begin();
+
+	id = paramsLocations[id].location[param_index].second;
+	Node* node = nodes[id];
+	if (!node->params[param_index].second.valid)
+		return false;
+
+	i2 = node->params[param_index].second.i2;
 
 	return true;
 }

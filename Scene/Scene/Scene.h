@@ -163,6 +163,8 @@ public:
 	void setNodeParam(NodeID id, const ParamKey& paramName, const flt3& f3);
 	void setNodeParam(NodeID id, const ParamKey& paramName, const flt4& f4);
 	void setNodeParam(NodeID id, const ParamKey& paramName, const flt4x4& f4x4);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const int& i);
+	void setNodeParam(NodeID id, const ParamKey& paramName, const Vec2d<int>& i2);
 
 	void createNodeParamReference(NodeID reference, NodeID referenced, const ParamKey& param);
 
@@ -172,6 +174,8 @@ public:
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt3& f3) const;
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4& f4) const;
 	bool getNodeParam(NodeID id, const ParamKey& paramName, flt4x4& f4x4) const;
+	bool getNodeParam(NodeID id, const ParamKey& paramName, int& i) const;
+	bool getNodeParam(NodeID id, const ParamKey& paramName, Vec2d<int>& i2) const;
 
 	flt4x4& getNodePosition4x4(NodeID id);
 	flt4& getNodePosition4(NodeID id);
