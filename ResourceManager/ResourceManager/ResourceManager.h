@@ -36,6 +36,8 @@ public:
 		FLOAT3_ALREADY_EXISTS,
 		FLOAT2_ALREADY_EXISTS,
 		FLOAT1_ALREADY_EXISTS,
+		INT2_ALREADY_EXISTS,
+		INT1_ALREADY_EXISTS,
 		VARIABLE_DOESNT_EXIST,
 		STRUCT_ALREADY_EXISTS,
 		TEXTURE_ALREADY_EXISTS,
@@ -55,6 +57,8 @@ public:
 	RegisterMessage registerFloat3(string_id techniqueName, string_id flt3Name, ID3DX11EffectVariable* flt3, unsigned int elementsCount);
 	RegisterMessage registerFloat2(string_id techniqueName, string_id flt2Name, ID3DX11EffectVariable* flt2, unsigned int elementsCount);
 	RegisterMessage registerFloat1(string_id techniqueName, string_id flt1Name, ID3DX11EffectVariable* flt1, unsigned int elementsCount);
+	RegisterMessage registerInt2(string_id techniqueName, string_id int2Name, ID3DX11EffectVariable* int2, unsigned int elementsCount);
+	RegisterMessage registerInt1(string_id techniqueName, string_id int1Name, ID3DX11EffectVariable* int1, unsigned int elementsCount);
 	RegisterMessage registerStruct(string_id techniqueName, string_id structName, const StructResource& structRes);
 	RegisterMessage registerTexture(string_id techniqueName, string_id textureName, const Texture2dResource& texRes);
 	RegisterMessage registerTexturesArray(string_id techniqueName, string_id textureArrName, const Texture2dArrayResource& texArrRes);
@@ -78,6 +82,8 @@ public:
 	std::map<string_id, Float3Resource>& getFloat3s(string_id techniqueName);
 	std::map<string_id, Float2Resource>& getFloat2s(string_id techniqueName);
 	std::map<string_id, Float1Resource>& getFloat1s(string_id techniqueName);
+	std::map<string_id, Int2Resource>& getInt2s(string_id techniqueName);
+	std::map<string_id, Int1Resource>& getInt1s(string_id techniqueName);
 	std::map<string_id, StructResource>& getStructures(string_id techniqueName);
 	std::map<string_id, Texture2dResource>& getTextures(string_id techniqueName);
 	std::map<string_id, Texture2dArrayResource>& getTexturesArrays(string_id techniqueName);

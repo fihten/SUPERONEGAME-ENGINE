@@ -136,6 +136,36 @@ ResourceManager::RegisterMessage ResourceManager::registerFloat1(string_id techn
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerInt2(string_id techniqueName, string_id int2Name, ID3DX11EffectVariable* int2, unsigned int elementsCount)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.int2s.count(int2Name) != 0)
+		return RegisterMessage::INT2_ALREADY_EXISTS;
+
+	techniqueRes.int2s[int2Name].ptr = int2;
+	techniqueRes.int2s[int2Name].elementsCount = elementsCount;
+
+	return RegisterMessage::OK;
+}
+
+ResourceManager::RegisterMessage ResourceManager::registerInt1(string_id techniqueName, string_id int1Name, ID3DX11EffectVariable* int1, unsigned int elementsCount)
+{
+	if (techniques.count(techniqueName) == 0)
+		return RegisterMessage::TECHNIQUE_DOESNT_EXIST;
+
+	TechniqueResource& techniqueRes = techniques[techniqueName];
+	if (techniqueRes.int1s.count(int1Name) != 0)
+		return RegisterMessage::INT1_ALREADY_EXISTS;
+
+	techniqueRes.int1s[int1Name].ptr = int1;
+	techniqueRes.int1s[int1Name].elementsCount = elementsCount;
+
+	return RegisterMessage::OK;
+}
+
 ResourceManager::RegisterMessage ResourceManager::registerStruct(string_id techniqueName, string_id structName, const StructResource& structRes)
 {
 	if (techniques.count(techniqueName) == 0)
@@ -525,6 +555,38 @@ std::map<string_id, Float1Resource>& ResourceManager::getFloat1s(string_id techn
 	}
 
 	return cashed_technique_resource->float1s;
+}
+
+std::map<string_id, Int2Resource>& ResourceManager::getInt2s(string_id techniqueName)
+{
+	static std::map<string_id, Int2Resource> empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
+
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->int2s;
+}
+
+std::map<string_id, Int1Resource>& ResourceManager::getInt1s(string_id techniqueName)
+{
+	static std::map<string_id, Int1Resource> empty;
+	if (techniqueName != cashed_technique_name_id)
+	{
+		if (techniques.count(techniqueName) == 0)
+			return empty;
+
+		cashed_technique_resource = &techniques.at(techniqueName);
+		cashed_technique_name_id = techniqueName;
+		techniqueCasheWasUpdated = true;
+	}
+
+	return cashed_technique_resource->int1s;
 }
 
 std::map<string_id, StructResource>& ResourceManager::getStructures(string_id techniqueName)

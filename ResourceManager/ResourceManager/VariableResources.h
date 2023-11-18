@@ -39,6 +39,20 @@ struct Float1Resource
 	ID3DX11EffectVariable* ptr = nullptr;
 };
 
+struct Int2Resource
+{
+	VariableLocation location;
+	unsigned int elementsCount = 0;
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
+struct Int1Resource
+{
+	VariableLocation location;
+	unsigned int elementsCount = 0;
+	ID3DX11EffectVariable* ptr = nullptr;
+};
+
 #define MAX_COUNT_OF_FIELDS 16
 struct StructResource
 {

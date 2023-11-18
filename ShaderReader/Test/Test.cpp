@@ -680,7 +680,7 @@ public:
 int main()
 {
 	ShaderReader reader;
-	reader.openShader(L"C:\\3dEngine\\Shaders\\SelectedObjectsBox.fx");
+	reader.openShader(L"C:\\3dEngine\\Shaders\\VisualizeAreaOfIntegration.fx");
 
 	HLSLConverter converter;
 	reader.parseShader(converter);

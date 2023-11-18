@@ -19,6 +19,10 @@ struct TechniqueResource
 	std::map<string_id, Float2Resource> float2s;
 	// float1
 	std::map<string_id, Float1Resource> float1s;
+	// int2
+	std::map<string_id, Int2Resource> int2s;
+	// int1
+	std::map<string_id, Int1Resource> int1s;
 	// structures
 	std::map<string_id, StructResource> structures;
 	// textures
