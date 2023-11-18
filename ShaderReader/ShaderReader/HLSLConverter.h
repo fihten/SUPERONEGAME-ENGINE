@@ -51,6 +51,7 @@ class HLSLConverter :public ShaderConverter
 		FLOAT3,
 		FLOAT4,
 		FLOAT3X3,
+		FLOAT3X4,
 		FLOAT4X4,
 		TEXTURE2D,
 		TEXTURE2DARRAY,
@@ -209,6 +210,7 @@ class HLSLConverter :public ShaderConverter
 	void float3State();
 	void float4State();
 	void float3x3State();
+	void float3x4State();
 	void float4x4State();
 	void userTypeState();
 	void customName();

@@ -46,6 +46,12 @@ void ShaderUnits::FLOAT3X3::query(ShaderVisitor* visitor)
 	visitor->finishVisit(this);
 }
 
+void ShaderUnits::FLOAT3X4::query(ShaderVisitor* visitor)
+{
+	visitor->startVisit(this);
+	visitor->finishVisit(this);
+}
+
 void ShaderUnits::FLOAT4X4::query(ShaderVisitor* visitor)
 {
 	visitor->startVisit(this);

@@ -29,6 +29,11 @@ public:
 		printSpaces();
 		std::cout << "float3x3" << std::endl;
 	};
+	void startVisit(const ShaderUnits::FLOAT3X4* pFLOAT3X4)
+	{
+		printSpaces();
+		std::cout << "float3x4" << std::endl;
+	};
 	void startVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4)
 	{
 		printSpaces();
@@ -455,6 +460,8 @@ public:
 	{
 		numberOfSpaces -= 4;
 	};
+	void finishVisit(const ShaderUnits::FLOAT3X3* pFLOAT3X3) {};
+	void finishVisit(const ShaderUnits::FLOAT3X4* pFLOAT3X4) {};
 	void finishVisit(const ShaderUnits::FLOAT4X4* pFLOAT4X4) {};
 	void finishVisit(const ShaderUnits::VOID_* pVOID) {};
 	void finishVisit(const ShaderUnits::BOOL1* pBOOL) {};

@@ -177,6 +177,10 @@ void HLSLConverter::getShader(HLSLShader& hlslShader)
 			float3x3State();
 			break;
 
+		case State::FLOAT3X4:
+			float3x4State();
+			break;
+
 		case State::FLOAT4X4:
 			float4x4State();
 			break;
@@ -760,6 +764,13 @@ void HLSLConverter::unknown()
 
 		return;
 	}
+	if (word == std::string("float3x4"))
+	{
+		words.pop();
+		currentState = State::FLOAT3X4;
+
+		return;
+	}
 	if (word == std::string("float4x4"))
 	{
 		words.pop();
@@ -1301,6 +1312,8 @@ bool HLSLConverter::isType(const std::string& str) const
 	if (std::strcmp(str.c_str(), "float4") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "float3x3") == 0)
+		return true;
+	if (std::strcmp(str.c_str(), "float3x4") == 0)
 		return true;
 	if (std::strcmp(str.c_str(), "float4x4") == 0)
 		return true;
@@ -1927,7 +1940,32 @@ void HLSLConverter::intState()
 
 void HLSLConverter::int2State()
 {
+	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
 
+		ShaderUnits::INT2* type = new ShaderUnits::INT2();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ShaderUnits::INT2();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+		return;
+	}
 }
 
 void HLSLConverter::uintState()
@@ -2123,6 +2161,37 @@ void HLSLConverter::float3x3State()
 		HLSLConverter::DeclarationFunctionOrVariable decl;
 
 		decl.type = new ShaderUnits::FLOAT3X3();
+		decl.name = word;
+
+		decls.push(decl);
+
+		currentState = State::CUSTOM_NAME;
+
+		return;
+	}
+}
+
+void HLSLConverter::float3x4State()
+{
+	std::string word = words.front();
+	if (!statesStack.empty() && statesStack.top() == State::CAST)
+	{
+		words.pop();
+
+		ShaderUnits::FLOAT3X4* type = new ShaderUnits::FLOAT3X4();
+		componentStack.push(type);
+
+		currentState = State::UPDATE_CAST;
+
+		return;
+	}
+	if (word != std::string("("))
+	{
+		words.pop();
+
+		HLSLConverter::DeclarationFunctionOrVariable decl;
+
+		decl.type = new ShaderUnits::FLOAT3X4();
 		decl.name = word;
 
 		decls.push(decl);
@@ -3397,6 +3466,13 @@ void HLSLConverter::cast()
 	{
 		words.pop();
 		currentState = State::FLOAT3X3;
+
+		return;
+	}
+	if (word == std::string("float3x4"))
+	{
+		words.pop();
+		currentState = State::FLOAT3X4;
 
 		return;
 	}
