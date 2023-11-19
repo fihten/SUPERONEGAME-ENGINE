@@ -256,6 +256,21 @@ void registerResources(HLSLShader& shader, ID3D11Device* device, ID3DX11Effect* 
 				t2dArrRes.texArr = mShader->GetVariableByName(gv.name.c_str())->AsShaderResource();
 				ResourceManager::instance()->registerTexturesArray(technique_id, gv_name_id, t2dArrRes);
 			}
+			if (gv.type == std::string("int"))
+			{
+				auto i1 = mShader->GetVariableByName(gv.name.c_str());
+				ResourceManager::instance()->registerInt1(technique_id, gv_name_id, i1, 1);
+			}
+			if (gv.type == std::string("int2"))
+			{
+				auto i2 = mShader->GetVariableByName(gv.name.c_str());
+				ResourceManager::instance()->registerInt2(technique_id, gv_name_id, i2, 1);
+			}
+			if (gv.type == std::string("float"))
+			{
+				auto f1 = mShader->GetVariableByName(gv.name.c_str());
+				ResourceManager::instance()->registerFloat1(technique_id, gv_name_id, f1, 1);
+			}
 		}
 	}
 }

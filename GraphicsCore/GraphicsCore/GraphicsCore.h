@@ -387,6 +387,8 @@ private:
 	const flt3* getFloat3(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	const flt2* getFloat2(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	const float* getFloat1(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const Vec2d<int>* getInt2(Mesh& mesh, string_id var, const VariableLocation& location) const;
+	const int* getInt1(Mesh& mesh, string_id var, const VariableLocation& location) const;
 	void* getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes = nullptr);
 	
 	ID3D11Buffer* getVertexBuffer(
@@ -428,6 +430,8 @@ private:
 	void setFloat3sOnGPU(Mesh& mesh);
 	void setFloat2sOnGPU(Mesh& mesh);
 	void setFloat1sOnGPU(Mesh& mesh);
+	void setInt2sOnGPU(Mesh& mesh);
+	void setInt1sOnGPU(Mesh& mesh);
 	void setStructsOnGPU(Mesh& mesh);
 	void setTexturesOnGPU(Mesh& mesh);
 	void setTexturesArraysOnGPU(Mesh& mesh);

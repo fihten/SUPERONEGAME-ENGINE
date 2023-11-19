@@ -944,6 +944,24 @@ void Mesh::setTechnique(string_id technique_name_id)
 		params.push_back({ pk,pv });
 	}
 
+	std::map<string_id, Int2Resource>& i2s =
+		ResourceManager::instance()->getInt2s(technique_name_id);
+	for (auto& i2 : i2s)
+	{
+		ParamKey pk{ i2.first, -1, string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
+	std::map<string_id, Int1Resource>& i1s =
+		ResourceManager::instance()->getInt1s(technique_name_id);
+	for (auto& i1 : i1s)
+	{
+		ParamKey pk{ i1.first, -1, string_id(-1) };
+		ParamValue pv;
+		params.push_back({ pk,pv });
+	}
+
 	std::map<string_id, StructResource>& structs =
 		ResourceManager::instance()->getStructures(technique_name_id);
 	for (auto& s : structs)

@@ -436,6 +436,16 @@ const float* GraphicsCore::getFloat1(Mesh& mesh, string_id var, const VariableLo
 	return mesh.getFloat(param_index);
 }
 
+const Vec2d<int>* GraphicsCore::getInt2(Mesh& mesh, string_id var, const VariableLocation& location) const
+{
+	return mesh.getInt2(param_index);
+}
+
+const int* GraphicsCore::getInt1(Mesh& mesh, string_id var, const VariableLocation& location) const
+{
+	return mesh.getInt(param_index);
+}
+
 void* GraphicsCore::getStruct(Mesh& mesh, string_id var, const StructResource& sr, int* bytes)
 {
 	string_id technique_name_id = mesh.getTechnique();
@@ -924,6 +934,38 @@ void GraphicsCore::setFloat1sOnGPU(Mesh& mesh)
 	}
 }
 
+void GraphicsCore::setInt2sOnGPU(Mesh& mesh)
+{
+	string_id technique_name_id = mesh.getTechnique();
+
+	std::map<string_id, Int2Resource>& int2s =
+		ResourceManager::instance()->getInt2s(technique_name_id);
+	for (auto& i2 : int2s)
+	{
+		const Vec2d<int>* v = getInt2(mesh, i2.first, i2.second.location);
+		param_index++;
+		if (v == nullptr)
+			continue;
+		i2.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, sizeof(*v));
+	}
+}
+
+void GraphicsCore::setInt1sOnGPU(Mesh& mesh)
+{
+	string_id technique_name_id = mesh.getTechnique();
+
+	std::map<string_id, Int1Resource>& int1s =
+		ResourceManager::instance()->getInt1s(technique_name_id);
+	for (auto& i1 : int1s)
+	{
+		const int* v = getInt1(mesh, i1.first, i1.second.location);
+		param_index++;
+		if (v == nullptr)
+			continue;
+		i1.second.ptr->SetRawValue(reinterpret_cast<const void*>(v), 0, sizeof(*v));
+	}
+}
+
 void GraphicsCore::setStructsOnGPU(Mesh& mesh)
 {
 	string_id technique_name_id = mesh.getTechnique();
@@ -973,6 +1015,8 @@ void GraphicsCore::setVariablesOnGPU(Mesh& mesh)
 	setFloat2sOnGPU(mesh);
 	setFloat1sOnGPU(mesh);
 	setFloat4x4sOnGPU(mesh);
+	setInt2sOnGPU(mesh);
+	setInt1sOnGPU(mesh);
 	setStructsOnGPU(mesh);
 	setTexturesOnGPU(mesh);
 	setTexturesArraysOnGPU(mesh);

@@ -630,3 +630,45 @@ void GlobalVariablesVisitor::startVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXT
 
 	globalVariables[globalVariablesCount].type = "Texture2DArray";
 }
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::INT1* pINT1)
+{
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	if (!withinVariableDeclaration)
+		return;
+
+	globalVariables[globalVariablesCount].type = "int";
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::INT2* pINT2)
+{
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	if (!withinVariableDeclaration)
+		return;
+
+	globalVariables[globalVariablesCount].type = "int2";
+}
+
+void GlobalVariablesVisitor::startVisit(const ShaderUnits::FLOAT1* pFloat1)
+{
+	if (withinCbuffer)
+		return;
+	if (withinFunctionDeclaration)
+		return;
+	if (withinStruct)
+		return;
+	if (!withinVariableDeclaration)
+		return;
+
+	globalVariables[globalVariablesCount].type = "float";
+}

@@ -246,6 +246,11 @@ public:
 	void startVisit(const ShaderUnits::TEXTURE2D* pTEXTURE2D);
 	void startVisit(const ShaderUnits::TEXTURE2DARRAY* pTEXTURE2DARRAY);
 
+	void startVisit(const ShaderUnits::INT1* pINT1);
+	void startVisit(const ShaderUnits::INT2* pINT2);
+
+	void startVisit(const ShaderUnits::FLOAT1* pFLOAT1);
+
 public:
 	GLOBAL_VARIABLE globalVariables[GLOBAL_VARIABLES_MAX_COUNT];
 	int globalVariablesCount = 0;
