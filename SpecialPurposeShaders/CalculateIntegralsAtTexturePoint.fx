@@ -1,9 +1,13 @@
+#include "constants.hlsl"
+
 Texture2D<float4> tex;
 RWStructuredBuffer<uint> Integrals;
 RWStructuredBuffer<uint> Variances;
 
 int radius0;
 int radius1;
+
+int sectors;
 
 int leftX;
 int rightX;
@@ -32,8 +36,12 @@ void cs_integral(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (bottomY + y > topY)
 		return;
 
-	int radius = radius0 + integralIndex;
-	if (radius > radius1)
+	int radiusIndex = integralIndex / sectors;
+	int sectorIndex = integralIndex % sectors;
+
+	int interiorRadius = sqrt(radiusIndex) * radius0;
+	int exteriorRadius = sqrt(radiusIndex + 1) * radius0;
+	if (exteriorRadius > radius1)
 		return;
 
 	x = leftX + x + x0;
@@ -67,7 +75,17 @@ void cs_integral(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float2 r = float2(x - x0, y - y0);
 	float2 r_ = mul(r, mInv);
-	if (dot(r_, r_) > radius * radius)
+	float r_Xr_ = dot(r_, r_);
+	if (r_Xr_ > exteriorRadius * exteriorRadius)
+		return;
+	if (r_Xr_ < interiorRadius * interiorRadius)
+		return;
+
+	float sectorLen = 2.0f * PI / sectors;
+	float angle = atan2(r_.y, r_.x);
+	if (angle < -PI + sectorLen * sectorIndex)
+		return;
+	if (angle > -PI + sectorLen * (sectorIndex + 1))
 		return;
 
 	uint4 color = round(255 * tex[int2(x, y)]);

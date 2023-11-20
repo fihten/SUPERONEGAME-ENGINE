@@ -18,7 +18,9 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define INTEGRALS 20
+#define INTEGRALS_ALONG_RADIUS 2
+#define INTEGRALS_ALONG_SECTORS 3
+#define INTEGRALS INTEGRALS_ALONG_RADIUS * INTEGRALS_ALONG_SECTORS
 
 class GraphicsCore;
 
@@ -275,8 +277,9 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 1;
-	int radius1 = radius0 + INTEGRALS - 1;
+	int radius0 = 20;
+	int radius1 = std::sqrt(INTEGRALS_ALONG_RADIUS) * radius0;
+	int sectors = INTEGRALS_ALONG_SECTORS;
 
 public:
 	void defineTheSamePoints();
@@ -340,6 +343,8 @@ private:
 
 	ID3DX11EffectVariable* mRadius0MDSP = nullptr;
 	ID3DX11EffectVariable* mRadius1MDSP = nullptr;
+
+	ID3DX11EffectVariable* mSectorsMDSP = nullptr;
 
 	ID3DX11EffectVariable* mLeftXMDSP = nullptr;
 	ID3DX11EffectVariable* mRightXMDSP = nullptr;
