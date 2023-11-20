@@ -23,7 +23,7 @@ struct vs_out
 vs_out VS(float2 ndc : Position)
 {
 	vs_out vout;
-	vout.ndc = float4(ndc, 0, 1);
+	vout.ndc = float4(ndc, 0.1, 1);
 	vout.tex = ndc;
 	return vout;
 }

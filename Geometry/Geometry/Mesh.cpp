@@ -891,6 +891,8 @@ Mesh createMeshVisualizingAreaOfIntegration()
 
 	ParamKey arrow_key{ StringManager::toStringId("arrow"),-1,string_id(-1) };
 	m.setParam(arrow_key, StringManager::toStringId("Arrow.jpg"));
+
+	return m;
 }
 
 void Mesh::setTechnique(string_id technique_name_id)

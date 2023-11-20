@@ -77,7 +77,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		testMesh.setParam(mappedPos_key, uvB); 
 		
 		// set params of area of integration within texture A
-		int radiusOfIntegrationArea = GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
+		int radiusOfIntegrationArea = 100 * GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
 		ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
 		areaOfIntegrationInA.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
 
@@ -111,6 +111,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		// set params of area of integration within texture B
 		areaOfIntegrationInB.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
 
+		areaOfIntegrationInB.setParam(angle0_key, 0.0f);
+		areaOfIntegrationInB.setParam(scale0_key, 1.0f);
+
+		areaOfIntegrationInB.setParam(angle1_key, 0.0f);
+		areaOfIntegrationInB.setParam(scale1_key, 1.0f);
+
 		int wB = GraphicsCore::instance()->getWidthOfTextureB();
 		areaOfIntegrationInB.setParam(width_key, wB);
 
@@ -119,8 +125,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		areaOfIntegrationInB.setParam(ndcOffsetY_key, -1.0f);
 
-		Vec2d<int> centerOfArrowInB(uA * wA - 0.5f, vA * hA - 0.5f);
-		ParamKey centerOfArrow_key{ StringManager::toStringId("centerOfArrow"), -1, string_id(-1) };
+		Vec2d<int> centerOfArrowInB(uB * wB - 0.5f, vB * hB - 0.5f);
 		areaOfIntegrationInB.setParam(centerOfArrow_key, centerOfArrowInB);
 	}
 #endif

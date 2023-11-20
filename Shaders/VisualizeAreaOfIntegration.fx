@@ -72,7 +72,8 @@ VertexOut vs(VertexIn vin)
 
 float4 ps(VertexOut pin) : SV_Target
 {
-	float4 color = arrow.Sample(ssLinear, pin.uv);
+	float4 color;
+	color.rgb = arrow.Sample(ssLinear, pin.uv).rgb;
 	color.a = 0.5f;
 
 	return color;
