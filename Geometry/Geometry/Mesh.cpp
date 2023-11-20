@@ -892,6 +892,8 @@ Mesh createMeshVisualizingAreaOfIntegration()
 	ParamKey arrow_key{ StringManager::toStringId("arrow"),-1,string_id(-1) };
 	m.setParam(arrow_key, StringManager::toStringId("Arrow.jpg"));
 
+	m.setBlendState(StringManager::toStringId("RenderTarget[0].BlendEnable=TRUE;RenderTarget[0].SrcBlend=D3D11_BLEND_INV_SRC_ALPHA;RenderTarget[0].DestBlend=D3D11_BLEND_SRC_ALPHA;RenderTarget[0].BlendOp=D3D11_BLEND_OP_ADD;RenderTarget[0].RenderTargetWriteMask=15"));
+
 	return m;
 }
 
