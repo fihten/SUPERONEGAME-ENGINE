@@ -899,7 +899,42 @@ Mesh createMeshVisualizingAreaOfIntegration()
 
 Mesh createHistogram(float y[], int N)
 {
+	Mesh m;
 
+	m.setTechnique(StringManager::toStringId("histogram"));
+	m.setPass(StringManager::toStringId("P0"));
+
+	m.flt2_streams.push_back(
+		std::pair<string_id, std::vector<flt2>>(
+			StringManager::toStringId("Position"),
+			std::vector<flt2>())
+	);
+	auto& positions = m.flt2_streams.back().second;
+
+	auto& inds = m.indicies;
+	inds.reserve(6 * N);
+
+	float h = 2.0f / N;
+	for (int x = 0; x < N; x++)
+	{
+		positions.push_back(flt2(x * h - 1.0f, -1.0f));
+		positions.push_back(flt2((x + 1) * h - 1.0f, -1.0f));
+
+		positions.push_back(flt2(x * h - 1.0f, 0.0f));
+		positions.push_back(flt2((x + 1) * h - 1.0f, 0.0f));
+
+		int offset = 6 * x;
+
+		inds.push_back(offset);
+		inds.push_back(offset + 2);
+		inds.push_back(offset + 1);
+
+		inds.push_back(offset + 2);
+		inds.push_back(offset + 3);
+		inds.push_back(offset + 1);
+	}
+
+	return m;
 }
 
 void Mesh::setTechnique(string_id technique_name_id)
