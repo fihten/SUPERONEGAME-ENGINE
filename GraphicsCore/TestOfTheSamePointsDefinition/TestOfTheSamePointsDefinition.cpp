@@ -77,7 +77,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		testMesh.setParam(mappedPos_key, uvB); 
 		
 		// set params of area of integration within texture A
-		int radiusOfIntegrationArea = 10 * GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
+		int radiusOfIntegrationArea = GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
 		ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
 		areaOfIntegrationInA.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
 

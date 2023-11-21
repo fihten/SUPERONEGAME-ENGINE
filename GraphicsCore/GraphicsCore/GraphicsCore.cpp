@@ -2599,6 +2599,8 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	mRadius0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius0");
 	mRadius1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius1");
 
+	mSectorsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("sectors");
+
 	mLeftXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("leftX");
 	mRightXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("rightX");
 
@@ -2664,6 +2666,8 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 
 	mRadius0MDSP->SetRawValue(&radius0, 0, sizeof radius0);
 	mRadius1MDSP->SetRawValue(&radius1, 0, sizeof radius1);
+
+	mSectorsMDSP->SetRawValue(&sectors, 0, sizeof sectors);
 
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
