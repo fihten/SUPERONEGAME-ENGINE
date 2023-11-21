@@ -24,6 +24,7 @@ Mesh createPlane(float width, float height, float m, float n);
 Mesh createAreaOfSelection();
 Mesh createMeshForTestingDefinitionOfTheSamePoints();
 Mesh createMeshVisualizingAreaOfIntegration();
+Mesh createHistogram(float y[], int N);
 
 class Mesh
 {
@@ -224,6 +225,7 @@ public:
 	friend Mesh createAreaOfSelection();
 	friend Mesh createMeshForTestingDefinitionOfTheSamePoints();
 	friend Mesh createMeshVisualizingAreaOfIntegration();
+	friend Mesh createHistogram(float y[], int N);
 public:
 	uint32_t id;
 	void* scene = nullptr;

@@ -277,7 +277,7 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 100;
+	int radius0 = 50;
 	int radius1 = std::sqrt(INTEGRALS_ALONG_RADIUS) * radius0;
 	int sectors = INTEGRALS_ALONG_SECTORS;
 

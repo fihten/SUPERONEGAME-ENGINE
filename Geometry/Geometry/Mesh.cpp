@@ -897,6 +897,11 @@ Mesh createMeshVisualizingAreaOfIntegration()
 	return m;
 }
 
+Mesh createHistogram(float y[], int N)
+{
+
+}
+
 void Mesh::setTechnique(string_id technique_name_id)
 {
 	this->technique_name_id = technique_name_id;
