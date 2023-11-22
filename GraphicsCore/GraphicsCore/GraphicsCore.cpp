@@ -2780,4 +2780,24 @@ void GraphicsCore::initCalculationOfTextureStatistic()
 	mHeightCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("height");
 	mRadiusCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("radius");
 	mR0CSOT = mCalculateStatisticOfTextureFX->GetVariableByName("r0");
+
+	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.ByteWidth = NCSOT * sizeof(int);
+	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	buffer_desc.CPUAccessFlags = 0;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	buffer_desc.StructureByteStride = sizeof(int);
+
+	D3D11_SUBRESOURCE_DATA data;
+	static int initialStatistic[1000];
+	data.pSysMem = initialStatistic;
+
+	device->CreateBuffer(&buffer_desc, &data, &mStatisticBuffer);
+
+	buffer_desc.Usage = D3D11_USAGE_STAGING;
+	buffer_desc.BindFlags = 0;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	device->CreateBuffer(&buffer_desc, nullptr, &mStatisticBufferCopy);
 }

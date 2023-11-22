@@ -398,6 +398,11 @@ private:
 	ID3DX11EffectVariable* mRadiusCSOT = nullptr;
 	ID3DX11EffectVariable* mR0CSOT = nullptr;
 
+	ID3D11Buffer* mStatisticBuffer = nullptr;
+	ID3D11Buffer* mStatisticBufferCopy = nullptr;
+
+	int NCSOT = 100;
+
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
