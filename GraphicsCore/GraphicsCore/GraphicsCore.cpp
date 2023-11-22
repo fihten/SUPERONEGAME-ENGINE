@@ -2800,4 +2800,17 @@ void GraphicsCore::initCalculationOfTextureStatistic()
 	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 
 	device->CreateBuffer(&buffer_desc, nullptr, &mStatisticBufferCopy);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uav_desc.Buffer.FirstElement = 0;
+	uav_desc.Buffer.NumElements = NCSOT;
+	uav_desc.Buffer.Flags = 0;
+	device->CreateUnorderedAccessView(mStatisticBuffer, &uav_desc, &mStatisticBufferUAV);
+}
+
+void GraphicsCore::calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int y[], int& N)
+{
+
 }

@@ -384,6 +384,9 @@ private:
 		float variancesB[]
 	);
 	
+public:
+	void calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int y[], int& N);
+
 private:
 	void initCalculationOfTextureStatistic();
 	ID3DX11Effect* mCalculateStatisticOfTextureFX = nullptr;
@@ -400,6 +403,8 @@ private:
 
 	ID3D11Buffer* mStatisticBuffer = nullptr;
 	ID3D11Buffer* mStatisticBufferCopy = nullptr;
+
+	ID3D11UnorderedAccessView* mStatisticBufferUAV = nullptr;
 
 	int NCSOT = 100;
 
