@@ -385,6 +385,11 @@ private:
 	);
 	
 private:
+	void initCalculationOfTextureStatistic();
+	ID3DX11Effect* mCalculateStatisticOfTextureFX = nullptr;
+	ID3DX11EffectTechnique* mCalculateStatisticOfTextureTech = nullptr;
+
+private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;
