@@ -389,6 +389,15 @@ private:
 	ID3DX11Effect* mCalculateStatisticOfTextureFX = nullptr;
 	ID3DX11EffectTechnique* mCalculateStatisticOfTextureTech = nullptr;
 
+	ID3DX11EffectShaderResourceVariable* mTextureCSOT = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mStatisticCSOT = nullptr;
+
+	ID3DX11EffectVariable* mNCSOT = nullptr;
+	ID3DX11EffectVariable* mWidthCSOT = nullptr;
+	ID3DX11EffectVariable* mHeightCSOT = nullptr;
+	ID3DX11EffectVariable* mRadiusCSOT = nullptr;
+	ID3DX11EffectVariable* mR0CSOT = nullptr;
+
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 

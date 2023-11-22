@@ -2772,4 +2772,12 @@ void GraphicsCore::initCalculationOfTextureStatistic()
 
 	mCalculateStatisticOfTextureTech = mCalculateStatisticOfTextureFX->GetTechniqueByName("CalculateStatisticOfTexture");
 	
+	mTextureCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("tex")->AsShaderResource();
+	mStatisticCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("statistic")->AsUnorderedAccessView();
+
+	mNCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("N");
+	mWidthCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("width");
+	mHeightCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("height");
+	mRadiusCSOT = mCalculateStatisticOfTextureFX->GetVariableByName("radius");
+	mR0CSOT = mCalculateStatisticOfTextureFX->GetVariableByName("r0");
 }
