@@ -193,11 +193,11 @@ void GraphicsCore::endFrame()
 	mSwapChain->Present(0, 0);
 }
 
-void GraphicsCore::draw(Mesh& mesh)
+void GraphicsCore::draw(Mesh& mesh, bool forceUpdatingOfGeometryOnGPU)
 {
 	param_index = 0;
 	setVariablesOnGPU(mesh);
-	setGeometryOnGPU(mesh);
+	setGeometryOnGPU(mesh, forceUpdatingOfGeometryOnGPU);
 	setPipelineStates(mesh);
 
 	string_id technique_name_id = mesh.getTechnique();
@@ -495,7 +495,8 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	uint32_t* elementSize,
 	string_id* technique,
 	string_id* pass,
-	bool structured
+	bool structured,
+	bool forceUpdatingOfGeometryOnGPU
 ) const
 {
 	(*elementSize) = 0;
@@ -517,7 +518,7 @@ ID3D11Buffer* GraphicsCore::getVertexBuffer(
 	if (mesh.gpuReadyData)
 		mVB = nullptr;
 
-	if (mVB == nullptr)
+	if (mVB == nullptr || forceUpdatingOfGeometryOnGPU)
 	{
 		uint32_t verticesCount = mesh.getVerticesCount();
 		if (mesh.gpuReadyData)
@@ -646,7 +647,8 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(
 	const Mesh& mesh,
 	string_id* technique,
 	string_id* pass,
-	bool structured
+	bool structured,
+	bool forceUpdatingOfGeometryOnGPU
 ) const
 {
 	string_id technique_name_id = technique ? *technique : mesh.getTechnique();
@@ -656,7 +658,7 @@ ID3D11Buffer* GraphicsCore::getIndexBuffer(
 		return nullptr;
 
 	ID3D11Buffer* mIB = ResourceManager::instance()->getIndexBuffer(technique_name_id, pass_name_id, mesh.id, structured);
-	if (mIB == nullptr)
+	if (mIB == nullptr || forceUpdatingOfGeometryOnGPU)
 	{
 		// Create index buffer
 		D3D11_BUFFER_DESC ibd;
@@ -1022,17 +1024,17 @@ void GraphicsCore::setVariablesOnGPU(Mesh& mesh)
 	setTexturesArraysOnGPU(mesh);
 }
 
-void GraphicsCore::setGeometryOnGPU(Mesh& mesh)
+void GraphicsCore::setGeometryOnGPU(Mesh& mesh, bool forceUpdatingOfGeometryOnGPU)
 {
 	uint32_t elementSize = 0;
-	ID3D11Buffer* mVB = getVertexBuffer(mesh, &elementSize);
+	ID3D11Buffer* mVB = getVertexBuffer(mesh, &elementSize, nullptr, nullptr, false, forceUpdatingOfGeometryOnGPU);
 	if (mVB == nullptr)
 		return;
 
 	string_id technique_name_id = mesh.getTechnique();
 	string_id pass_name_id = mesh.getPass();
 
-	ID3D11Buffer* mIB = getIndexBuffer(mesh);
+	ID3D11Buffer* mIB = getIndexBuffer(mesh, nullptr, nullptr, false, forceUpdatingOfGeometryOnGPU);
 	if (mIB ==  nullptr && !ResourceManager::instance()->isThereAGeometryShaderInThePass(technique_name_id, pass_name_id))
 		return;
 

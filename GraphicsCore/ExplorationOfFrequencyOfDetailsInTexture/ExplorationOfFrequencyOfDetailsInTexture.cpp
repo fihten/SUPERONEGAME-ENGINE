@@ -97,7 +97,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 
 		statisticOfTextureAtPoint = createHistogram(fy, N);
 	}
-	graphicsCore->draw(statisticOfTextureAtPoint);
+	graphicsCore->draw(statisticOfTextureAtPoint, true);
 	graphicsCore->endFrame();
 }
 

@@ -48,7 +48,7 @@ public:
 	void startFrame();
 	void endFrame();
 
-	void draw(Mesh& mesh);
+	void draw(Mesh& mesh, bool forceUpdatingOfGeometryOnGPU = false);
 	
 	int run();
 	void resize(UINT width, UINT height);
@@ -425,7 +425,8 @@ private:
 		uint32_t* elementSize,
 		string_id* technique = nullptr,
 		string_id* pass = nullptr,
-		bool structured = false
+		bool structured = false,
+		bool forceUpdatingOfGeometryOnGPU = false
 		) const;
 	void* fetchVerticesFromMesh(
 		const Mesh& mesh,
@@ -436,7 +437,8 @@ private:
 		const Mesh& mesh,
 		string_id* technique = nullptr,
 		string_id* pass = nullptr,
-		bool structured = false
+		bool structured = false,
+		bool forceUpdatingOfGeometryOnGPU = false
 	) const;
 
 	ID3D11ShaderResourceView* getVertexBufferSRV(
@@ -467,7 +469,7 @@ private:
 
 	void setVariablesOnGPU(Mesh& mesh);
 
-	void setGeometryOnGPU(Mesh& mesh);
+	void setGeometryOnGPU(Mesh& mesh, bool forceUpdatingOfGeometryOnGPU = false);
 
 	ID3D11BlendState* getBlendState(Mesh& mesh);
 	void setBlendState(Mesh& mesh);
