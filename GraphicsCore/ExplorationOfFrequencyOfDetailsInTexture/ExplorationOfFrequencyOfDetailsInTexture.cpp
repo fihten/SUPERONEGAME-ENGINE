@@ -7,6 +7,11 @@
 int radius = 1;
 Mesh testMesh;
 Mesh areaOfIntegrationInA;
+Mesh statisticOfTextureAtPoint;
+
+int N = 0;
+int y[1000];
+bool updateStatisticMesh = true;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -44,6 +49,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ParamKey centerOfArrow_key{ StringManager::toStringId("centerOfArrow"), -1, string_id(-1) };
 		areaOfIntegrationInA.setParam(centerOfArrow_key, centerOfArrowInA);
 
+		GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(centerOfArrowInA, radius, y, N);
+		updateStatisticMesh = true;
+
 		break;
 	case WM_CHAR:
 		switch (wParam)
@@ -52,6 +60,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			radius++;
 			
 		case '-':
+
+			GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(
+				centerOfArrowInA, wParam == '+' ? radius : radius - 1, y, N
+			);
+			updateStatisticMesh = true;
 
 			ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
 			areaOfIntegrationInA.setParam(radiusOfArrow_key, wParam == '+' ? radius : radius - 1);
@@ -72,6 +85,19 @@ void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
 	graphicsCore->draw(testMesh);
+	if (updateStatisticMesh)
+	{
+		int maxY = 0;
+		for (int i = 0; i < N; i++)
+			maxY = std::max<int>(maxY, y[i]);
+
+		float fy[1000];
+		for (int i = 0; i < N; i++)
+			fy[i] = (float)(y[i]) / (float)(maxY);
+
+		statisticOfTextureAtPoint = createHistogram(fy, N);
+	}
+	graphicsCore->draw(statisticOfTextureAtPoint);
 	graphicsCore->endFrame();
 }
 
