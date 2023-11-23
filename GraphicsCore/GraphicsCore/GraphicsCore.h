@@ -385,7 +385,7 @@ private:
 	);
 	
 public:
-	void calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int y[], int& N);
+	void calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int radius, int y[], int& N);
 
 private:
 	void initCalculationOfTextureStatistic();

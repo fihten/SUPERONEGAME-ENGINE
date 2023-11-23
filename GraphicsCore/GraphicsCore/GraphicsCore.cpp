@@ -2810,7 +2810,34 @@ void GraphicsCore::initCalculationOfTextureStatistic()
 	device->CreateUnorderedAccessView(mStatisticBuffer, &uav_desc, &mStatisticBufferUAV);
 }
 
-void GraphicsCore::calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int y[], int& N)
+void GraphicsCore::calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int radius, int y[], int& N)
 {
+	mTextureCSOT->SetResource(mTextureToIntegrateAsrv);
 
+	static int initialStatistic[1000];
+	context->UpdateSubresource(mStatisticBuffer, 0, 0, initialStatistic, 0, 0);
+	mStatisticCSOT->SetUnorderedAccessView(mStatisticBufferUAV);
+
+	mNCSOT->SetRawValue(&NCSOT, 0, sizeof NCSOT);
+	mWidthCSOT->SetRawValue(&widthOfA, 0, sizeof widthOfA);
+	mHeightCSOT->SetRawValue(&heightOfA, 0, sizeof heightOfA);
+	mRadiusCSOT->SetRawValue(&radius, 0, sizeof radius);
+	mR0CSOT->SetRawValue(&pt, 0, sizeof pt);
+
+	mCalculateStatisticOfTextureTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t groups_x = (float)(2 * radius + 1) / 16.0f;
+	uint32_t groups_y = (float)(2 * radius + 1) / 16.0f;
+	uint32_t groups_z = 1;
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CopyResource(mStatisticBufferCopy, mStatisticBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mStatisticBufferCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	N = NCSOT;
+	std::memcpy(y, data.pData, N * sizeof(int));
+
+	context->Unmap(mStatisticBufferCopy, 0);
 }
