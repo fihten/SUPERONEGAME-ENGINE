@@ -178,6 +178,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initCalculationOfTextureIntegrals();
 	initDefinitionOfTheSamePoints();
 	initManualDefinitionOfTheSamePoint();
+	initCalculationOfTextureStatistic();
 }
 
 void GraphicsCore::startFrame()

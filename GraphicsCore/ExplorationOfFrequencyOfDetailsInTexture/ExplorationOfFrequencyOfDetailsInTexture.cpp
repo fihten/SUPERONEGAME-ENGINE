@@ -9,16 +9,19 @@ Mesh testMesh;
 Mesh areaOfIntegrationInA;
 Mesh statisticOfTextureAtPoint;
 
-int N = 0;
+int N = 100;
 int y[1000];
 bool updateStatisticMesh = true;
+
+float uA = 0;
+float vA = 0;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	switch (message)
 	{
 	case WM_LBUTTONUP:
-
+	{
 		float mousePosX = LOWORD(lParam) + 0.5f;
 		float mousePosY = HIWORD(lParam) + 0.5f;
 
@@ -28,8 +31,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		float width = rect.right - rect.left;
 		float height = std::floor(0.5f * (rect.bottom - rect.top));
 
-		static float uA = 0;
-		static float vA = 0;
 		if (mousePosY < height)
 		{
 			uA = (mousePosX + 0.5f) / width;
@@ -52,7 +53,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(centerOfArrowInA, radius, y, N);
 		updateStatisticMesh = true;
 
-		break;
+		break; 
+	}
 	case WM_CHAR:
 		switch (wParam)
 		{
@@ -60,6 +62,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			radius++;
 			
 		case '-':
+		{
+			int wA = GraphicsCore::instance()->getWidthOfTextureA();
+			int hA = GraphicsCore::instance()->getHeightOfTextureA();
+
+			Vec2d<int> centerOfArrowInA(uA * wA - 0.5f, vA * hA - 0.5f);
 
 			GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(
 				centerOfArrowInA, wParam == '+' ? radius : radius - 1, y, N
@@ -74,7 +81,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			radius--;
 			radius = std::max<int>(radius, 1);
-			break;
+			break; 
+		}
 		}
 	}
 
@@ -85,6 +93,9 @@ void drawFunc(GraphicsCore* graphicsCore)
 {
 	graphicsCore->startFrame();
 	graphicsCore->draw(testMesh);
+	graphicsCore->draw(areaOfIntegrationInA);
+
+	bool forceUpdatingOfGeometryOnGPU = false;
 	if (updateStatisticMesh)
 	{
 		int maxY = 0;
@@ -96,8 +107,12 @@ void drawFunc(GraphicsCore* graphicsCore)
 			fy[i] = (float)(y[i]) / (float)(maxY);
 
 		statisticOfTextureAtPoint = createHistogram(fy, N);
+		forceUpdatingOfGeometryOnGPU = true;
+		updateStatisticMesh = false;
 	}
-	graphicsCore->draw(statisticOfTextureAtPoint, true);
+	graphicsCore->draw(statisticOfTextureAtPoint, forceUpdatingOfGeometryOnGPU);
+
+
 	graphicsCore->endFrame();
 }
 

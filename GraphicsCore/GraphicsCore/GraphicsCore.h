@@ -406,7 +406,7 @@ private:
 
 	ID3D11UnorderedAccessView* mStatisticBufferUAV = nullptr;
 
-	int NCSOT = 100;
+	int NCSOT = 50;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

@@ -31,7 +31,8 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (ch > 2)
 		return;
 
-	float v = tex[r][ch];
+	float4 v4 = tex[r].rgba;
+	float v = v4[ch];
 
 	float h = 1.0f / N;
 	int index = floor(v / h);

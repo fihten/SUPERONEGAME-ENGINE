@@ -920,10 +920,10 @@ Mesh createHistogram(float y[], int N)
 		positions.push_back(flt2(x * h - 1.0f, -1.0f));
 		positions.push_back(flt2((x + 1) * h - 1.0f, -1.0f));
 
-		positions.push_back(flt2(x * h - 1.0f, 0.0f));
-		positions.push_back(flt2((x + 1) * h - 1.0f, 0.0f));
+		positions.push_back(flt2(x * h - 1.0f, y[x] - 1.0f));
+		positions.push_back(flt2((x + 1) * h - 1.0f, y[x] - 1.0f));
 
-		int offset = 6 * x;
+		int offset = 4 * x;
 
 		inds.push_back(offset);
 		inds.push_back(offset + 2);
