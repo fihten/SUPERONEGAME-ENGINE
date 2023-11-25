@@ -2453,8 +2453,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		);
 		flt2 J = leastSquaresMethode(
 			integralsA,
-			integralsB,
-			variances
+			integralsB
 		);
 		float error = J.y();
 		if (error < minError)
@@ -2525,6 +2524,22 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		fileOfY << integralsB[i] << std::endl;
 	}
 
+	const int degreeOfDiscretization = 10;
+	float distribution[degreeOfDiscretization];
+	findDistributionOfErrors(integralsA, integralsB, distribution, degreeOfDiscretization);
+
+	std::ofstream fileOfDistributionX("distribution_x.txt");
+	std::ofstream fileOfDistributionY("distribution_y.txt");
+
+	fileOfDistributionX.imbue(std::locale(std::locale::classic(), new Comma));
+	fileOfDistributionY.imbue(std::locale(std::locale::classic(), new Comma));
+
+	for (int i = 0; i < degreeOfDiscretization; i++)
+	{
+		fileOfDistributionX << i << std::endl;
+		fileOfDistributionY << distribution[i] << std::endl;
+	}
+
 	char buffer[2048];
 	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f\n",
 		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ);
@@ -2533,23 +2548,20 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 flt2 GraphicsCore::leastSquaresMethode(
 	float integralsA[],
-	float integralsB[],
-	float variancesB[]
+	float integralsB[]
 )
 {
 	float xx = 0;
 	float xy = 0;
 	float yy = 0;
 
-	float integralsA0 = integralsA[3 * (INTEGRALS - 1) + 0];
-	float integralsA1 = integralsA[3 * (INTEGRALS - 1) + 1];
-	float integralsA2 = integralsA[3 * (INTEGRALS - 1) + 2];
-	float maxIntegralA = max(integralsA0, max(integralsA1, integralsA2));
-
-	float integralsB0 = integralsB[3 * (INTEGRALS - 1) + 0];
-	float integralsB1 = integralsB[3 * (INTEGRALS - 1) + 1];
-	float integralsB2 = integralsB[3 * (INTEGRALS - 1) + 2];
-	float maxIntegralB = max(integralsB0, max(integralsB1, integralsB2));
+	float maxIntegralA = 0;
+	float maxIntegralB = 0;
+	for (int i = 0; i < 3 * INTEGRALS; i++)
+	{
+		maxIntegralA = std::max<float>(maxIntegralA, integralsA[i]);
+		maxIntegralB = std::max<float>(maxIntegralB, integralsB[i]);
+	}
 
 	for (int i = 0; i < 3 * INTEGRALS; i++)
 	{
@@ -2566,6 +2578,56 @@ flt2 GraphicsCore::leastSquaresMethode(
 	float ferr = k * k * xx + yy - 2 * k * xy;
 
 	return flt2(JacobianDeterminant, ferr);
+}
+
+void GraphicsCore::findDistributionOfErrors(
+	float integralsA[],
+	float integralsB[],
+	float distribution[],
+	int N
+)
+{
+	flt2 J = leastSquaresMethode(integralsA, integralsB);
+	float jacobianDeterminant = J.x();
+
+	float maxIntegralA = 0;
+	float maxIntegralB = 0;
+	for (int i = 0; i < 3 * INTEGRALS; i++)
+	{
+		maxIntegralA = std::max<float>(maxIntegralA, integralsA[i]);
+		maxIntegralB = std::max<float>(maxIntegralB, integralsB[i]);
+	}
+
+	float minError = FLT_MAX;
+	float maxError = 0;
+	for (int i = 0; i < 3 * INTEGRALS; i++)
+	{
+		float A = integralsA[i] / maxIntegralA;
+		float B = integralsB[i] / maxIntegralB;
+
+		float error = B - jacobianDeterminant * A;
+		minError = std::min<float>(minError, error);
+		maxError = std::max<float>(maxError, error);
+	}
+
+	std::memset(distribution, 0, N * sizeof(float));
+
+	float h = 1.0f / N;
+	for (int i = 0; i < 3 * INTEGRALS; i++)
+	{
+		float A = integralsA[i] / maxIntegralA;
+		float B = integralsB[i] / maxIntegralB;
+
+		float error = B - jacobianDeterminant * A;
+		int index = std::floor((error - minError) / (maxError - minError) / h);
+		distribution[index]++;
+	}
+
+	float maxDensity = 0;
+	for (int i = 0; i < N; i++)
+		maxDensity = std::max<float>(maxDensity, distribution[i]);
+	for (int i = 0; i < N; i++)
+		distribution[i] /= maxDensity;
 }
 
 void GraphicsCore::initManualDefinitionOfTheSamePoint()

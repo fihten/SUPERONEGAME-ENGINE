@@ -18,7 +18,7 @@
 #define MAX_TRIANGLES_COUNT 16384
 #define MAX_OBJECTS_COUNT 64
 #define MAX_SELECTING_SEGMENTS_COUNT 8
-#define INTEGRALS_ALONG_RADIUS 4
+#define INTEGRALS_ALONG_RADIUS 16
 #define INTEGRALS_ALONG_SECTORS 3
 #define INTEGRALS INTEGRALS_ALONG_RADIUS * INTEGRALS_ALONG_SECTORS
 
@@ -277,7 +277,7 @@ private:
 	uint32_t widthOfB = 0;
 	uint32_t heightOfB = 0;
 
-	int radius0 = 50;
+	int radius0 = 20;
 	int radius1 = std::sqrt(INTEGRALS_ALONG_RADIUS) * radius0;
 	int sectors = INTEGRALS_ALONG_SECTORS;
 
@@ -380,10 +380,16 @@ private:
 
 	flt2 leastSquaresMethode(
 		float integralsA[],
-		float integralsB[],
-		float variancesB[]
+		float integralsB[]
 	);
 	
+	void findDistributionOfErrors(
+		float integralsA[],
+		float integralsB[],
+		float distribution[],
+		int N
+	);
+
 public:
 	void calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int radius, int y[], int& N);
 
