@@ -2527,6 +2527,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	const int degreeOfDiscretization = 10;
 	float distribution[degreeOfDiscretization];
 	findDistributionOfErrors(integralsA, integralsB, distribution, degreeOfDiscretization);
+	float distFromBellCurve = distanceFromNormalDistribution(distribution, degreeOfDiscretization);
 
 	std::ofstream fileOfDistributionX("distribution_x.txt");
 	std::ofstream fileOfDistributionY("distribution_y.txt");
@@ -2541,8 +2542,8 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	}
 
 	char buffer[2048];
-	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f\n",
-		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ);
+	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f, distance from bell curve = %f\n",
+		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ, distFromBellCurve);
 	OutputDebugStringA(buffer);
 }
 
@@ -2628,6 +2629,63 @@ void GraphicsCore::findDistributionOfErrors(
 		maxDensity = std::max<float>(maxDensity, distribution[i]);
 	for (int i = 0; i < N; i++)
 		distribution[i] /= maxDensity;
+}
+
+float GraphicsCore::distanceFromNormalDistribution(float distribution[], int N)
+{
+	float xxxx = 0;
+	float xxx = 0;
+	float xx = 0;
+	float x = 0;
+	float xxy = 0;
+	float xy = 0;
+	float y = 0;
+	float yy = 0;
+	float n = 0;
+	for (int i = 0; i < N; i++)
+	{
+		if (distribution[i] == 0)
+			continue;
+
+		float xi = (float)(i) / (float)(N - 1);
+		float xi_2 = xi * xi;
+		float xi_3 = xi_2 * xi;
+		float xi_4 = xi_3 * xi;
+
+		float yi = std::log(distribution[i]);
+		float yi_2 = yi * yi;
+
+		float xixiyi = xi_2 * yi;
+		float xiyi = xi * yi;
+
+		x += xi;
+		xx += xi_2;
+		xxx += xi_3;
+		xxxx += xi_4;
+		y += yi;
+		yy += yi_2;
+		xxy += xixiyi;
+		xy += xiyi;
+		n++;
+	}
+
+	flt3 l0(xxxx, xxx, xx);
+	flt3 l1(xxx, xx, x);
+	flt3 l2(xx, x, n);
+	flt3 r(xxy, xy, y);
+
+	float det = dot(cross(l0, l1), l2);
+	float det0 = dot(cross(r, l1), l2);
+	float det1 = dot(cross(l0, r), l2);
+	float det2 = dot(cross(l0, l1), r);
+
+	float a = det0 / det;
+	float b = det1 / det;
+	float c = det2 / det;
+
+	float ferr = xxxx * a * a + 2 * xxx * a * b + 2 * xx * a * c - 2 * xxy * a + 2 * x * b * c - 2 * xy * b - 2 * y * c + xx * b * b + n * c * c + yy;
+	
+	return ferr;
 }
 
 void GraphicsCore::initManualDefinitionOfTheSamePoint()
