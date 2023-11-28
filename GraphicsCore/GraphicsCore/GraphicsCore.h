@@ -416,6 +416,54 @@ private:
 	int NCSOT = 50;
 
 private:
+	void initFourierTransform();
+	ID3DX11Effect* mFourierTransformFX = nullptr;
+
+	ID3DX11EffectTechnique* mFourierTransformCosR_TECH = nullptr;
+	ID3DX11EffectTechnique* mFourierTransformCosG_TECH = nullptr;
+	ID3DX11EffectTechnique* mFourierTransformCosB_TECH = nullptr;
+
+	ID3DX11EffectTechnique* mFourierTransformSinR_TECH = nullptr;
+	ID3DX11EffectTechnique* mFourierTransformSinG_TECH = nullptr;
+	ID3DX11EffectTechnique* mFourierTransformSinB_TECH = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* mTextureForFourierTransform = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtCos_R = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtCos_G = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtCos_B = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_R = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_G = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_B = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtCos_R_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtCos_R_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtCos_R_uav = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtCos_G_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtCos_G_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtCos_G_uav = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtCos_B_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtCos_B_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtCos_B_uav = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtSin_R_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtSin_R_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtSin_R_uav = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtSin_G_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtSin_G_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtSin_G_uav = nullptr;
+
+	ID3D11Buffer* mFourierCoefficientsAtSin_B_buffer = nullptr;
+	ID3D11Buffer* mFourierCoefficientsAtSin_B_bufferCopy = nullptr;
+	ID3D11UnorderedAccessView* mFourierCoefficientsAtSin_B_uav = nullptr;
+
+	const int numberOfElementsInFourierRow = 20;
+
+private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 
 	const flt4x4* getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const;

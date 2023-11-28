@@ -1,4 +1,5 @@
 #include "constants.hlsl"
+#include "ColorSpace.hlsl"
 
 Texture2D<float4> tex;
 RWStructuredBuffer<uint> Integrals;
@@ -88,13 +89,7 @@ void cs_integral(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (angle > -PI + sectorLen * (sectorIndex + 1))
 		return;
 
-	float3x3 fromPCS = {
-		0.60974f, 0.20528f, 0.14919f,
-		0.31111f, 0.62567f, 0.06322f,
-		0.01947f, 0.06087f, 0.74457f
-	};
-
-	uint3 color = round(255 * mul(fromPCS, pow(tex[int2(x, y)], 563.0f / 256.0f).rgb));
+	uint3 color = round(255 * adobeToRaw(tex[int2(x, y)].rgb));
 	InterlockedAdd(Integrals[4 * integralIndex + 0], color.x);
 	InterlockedAdd(Integrals[4 * integralIndex + 1], color.y);
 	InterlockedAdd(Integrals[4 * integralIndex + 2], color.z);

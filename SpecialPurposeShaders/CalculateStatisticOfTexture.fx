@@ -1,3 +1,5 @@
+#include "ColorSpace.hlsl"
+
 Texture2D<float4> tex;
 RWStructuredBuffer<int> statistic;
 
@@ -31,8 +33,8 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (ch > 2)
 		return;
 
-	float4 v4 = tex[r].rgba;
-	float v = v4[ch];
+	float3 v3 = adobeToRaw(tex[r].rgb);
+	float v = v3[ch];
 
 	float h = 1.0f / N;
 	int index = floor(v / h);

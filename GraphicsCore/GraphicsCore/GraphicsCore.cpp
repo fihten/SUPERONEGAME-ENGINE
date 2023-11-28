@@ -2964,3 +2964,46 @@ void GraphicsCore::calculateStatisticOfTextureAtPoint(const Vec2d<int>& pt, int 
 
 	context->Unmap(mStatisticBufferCopy, 0);
 }
+
+void GraphicsCore::initFourierTransform()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sFourierTransform = std::string(shadersFolder) + "\\FourierTransform.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sFourierTransform.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mFourierTransformFX);
+
+	mFourierTransformCosR_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_R");
+	mFourierTransformCosG_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_G");
+	mFourierTransformCosB_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_B");
+
+	mFourierTransformSinR_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_R");
+	mFourierTransformSinG_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_G");
+	mFourierTransformSinB_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_B");
+
+	mTextureForFourierTransform = mFourierTransformFX->GetVariableByName("tex")->AsShaderResource();
+
+	mFourierCoefficientsAtCos_R = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtCos_R")->AsUnorderedAccessView();
+	mFourierCoefficientsAtCos_G = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtCos_G")->AsUnorderedAccessView();
+	mFourierCoefficientsAtCos_B = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtCos_B")->AsUnorderedAccessView();
+
+	mFourierCoefficientsAtSin_R = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_R")->AsUnorderedAccessView();
+	mFourierCoefficientsAtSin_G = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_G")->AsUnorderedAccessView();
+	mFourierCoefficientsAtSin_B = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_B")->AsUnorderedAccessView();
+}
