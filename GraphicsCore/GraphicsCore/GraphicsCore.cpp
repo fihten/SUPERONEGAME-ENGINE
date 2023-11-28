@@ -3006,4 +3006,36 @@ void GraphicsCore::initFourierTransform()
 	mFourierCoefficientsAtSin_R = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_R")->AsUnorderedAccessView();
 	mFourierCoefficientsAtSin_G = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_G")->AsUnorderedAccessView();
 	mFourierCoefficientsAtSin_B = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_B")->AsUnorderedAccessView();
+
+	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.ByteWidth = numberOfElementsInFourierRow * sizeof(int);
+	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	buffer_desc.CPUAccessFlags = 0;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	buffer_desc.StructureByteStride = sizeof(int);
+	
+	static int initialFourierCoefficients[1000];
+	D3D11_SUBRESOURCE_DATA data;
+	data.pSysMem = initialFourierCoefficients;
+
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtCos_R_buffer);
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtCos_G_buffer);
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtCos_B_buffer);
+
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtSin_R_buffer);
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtSin_G_buffer);
+	device->CreateBuffer(&buffer_desc, &data, &mFourierCoefficientsAtSin_B_buffer);
+
+	buffer_desc.Usage = D3D11_USAGE_STAGING;
+	buffer_desc.BindFlags = 0;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtCos_R_bufferCopy);
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtCos_G_bufferCopy);
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtCos_B_bufferCopy);
+
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_R_bufferCopy);
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_G_bufferCopy);
+	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_B_bufferCopy);
 }
