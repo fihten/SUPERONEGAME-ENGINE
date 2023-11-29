@@ -3187,3 +3187,129 @@ void GraphicsCore::calculateFourierCoefficientsAtCosForBChanel(
 
 	context->Unmap(mFourierCoefficientsAtCos_B_bufferCopy, 0);
 }
+
+void GraphicsCore::calculateFourierCoefficientsAtSinForRChanel(
+	const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N)
+{
+	N = numberOfElementsInFourierRow;
+
+	mTextureForFourierTransform->SetResource(mTextureToIntegrateAsrv);
+
+	static int initialFourierCoefficients[1000];
+	context->UpdateSubresource(mFourierCoefficientsAtSin_R_buffer, 0, 0, initialFourierCoefficients, 0, 0);
+
+	mFourierCoefficientsAtSin_R->SetUnorderedAccessView(mFourierCoefficientsAtSin_R_uav);
+
+	mRadiusFourierTransform->SetRawValue(&radius, 0, sizeof radius);
+	mThicknessFourierTransform->SetRawValue(&thickness, 0, sizeof thickness);
+	mWidthFourierTransform->SetRawValue(&widthOfA, 0, sizeof widthOfA);
+	mHeightFourierTransform->SetRawValue(&heightOfA, 0, sizeof heightOfA);
+	mNumberOfElementsInFourierRow->SetRawValue(&N, 0, sizeof N);
+	mR0FourierTransform->SetRawValue(&pt, 0, sizeof pt);
+
+	mFourierTransformSinR_TECH->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(N) / 4.0f);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CopyResource(mFourierCoefficientsAtSin_R_bufferCopy, mFourierCoefficientsAtSin_R_buffer);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mFourierCoefficientsAtSin_R_bufferCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	int* fourierCoefficients = (int*)data.pData;
+	int maxCoeff = 0;
+	for (int i = 0; i < N; i++)
+		maxCoeff = std::max<int>(maxCoeff, std::abs(fourierCoefficients[i]));
+	for (int i = 0; i < N; i++)
+		coeffs[i] = std::fabs((float)(fourierCoefficients[i]) / maxCoeff);
+
+	context->Unmap(mFourierCoefficientsAtSin_R_bufferCopy, 0);
+}
+
+void GraphicsCore::calculateFourierCoefficientsAtSinForGChanel(
+	const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N)
+{
+	N = numberOfElementsInFourierRow;
+
+	mTextureForFourierTransform->SetResource(mTextureToIntegrateAsrv);
+
+	static int initialFourierCoefficients[1000];
+	context->UpdateSubresource(mFourierCoefficientsAtSin_G_buffer, 0, 0, initialFourierCoefficients, 0, 0);
+
+	mFourierCoefficientsAtSin_G->SetUnorderedAccessView(mFourierCoefficientsAtSin_G_uav);
+
+	mRadiusFourierTransform->SetRawValue(&radius, 0, sizeof radius);
+	mThicknessFourierTransform->SetRawValue(&thickness, 0, sizeof thickness);
+	mWidthFourierTransform->SetRawValue(&widthOfA, 0, sizeof widthOfA);
+	mHeightFourierTransform->SetRawValue(&heightOfA, 0, sizeof heightOfA);
+	mNumberOfElementsInFourierRow->SetRawValue(&N, 0, sizeof N);
+	mR0FourierTransform->SetRawValue(&pt, 0, sizeof pt);
+
+	mFourierTransformSinG_TECH->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(N) / 4.0f);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CopyResource(mFourierCoefficientsAtSin_G_bufferCopy, mFourierCoefficientsAtSin_G_buffer);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mFourierCoefficientsAtSin_G_bufferCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	int* fourierCoefficients = (int*)data.pData;
+	int maxCoeff = 0;
+	for (int i = 0; i < N; i++)
+		maxCoeff = std::max<int>(maxCoeff, std::abs(fourierCoefficients[i]));
+	for (int i = 0; i < N; i++)
+		coeffs[i] = std::fabs((float)(fourierCoefficients[i]) / maxCoeff);
+
+	context->Unmap(mFourierCoefficientsAtSin_G_bufferCopy, 0);
+}
+
+void GraphicsCore::calculateFourierCoefficientsAtSinForBChanel(
+	const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N)
+{
+	N = numberOfElementsInFourierRow;
+
+	mTextureForFourierTransform->SetResource(mTextureToIntegrateAsrv);
+
+	static int initialFourierCoefficients[1000];
+	context->UpdateSubresource(mFourierCoefficientsAtSin_B_buffer, 0, 0, initialFourierCoefficients, 0, 0);
+
+	mFourierCoefficientsAtSin_B->SetUnorderedAccessView(mFourierCoefficientsAtSin_B_uav);
+
+	mRadiusFourierTransform->SetRawValue(&radius, 0, sizeof radius);
+	mThicknessFourierTransform->SetRawValue(&thickness, 0, sizeof thickness);
+	mWidthFourierTransform->SetRawValue(&widthOfA, 0, sizeof widthOfA);
+	mHeightFourierTransform->SetRawValue(&heightOfA, 0, sizeof heightOfA);
+	mNumberOfElementsInFourierRow->SetRawValue(&N, 0, sizeof N);
+	mR0FourierTransform->SetRawValue(&pt, 0, sizeof pt);
+
+	mFourierTransformSinB_TECH->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_y = std::ceil((float)(2 * radius + 1 + thickness) / 16.0f);
+	uint32_t groups_z = std::ceil((float)(N) / 4.0f);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CopyResource(mFourierCoefficientsAtSin_B_bufferCopy, mFourierCoefficientsAtSin_B_buffer);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mFourierCoefficientsAtSin_B_bufferCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	int* fourierCoefficients = (int*)data.pData;
+	int maxCoeff = 0;
+	for (int i = 0; i < N; i++)
+		maxCoeff = std::max<int>(maxCoeff, std::abs(fourierCoefficients[i]));
+	for (int i = 0; i < N; i++)
+		coeffs[i] = std::fabs((float)(fourierCoefficients[i]) / maxCoeff);
+
+	context->Unmap(mFourierCoefficientsAtSin_B_bufferCopy, 0);
+}

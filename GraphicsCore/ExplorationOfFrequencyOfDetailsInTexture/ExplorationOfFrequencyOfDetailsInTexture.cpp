@@ -4,14 +4,38 @@
 #include <algorithm>
 #include <cmath>
 
-int radius = 1;
+int radius = 10;
+int thickness = 4;
+
 Mesh testMesh;
 Mesh areaOfIntegrationInA;
-Mesh statisticOfTextureAtPoint;
 
-int N = 100;
-int y[1000];
-bool updateStatisticMesh = true;
+Mesh fourierCoeffsOfRatCos;
+Mesh fourierCoeffsOfGatCos;
+Mesh fourierCoeffsOfBatCos;
+
+Mesh fourierCoeffsOfRatSin;
+Mesh fourierCoeffsOfGatSin;
+Mesh fourierCoeffsOfBatSin;
+
+enum FourierCoeffs
+{
+	RatCos,
+	GatCos,
+	BatCos,
+	RatSin,
+	GatSin,
+	BatSin
+};
+FourierCoeffs currentFourierCoeffs = RatCos;
+
+bool bUpdateCoeffsAtCosOfR = true;
+bool bUpdateCoeffsAtCosOfG = true;
+bool bUpdateCoeffsAtCosOfB = true;
+
+bool bUpdateCoeffsAtSinOfR = true;
+bool bUpdateCoeffsAtSinOfG = true;
+bool bUpdateCoeffsAtSinOfB = true;
 
 float uA = 0;
 float vA = 0;
@@ -50,8 +74,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		ParamKey centerOfArrow_key{ StringManager::toStringId("centerOfArrow"), -1, string_id(-1) };
 		areaOfIntegrationInA.setParam(centerOfArrow_key, centerOfArrowInA);
 
-		GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(centerOfArrowInA, radius, y, N);
-		updateStatisticMesh = true;
+		bUpdateCoeffsAtCosOfR = true;
+		bUpdateCoeffsAtCosOfG = true;
+		bUpdateCoeffsAtCosOfB = true;
+
+		bUpdateCoeffsAtSinOfR = true;
+		bUpdateCoeffsAtSinOfG = true;
+		bUpdateCoeffsAtSinOfB = true;
 
 		break; 
 	}
