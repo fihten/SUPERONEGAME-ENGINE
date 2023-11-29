@@ -3007,6 +3007,13 @@ void GraphicsCore::initFourierTransform()
 	mFourierCoefficientsAtSin_G = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_G")->AsUnorderedAccessView();
 	mFourierCoefficientsAtSin_B = mFourierTransformFX->GetVariableByName("fourierCoefficientsAtSin_B")->AsUnorderedAccessView();
 
+	mRadiusFourierTransform = mFourierTransformFX->GetVariableByName("radius");
+	mThicknessFourierTransform = mFourierTransformFX->GetVariableByName("thickness");
+	mWidthFourierTransform = mFourierTransformFX->GetVariableByName("width");
+	mHeightFourierTransform = mFourierTransformFX->GetVariableByName("height");
+	mNumberOfElementsInFourierRow = mFourierTransformFX->GetVariableByName("numberOfElementsInFourierRow");
+	mR0FourierTransform = mFourierTransformFX->GetVariableByName("r0");
+
 	D3D11_BUFFER_DESC buffer_desc;
 	buffer_desc.ByteWidth = numberOfElementsInFourierRow * sizeof(int);
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
@@ -3038,4 +3045,39 @@ void GraphicsCore::initFourierTransform()
 	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_R_bufferCopy);
 	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_G_bufferCopy);
 	device->CreateBuffer(&buffer_desc, nullptr, &mFourierCoefficientsAtSin_B_bufferCopy);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uav_desc.Buffer.FirstElement = 0;
+	uav_desc.Buffer.NumElements = numberOfElementsInFourierRow;
+	uav_desc.Buffer.Flags = 0;
+
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtCos_R_buffer, &uav_desc, &mFourierCoefficientsAtCos_R_uav);
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtCos_G_buffer, &uav_desc, &mFourierCoefficientsAtCos_G_uav);
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtCos_B_buffer, &uav_desc, &mFourierCoefficientsAtCos_B_uav);
+
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtSin_R_buffer, &uav_desc, &mFourierCoefficientsAtSin_R_uav);
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtSin_G_buffer, &uav_desc, &mFourierCoefficientsAtSin_G_uav);
+	device->CreateUnorderedAccessView(mFourierCoefficientsAtSin_B_buffer, &uav_desc, &mFourierCoefficientsAtSin_B_uav);
+}
+
+void GraphicsCore::calculateFourierCoefficientsAtCosForRChanel(
+	const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N)
+{
+	N = numberOfElementsInFourierRow;
+
+	mTextureForFourierTransform->SetResource(mTextureToIntegrateAsrv);
+
+	static int initialFourierCoefficients[1000];
+	context->UpdateSubresource(mFourierCoefficientsAtCos_R_buffer, 0, 0, initialFourierCoefficients, 0, 0);
+
+	mFourierCoefficientsAtCos_R->SetUnorderedAccessView(mFourierCoefficientsAtCos_R_uav);
+
+	mRadiusFourierTransform->SetRawValue(&radius, 0, sizeof radius);
+	mThicknessFourierTransform->SetRawValue(&thickness, 0, sizeof thickness);
+	mWidthFourierTransform->SetRawValue(&widthOfA, 0, sizeof widthOfA);
+	mHeightFourierTransform->SetRawValue(&heightOfA, 0, sizeof heightOfA);
+	mNumberOfElementsInFourierRow->SetRawValue(&N, 0, sizeof N);
+	mR0FourierTransform->SetRawValue(&pt, 0, sizeof pt);
 }

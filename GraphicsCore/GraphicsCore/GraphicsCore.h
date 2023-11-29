@@ -415,6 +415,20 @@ private:
 
 	int NCSOT = 50;
 
+public:
+	void calculateFourierCoefficientsAtCosForRChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
+	void calculateFourierCoefficientsAtCosForGChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
+	void calculateFourierCoefficientsAtCosForBChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
+
+	void calculateFourierCoefficientsAtSinForRChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
+	void calculateFourierCoefficientsAtSinForGChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
+	void calculateFourierCoefficientsAtSinForBChanel(
+		const Vec2d<int>& pt, int radius, int thickness, float coeffs[], int& N);
 private:
 	void initFourierTransform();
 	ID3DX11Effect* mFourierTransformFX = nullptr;
@@ -436,6 +450,13 @@ private:
 	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_R = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_G = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mFourierCoefficientsAtSin_B = nullptr;
+
+	ID3DX11EffectVariable* mRadiusFourierTransform = nullptr;
+	ID3DX11EffectVariable* mThicknessFourierTransform = nullptr;
+	ID3DX11EffectVariable* mWidthFourierTransform = nullptr;
+	ID3DX11EffectVariable* mHeightFourierTransform = nullptr;
+	ID3DX11EffectVariable* mNumberOfElementsInFourierRow = nullptr;
+	ID3DX11EffectVariable* mR0FourierTransform = nullptr;
 
 	ID3D11Buffer* mFourierCoefficientsAtCos_R_buffer = nullptr;
 	ID3D11Buffer* mFourierCoefficientsAtCos_R_bufferCopy = nullptr;

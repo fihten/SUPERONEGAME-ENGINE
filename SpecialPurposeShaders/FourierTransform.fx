@@ -18,7 +18,7 @@ int height;
 
 int numberOfElementsInFourierRow;
 
-int r0;
+int2 r0;
 
 // Coefficients near cos
 
