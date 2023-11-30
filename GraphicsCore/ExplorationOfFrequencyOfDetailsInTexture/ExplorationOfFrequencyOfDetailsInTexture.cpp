@@ -20,14 +20,14 @@ Mesh fourierCoeffsOfBatSin;
 
 enum FourierCoeffs
 {
-	RatCos,
-	GatCos,
-	BatCos,
-	RatSin,
-	GatSin,
-	BatSin
+	atCos,
+	atSin,
+	ofR,
+	ofG,
+	ofB
 };
-FourierCoeffs currentFourierCoeffs = RatCos;
+FourierCoeffs chanel = ofR;
+FourierCoeffs basis = atCos;
 
 bool bUpdateCoeffsAtCosOfR = true;
 bool bUpdateCoeffsAtCosOfG = true;
@@ -92,18 +92,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			
 		case '-':
 		{
-			int wA = GraphicsCore::instance()->getWidthOfTextureA();
-			int hA = GraphicsCore::instance()->getHeightOfTextureA();
-
-			Vec2d<int> centerOfArrowInA(uA * wA - 0.5f, vA * hA - 0.5f);
-
-			GraphicsCore::instance()->calculateStatisticOfTextureAtPoint(
-				centerOfArrowInA, wParam == '+' ? radius : radius - 1, y, N
-			);
-			updateStatisticMesh = true;
-
 			ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
 			areaOfIntegrationInA.setParam(radiusOfArrow_key, wParam == '+' ? radius : radius - 1);
+
+			bUpdateCoeffsAtCosOfR = true;
+			bUpdateCoeffsAtCosOfG = true;
+			bUpdateCoeffsAtCosOfB = true;
+
+			bUpdateCoeffsAtSinOfR = true;
+			bUpdateCoeffsAtSinOfG = true;
+			bUpdateCoeffsAtSinOfB = true;
 
 			if (wParam == '+')
 				break;
@@ -112,6 +110,21 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			radius = std::max<int>(radius, 1);
 			break; 
 		}
+		case 'c':
+			basis = atCos;
+			break;
+		case 's':
+			basis = atSin;
+			break;
+		case 'r':
+			chanel = ofR;
+			break;
+		case 'g':
+			chanel = ofG;
+			break;
+		case 'b':
+			chanel = ofB;
+			break;
 		}
 	}
 
@@ -124,23 +137,126 @@ void drawFunc(GraphicsCore* graphicsCore)
 	graphicsCore->draw(testMesh);
 	graphicsCore->draw(areaOfIntegrationInA);
 
-	bool forceUpdatingOfGeometryOnGPU = false;
-	if (updateStatisticMesh)
+	int wA = GraphicsCore::instance()->getWidthOfTextureA();
+	int hA = GraphicsCore::instance()->getHeightOfTextureA();
+	Vec2d<int> centerOfArrowInA(uA * wA - 0.5f, vA * hA - 0.5f);
+
+	bool forceUpdatingGeometryOnGPU = false;
+	switch (basis)
 	{
-		int maxY = 0;
-		for (int i = 0; i < N; i++)
-			maxY = std::max<int>(maxY, y[i]);
+	case atCos:
+		switch (chanel)
+		{
+		case ofR:
+			if (bUpdateCoeffsAtCosOfR)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtCosForRChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
 
-		float fy[1000];
-		for (int i = 0; i < N; i++)
-			fy[i] = (float)(y[i]) / (float)(maxY);
+				fourierCoeffsOfRatCos = createHistogram(fourierCoeffs, N);
 
-		statisticOfTextureAtPoint = createHistogram(fy, N);
-		forceUpdatingOfGeometryOnGPU = true;
-		updateStatisticMesh = false;
+				bUpdateCoeffsAtCosOfR = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfRatCos, forceUpdatingGeometryOnGPU);
+			break;
+		case ofG:
+			if (bUpdateCoeffsAtCosOfG)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtCosForGChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
+
+				fourierCoeffsOfGatCos = createHistogram(fourierCoeffs, N);
+
+				bUpdateCoeffsAtCosOfG = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfGatCos, forceUpdatingGeometryOnGPU);
+			break;
+		case ofB:
+			if (bUpdateCoeffsAtCosOfB)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtCosForBChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
+
+				fourierCoeffsOfBatCos = createHistogram(fourierCoeffs, N);
+
+				bUpdateCoeffsAtCosOfB = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfBatCos, forceUpdatingGeometryOnGPU);
+			break;
+		}
+		break;
+	case atSin:
+		switch (chanel)
+		{
+		case ofR:
+			if (bUpdateCoeffsAtSinOfR)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtSinForRChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
+
+				fourierCoeffsOfRatSin = createHistogram(fourierCoeffs, N);
+
+				bUpdateCoeffsAtSinOfR = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfRatSin, forceUpdatingGeometryOnGPU);
+			break;
+		case ofG:
+			if (bUpdateCoeffsAtSinOfG)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtSinForGChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
+
+				fourierCoeffsOfGatSin = createHistogram(fourierCoeffs, N);
+
+				bUpdateCoeffsAtSinOfG = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfGatSin, forceUpdatingGeometryOnGPU);
+			break;
+		case ofB:
+			if (bUpdateCoeffsAtSinOfB)
+			{
+				float fourierCoeffs[1000];
+				int N = 0;
+				GraphicsCore::instance()->calculateFourierCoefficientsAtSinForBChanel(
+					centerOfArrowInA, radius, thickness, fourierCoeffs, N
+				);
+
+				fourierCoeffsOfBatSin = createHistogram(fourierCoeffs, N);
+
+				bUpdateCoeffsAtSinOfB = false;
+				forceUpdatingGeometryOnGPU = true;
+			}
+
+			GraphicsCore::instance()->draw(fourierCoeffsOfBatSin, forceUpdatingGeometryOnGPU);
+			break;
+		}
+		break;
 	}
-	graphicsCore->draw(statisticOfTextureAtPoint, forceUpdatingOfGeometryOnGPU);
-
 
 	graphicsCore->endFrame();
 }

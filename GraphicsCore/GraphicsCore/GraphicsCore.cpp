@@ -179,6 +179,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initDefinitionOfTheSamePoints();
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
+	initFourierTransform();
 }
 
 void GraphicsCore::startFrame()
@@ -2989,13 +2990,13 @@ void GraphicsCore::initFourierTransform()
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mFourierTransformFX);
 
-	mFourierTransformCosR_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_R");
-	mFourierTransformCosG_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_G");
-	mFourierTransformCosB_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtCos_B");
+	mFourierTransformCosR_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_cos_r");
+	mFourierTransformCosG_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_cos_g");
+	mFourierTransformCosB_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_cos_b");
 
-	mFourierTransformSinR_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_R");
-	mFourierTransformSinG_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_G");
-	mFourierTransformSinB_TECH = mFourierTransformFX->GetTechniqueByName("fourierCoefficientsAtSin_B");
+	mFourierTransformSinR_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_sin_r");
+	mFourierTransformSinG_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_sin_g");
+	mFourierTransformSinB_TECH = mFourierTransformFX->GetTechniqueByName("FourierTransform_sin_b");
 
 	mTextureForFourierTransform = mFourierTransformFX->GetVariableByName("tex")->AsShaderResource();
 

@@ -1,6 +1,6 @@
 #include "ColorSpace.hlsl"
 
-Texture2D tex;
+Texture2D<float4> tex;
 
 RWStructuredBuffer<int> fourierCoefficientsAtCos_R;
 RWStructuredBuffer<int> fourierCoefficientsAtCos_G;
@@ -212,8 +212,8 @@ void cs_sin_b(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	int2 r = dispatchThreadID.xy;
-	r.x -= radius;
-	r.y -= radius;
+	r.x -= ceil((float)(radius)+0.5f * (float)(thickness));
+	r.y -= ceil((float)(radius)+0.5f * (float)(thickness));
 
 	float l = length(r);
 	if (l < (float)(radius)-0.5f * (float)(thickness))
