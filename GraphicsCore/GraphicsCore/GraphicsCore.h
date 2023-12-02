@@ -482,7 +482,7 @@ private:
 	ID3D11Buffer* mFourierCoefficientsAtSin_B_bufferCopy = nullptr;
 	ID3D11UnorderedAccessView* mFourierCoefficientsAtSin_B_uav = nullptr;
 
-	const int numberOfElementsInFourierRow = 20;
+	const int numberOfElementsInFourierRow = 1000;
 
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);

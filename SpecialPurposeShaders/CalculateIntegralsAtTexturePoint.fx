@@ -89,7 +89,7 @@ void cs_integral(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (angle > -PI + sectorLen * (sectorIndex + 1))
 		return;
 
-	uint3 color = round(255 * adobeToRaw(tex[int2(x, y)].rgb));
+	uint3 color = round(255 * srgbToRaw(tex[int2(x, y)].rgb));
 	InterlockedAdd(Integrals[4 * integralIndex + 0], color.x);
 	InterlockedAdd(Integrals[4 * integralIndex + 1], color.y);
 	InterlockedAdd(Integrals[4 * integralIndex + 2], color.z);

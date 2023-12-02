@@ -2465,6 +2465,10 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 			minAngle1 = angle0 + angle1;
 			minScale1 = scale1;
 			minJ = J.x();
+
+			char buffer[256];
+			sprintf(buffer, "error = %f\n", minError);
+			OutputDebugStringA(buffer);
 		}
 
 		index[0] = (index[0] + 1) % numberOfSteps[0];
