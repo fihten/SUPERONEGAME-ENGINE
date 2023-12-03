@@ -2552,6 +2552,53 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	OutputDebugStringA(buffer);
 }
 
+void GraphicsCore::findMinimumAlongAxis(
+	int xB, int yB,
+	float integralsA[],
+	int axis,
+	float index[],
+	float leftBorder[],
+	float rightBorder[],
+	float step[]
+)
+{
+	int minIndex = 0;
+	float minError = FLT_MAX;
+	index[axis] = 0;
+	int N = (rightBorder[axis] - leftBorder[axis]) / step[axis] + 1;
+	for (; index[axis] < N; index[axis]++)
+	{
+		float angle0 = leftBorder[0] + index[0] * step[0];
+		float scale0 = leftBorder[1] + index[1] * step[1];
+
+		float angle1 = leftBorder[2] + index[2] * step[2];
+		float scale1 = leftBorder[3] + index[3] * step[3];
+
+		float integralsB[3 * INTEGRALS];
+		float variances[3 * INTEGRALS];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			integralsB,
+			variances
+		);
+
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB
+		);
+		float error = J.y();
+		if (error < minError)
+		{
+			minError = error;
+			minIndex = index[axis];
+		}
+	}
+	index[axis] = minIndex;
+}
+
 flt2 GraphicsCore::leastSquaresMethode(
 	float integralsA[],
 	float integralsB[]

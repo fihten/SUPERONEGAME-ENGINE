@@ -331,6 +331,17 @@ public:
 	);
 
 private:
+	void findMinimumAlongAxis(
+		int xB, int yB,
+		float integralsA[],
+		int axis,
+		float index[],
+		float leftBorder[],
+		float rightBorder[],
+		float step[]
+	);
+
+private:
 	void initManualDefinitionOfTheSamePoint();
 	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
 
