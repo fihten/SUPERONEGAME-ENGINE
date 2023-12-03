@@ -331,11 +331,11 @@ public:
 	);
 
 private:
-	void findMinimumAlongAxis(
+	float findMinimumAlongAxis(
 		int xB, int yB,
 		float integralsA[],
 		int axis,
-		float index[],
+		int index[],
 		float leftBorder[],
 		float rightBorder[],
 		float step[]

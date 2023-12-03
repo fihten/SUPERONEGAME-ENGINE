@@ -2433,70 +2433,29 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 	int index[4] = { 0,0,0,0 };
 
-	float h = FLT_MAX;
+	float maxStep = FLT_MAX;
 	float threshold = 1e-6;
-
-	while (h > threshold)
+	float minError = FLT_MAX;
+	while (maxStep > threshold)
 	{
-		float angle0 = a[0] + index[0] * step[0];
-		float scale0 = a[1] + index[1] * step[1];
-
-		float angle1 = a[2] + index[2] * step[2];
-		float scale1 = a[3] + index[3] * step[3];
-
-		calculateIntegralsAtTexturePoint(
-			mTextureToIntegrateBsrv,
-			xB, yB,
-			angle0, scale0,
-			angle0 + angle1, scale1,
-			integralsB,
-			variances
-		);
-		flt2 J = leastSquaresMethode(
-			integralsA,
-			integralsB
-		);
-		float error = J.y();
-		if (error < minError)
+		findMinimumAlongAxis(xB, yB, integralsA, 0, index, a, b, step);
+		findMinimumAlongAxis(xB, yB, integralsA, 1, index, a, b, step);
+		findMinimumAlongAxis(xB, yB, integralsA, 2, index, a, b, step);
+		float error = findMinimumAlongAxis(xB, yB, integralsA, 3, index, a, b, step);
+		if (error == minError)
 		{
-			minError = error;
-			minAngle0 = angle0;
-			minScale0 = scale0;
-			minAngle1 = angle0 + angle1;
-			minScale1 = scale1;
-			minJ = J.x();
+			maxStep = 0;
+			for (int i = 0; i < 4; i++)
+			{
+				a[i] = std::max<float>(a[i] + (index[i] - 1) * step[i], a[i]);
+				b[i] = std::min<float>(a[i] + 2 * step[i], b[i]);
+				step[i] = (b[i] - a[i]) / numberOfSteps[i];
+				index[i] = 0;
 
-			char buffer[256];
-			sprintf(buffer, "error = %f\n", minError);
-			OutputDebugStringA(buffer);
+				maxStep = std::max<float>(maxStep, step[i]);
+			}
 		}
-
-		index[0] = (index[0] + 1) % numberOfSteps[0];
-		int i = 1;
-		for (; i < 4 && index[i - 1] == 0; i++)
-			index[i] = (index[i] + 1) % numberOfSteps[i];
-		if (index[i - 1] == 0)
-		{
-			a[0] = minAngle0 - step[0];
-			b[0] = minAngle0 + step[0];
-			step[0] = 2 * step[0] / numberOfSteps[0];
-
-			a[1] = minScale0 - step[1];
-			b[1] = minScale0 + step[1];
-			step[1] = 2 * step[1] / numberOfSteps[1];
-
-			a[2] = minAngle1 - step[2];
-			b[2] = minAngle1 + step[2];
-			step[2] = 2 * step[2] / numberOfSteps[2];
-
-			a[3] = minScale1 - step[3];
-			b[3] = minScale1 + step[3];
-			step[3] = 2 * step[3] / numberOfSteps[3];
-		}
-
-		h = step[0];
-		for (int i = 1; i < 4; i++)
-			h = std::max<float>(h, step[i]);
+		minError = error;
 	}
 
 	angle0 = minAngle0;
@@ -2552,11 +2511,11 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	OutputDebugStringA(buffer);
 }
 
-void GraphicsCore::findMinimumAlongAxis(
+float GraphicsCore::findMinimumAlongAxis(
 	int xB, int yB,
 	float integralsA[],
 	int axis,
-	float index[],
+	int index[],
 	float leftBorder[],
 	float rightBorder[],
 	float step[]
@@ -2597,6 +2556,8 @@ void GraphicsCore::findMinimumAlongAxis(
 		}
 	}
 	index[axis] = minIndex;
+
+	return minError;
 }
 
 flt2 GraphicsCore::leastSquaresMethode(
