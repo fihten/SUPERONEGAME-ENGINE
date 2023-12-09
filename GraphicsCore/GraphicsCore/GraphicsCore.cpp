@@ -2405,13 +2405,6 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		variances
 	);
 
-	float minAngle0;
-	float minScale0;
-	float minAngle1;
-	float minScale1;
-	float minJ;
-	float minError = FLT_MAX;
-
 	float a[4] = {
 		-maxAngle,
 		minScale,
@@ -2434,7 +2427,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	int index[4] = { 0,0,0,0 };
 
 	float maxStep = FLT_MAX;
-	float threshold = 1e-6;
+	float threshold = 1e-8;
 	float minError = FLT_MAX;
 	while (maxStep > threshold)
 	{
@@ -2458,17 +2451,16 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		minError = error;
 	}
 
-	angle0 = minAngle0;
-	scale0 = minScale0;
-
-	angle1 = minAngle1;
-	scale1 = minScale1;
+	angle0 = 0.5f * (a[0] + b[0]);
+	scale0 = 0.5f * (a[1] + b[1]);
+	angle1 = 0.5f * (a[2] + b[2]);
+	scale1 = 0.5f * (a[3] + b[3]);
 
 	calculateIntegralsAtTexturePoint(
 		mTextureToIntegrateBsrv,
 		xB, yB,
-		minAngle0, minScale0,
-		minAngle1, minScale1,
+		angle0, scale0,
+		angle1, scale1,
 		integralsB,
 		variances
 	);
@@ -2506,8 +2498,8 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	}
 
 	char buffer[2048];
-	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, j = %f, distance from bell curve = %f\n",
-		minError, minAngle0 * 180.0f / M_PI, minScale0, minAngle1 * 180.0f / M_PI, minScale1, minJ, distFromBellCurve);
+	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, distance from bell curve = %f\n",
+		minError, angle0 * 180.0f / M_PI, scale0, angle1 * 180.0f / M_PI, scale1, distFromBellCurve);
 	OutputDebugStringA(buffer);
 }
 
