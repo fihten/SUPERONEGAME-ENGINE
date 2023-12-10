@@ -2394,7 +2394,6 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	int yB = std::min<float>(std::max<float>(fyB, 0.0f), heightOfB - 1);
 
 	float integralsA[3 * INTEGRALS];
-	float integralsB[3 * INTEGRALS];
 	float variances[3 * INTEGRALS];
 	calculateIntegralsAtTexturePoint(
 		mTextureToIntegrateAsrv,
@@ -2404,6 +2403,30 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		integralsA,
 		variances
 	);
+
+	float integralsAlongRadiusA[3 * INTEGRALS_ALONG_RADIUS];
+	calculateIntegralsAtTexturePoint(
+		mTextureToIntegrateAsrv,
+		xA, yA,
+		0, 1,
+		0, 1,
+		1, INTEGRALS_ALONG_RADIUS,
+		integralsAlongRadiusA,
+		variances
+	);
+
+	float integralsAlongSectorsA[3 * INTEGRALS_ALONG_SECTORS];
+	calculateIntegralsAtTexturePoint(
+		mTextureToIntegrateAsrv,
+		xA, yA,
+		0, 1,
+		0, 1,
+		INTEGRALS_ALONG_SECTORS, 1,
+		integralsAlongSectorsA,
+		variances
+	);
+
+	float integralsB[3 * INTEGRALS];
 
 	float a[4] = {
 		-maxAngle,
@@ -2431,6 +2454,31 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	float minError = FLT_MAX;
 	while (maxStep > threshold)
 	{
+		findMinimumForAngle0(xB, yB, integralsAlongSectorsA, index, a, b, step);
+		findMinimumForAngle1(xB, yB, integralsAlongSectorsA, index, a, b, step);
+		findMinimumForScale0(xB, yB, integralsAlongRadiusA, index, a, b, step);
+		float error = findMinimumForScale1(xB, yB, integralsAlongRadiusA, index, a, b, step);
+		if (error == minError)
+		{
+			maxStep = 0;
+			for (int i = 0; i < 4; i++)
+			{
+				a[i] = std::max<float>(a[i] + (index[i] - 1) * step[i], a[i]);
+				b[i] = std::min<float>(a[i] + 2 * step[i], b[i]);
+				step[i] = (b[i] - a[i]) / numberOfSteps[i];
+				index[i] = 0;
+
+				maxStep = std::max<float>(maxStep, step[i]);
+			}
+		}
+		minError = error;
+	}
+
+/*	float maxStep = FLT_MAX;
+	float threshold = 1e-8;
+	float minError = FLT_MAX;
+	while (maxStep > threshold)
+	{
 		findMinimumAlongAxis(xB, yB, integralsA, 0, index, a, b, step);
 		findMinimumAlongAxis(xB, yB, integralsA, 1, index, a, b, step);
 		findMinimumAlongAxis(xB, yB, integralsA, 2, index, a, b, step);
@@ -2449,7 +2497,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 			}
 		}
 		minError = error;
-	}
+	}*/
 
 	angle0 = 0.5f * (a[0] + b[0]);
 	scale0 = 0.5f * (a[1] + b[1]);
