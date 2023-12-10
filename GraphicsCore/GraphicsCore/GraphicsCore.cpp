@@ -2552,9 +2552,214 @@ float GraphicsCore::findMinimumAlongAxis(
 	return minError;
 }
 
+float GraphicsCore::findMinimumForAngle0(
+	int xB, int yB,
+	float integralsA[],
+	int index[],
+	float leftBorder[],
+	float rightBorder[],
+	float step[]
+)
+{
+	int minIndex = 0;
+	float minError = FLT_MAX;
+	int axis = 0;
+	index[axis] = 0;
+	int N = (rightBorder[axis] - leftBorder[axis]) / step[axis] + 1;
+	for (; index[axis] < N; index[axis]++)
+	{
+		float angle0 = leftBorder[0] + index[0] * step[0];
+		float scale0 = leftBorder[1] + index[1] * step[1];
+
+		float angle1 = leftBorder[2] + index[2] * step[2];
+		float scale1 = leftBorder[3] + index[3] * step[3];
+
+		float integralsB[3 * INTEGRALS_ALONG_SECTORS];
+		float variances[3 * INTEGRALS_ALONG_SECTORS];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			INTEGRALS_ALONG_SECTORS, 1,
+			integralsB,
+			variances
+		);
+
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB,
+			INTEGRALS_ALONG_SECTORS
+		);
+		float error = J.y();
+		if (error < minError)
+		{
+			minError = error;
+			minIndex = index[axis];
+		}
+	}
+	index[axis] = minIndex;
+
+	return minError;
+}
+
+float GraphicsCore::findMinimumForScale0(
+	int xB, int yB,
+	float integralsA[],
+	int index[],
+	float leftBorder[],
+	float rightBorder[],
+	float step[]
+)
+{
+	int minIndex = 0;
+	float minError = FLT_MAX;
+	int axis = 1;
+	index[axis] = 0;
+	int N = (rightBorder[axis] - leftBorder[axis]) / step[axis] + 1;
+	for (; index[axis] < N; index[axis]++)
+	{
+		float angle0 = leftBorder[0] + index[0] * step[0];
+		float scale0 = leftBorder[1] + index[1] * step[1];
+
+		float angle1 = leftBorder[2] + index[2] * step[2];
+		float scale1 = leftBorder[3] + index[3] * step[3];
+
+		float integralsB[3 * INTEGRALS_ALONG_RADIUS];
+		float variances[3 * INTEGRALS_ALONG_RADIUS];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			1, INTEGRALS_ALONG_RADIUS,
+			integralsB,
+			variances
+		);
+
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB,
+			INTEGRALS_ALONG_RADIUS
+		);
+		float error = J.y();
+		if (error < minError)
+		{
+			minError = error;
+			minIndex = index[axis];
+		}
+	}
+	index[axis] = minIndex;
+
+	return minError;
+}
+
+float GraphicsCore::findMinimumForAngle1(
+	int xB, int yB,
+	float integralsA[],
+	int index[],
+	float leftBorder[],
+	float rightBorder[],
+	float step[]
+)
+{
+	int minIndex = 0;
+	float minError = FLT_MAX;
+	int axis = 2;
+	index[axis] = 0;
+	int N = (rightBorder[axis] - leftBorder[axis]) / step[axis] + 1;
+	for (; index[axis] < N; index[axis]++)
+	{
+		float angle0 = leftBorder[0] + index[0] * step[0];
+		float scale0 = leftBorder[1] + index[1] * step[1];
+
+		float angle1 = leftBorder[2] + index[2] * step[2];
+		float scale1 = leftBorder[3] + index[3] * step[3];
+
+		float integralsB[3 * INTEGRALS_ALONG_SECTORS];
+		float variances[3 * INTEGRALS_ALONG_SECTORS];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			INTEGRALS_ALONG_SECTORS, 1,
+			integralsB,
+			variances
+		);
+
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB,
+			INTEGRALS_ALONG_SECTORS
+		);
+		float error = J.y();
+		if (error < minError)
+		{
+			minError = error;
+			minIndex = index[axis];
+		}
+	}
+	index[axis] = minIndex;
+
+	return minError;
+}
+
+float GraphicsCore::findMinimumForScale1(
+	int xB, int yB,
+	float integralsA[],
+	int index[],
+	float leftBorder[],
+	float rightBorder[],
+	float step[]
+)
+{
+	int minIndex = 0;
+	float minError = FLT_MAX;
+	int axis = 3;
+	index[axis] = 0;
+	int N = (rightBorder[axis] - leftBorder[axis]) / step[axis] + 1;
+	for (; index[axis] < N; index[axis]++)
+	{
+		float angle0 = leftBorder[0] + index[0] * step[0];
+		float scale0 = leftBorder[1] + index[1] * step[1];
+
+		float angle1 = leftBorder[2] + index[2] * step[2];
+		float scale1 = leftBorder[3] + index[3] * step[3];
+
+		float integralsB[3 * INTEGRALS_ALONG_RADIUS];
+		float variances[3 * INTEGRALS_ALONG_RADIUS];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle0 + angle1, scale1,
+			1, INTEGRALS_ALONG_RADIUS,
+			integralsB,
+			variances
+		);
+
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB,
+			INTEGRALS_ALONG_RADIUS
+		);
+		float error = J.y();
+		if (error < minError)
+		{
+			minError = error;
+			minIndex = index[axis];
+		}
+	}
+	index[axis] = minIndex;
+
+	return minError;
+}
+
 flt2 GraphicsCore::leastSquaresMethode(
 	float integralsA[],
-	float integralsB[]
+	float integralsB[],
+	int count
 )
 {
 	float xx = 0;
@@ -2563,13 +2768,13 @@ flt2 GraphicsCore::leastSquaresMethode(
 
 	float maxIntegralA = 0;
 	float maxIntegralB = 0;
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * count; i++)
 	{
 		maxIntegralA = std::max<float>(maxIntegralA, integralsA[i]);
 		maxIntegralB = std::max<float>(maxIntegralB, integralsB[i]);
 	}
 
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * count; i++)
 	{
 		float A = integralsA[i] / maxIntegralA;
 		float B = integralsB[i] / maxIntegralB;
@@ -2872,6 +3077,95 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 	}
 
 	context->Unmap(mVariancesBufferCopyMDSP, 0);
+}
+
+void GraphicsCore::calculateIntegralsAtTexturePoint(
+	ID3D11ShaderResourceView* texSRV,
+	int x, int y,
+	float angle0, float scale0,
+	float angle1, float scale1,
+	int sectors, int sectorElements,
+	float integrals[],
+	float variances[]
+)
+{
+	mTextureMDSP->SetResource(texSRV);
+
+	static uint32_t initData[4 * INTEGRALS];
+	context->UpdateSubresource(mIntegralsBufferMDSP, 0, 0, initData, 0, 0);
+	context->UpdateSubresource(mVariancesBufferMDSP, 0, 0, initData, 0, 0);
+
+	mIntegralsMDSP->SetUnorderedAccessView(mIntegralsBufferMDSPuav);
+	mVariancesMDSP->SetUnorderedAccessView(mVariancesBufferMDSPuav);
+
+	int radius0 = this->radius1 / sqrt(sectorElements);
+	int radius1 = std::sqrt(sectorElements) * radius0;
+
+	mRadius0MDSP->SetRawValue(&radius0, 0, sizeof radius0);
+	mRadius1MDSP->SetRawValue(&radius1, 0, sizeof radius1);
+
+	mSectorsMDSP->SetRawValue(&sectors, 0, sizeof sectors);
+
+	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
+	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
+
+	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
+	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+
+	int x_left = INT_MAX;
+	int x_right = -INT_MAX;
+
+	int y_bottom = INT_MAX;
+	int y_top = -INT_MAX;
+
+	for (int i = 0; i < 4; i++)
+	{
+		float x_corner = xs[i] * m00 + ys[i] * m10;
+		float y_corner = xs[i] * m01 + ys[i] * m11;
+
+		x_left = std::min<int>(x_left, std::floor(x_corner));
+		x_right = std::max<int>(x_right, std::ceil(x_corner));
+
+		y_bottom = std::min<int>(y_bottom, std::floor(y_corner));
+		y_top = std::max<int>(y_top, std::ceil(y_corner));
+	}
+
+	mLeftXMDSP->SetRawValue(&x_left, 0, sizeof x_left);
+	mRightXMDSP->SetRawValue(&x_right, 0, sizeof x_right);
+
+	mBottomYMDSP->SetRawValue(&y_bottom, 0, sizeof y_bottom);
+	mTopYMDSP->SetRawValue(&y_top, 0, sizeof y_top);
+
+	mX0MDSP->SetRawValue(&x, 0, sizeof x);
+	mY0MDSP->SetRawValue(&y, 0, sizeof y);
+
+	mAngle0MDSP->SetRawValue(&angle0, 0, sizeof angle0);
+	mScale0MDSP->SetRawValue(&scale0, 0, sizeof scale0);
+
+	mAngle1MDSP->SetRawValue(&angle1, 0, sizeof angle1);
+	mScale1MDSP->SetRawValue(&scale1, 0, sizeof scale1);
+
+	mCalculateIntegralsAtTexturePointTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 16.0f);
+	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 16.0f);
+	uint32_t z_groups = std::ceil((float)(INTEGRALS) / 4.0f);
+	context->Dispatch(x_groups, y_groups, z_groups);
+
+	context->CopyResource(mIntegralsBufferCopyMDSP, mIntegralsBufferMDSP);
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mIntegralsBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	uint32_t* pIntegrals = (uint32_t*)data.pData;
+	int integralsCount = sectors * sectorElements;
+	for (int i = 0; i < integralsCount; ++i)
+	{
+		integrals[3 * i + 0] = (float)(pIntegrals[4 * i + 0]) / 255.0f;
+		integrals[3 * i + 1] = (float)(pIntegrals[4 * i + 1]) / 255.0f;
+		integrals[3 * i + 2] = (float)(pIntegrals[4 * i + 2]) / 255.0f;
+	}
+
+	context->Unmap(mIntegralsBufferCopyMDSP, 0);
 }
 
 void GraphicsCore::initCalculationOfTextureStatistic()

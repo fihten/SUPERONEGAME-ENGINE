@@ -341,6 +341,42 @@ private:
 		float step[]
 	);
 
+	float findMinimumForAngle0(
+		int xB, int yB,
+		float integralsA[],
+		int index[],
+		float leftBorder[],
+		float rightBorder[],
+		float step[]
+	);
+
+	float findMinimumForScale0(
+		int xB, int yB,
+		float integralsA[],
+		int index[],
+		float leftBorder[],
+		float rightBorder[],
+		float step[]
+	);
+
+	float findMinimumForAngle1(
+		int xB, int yB,
+		float integralsA[],
+		int index[],
+		float leftBorder[],
+		float rightBorder[],
+		float step[]
+	);
+
+	float findMinimumForScale1(
+		int xB, int yB,
+		float integralsA[],
+		int index[],
+		float leftBorder[],
+		float rightBorder[],
+		float step[]
+	);
+
 private:
 	void initManualDefinitionOfTheSamePoint();
 	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
@@ -389,9 +425,20 @@ private:
 		float variances[]
 	);
 
+	void calculateIntegralsAtTexturePoint(
+		ID3D11ShaderResourceView* texSRV,
+		int x, int y,
+		float angle0, float scale0,
+		float angle1, float scale1,
+		int sectors, int sectorElements,
+		float integrals[],
+		float variances[]
+	);
+
 	flt2 leastSquaresMethode(
 		float integralsA[],
-		float integralsB[]
+		float integralsB[],
+		int count = INTEGRALS
 	);
 	
 	void findDistributionOfErrors(
