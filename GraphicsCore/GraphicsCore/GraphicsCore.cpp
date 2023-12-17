@@ -2451,14 +2451,59 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 	float maxStep = FLT_MAX;
 	float threshold = 1e-8;
-	float minError = FLT_MAX;
+	
+	float e0 = FLT_MAX;
+	float e1 = FLT_MAX;
+
 	while (maxStep > threshold)
 	{
-		findMinimumForAngle0(xB, yB, integralsAlongSectorsA, index, a, b, step);
-		findMinimumForAngle1(xB, yB, integralsAlongSectorsA, index, a, b, step);
-		findMinimumForScale0(xB, yB, integralsAlongRadiusA, index, a, b, step);
-		float error = findMinimumForScale1(xB, yB, integralsAlongRadiusA, index, a, b, step);
-		if (error == minError)
+		float prevError = FLT_MAX;
+		float currError = FLT_MAX;
+		float diffError = FLT_MAX;
+		while (diffError != 0)
+		{
+			prevError = currError;
+
+			findMinimumForAngle0(xB, yB, integralsAlongSectorsA, index, a, b, step);
+			currError = findMinimumForAngle1(xB, yB, integralsAlongSectorsA, index, a, b, step);
+
+			diffError = std::abs(currError - prevError);
+		}
+
+		prevError = FLT_MAX;
+		currError = FLT_MAX;
+		diffError = FLT_MAX;
+		while (diffError != 0)
+		{
+			prevError = currError;
+
+			findMinimumForScale0(xB, yB, integralsAlongRadiusA, index, a, b, step);
+			currError = findMinimumForScale1(xB, yB, integralsAlongRadiusA, index, a, b, step);
+
+			diffError = std::abs(currError - prevError);
+		}
+
+		float angle0 = a[0] + index[0] * step[0];
+		float scale0 = a[1] + index[1] * step[1];
+
+		float angle1 = a[2] + index[2] * step[2];
+		float scale1 = a[3] + index[3] * step[3];
+		calculateIntegralsAtTexturePoint(
+			mTextureToIntegrateBsrv,
+			xB, yB,
+			angle0, scale0,
+			angle1, scale1,
+			integralsB,
+			variances
+		);
+		flt2 J = leastSquaresMethode(
+			integralsA,
+			integralsB
+		);
+
+		e0 = e1;
+		e1 = J.y();
+		if (e1 <= e0 && e0 - e1 < e0 * 0.1f)
 		{
 			maxStep = 0;
 			for (int i = 0; i < 4; i++)
@@ -2471,7 +2516,6 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 				maxStep = std::max<float>(maxStep, step[i]);
 			}
 		}
-		minError = error;
 	}
 
 /*	float maxStep = FLT_MAX;
@@ -2547,7 +2591,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 	char buffer[2048];
 	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, distance from bell curve = %f\n",
-		minError, angle0 * 180.0f / M_PI, scale0, angle1 * 180.0f / M_PI, scale1, distFromBellCurve);
+		e1, angle0 * 180.0f / M_PI, scale0, angle1 * 180.0f / M_PI, scale1, distFromBellCurve);
 	OutputDebugStringA(buffer);
 }
 
