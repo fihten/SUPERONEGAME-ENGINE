@@ -8,11 +8,18 @@ Selector* Selector::pSelector = nullptr;
 
 Selector::Selector()
 {
+	// Initialization of selected objects' boxes 	
 	selectedObjectsBoxesMesh.setTechnique(selected_objects_box_id);
 	selectedObjectsBoxesMesh.setPass(p0_pass_id);
 
 	selectedObjectsBoxesMesh.gpuReadyData = selectedObjectsBoxes;
 	selectedObjectsBoxesMesh.elementSize = sizeof SelectedObjectBox;
+
+	// Initialization of frames of references
+	framesOfReferences.setTechnique(frame_of_reference_id);
+	framesOfReferences.setPass(p0_pass_id);
+
+	framesOfReferences.elementSize = sizeof FrameOfReference;
 
 	areaOfSelection = createAreaOfSelection();
 }

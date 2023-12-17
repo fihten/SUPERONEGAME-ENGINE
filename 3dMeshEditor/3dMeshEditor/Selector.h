@@ -1,6 +1,7 @@
 #pragma once
 #include "Mesh.h"
 #include "SelectedObjectBox.h"
+#include "FrameOfReference.h"
 #include "GraphicsCore.h"
 #include "Frustum.h"
 #include "Segment.h"
@@ -30,9 +31,12 @@ public:
 	Frustum selectorFrustum;
 	Segment selectorFrustumDiagonals[4];
 
+	FrameOfReference frameOfReference;
+
 private:
 	static Selector* pSelector;
 	Mesh selectedObjectsBoxesMesh;
+	Mesh framesOfReferences;
 	Mesh areaOfSelection;
 	bool bProcessOfMultipleSelection = false;
 };

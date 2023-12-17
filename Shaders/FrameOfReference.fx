@@ -60,7 +60,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	pt = gin[0].posW + gin[0].scale * gin[0].axis1;
 
 	gout.posH = mul(float4(pt, 1.0f), gViewProj);
-	gout.color = float4(1, 0, 0, 1);
+	gout.color = float4(0, 1, 0, 1);
 	lineStream.Append(gout);
 
 	pt = gin[0].posW - gin[0].scale * gin[0].axis1;
@@ -74,7 +74,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	pt = gin[0].posW + gin[0].scale * gin[0].axis2;
 
 	gout.posH = mul(float4(pt, 1.0f), gViewProj);
-	gout.color = float4(1, 0, 0, 1);
+	gout.color = float4(0, 0, 1, 1);
 	lineStream.Append(gout);
 
 	pt = gin[0].posW - gin[0].scale * gin[0].axis2;

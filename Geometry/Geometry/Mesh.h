@@ -226,6 +226,7 @@ public:
 	friend Mesh createMeshForTestingDefinitionOfTheSamePoints();
 	friend Mesh createMeshVisualizingAreaOfIntegration();
 	friend Mesh createHistogram(float y[], int N);
+
 public:
 	uint32_t id;
 	void* scene = nullptr;
