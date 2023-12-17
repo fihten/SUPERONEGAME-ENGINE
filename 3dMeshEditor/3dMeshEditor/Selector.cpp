@@ -4,6 +4,9 @@
 #include "MainScene.h"
 #include <algorithm>
 
+#undef min
+#undef max
+
 Selector* Selector::pSelector = nullptr;
 
 Selector::Selector()
@@ -134,7 +137,34 @@ void Selector::selectObjects(
 	selectedObjectsCount = 0;
 	class VisitFineSelectedObjects : public SelectedObjectVisitor
 	{
+		void updateMinMax(const SelectedObjectBox& sob)
+		{
+			flt3 corners[8] = {
+				sob.posW - sob.axis0 - sob.axis1 - sob.axis2,
+				sob.posW - sob.axis0 - sob.axis1 + sob.axis2,
+				sob.posW - sob.axis0 + sob.axis1 - sob.axis2,
+				sob.posW - sob.axis0 + sob.axis1 + sob.axis2,
+				sob.posW + sob.axis0 - sob.axis1 - sob.axis2,
+				sob.posW + sob.axis0 - sob.axis1 + sob.axis2,
+				sob.posW + sob.axis0 + sob.axis1 - sob.axis2,
+				sob.posW + sob.axis0 + sob.axis1 + sob.axis2
+			};
+			for (int i = 0; i < 8; i++)
+			{
+				min.x() = std::min<float>(min.x(), corners[i].x());
+				min.y() = std::min<float>(min.y(), corners[i].y());
+				min.z() = std::min<float>(min.z(), corners[i].z());
+
+				max.x() = std::max<float>(max.x(), corners[i].x());
+				max.y() = std::max<float>(max.y(), corners[i].y());
+				max.z() = std::max<float>(max.z(), corners[i].z());
+			}
+		}
 	public:
+		VisitFineSelectedObjects(): min(FLT_MAX,FLT_MAX,FLT_MAX),max(-FLT_MAX,-FLT_MAX,-FLT_MAX)
+		{
+		}
+
 		void operator()(uint32_t objectID)
 		{
 			auto& boxes = Selector::instance()->selectedObjectsBoxes;
@@ -144,11 +174,21 @@ void Selector::selectObjects(
 			objects[count] = objectID;
 			count++;
 		}
+		flt3 min;
+		flt3 max;
 	};
 	VisitFineSelectedObjects fineVisitor;
 	GraphicsCore::instance()->traverseFineSelectedObjects(&fineVisitor);
 
 	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
+
+	frameOfReference.posW = 0.5f * (fineVisitor.min + fineVisitor.max);
+
+	frameOfReference.axis0 = 0.5f * (fineVisitor.max - fineVisitor.min).x() * frameOfReference.axis0;
+	frameOfReference.axis1 = 0.5f * (fineVisitor.max - fineVisitor.min).y() * frameOfReference.axis1;
+	frameOfReference.axis2 = 0.5f * (fineVisitor.max - fineVisitor.min).z() * frameOfReference.axis2;
+
+	frameOfReference.scale = 1;
 }
 
 void Selector::selectObject(float mousePosX, float mousePosY)
