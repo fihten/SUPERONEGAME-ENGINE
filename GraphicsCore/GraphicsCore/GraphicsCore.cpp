@@ -175,11 +175,11 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	initFineObjectsSelectionBySegments();
 
 	// 12. Init photogrammetry
-	initCalculationOfTextureIntegrals();
+/*	initCalculationOfTextureIntegrals();
 	initDefinitionOfTheSamePoints();
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
-	initFourierTransform();
+	initFourierTransform();*/
 }
 
 void GraphicsCore::startFrame()

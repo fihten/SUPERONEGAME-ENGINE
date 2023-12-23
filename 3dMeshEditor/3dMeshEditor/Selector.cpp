@@ -22,6 +22,7 @@ Selector::Selector()
 	framesOfReferences.setTechnique(frame_of_reference_id);
 	framesOfReferences.setPass(p0_pass_id);
 
+	framesOfReferences.gpuReadyData = &frameOfReference;
 	framesOfReferences.elementSize = sizeof FrameOfReference;
 
 	areaOfSelection = createAreaOfSelection();
@@ -172,6 +173,9 @@ void Selector::selectObjects(
 			auto& objects = Selector::instance()->selectedObjects;
 			boxes[count] = MainScene::instance()->selectedObjectsBoxes[objectID];
 			objects[count] = objectID;
+
+			updateMinMax(boxes[count]);
+
 			count++;
 		}
 		flt3 min;
@@ -183,12 +187,19 @@ void Selector::selectObjects(
 	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
 
 	frameOfReference.posW = 0.5f * (fineVisitor.min + fineVisitor.max);
-
-	frameOfReference.axis0 = 0.5f * (fineVisitor.max - fineVisitor.min).x() * frameOfReference.axis0;
-	frameOfReference.axis1 = 0.5f * (fineVisitor.max - fineVisitor.min).y() * frameOfReference.axis1;
-	frameOfReference.axis2 = 0.5f * (fineVisitor.max - fineVisitor.min).z() * frameOfReference.axis2;
-
+	frameOfReference.axis0 = 0.5f * (fineVisitor.max - fineVisitor.min).x() * flt3(1, 0, 0);
+	frameOfReference.axis1 = 0.5f * (fineVisitor.max - fineVisitor.min).y() * flt3(0, 1, 0);
+	frameOfReference.axis2 = 0.5f * (fineVisitor.max - fineVisitor.min).z() * flt3(0, 0, 1);
 	frameOfReference.scale = 1;
+	if (selectedObjectsCount == 1)
+	{
+		frameOfReference.posW = selectedObjectsBoxes[0].posW;
+		frameOfReference.axis0 = selectedObjectsBoxes[0].axis0;
+		frameOfReference.axis1 = selectedObjectsBoxes[0].axis1;
+		frameOfReference.axis2 = selectedObjectsBoxes[0].axis2;
+		frameOfReference.scale = 1;
+	}
+	framesOfReferences.verticesCount = selectedObjectsCount > 0 ? 1 : 0;
 }
 
 void Selector::selectObject(float mousePosX, float mousePosY)
@@ -284,7 +295,10 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 void Selector::draw()
 {
 	if (selectedObjectsCount > 0)
+	{
 		GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
+		GraphicsCore::instance()->draw(framesOfReferences);
+	}
 	if (bProcessOfMultipleSelection)
 		GraphicsCore::instance()->draw(areaOfSelection);
 }
