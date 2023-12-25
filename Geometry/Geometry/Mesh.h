@@ -36,6 +36,7 @@ private:
 	string_id technique_name_id = string_id(-1);
 	string_id pass_name_id = string_id(-1);
 	string_id blend_state_id = string_id(-1);
+	string_id depth_stencil_state_id = string_id(-1);
 
 	std::vector<std::pair<string_id, std::vector<flt1>>> flt1_streams;
 	std::vector<std::pair<string_id, std::vector<flt2>>> flt2_streams;
@@ -60,6 +61,7 @@ public:
 		this->technique_name_id = m.technique_name_id;
 		this->pass_name_id = m.pass_name_id;
 		this->blend_state_id = m.blend_state_id;
+		this->depth_stencil_state_id = m.depth_stencil_state_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -79,6 +81,7 @@ public:
 		this->technique_name_id = std::move(m.technique_name_id);
 		this->pass_name_id = std::move(m.pass_name_id);
 		this->blend_state_id = std::move(m.blend_state_id);
+		this->depth_stencil_state_id = std::move(m.depth_stencil_state_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -96,6 +99,7 @@ public:
 		this->technique_name_id = std::move(m.technique_name_id);
 		this->pass_name_id = std::move(m.pass_name_id);
 		this->blend_state_id = std::move(m.blend_state_id);
+		this->depth_stencil_state_id = std::move(m.depth_stencil_state_id);
 
 		this->flt1_streams = std::move(m.flt1_streams);
 		this->flt2_streams = std::move(m.flt2_streams);
@@ -115,6 +119,7 @@ public:
 		this->technique_name_id = m.technique_name_id;
 		this->pass_name_id = m.pass_name_id;
 		this->blend_state_id = m.blend_state_id;
+		this->depth_stencil_state_id = m.depth_stencil_state_id;
 
 		this->flt1_streams = m.flt1_streams;
 		this->flt2_streams = m.flt2_streams;
@@ -131,10 +136,12 @@ public:
 	virtual void setTechnique(string_id technique_name_id);
 	virtual void setPass(string_id pass_name_id);
 	virtual void setBlendState(string_id blend_state_id);
+	virtual void setDepthStencilState(string_id depth_stencil_state_id);
 
 	virtual string_id getTechnique() const;
 	virtual string_id getPass() const;
 	virtual string_id getBlendState() const;
+	virtual string_id getDepthStencilState() const;
 
 	virtual const void* getStream(string_id name, StreamType type) const;
 	virtual const std::vector<uint32_t>* getIndicies() const;

@@ -1054,6 +1054,11 @@ void Mesh::setBlendState(string_id blend_state_id)
 	this->blend_state_id = blend_state_id;
 }
 
+void Mesh::setDepthStencilState(string_id depth_stencil_state_id)
+{
+	this->depth_stencil_state_id = depth_stencil_state_id;
+}
+
 string_id Mesh::getTechnique() const
 {
 	return technique_name_id;
@@ -1067,6 +1072,11 @@ string_id Mesh::getPass() const
 string_id Mesh::getBlendState() const
 {
 	return blend_state_id;
+}
+
+string_id Mesh::getDepthStencilState() const
+{
+	return depth_stencil_state_id;
 }
 
 const void* Mesh::getStream(string_id name, StreamType type) const

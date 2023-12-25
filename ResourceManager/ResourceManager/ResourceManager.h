@@ -45,7 +45,8 @@ public:
 		IMAGE_ALREADY_EXISTS,
 		IMAGES_ARRAY_ALREADY_EXISTS,
 		THERE_IS_NO_GEOMETRY_SHADER_IN_THE_PASS,
-		BLEND_STATE_ALREADY_EXISTS
+		BLEND_STATE_ALREADY_EXISTS,
+		DEPTH_STENCIL_STATE_ALREADY_EXISTS
 	};
 
 	RegisterMessage registerTechnique(string_id techniqueName, const ID3DX11EffectTechnique* technique);
@@ -72,6 +73,7 @@ public:
 	RegisterMessage registerVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mVerticesSRV);
 	RegisterMessage registerIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId, ID3D11ShaderResourceView* mIndicesSRV);
 	RegisterMessage registerBlendState(string_id blendStateName, ID3D11BlendState* blendState);
+	RegisterMessage registerDepthStencilState(string_id depthStencilStateName, ID3D11DepthStencilState* depthStencilState);
 
 	const std::vector<InputLayoutResource::StreamInfo>* getStreamsInfo(string_id techniqueName, string_id passName);
 	ID3D11InputLayout* getInputLayout(string_id techniqueName, string_id passName);

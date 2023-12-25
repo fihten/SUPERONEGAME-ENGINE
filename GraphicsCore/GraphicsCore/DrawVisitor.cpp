@@ -30,6 +30,14 @@ string_id DrawVisitor::MeshInScene::getBlendState() const
 	return mesh->getBlendState();
 }
 
+string_id DrawVisitor::MeshInScene::getDepthStencilState() const
+{
+	if (mesh == nullptr)
+		return string_id(-1);
+
+	return mesh->getDepthStencilState();
+}
+
 const void* DrawVisitor::MeshInScene::getStream(string_id name, StreamType type) const
 {
 	if (mesh == nullptr)

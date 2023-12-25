@@ -68,6 +68,16 @@ void parseDepthStencilState(const char* szDepthStencilState, D3D11_DEPTH_STENCIL
 		toComparisonFunc["D3D11_COMPARISON_GREATER_EQUAL"] = D3D11_COMPARISON_GREATER_EQUAL;
 		toComparisonFunc["D3D11_COMPARISON_ALWAYS"] = D3D11_COMPARISON_ALWAYS;
 
+		std::map<std::string, D3D11_STENCIL_OP> toStencilOp;
+		toStencilOp["D3D11_STENCIL_OP_KEEP"] = D3D11_STENCIL_OP_KEEP;
+		toStencilOp["D3D11_STENCIL_OP_ZERO"] = D3D11_STENCIL_OP_ZERO;
+		toStencilOp["D3D11_STENCIL_OP_REPLACE"] = D3D11_STENCIL_OP_REPLACE;
+		toStencilOp["D3D11_STENCIL_OP_INCR_SAT"] = D3D11_STENCIL_OP_INCR_SAT;
+		toStencilOp["D3D11_STENCIL_OP_DECR_SAT"] = D3D11_STENCIL_OP_DECR_SAT;
+		toStencilOp["D3D11_STENCIL_OP_INVERT"] = D3D11_STENCIL_OP_INVERT;
+		toStencilOp["D3D11_STENCIL_OP_INCR"] = D3D11_STENCIL_OP_INCR;
+		toStencilOp["D3D11_STENCIL_OP_DECR"] = D3D11_STENCIL_OP_DECR;
+
 		if (param == "DepthEnable")
 		{
 			depthStencilDesc.DepthEnable = toBool[value];
@@ -81,6 +91,61 @@ void parseDepthStencilState(const char* szDepthStencilState, D3D11_DEPTH_STENCIL
 		if (param == "DepthFunc")
 		{
 			depthStencilDesc.DepthFunc = toComparisonFunc[value];
+			continue;
+		}
+		if (param == "StencilEnable")
+		{
+			depthStencilDesc.StencilEnable = toBool[value];
+			continue;
+		}
+		if (param == "StencilReadMask")
+		{
+			depthStencilDesc.StencilReadMask = std::atoi(value.c_str());
+			continue;
+		}
+		if (param == "StencilWriteMask")
+		{
+			depthStencilDesc.StencilWriteMask = std::atoi(value.c_str());
+			continue;
+		}
+		if (param == "FrontFace.StencilFailOp")
+		{
+			depthStencilDesc.FrontFace.StencilFailOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "FrontFace.StencilDepthFailOp")
+		{
+			depthStencilDesc.FrontFace.StencilDepthFailOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "FrontFace.StencilPassOp")
+		{
+			depthStencilDesc.FrontFace.StencilPassOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "FrontFace.StencilFunc") 
+		{
+			depthStencilDesc.FrontFace.StencilFunc = toComparisonFunc[value];
+			continue;
+		}
+		if (param == "BackFace.StencilFailOp")
+		{
+			depthStencilDesc.BackFace.StencilFailOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "BackFace.StencilDepthFailOp")
+		{
+			depthStencilDesc.BackFace.StencilDepthFailOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "BackFace.StencilPassOp")
+		{
+			depthStencilDesc.BackFace.StencilPassOp = toStencilOp[value];
+			continue;
+		}
+		if (param == "BackFace.StencilFunc")
+		{
+			depthStencilDesc.BackFace.StencilFunc == toComparisonFunc[value];
 			continue;
 		}
 	}

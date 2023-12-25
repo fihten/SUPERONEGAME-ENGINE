@@ -20,6 +20,7 @@ class DrawVisitor :public Scene::Visitor
 		string_id getTechnique() const;
 		string_id getPass() const;
 		string_id getBlendState() const;
+		string_id getDepthStencilState() const;
 
 		const void* getStream(string_id name, StreamType type) const;
 		const std::vector<uint32_t>* getIndicies() const;

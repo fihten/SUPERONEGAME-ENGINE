@@ -1105,6 +1105,20 @@ void GraphicsCore::setBlendState(Mesh& mesh)
 	context->OMSetBlendState(blendState, NULL, 0xffffffff);
 }
 
+ID3D11DepthStencilState* GraphicsCore::getDepthStencilState(Mesh& mesh)
+{
+	string_id depth_stencil_state_id = mesh.getDepthStencilState();
+	if (depth_stencil_state_id == string_id(-1))
+		return nullptr;
+
+
+}
+
+void GraphicsCore::setDepthStencilState(Mesh& mesh)
+{
+
+}
+
 void GraphicsCore::setPipelineStates(Mesh& mesh)
 {
 	setBlendState(mesh);

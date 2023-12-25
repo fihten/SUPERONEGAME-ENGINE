@@ -607,6 +607,10 @@ private:
 
 	ID3D11BlendState* getBlendState(Mesh& mesh);
 	void setBlendState(Mesh& mesh);
+
+	ID3D11DepthStencilState* getDepthStencilState(Mesh& mesh);
+	void setDepthStencilState(Mesh& mesh);
+
 	void setPipelineStates(Mesh& mesh);
 
 private:

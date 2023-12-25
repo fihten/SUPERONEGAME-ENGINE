@@ -379,6 +379,11 @@ ResourceManager::RegisterMessage ResourceManager::registerBlendState(string_id b
 	return RegisterMessage::OK;
 }
 
+ResourceManager::RegisterMessage ResourceManager::registerDepthStencilState(string_id depthStencilStateName, ID3D11DepthStencilState* depthStencilState)
+{
+
+}
+
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(string_id techniqueName, string_id passName) 
 {
 	if (techniqueName != cashed_technique_name_id)
