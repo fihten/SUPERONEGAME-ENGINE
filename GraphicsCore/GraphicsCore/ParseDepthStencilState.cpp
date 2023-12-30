@@ -45,7 +45,7 @@ void parseDepthStencilState(const char* szDepthStencilState, D3D11_DEPTH_STENCIL
 		std::string param(szDepthStencilState + pos, p - pos);
 
 		pos = p + 1;
-		int p = readValue(szDepthStencilState, pos);
+		p = readValue(szDepthStencilState, pos);
 		std::string value(szDepthStencilState + pos, p - pos);
 
 		pos = p + 1;

@@ -14,6 +14,7 @@ private:
 	std::map<string_id, ID3D11ShaderResourceView*> imgs;
 	std::map<string_id, ID3D11ShaderResourceView*> imgsArrs;
 	std::map<string_id, ID3D11BlendState*> blendStates;
+	std::map<string_id, ID3D11DepthStencilState*> depthStencilStates;
 
 private:
 	string_id cashed_technique_name_id = string_id(-1);
@@ -98,6 +99,7 @@ public:
 	ID3D11ShaderResourceView* getVertexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
 	ID3D11ShaderResourceView* getIndexBufferSRV(string_id techniqueName, string_id passName, uint32_t meshId);
 	ID3D11BlendState* getBlendState(string_id blendStateName);
+	ID3D11DepthStencilState* getDepthStencilState(string_id depthStencilStateName);
 
 public:
 	static ResourceManager* instance();

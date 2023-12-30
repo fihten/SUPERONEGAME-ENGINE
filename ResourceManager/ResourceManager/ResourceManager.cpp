@@ -381,7 +381,12 @@ ResourceManager::RegisterMessage ResourceManager::registerBlendState(string_id b
 
 ResourceManager::RegisterMessage ResourceManager::registerDepthStencilState(string_id depthStencilStateName, ID3D11DepthStencilState* depthStencilState)
 {
+	if (depthStencilStates.count(depthStencilStateName))
+		return RegisterMessage::DEPTH_STENCIL_STATE_ALREADY_EXISTS;
 
+	depthStencilStates[depthStencilStateName] = depthStencilState;
+
+	return RegisterMessage::OK;
 }
 
 const std::vector<InputLayoutResource::StreamInfo>* ResourceManager::getStreamsInfo(string_id techniqueName, string_id passName) 
@@ -829,6 +834,13 @@ ID3D11BlendState* ResourceManager::getBlendState(string_id blendStateName)
 	if (blendStates.count(blendStateName) == 0)
 		return nullptr;
 	return blendStates[blendStateName];
+}
+
+ID3D11DepthStencilState* ResourceManager::getDepthStencilState(string_id depthStencilStateName)
+{
+	if (depthStencilStates.count(depthStencilStateName) == 0)
+		return nullptr;
+	return depthStencilStates[depthStencilStateName];
 }
 
 ResourceManager* ResourceManager::instance()

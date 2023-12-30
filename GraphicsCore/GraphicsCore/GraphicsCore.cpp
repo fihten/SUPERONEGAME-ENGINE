@@ -4,6 +4,7 @@
 #include "Cameras.h"
 #include "auto_ptr.h"
 #include "ParseBlendState.h"
+#include "ParseDepthStencilState.h"
 #include <algorithm>
 #include <sstream>
 #include <D3DX11tex.h>
@@ -1111,17 +1112,29 @@ ID3D11DepthStencilState* GraphicsCore::getDepthStencilState(Mesh& mesh)
 	if (depth_stencil_state_id == string_id(-1))
 		return nullptr;
 
+	ID3D11DepthStencilState* depthStencilState = ResourceManager::instance()->getDepthStencilState(depth_stencil_state_id);
+	if (depthStencilState)
+		return depthStencilState;
 
+	D3D11_DEPTH_STENCIL_DESC depth_stencil_desc;
+	parseDepthStencilState(StringManager::toString(depth_stencil_state_id), depth_stencil_desc);
+
+	device->CreateDepthStencilState(&depth_stencil_desc, &depthStencilState);
+	ResourceManager::instance()->registerDepthStencilState(depth_stencil_state_id, depthStencilState);
+
+	return depthStencilState;
 }
 
 void GraphicsCore::setDepthStencilState(Mesh& mesh)
 {
-
+	ID3D11DepthStencilState* depthStencilState = getDepthStencilState(mesh);
+	context->OMSetDepthStencilState(depthStencilState, 0);
 }
 
 void GraphicsCore::setPipelineStates(Mesh& mesh)
 {
 	setBlendState(mesh);
+	setDepthStencilState(mesh);
 }
 
 void GraphicsCore::initRoughObjectsSelection()
