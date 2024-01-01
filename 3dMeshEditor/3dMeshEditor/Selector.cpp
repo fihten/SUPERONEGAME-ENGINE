@@ -2,6 +2,7 @@
 #include "GraphicsCore.h"
 #include "Cameras.h"
 #include "MainScene.h"
+#include "FrameOfReferenceState.h"
 #include <algorithm>
 
 #undef min
@@ -179,6 +180,11 @@ void Selector::selectObjects(
 
 	selectedObjectsBoxesMesh.verticesCount = selectedObjectsCount;
 
+	FrameOfReferenceState::instance()->turnOff();
+	if (selectedObjectsCount == 0)
+		return;
+	
+	FrameOfReference frameOfReference;
 	frameOfReference.posW = 0.5f * (fineVisitor.min + fineVisitor.max);
 	frameOfReference.axis0 = 0.5f * (fineVisitor.max - fineVisitor.min).x() * flt3(1, 0, 0);
 	frameOfReference.axis1 = 0.5f * (fineVisitor.max - fineVisitor.min).y() * flt3(0, 1, 0);
@@ -192,7 +198,9 @@ void Selector::selectObjects(
 		frameOfReference.axis2 = selectedObjectsBoxes[0].axis2;
 		frameOfReference.scale = 1;
 	}
-	framesOfReferences.verticesCount = selectedObjectsCount > 0 ? 1 : 0;
+	FrameOfReferenceState::instance()->setFrameOfReference(frameOfReference);
+
+	FrameOfReferenceState::instance()->turnOn();
 }
 
 void Selector::selectObject(float mousePosX, float mousePosY)
@@ -288,10 +296,7 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 void Selector::draw()
 {
 	if (selectedObjectsCount > 0)
-	{
 		GraphicsCore::instance()->draw(selectedObjectsBoxesMesh);
-		GraphicsCore::instance()->draw(framesOfReferences);
-	}
 	if (bProcessOfMultipleSelection)
 		GraphicsCore::instance()->draw(areaOfSelection);
 }

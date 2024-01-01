@@ -31,12 +31,9 @@ public:
 	Frustum selectorFrustum;
 	Segment selectorFrustumDiagonals[4];
 
-	FrameOfReference frameOfReference;
-
 private:
 	static Selector* pSelector;
 	Mesh selectedObjectsBoxesMesh;
-	Mesh framesOfReferences;
 	Mesh areaOfSelection;
 	bool bProcessOfMultipleSelection = false;
 };

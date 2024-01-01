@@ -16,6 +16,8 @@ FrameOfReferenceState::FrameOfReferenceState()
 
 	const char* septh_stencil_state = "DepthEnable=false;DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;DepthFunc=D3D11_COMPARISON_ALWAYS;StencilEnable=false;StencilReadMask=0;StencilWriteMask=0;FrontFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilFunc=D3D11_COMPARISON_ALWAYS;BackFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;";
 	framesOfReferences.setDepthStencilState(StringManager::toStringId(septh_stencil_state));
+
+	framesOfReferences.verticesCount = 1;
 }
 
 void FrameOfReferenceState::attach(FrameOfReferenceStateObserver* observer)
@@ -115,6 +117,16 @@ void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfR
 	notify();
 }
 
+void FrameOfReferenceState::turnOn()
+{
+	bTurnedOn = true;
+}
+
+void FrameOfReferenceState::turnOff()
+{
+	bTurnedOn = false;
+}
+
 auto FrameOfReferenceState::instance()->std::shared_ptr<FrameOfReferenceState>
 {
 	if (!ptr)
@@ -124,5 +136,6 @@ auto FrameOfReferenceState::instance()->std::shared_ptr<FrameOfReferenceState>
 
 void FrameOfReferenceState::draw()
 {
-	GraphicsCore::instance()->draw(framesOfReferences);
+	if (bTurnedOn)
+		GraphicsCore::instance()->draw(framesOfReferences);
 }

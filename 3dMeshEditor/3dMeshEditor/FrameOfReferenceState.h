@@ -27,6 +27,8 @@ public:
 	void scaleAlongAxisZ(float z);
 
 	void setFrameOfReference(const FrameOfReference& frameOfReference);
+	void turnOn();
+	void turnOff();
 
 public:
 	void draw();
@@ -41,4 +43,6 @@ private:
 	Mesh framesOfReferences;
 
 	static std::shared_ptr<FrameOfReferenceState> ptr;
+
+	bool bTurnedOn = false;
 };
