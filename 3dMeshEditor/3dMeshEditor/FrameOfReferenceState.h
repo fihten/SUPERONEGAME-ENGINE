@@ -1,10 +1,13 @@
 #pragma once
 #include "FrameOfReferenceStateObserver.h"
 #include "FrameOfReference.h"
+#include "Mesh.h"
 #include <list>
+#include <memory>
 
 class FrameOfReferenceState
 {
+	FrameOfReferenceState();
 public:
 	void attach(FrameOfReferenceStateObserver* observer);
 	void detach(const FrameOfReferenceStateObserver* observer);
@@ -23,7 +26,19 @@ public:
 	void scaleAlongAxisY(float y);
 	void scaleAlongAxisZ(float z);
 
+	void setFrameOfReference(const FrameOfReference& frameOfReference);
+
+public:
+	void draw();
+
+public:
+	static auto instance()->std::shared_ptr<FrameOfReferenceState>;
+
 private:
 	std::list<FrameOfReferenceStateObserver*> observers;
 	FrameOfReference state;
+
+	Mesh framesOfReferences;
+
+	static std::shared_ptr<FrameOfReferenceState> ptr;
 };

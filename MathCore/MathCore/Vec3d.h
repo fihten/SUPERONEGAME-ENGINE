@@ -40,6 +40,7 @@ public:
 	Vec3d<value_type> operator/(const value_type& x) const;
 	Vec3d<value_type>& operator+=(const Vec3d<value_type>& v);
 	Vec3d<value_type>& operator/=(const value_type& v);
+	Vec3d<value_type>& operator*=(const value_type& v);
 	operator std::string()const {
 		return numbersToString((float*)(v), sizeof v / sizeof * v);
 	};
@@ -92,6 +93,16 @@ Vec3d<value_type>& Vec3d<value_type>::operator/=(const value_type& v)
 	this->x() /= v;
 	this->y() /= v;
 	this->z() /= v;
+
+	return *this;
+}
+
+template<class value_type>
+Vec3d<value_type>& Vec3d<value_type>::operator*=(const value_type& v)
+{
+	this->x() *= v;
+	this->y() *= v;
+	this->z() *= v;
 
 	return *this;
 }

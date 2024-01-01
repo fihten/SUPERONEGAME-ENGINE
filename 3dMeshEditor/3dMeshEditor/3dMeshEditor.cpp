@@ -7,6 +7,7 @@
 #include "Selector.h"
 #include "MainScene.h"
 #include "SelectionObjectsTesting.h"
+#include "FrameOfReferenceState.h"
 #include <Windows.h>
 #include <windef.h>
 
@@ -135,6 +136,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 	graphicsCore->startFrame();
 	MainScene::instance()->accept(&drawVisitor);
 	Selector::instance()->draw();
+	FrameOfReferenceState::instance()->draw();
 	graphicsCore->endFrame();
 }
 
