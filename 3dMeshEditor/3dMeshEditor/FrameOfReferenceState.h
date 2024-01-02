@@ -5,6 +5,14 @@
 #include <list>
 #include <memory>
 
+enum class IntersectedAxis :uint32_t
+{
+	NONE,
+	AXIS_X,
+	AXIS_Y,
+	AXIS_Z
+};
+
 class FrameOfReferenceState
 {
 	FrameOfReferenceState();
@@ -32,6 +40,7 @@ public:
 
 public:
 	void draw();
+	IntersectedAxis checkIntersection();
 
 public:
 	static auto instance()->std::shared_ptr<FrameOfReferenceState>;

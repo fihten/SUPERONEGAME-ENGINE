@@ -139,3 +139,8 @@ void FrameOfReferenceState::draw()
 	if (bTurnedOn)
 		GraphicsCore::instance()->draw(framesOfReferences);
 }
+
+IntersectedAxis FrameOfReferenceState::checkIntersection()
+{
+
+}
