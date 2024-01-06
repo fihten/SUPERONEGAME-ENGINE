@@ -1,6 +1,8 @@
 #include "FrameOfReferenceState.h"
 #include "Matrix4x4.h"
 #include "GraphicsCore.h"
+#include "Cameras.h"
+#include "MathUtils.h"
 #include <algorithm>
 
 std::shared_ptr<FrameOfReferenceState> FrameOfReferenceState::ptr{ nullptr };
@@ -140,7 +142,51 @@ void FrameOfReferenceState::draw()
 		GraphicsCore::instance()->draw(framesOfReferences);
 }
 
-IntersectedAxis FrameOfReferenceState::checkIntersection()
+IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float mousePosY)
 {
+	auto& camera = cameras()[MAIN_CAMERA];
 
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	flt3 pt(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
+
+	flt4 posW4(state.posW, 1.0f);
+	auto v = camera.getView();
+	flt3 origin = (posW4 * v).xyz();
+
+	float threshold = 1e-2;
+
+	// check axis x
+	flt3 axisX = state.axis0;
+	axisX = axisX * v;
+	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisX);
+	if (distance < threshold)
+		return IntersectedAxis::AXIS_X;
+
+	// check axis y
+	flt3 axisY = state.axis1;
+	axisY = axisY * v;
+	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisY);
+	if (distance < threshold)
+		return IntersectedAxis::AXIS_Y;
+
+	// check axis z
+	flt3 axisZ = state.axis2;
+	axisZ = axisZ * v;
+	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisZ);
+	if (distance < threshold)
+		return IntersectedAxis::AXIS_Z;
+
+	return IntersectedAxis::NONE;
 }

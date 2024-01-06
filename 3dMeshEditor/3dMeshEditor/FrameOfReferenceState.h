@@ -40,7 +40,7 @@ public:
 
 public:
 	void draw();
-	IntersectedAxis checkIntersection();
+	IntersectedAxis checkIntersection(float mousePosX, float mousePosY);
 
 public:
 	static auto instance()->std::shared_ptr<FrameOfReferenceState>;
