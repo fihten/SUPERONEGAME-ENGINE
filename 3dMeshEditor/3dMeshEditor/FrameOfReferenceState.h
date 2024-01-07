@@ -41,6 +41,9 @@ public:
 public:
 	void draw();
 	IntersectedAxis checkIntersection(float mousePosX, float mousePosY);
+	float projectOnXaxis(float mousePosX, float mousePosY);
+	float projectOnYaxis(float mousePosX, float mousePosY);
+	float projectOnZaxis(float mousePosX, float mousePosY);
 
 public:
 	static auto instance()->std::shared_ptr<FrameOfReferenceState>;

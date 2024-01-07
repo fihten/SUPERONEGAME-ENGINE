@@ -190,3 +190,105 @@ IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float 
 
 	return IntersectedAxis::NONE;
 }
+
+float FrameOfReferenceState::projectOnXaxis(float mousePosX, float mousePosY)
+{
+	auto& camera = cameras()[MAIN_CAMERA];
+
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	flt3 pt(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
+
+	flt4 posW4(state.posW, 1.0f);
+	auto v = camera.getView();
+	flt3 origin = (posW4 * v).xyz();
+
+	flt3 axisX = state.axis0;
+	axisX = axisX * v;
+	axisX.normalize();
+
+	float t0 = 0;
+	float t1 = 0;
+	distanceBetweenLines(pt, dir, origin, origin + axisX, &t0, &t1);
+
+	return t1;
+}
+
+float FrameOfReferenceState::projectOnYaxis(float mousePosX, float mousePosY)
+{
+	auto& camera = cameras()[MAIN_CAMERA];
+
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	flt3 pt(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
+
+	flt4 posW4(state.posW, 1.0f);
+	auto v = camera.getView();
+	flt3 origin = (posW4 * v).xyz();
+
+	flt3 axisY = state.axis1;
+	axisY = axisY * v;
+	axisY.normalize();
+
+	float t0 = 0;
+	float t1 = 0;
+	distanceBetweenLines(pt, dir, origin, origin + axisY, &t0, &t1);
+
+	return t1;
+}
+
+float FrameOfReferenceState::projectOnZaxis(float mousePosX, float mousePosY)
+{
+	auto& camera = cameras()[MAIN_CAMERA];
+
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	flt3 pt(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
+
+	flt4 posW4(state.posW, 1.0f);
+	auto v = camera.getView();
+	flt3 origin = (posW4 * v).xyz();
+
+	flt3 axisZ = state.axis2;
+	axisZ = axisZ * v;
+	axisZ.normalize();
+
+	float t0 = 0;
+	float t1 = 0;
+	distanceBetweenLines(pt, dir, origin, origin + axisZ, &t0, &t1);
+
+	return t1;
+}
