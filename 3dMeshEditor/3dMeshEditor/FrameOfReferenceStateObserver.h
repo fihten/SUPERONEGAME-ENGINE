@@ -1,7 +1,14 @@
 #pragma once
 
+enum class UpdateType 
+{
+	Translation,
+	Rotation,
+	Scaling
+};
+
 class FrameOfReferenceStateObserver
 {
 public:
-	virtual void update() = 0;
+	virtual void update(UpdateType updateType) = 0;
 };

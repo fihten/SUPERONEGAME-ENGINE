@@ -6,9 +6,10 @@
 #include "ResourceManager.h"
 #include <algorithm>
 
-Scene::Node::Node(NodeID id)
+Scene::Node::Node(NodeID id, type nodeType)
 {
 	ID = id;
+	this->nodeType = nodeType;
 }
 
 Scene::Node::~Node()
@@ -1375,4 +1376,19 @@ void Scene::accept(Visitor* visitor) const
 void* Scene::getNode(NodeID id)
 {
 	return nodes[id];
+}
+
+void Scene::updateTransformWithTranslation(NodeID id, flt4x4& translation)
+{
+	auto currentNode = nodes[id];
+	while (currentNode->nodeType != Node::type::TRANSFORM &&
+		currentNode->nodeType != Node::type::ROOT)
+	{
+		currentNode = currentNode->parent;
+	}
+	if (currentNode->nodeType == Node::type::ROOT)
+		return;
+
+	auto transformNode = static_cast<TransformNode*>(currentNode);
+	transformNode->pos *= translation;
 }

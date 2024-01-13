@@ -1,5 +1,6 @@
 #include "MainScene.h"
 #include "GraphicsCore.h"
+#include "Selector.h"
 
 MainScene* MainScene::pMainScene = nullptr;
 
@@ -165,4 +166,14 @@ void MainScene::accept(Scene::Visitor* visitor) const
 void* MainScene::getNode(NodeID id)
 {
 	return scene.getNode(id);
+}
+
+void MainScene::update(UpdateType updateType)
+{
+	for (int i = 0; i < Selector::instance()->selectedObjectsCount; i++)
+	{
+		auto isphere = Selector::instance()->selectedObjects[i];
+		auto nodeId = boundingSphereToNode[isphere];
+		scene.updateTransformWithTranslation();
+	}
 }

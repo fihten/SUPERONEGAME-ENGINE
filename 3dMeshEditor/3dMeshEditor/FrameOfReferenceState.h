@@ -19,7 +19,7 @@ class FrameOfReferenceState
 public:
 	void attach(FrameOfReferenceStateObserver* observer);
 	void detach(const FrameOfReferenceStateObserver* observer);
-	void notify();
+	void notify(UpdateType updateType);
 
 public:
 	void moveAlongAxisX(float x);
@@ -45,6 +45,8 @@ public:
 	float projectOnYaxis(float mousePosX, float mousePosY);
 	float projectOnZaxis(float mousePosX, float mousePosY);
 
+	flt4x4& getDiffPosition();
+
 public:
 	static auto instance()->std::shared_ptr<FrameOfReferenceState>;
 
@@ -57,4 +59,5 @@ private:
 	static std::shared_ptr<FrameOfReferenceState> ptr;
 
 	bool bTurnedOn = false;
+	flt4x4 dPos;
 };

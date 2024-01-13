@@ -14,6 +14,14 @@ public:
 		std::vector<Node*> childs;
 		friend Scene;
 	protected:
+		enum class type :uint32_t
+		{
+			ROOT,
+			TRANSFORM,
+			MESH
+		};
+		type nodeType;
+
 		Node* parent = nullptr;
 		Scene* scene = nullptr;
 
@@ -27,7 +35,7 @@ public:
 		bool bCached;
 
 	public:
-		Node(NodeID id);
+		Node(NodeID id, type nodeType);
 		virtual ~Node();
 
 		virtual void addChild(Node* n);
@@ -84,15 +92,16 @@ public:
 	class RootNode : public Node
 	{
 	public:
-		RootNode(NodeID id) :Node(id) {}
+		RootNode(NodeID id) :Node(id, type::ROOT) {}
 		virtual void accept(Visitor* visitor) const;
 	};
 
 	class TransformNode : public Node
 	{
+		friend Scene;
 		flt4x4 pos;
 	public:
-		TransformNode(NodeID id, const flt4x4& pos) :Node(id), pos(pos) {}
+		TransformNode(NodeID id, const flt4x4& pos) :Node(id, type::TRANSFORM), pos(pos) {}
 		
 		virtual flt4x4& getPos4x4();
 		virtual flt3& getPos3();
@@ -106,7 +115,7 @@ public:
 	class MeshNode : public Node
 	{
 	public:
-		MeshNode(NodeID id, const Mesh* mesh) :Node(id), mesh(mesh) {}
+		MeshNode(NodeID id, const Mesh* mesh) :Node(id, type::MESH), mesh(mesh) {}
 		virtual void accept(Visitor* visitor) const;
 
 		const Mesh* mesh = nullptr;
@@ -193,4 +202,6 @@ public:
 
 	void accept(Visitor* visitor) const;
 	void* getNode(NodeID id);
+
+	void updateTransformWithTranslation(NodeID id, flt4x4& translation);
 };

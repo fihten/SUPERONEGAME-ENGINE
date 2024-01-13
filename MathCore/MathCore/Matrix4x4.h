@@ -75,6 +75,25 @@ public:
 		return ret;
 	}
 
+	friend Matrix4x4<value_type>& operator*=(Matrix4x4<value_type>& x, Matrix4x4<value_type>& y)
+	{
+		Matrix4x4<value_type> r;
+
+		int n = 4;
+		for (int i = 0; i < n; ++i)
+		{
+			for (int j = 0; j < n; ++j)
+			{
+				r.m[i * n + j] = 0;
+				for (int k = 0; k < n; ++k)
+					r.m[i * n + j] += x.m[i * n + k] * y.m[k * n + j];
+			}
+		}
+
+		x = r;
+		return x;
+	};
+
 	friend Vec4d<value_type> operator*(Vec4d<value_type>& v, Matrix4x4<value_type>& m)
 	{
 		Vec4d<value_type> r;
@@ -238,6 +257,17 @@ Matrix4x4<value_type> makeRotate(const Vec3d<value_type>&  axis, value_type angl
 	}
 
 	return rot;
+}
+
+template<class value_type>
+Matrix4x4<value_type> makeTranslation(const Vec3d<value_type>& r)
+{
+	return Matrix4x4<value_type>(
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		r.x(), r.y(), r.z(), 1.0f
+		);
 }
 
 typedef Matrix4x4<float> flt4x4;

@@ -3,8 +3,9 @@
 #include "Scene.h"
 #include "SelectedObjectBox.h"
 #include "GraphicsCore.h"
+#include "FrameOfReferenceStateObserver.h"
 
-class MainScene
+class MainScene : public FrameOfReferenceStateObserver
 {
 	MainScene();
 public:
@@ -51,6 +52,9 @@ public:
 
 	uint32_t meshIDtoStartVertex[MAX_OBJECTS_COUNT];
 	uint32_t meshIDtoStartIndex[MAX_OBJECTS_COUNT];
+
+public:
+	void update(UpdateType updateType);
 
 private:
 	Scene scene;

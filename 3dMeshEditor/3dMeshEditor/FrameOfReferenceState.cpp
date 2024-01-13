@@ -35,10 +35,10 @@ void FrameOfReferenceState::detach(const FrameOfReferenceStateObserver* observer
 	observers.erase(it);
 }
 
-void FrameOfReferenceState::notify()
+void FrameOfReferenceState::notify(UpdateType updateType)
 {
 	for (auto it : observers)
-		it->update();
+		it->update(updateType);
 }
 
 void FrameOfReferenceState::moveAlongAxisX(float x)
@@ -47,8 +47,9 @@ void FrameOfReferenceState::moveAlongAxisX(float x)
 	axis.normalize();
 
 	state.posW += x * axis;
+	dPos = makeTranslation(x * axis);
 
-	notify();
+	notify(UpdateType::Translation);
 }
 
 void FrameOfReferenceState::moveAlongAxisY(float y)
@@ -57,8 +58,9 @@ void FrameOfReferenceState::moveAlongAxisY(float y)
 	axis.normalize();
 
 	state.posW += y * axis;
+	dPos = makeTranslation(y * axis);
 
-	notify();
+	notify(UpdateType::Translation);
 }
 
 void FrameOfReferenceState::moveAlongAxisZ(float z)
@@ -67,50 +69,51 @@ void FrameOfReferenceState::moveAlongAxisZ(float z)
 	axis.normalize();
 
 	state.posW += z * axis;
+	dPos = makeTranslation(z * axis);
 
-	notify();
+	notify(UpdateType::Translation;
 }
 
 void FrameOfReferenceState::rotateAlongAxisX(float x)
 {
-	auto m = makeRotate<float>(state.axis0, x);
-	state.axis1 = state.axis1 * m;
-	state.axis2 = state.axis2 * m;
-	notify();
+	dPos = makeRotate<float>(state.axis0, x);
+	state.axis1 = state.axis1 * dPos;
+	state.axis2 = state.axis2 * dPos;
+	notify(UpdateType::Rotation);
 }
 
 void FrameOfReferenceState::rotateAlongAxisY(float y)
 {
-	auto m = makeRotate<float>(state.axis1, y);
-	state.axis0 = state.axis0 * m;
-	state.axis2 = state.axis2 * m;
-	notify();
+	dPos = makeRotate<float>(state.axis1, y);
+	state.axis0 = state.axis0 * dPos;
+	state.axis2 = state.axis2 * dPos;
+	notify(UpdateType::Rotation);
 }
 
 void FrameOfReferenceState::rotateAlongAxisZ(float z)
 {
-	auto m = makeRotate<float>(state.axis2, z);
-	state.axis0 = state.axis0 * m;
-	state.axis1 = state.axis1 * m;
-	notify();
+	dPos = makeRotate<float>(state.axis2, z);
+	state.axis0 = state.axis0 * dPos;
+	state.axis1 = state.axis1 * dPos;
+	notify(UpdateType::Rotation);
 }
 
 void FrameOfReferenceState::scaleAlongAxisX(float x)
 {
 	state.axis0 *= x;
-	notify();
+	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisY(float y)
 {
 	state.axis1 *= y;
-	notify();
+	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisZ(float z)
 {
 	state.axis2 *= z;
-	notify();
+	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfReference)
@@ -291,4 +294,9 @@ float FrameOfReferenceState::projectOnZaxis(float mousePosX, float mousePosY)
 	distanceBetweenLines(pt, dir, origin, origin + axisZ, &t0, &t1);
 
 	return t1;
+}
+
+flt4x4& FrameOfReferenceState::getDiffPosition()
+{
+	return dPos;
 }
