@@ -1,6 +1,7 @@
 #pragma once
 #include "StringToNumbers.h"
 #include "NumbersToString.h"
+#include <cmath>
 
 template<class value_type>
 class Matrix4x4;

@@ -4,7 +4,8 @@ enum class UpdateType
 {
 	Translation,
 	Rotation,
-	Scaling
+	Scaling,
+	SetFrameOfReference
 };
 
 class FrameOfReferenceStateObserver

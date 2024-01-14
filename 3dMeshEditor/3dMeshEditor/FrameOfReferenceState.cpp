@@ -43,35 +43,38 @@ void FrameOfReferenceState::notify(UpdateType updateType)
 
 void FrameOfReferenceState::moveAlongAxisX(float x)
 {
-	flt3 axis = state.axis0;
-	axis.normalize();
+	flt3 shift = state.axis0;
+	shift.normalize();
+	shift *= x;
 
-	state.posW += x * axis;
-	dPos = makeTranslation(x * axis);
+	state.posW += shift;
+	dPos = makeTranslation(shift);
 
 	notify(UpdateType::Translation);
 }
 
 void FrameOfReferenceState::moveAlongAxisY(float y)
 {
-	flt3 axis = state.axis1;
-	axis.normalize();
+	flt3 shift = state.axis1;
+	shift.normalize();
+	shift *= y;
 
-	state.posW += y * axis;
-	dPos = makeTranslation(y * axis);
+	state.posW += shift;
+	dPos = makeTranslation(shift);
 
 	notify(UpdateType::Translation);
 }
 
 void FrameOfReferenceState::moveAlongAxisZ(float z)
 {
-	flt3 axis = state.axis2;
-	axis.normalize();
+	flt3 shift = state.axis2;
+	shift.normalize();
+	shift *= z;
 
-	state.posW += z * axis;
-	dPos = makeTranslation(z * axis);
+	state.posW += shift;
+	dPos = makeTranslation(shift);
 
-	notify(UpdateType::Translation;
+	notify(UpdateType::Translation);
 }
 
 void FrameOfReferenceState::rotateAlongAxisX(float x)
@@ -119,7 +122,7 @@ void FrameOfReferenceState::scaleAlongAxisZ(float z)
 void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfReference)
 {
 	state = frameOfReference;
-	notify();
+	notify(UpdateType::SetFrameOfReference);
 }
 
 void FrameOfReferenceState::turnOn()
@@ -180,14 +183,14 @@ IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float 
 	// check axis y
 	flt3 axisY = state.axis1;
 	axisY = axisY * v;
-	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisY);
+	distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisY);
 	if (distance < threshold)
 		return IntersectedAxis::AXIS_Y;
 
 	// check axis z
 	flt3 axisZ = state.axis2;
 	axisZ = axisZ * v;
-	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisZ);
+	distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisZ);
 	if (distance < threshold)
 		return IntersectedAxis::AXIS_Z;
 

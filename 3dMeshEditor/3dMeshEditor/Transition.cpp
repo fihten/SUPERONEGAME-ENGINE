@@ -5,7 +5,7 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 	switch (msg)
 	{
 	case WM_LBUTTONDOWN:
-		
+	{
 		mousePosX = LOWORD(lparam) + 0.5f;
 		mousePosY = HIWORD(lparam) + 0.5f;
 
@@ -24,7 +24,7 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 		grabbedAxis =
 			FrameOfReferenceState::instance()->checkIntersection(
 				mousePosX, mousePosY);
-		
+
 		switch (grabbedAxis)
 		{
 		case IntersectedAxis::AXIS_X:
@@ -37,7 +37,7 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnZaxis(mousePosX, mousePosY);
 			break;
 		}
-
+	}
 		break;
 
 	case WM_LBUTTONUP:

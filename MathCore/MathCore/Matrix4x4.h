@@ -260,7 +260,7 @@ Matrix4x4<value_type> makeRotate(const Vec3d<value_type>&  axis, value_type angl
 }
 
 template<class value_type>
-Matrix4x4<value_type> makeTranslation(const Vec3d<value_type>& r)
+Matrix4x4<value_type> makeTranslation(Vec3d<value_type>& r)
 {
 	return Matrix4x4<value_type>(
 		1.0f, 0.0f, 0.0f, 0.0f,
