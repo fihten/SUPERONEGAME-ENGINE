@@ -129,6 +129,11 @@ void FrameOfReferenceState::scaleAlongAxisZ(float z)
 	notify(UpdateType::Scaling);
 }
 
+void FrameOfReferenceState::release()
+{
+	notify(UpdateType::Release);
+}
+
 void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfReference)
 {
 	state = frameOfReference;

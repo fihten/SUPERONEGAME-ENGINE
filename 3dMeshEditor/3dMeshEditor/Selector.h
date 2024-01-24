@@ -20,6 +20,8 @@ public:
 	bool turnOnMultipleSelection();
 	void turnOffMultipleSelection();
 
+	void updateSelectedObjectsBoxes();
+
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	uint32_t selectedObjectsCount = 0;
 	

@@ -6,7 +6,8 @@ enum class UpdateType
 	Translation,
 	Rotation,
 	Scaling,
-	SetFrameOfReference
+	SetFrameOfReference,
+	Release
 };
 
 class FrameOfReferenceStateObserver

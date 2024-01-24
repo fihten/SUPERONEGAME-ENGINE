@@ -42,6 +42,7 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 
 	case WM_LBUTTONUP:
 		grabbedAxis = IntersectedAxis::NONE;
+		FrameOfReferenceState::instance()->release();
 		break;
 
 	case WM_MOUSEMOVE:

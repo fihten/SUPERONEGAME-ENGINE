@@ -36,6 +36,8 @@ public:
 	void scaleAlongAxisY(float y);
 	void scaleAlongAxisZ(float z);
 
+	void release();
+
 	void setFrameOfReference(const FrameOfReference& frameOfReference);
 	void turnOn();
 	void turnOff();

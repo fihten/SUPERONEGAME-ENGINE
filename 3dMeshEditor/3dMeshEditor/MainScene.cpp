@@ -171,6 +171,12 @@ void* MainScene::getNode(NodeID id)
 
 void MainScene::update(UpdateType updateType)
 {
+	if (updateType == UpdateType::Release)
+	{
+		this->updateGpu();
+		return;
+	}
+
 	for (int i = 0; i < Selector::instance()->selectedObjectsCount; i++)
 	{
 		auto isphere = Selector::instance()->selectedObjects[i];
@@ -200,4 +206,5 @@ void MainScene::update(UpdateType updateType)
 			break;
 		}
 	}
+	Selector::instance()->updateSelectedObjectsBoxes();
 }

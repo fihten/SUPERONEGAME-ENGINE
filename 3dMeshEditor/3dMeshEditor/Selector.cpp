@@ -10,6 +10,52 @@
 
 Selector* Selector::pSelector = nullptr;
 
+class VisitFineSelectedObjects : public SelectedObjectVisitor
+{
+	void updateMinMax(const SelectedObjectBox& sob)
+	{
+		flt3 corners[8] = {
+			sob.posW - sob.axis0 - sob.axis1 - sob.axis2,
+			sob.posW - sob.axis0 - sob.axis1 + sob.axis2,
+			sob.posW - sob.axis0 + sob.axis1 - sob.axis2,
+			sob.posW - sob.axis0 + sob.axis1 + sob.axis2,
+			sob.posW + sob.axis0 - sob.axis1 - sob.axis2,
+			sob.posW + sob.axis0 - sob.axis1 + sob.axis2,
+			sob.posW + sob.axis0 + sob.axis1 - sob.axis2,
+			sob.posW + sob.axis0 + sob.axis1 + sob.axis2
+		};
+		for (int i = 0; i < 8; i++)
+		{
+			min.x() = std::min<float>(min.x(), corners[i].x());
+			min.y() = std::min<float>(min.y(), corners[i].y());
+			min.z() = std::min<float>(min.z(), corners[i].z());
+
+			max.x() = std::max<float>(max.x(), corners[i].x());
+			max.y() = std::max<float>(max.y(), corners[i].y());
+			max.z() = std::max<float>(max.z(), corners[i].z());
+		}
+	}
+public:
+	VisitFineSelectedObjects() : min(FLT_MAX, FLT_MAX, FLT_MAX), max(-FLT_MAX, -FLT_MAX, -FLT_MAX)
+	{
+	}
+
+	void operator()(uint32_t objectID)
+	{
+		auto& boxes = Selector::instance()->selectedObjectsBoxes;
+		auto& count = Selector::instance()->selectedObjectsCount;
+		auto& objects = Selector::instance()->selectedObjects;
+		boxes[count] = MainScene::instance()->selectedObjectsBoxes[objectID];
+		objects[count] = objectID;
+
+		updateMinMax(boxes[count]);
+
+		count++;
+	}
+	flt3 min;
+	flt3 max;
+};
+
 Selector::Selector()
 {
 	// Initialization of selected objects' boxes 	
@@ -130,51 +176,6 @@ void Selector::selectObjects(
 	GraphicsCore::instance()->checkIntersection();
 
 	selectedObjectsCount = 0;
-	class VisitFineSelectedObjects : public SelectedObjectVisitor
-	{
-		void updateMinMax(const SelectedObjectBox& sob)
-		{
-			flt3 corners[8] = {
-				sob.posW - sob.axis0 - sob.axis1 - sob.axis2,
-				sob.posW - sob.axis0 - sob.axis1 + sob.axis2,
-				sob.posW - sob.axis0 + sob.axis1 - sob.axis2,
-				sob.posW - sob.axis0 + sob.axis1 + sob.axis2,
-				sob.posW + sob.axis0 - sob.axis1 - sob.axis2,
-				sob.posW + sob.axis0 - sob.axis1 + sob.axis2,
-				sob.posW + sob.axis0 + sob.axis1 - sob.axis2,
-				sob.posW + sob.axis0 + sob.axis1 + sob.axis2
-			};
-			for (int i = 0; i < 8; i++)
-			{
-				min.x() = std::min<float>(min.x(), corners[i].x());
-				min.y() = std::min<float>(min.y(), corners[i].y());
-				min.z() = std::min<float>(min.z(), corners[i].z());
-
-				max.x() = std::max<float>(max.x(), corners[i].x());
-				max.y() = std::max<float>(max.y(), corners[i].y());
-				max.z() = std::max<float>(max.z(), corners[i].z());
-			}
-		}
-	public:
-		VisitFineSelectedObjects(): min(FLT_MAX,FLT_MAX,FLT_MAX),max(-FLT_MAX,-FLT_MAX,-FLT_MAX)
-		{
-		}
-
-		void operator()(uint32_t objectID)
-		{
-			auto& boxes = Selector::instance()->selectedObjectsBoxes;
-			auto& count = Selector::instance()->selectedObjectsCount;
-			auto& objects = Selector::instance()->selectedObjects;
-			boxes[count] = MainScene::instance()->selectedObjectsBoxes[objectID];
-			objects[count] = objectID;
-
-			updateMinMax(boxes[count]);
-
-			count++;
-		}
-		flt3 min;
-		flt3 max;
-	};
 	VisitFineSelectedObjects fineVisitor;
 	GraphicsCore::instance()->traverseFineSelectedObjects(&fineVisitor);
 
@@ -311,4 +312,11 @@ bool Selector::turnOnMultipleSelection()
 void Selector::turnOffMultipleSelection()
 {
 	bProcessOfMultipleSelection = false;
+}
+
+void Selector::updateSelectedObjectsBoxes()
+{
+	selectedObjectsCount = 0;
+	VisitFineSelectedObjects fineVisitor;
+	GraphicsCore::instance()->traverseFineSelectedObjects(&fineVisitor);
 }
