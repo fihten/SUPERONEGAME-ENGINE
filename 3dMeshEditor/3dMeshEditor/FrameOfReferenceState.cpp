@@ -1,4 +1,5 @@
 #include "FrameOfReferenceState.h"
+#include "FrameOfReferenceStateObserver.h"
 #include "Matrix4x4.h"
 #include "GraphicsCore.h"
 #include "Cameras.h"
@@ -43,6 +44,9 @@ void FrameOfReferenceState::notify(UpdateType updateType)
 
 void FrameOfReferenceState::moveAlongAxisX(float x)
 {
+	if (x == 0)
+		return;
+
 	flt3 shift = state.axis0;
 	shift.normalize();
 	shift *= x;
@@ -55,6 +59,9 @@ void FrameOfReferenceState::moveAlongAxisX(float x)
 
 void FrameOfReferenceState::moveAlongAxisY(float y)
 {
+	if (y == 0)
+		return;
+
 	flt3 shift = state.axis1;
 	shift.normalize();
 	shift *= y;
@@ -67,6 +74,9 @@ void FrameOfReferenceState::moveAlongAxisY(float y)
 
 void FrameOfReferenceState::moveAlongAxisZ(float z)
 {
+	if (z == 0)
+		return;
+
 	flt3 shift = state.axis2;
 	shift.normalize();
 	shift *= z;
@@ -138,7 +148,7 @@ void FrameOfReferenceState::turnOff()
 auto FrameOfReferenceState::instance()->std::shared_ptr<FrameOfReferenceState>
 {
 	if (!ptr)
-		ptr = std::make_shared<FrameOfReferenceState>(new FrameOfReferenceState());
+		ptr = std::shared_ptr<FrameOfReferenceState>(new FrameOfReferenceState());
 	return ptr;
 }
 
@@ -176,21 +186,21 @@ IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float 
 	// check axis x
 	flt3 axisX = state.axis0;
 	axisX = axisX * v;
-	float distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisX);
+	float distance = distanceBetweenLineAndSegment(pt, dir, origin - axisX, origin + axisX);
 	if (distance < threshold)
 		return IntersectedAxis::AXIS_X;
 
 	// check axis y
 	flt3 axisY = state.axis1;
 	axisY = axisY * v;
-	distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisY);
+	distance = distanceBetweenLineAndSegment(pt, dir, origin - axisY, origin + axisY);
 	if (distance < threshold)
 		return IntersectedAxis::AXIS_Y;
 
 	// check axis z
 	flt3 axisZ = state.axis2;
 	axisZ = axisZ * v;
-	distance = distanceBetweenLineAndSegment(pt, dir, origin, origin + axisZ);
+	distance = distanceBetweenLineAndSegment(pt, dir, origin - axisZ, origin + axisZ);
 	if (distance < threshold)
 		return IntersectedAxis::AXIS_Z;
 
@@ -226,7 +236,7 @@ float FrameOfReferenceState::projectOnXaxis(float mousePosX, float mousePosY)
 
 	float t0 = 0;
 	float t1 = 0;
-	distanceBetweenLines(pt, dir, origin, origin + axisX, &t0, &t1);
+	distanceBetweenLines(pt, dir, origin, axisX, &t0, &t1);
 
 	return t1;
 }
@@ -260,7 +270,7 @@ float FrameOfReferenceState::projectOnYaxis(float mousePosX, float mousePosY)
 
 	float t0 = 0;
 	float t1 = 0;
-	distanceBetweenLines(pt, dir, origin, origin + axisY, &t0, &t1);
+	distanceBetweenLines(pt, dir, origin, axisY, &t0, &t1);
 
 	return t1;
 }
@@ -294,7 +304,7 @@ float FrameOfReferenceState::projectOnZaxis(float mousePosX, float mousePosY)
 
 	float t0 = 0;
 	float t1 = 0;
-	distanceBetweenLines(pt, dir, origin, origin + axisZ, &t0, &t1);
+	distanceBetweenLines(pt, dir, origin, axisZ, &t0, &t1);
 
 	return t1;
 }

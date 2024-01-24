@@ -1,9 +1,11 @@
 #pragma once
-#include "FrameOfReferenceStateObserver.h"
 #include "FrameOfReference.h"
 #include "Mesh.h"
 #include <list>
 #include <memory>
+
+class FrameOfReferenceStateObserver;
+enum class UpdateType;
 
 enum class IntersectedAxis :uint32_t
 {

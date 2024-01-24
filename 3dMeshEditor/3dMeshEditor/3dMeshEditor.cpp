@@ -8,9 +8,11 @@
 #include "MainScene.h"
 #include "SelectionObjectsTesting.h"
 #include "FrameOfReferenceState.h"
+#include "Transition.h"
 #include <Windows.h>
 #include <windef.h>
 
+Transition transitionModifier;
 DrawVisitor drawVisitor;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -54,7 +56,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			mousePosX1, mousePosY1
 		);
 
-		return 0;
+		break;
 	}
 	case WM_MOUSEMOVE:
 	{
@@ -78,7 +80,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	case WM_LBUTTONUP:
 	{
 		if (!bMarginSelection)
-			return 0;
+			break;
 
 		mousePosX1 = LOWORD(lparam) + 0.5f;
 		mousePosY1 = HIWORD(lparam) + 0.5f;
@@ -106,7 +108,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 			Selector::instance()->turnOffMultipleSelection();
 		}
 
-		return 0;
+		break;
 	}
 	case WM_SIZE:
 	{
@@ -115,18 +117,20 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		GraphicsCore::instance()->resize(width, height);
 
-		return 0;
+		break;
 	}
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
-		return 0;
+		break;
 	}
 	}
 
 	float dt = Timer::Instance()->elapsedTime();
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 		cameras()[i].processMessage(msg,wparam,lparam, dt);
+
+	transitionModifier.processWindowMessage(msg, wparam, lparam);
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -146,6 +150,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
 	fillSceneForObjectsSelectionTesting();
+	transitionModifier.setWindow(GraphicsCore::instance()->getWindow());
 
 	return GraphicsCore::instance()->run();
 }

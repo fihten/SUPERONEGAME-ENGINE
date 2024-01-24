@@ -53,6 +53,8 @@ public:
 	int run();
 	void resize(UINT width, UINT height);
 
+	HWND getWindow();
+
 public:
 	void updateBoundingSpheres(flt4 spheres[]);
 	void setBoundingSpheresRoughByFrustum();

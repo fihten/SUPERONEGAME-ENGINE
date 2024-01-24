@@ -377,6 +377,11 @@ void GraphicsCore::resize(UINT width, UINT height)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
 }
 
+HWND GraphicsCore::getWindow()
+{
+	return mWindow;
+}
+
 const flt4x4* GraphicsCore::getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const
 {
 	if (location.name == cameras_id)

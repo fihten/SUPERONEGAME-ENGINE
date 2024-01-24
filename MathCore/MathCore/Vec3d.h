@@ -81,9 +81,9 @@ Vec3d<value_type> Vec3d<value_type>::operator/(const value_type& x) const
 template<class value_type>
 Vec3d<value_type>& Vec3d<value_type>::operator+=(const Vec3d<value_type>& v)
 {
-	this->x() = const_cast<Vec3d<value_type>&>(v).x();
-	this->y() = const_cast<Vec3d<value_type>&>(v).y();
-	this->z() = const_cast<Vec3d<value_type>&>(v).z();
+	this->x() += const_cast<Vec3d<value_type>&>(v).x();
+	this->y() += const_cast<Vec3d<value_type>&>(v).y();
+	this->z() += const_cast<Vec3d<value_type>&>(v).z();
 
 	return *this;
 }

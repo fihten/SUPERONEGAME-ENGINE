@@ -1384,8 +1384,11 @@ void Scene::updateTransformWithTranslation(NodeID id, flt4x4& translation)
 	while (currentNode->nodeType != Node::type::TRANSFORM &&
 		currentNode->nodeType != Node::type::ROOT)
 	{
+		currentNode->bCached = false;
 		currentNode = currentNode->parent;
 	}
+	currentNode->bCached = false;
+
 	if (currentNode->nodeType == Node::type::ROOT)
 		return;
 

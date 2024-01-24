@@ -1,4 +1,5 @@
 #pragma once
+#include "FrameOfReferenceState.h"
 
 enum class UpdateType 
 {
@@ -11,5 +12,10 @@ enum class UpdateType
 class FrameOfReferenceStateObserver
 {
 public:
-	virtual void update(UpdateType updateType) = 0;
+	FrameOfReferenceStateObserver() 
+	{ 
+		FrameOfReferenceState::instance()->attach(this); 
+	}
+
+	virtual void update(UpdateType updateType) {};
 };
