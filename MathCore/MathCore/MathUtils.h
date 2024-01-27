@@ -16,3 +16,8 @@ float distanceBetweenLineAndSegment(
 	const flt3& pt, const flt3& dir,
 	const flt3& a, const flt3& b
 );
+
+flt3 linePlaneIntersection(
+	const flt3& pt, const flt3& dir,
+	const flt3& o, const flt3& e1, const flt3& e2
+);

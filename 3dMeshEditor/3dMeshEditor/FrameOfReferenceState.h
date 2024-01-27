@@ -49,6 +49,10 @@ public:
 	float projectOnYaxis(float mousePosX, float mousePosY);
 	float projectOnZaxis(float mousePosX, float mousePosY);
 
+	flt2 intersectWithOxy(float mousePosX, float mousePosY);
+	flt2 intersectWithOxz(float mousePosX, float mousePosY);
+	flt2 intersectWithOyz(float mousePosX, float mousePosY);
+
 	flt4x4& getDiffPosition();
 
 public:

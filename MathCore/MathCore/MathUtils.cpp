@@ -54,3 +54,16 @@ float distanceBetweenLineAndSegment(
 
 	return distance;
 }
+
+flt3 linePlaneIntersection(
+	const flt3& pt, const flt3& dir,
+	const flt3& o, const flt3& e1, const flt3& e2
+)
+{
+	float det = -dot(cross(e1, e2), dir);
+	float det0 = -dot(cross(pt - o, e2), dir);
+	float det1 = -dot(cross(e1, pt - o), dir);
+	float det2 = dot(cross(e1, e2), pt - o);
+
+	return flt3(det0 / det, det1 / det, det2 / det);
+}
