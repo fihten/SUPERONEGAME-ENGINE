@@ -55,7 +55,7 @@ void fillSceneForObjectsSelectionTesting()
 					0, 0, 0, 1
 				);
 
-				pos = rot * scale * pos;
+				pos = scale * rot * pos;
 
 				NodeID transformID = MainScene::instance()->addTransformNode(pos);
 

@@ -37,6 +37,7 @@ string_id p0_pass_id;
 string_id selected_objects_box_id;
 
 string_id frame_of_reference_id;
+string_id spheric_frame_of_reference_id;
 
 StringManager* StringManager::stringManager = nullptr;
 
@@ -82,6 +83,7 @@ void StringManager::init()
 	selected_objects_box_id = toStringId("SelectedObjectsBox");
 
 	frame_of_reference_id = toStringId("FrameOfReference");
+	spheric_frame_of_reference_id = toStringId("SphericFrameOfReference");
 }
 
 string_id StringManager::toStringId(const char* str)

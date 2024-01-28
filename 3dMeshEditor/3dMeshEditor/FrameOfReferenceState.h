@@ -1,5 +1,6 @@
 #pragma once
 #include "FrameOfReference.h"
+#include "SphericFrameOfReference.h"
 #include "Mesh.h"
 #include <list>
 #include <memory>
@@ -13,6 +14,14 @@ enum class IntersectedAxis :uint32_t
 	AXIS_X,
 	AXIS_Y,
 	AXIS_Z
+};
+
+enum class IntersectedCircleAxis :uint32_t
+{
+	NONE,
+	PLAIN_XY,
+	PLAIN_XZ,
+	PLAIN_YZ
 };
 
 class FrameOfReferenceState
@@ -44,10 +53,17 @@ public:
 
 public:
 	void draw();
+	void drawSpheric();
 	IntersectedAxis checkIntersection(float mousePosX, float mousePosY);
+	IntersectedCircleAxis checkCircleIntersection(float mousePosX, float mousePosY);
+	
 	float projectOnXaxis(float mousePosX, float mousePosY);
 	float projectOnYaxis(float mousePosX, float mousePosY);
 	float projectOnZaxis(float mousePosX, float mousePosY);
+
+	float projectOnXYcircle(float mousePosX, float mousePosY);
+	float projectOnXZcircle(float mousePosX, float mousePosY);
+	float projectOnYZcircle(float mousePosX, float mousePosY);
 
 	flt2 intersectWithOxy(float mousePosX, float mousePosY);
 	flt2 intersectWithOxz(float mousePosX, float mousePosY);
@@ -61,8 +77,10 @@ public:
 private:
 	std::list<FrameOfReferenceStateObserver*> observers;
 	FrameOfReference state;
+	SphericFrameOfReference spheric_state;
 
 	Mesh framesOfReferences;
+	Mesh sphericFramesOfReferences;
 
 	static std::shared_ptr<FrameOfReferenceState> ptr;
 

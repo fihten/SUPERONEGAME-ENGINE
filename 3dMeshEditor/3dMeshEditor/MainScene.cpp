@@ -194,15 +194,33 @@ void MainScene::update(UpdateType updateType)
 			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
 			boundingSpheres[isphere].xyz() = spherePos.xyz();
 
+			scene.updateTransformWithTranslation(nodeId, FrameOfReferenceState::instance()->getDiffPosition());
+
 			flt4x4& pos = scene.getNodePosition4x4(nodeId);
 			objectsInfo[isphere].world = pos.transpose();
-
-			scene.updateTransformWithTranslation(nodeId, FrameOfReferenceState::instance()->getDiffPosition()); 
 		}
 			break;
 		case UpdateType::Scaling:
+		{
+
+		}
 			break;
 		case UpdateType::Rotation:
+		{
+			auto& selectedObjectBox = selectedObjectsBoxes[isphere];
+			flt4 posW4(selectedObjectBox.posW, 1);
+			posW4 = posW4 * FrameOfReferenceState::instance()->getDiffPosition();
+			selectedObjectBox.posW = posW4.xyz();
+
+			flt4 spherePos(boundingSpheres[isphere].xyz(), 1);
+			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
+			boundingSpheres[isphere].xyz() = spherePos.xyz();
+
+			scene.updateTransformWithRotation(nodeId, FrameOfReferenceState::instance()->getDiffPosition());
+
+			flt4x4& pos = scene.getNodePosition4x4(nodeId);
+			objectsInfo[isphere].world = pos.transpose();
+		}
 			break;
 		}
 	}

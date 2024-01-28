@@ -17,10 +17,21 @@ FrameOfReferenceState::FrameOfReferenceState()
 	framesOfReferences.gpuReadyData = &state;
 	framesOfReferences.elementSize = sizeof FrameOfReference;
 
-	const char* septh_stencil_state = "DepthEnable=false;DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;DepthFunc=D3D11_COMPARISON_ALWAYS;StencilEnable=false;StencilReadMask=0;StencilWriteMask=0;FrontFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilFunc=D3D11_COMPARISON_ALWAYS;BackFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;";
-	framesOfReferences.setDepthStencilState(StringManager::toStringId(septh_stencil_state));
+	const char* depth_stencil_state = "DepthEnable=false;DepthWriteMask=D3D11_DEPTH_WRITE_MASK_ZERO;DepthFunc=D3D11_COMPARISON_ALWAYS;StencilEnable=false;StencilReadMask=0;StencilWriteMask=0;FrontFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;FrontFace.StencilFunc=D3D11_COMPARISON_ALWAYS;BackFace.StencilFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilDepthFailOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilPassOp=D3D11_STENCIL_OP_KEEP;BackFace.StencilFunc=D3D11_COMPARISON_ALWAYS;";
+	framesOfReferences.setDepthStencilState(StringManager::toStringId(depth_stencil_state));
 
 	framesOfReferences.verticesCount = 1;
+
+	// Initialization of spheric frames of references
+	sphericFramesOfReferences.setTechnique(spheric_frame_of_reference_id);
+	sphericFramesOfReferences.setPass(p0_pass_id);
+
+	sphericFramesOfReferences.gpuReadyData = &spheric_state;
+	sphericFramesOfReferences.elementSize = sizeof SphericFrameOfReference;
+
+	sphericFramesOfReferences.setDepthStencilState(StringManager::toStringId(depth_stencil_state));
+
+	sphericFramesOfReferences.verticesCount = 1;
 }
 
 void FrameOfReferenceState::attach(FrameOfReferenceStateObserver* observer)
@@ -52,6 +63,7 @@ void FrameOfReferenceState::moveAlongAxisX(float x)
 	shift *= x;
 
 	state.posW += shift;
+	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
 	notify(UpdateType::Translation);
@@ -67,6 +79,7 @@ void FrameOfReferenceState::moveAlongAxisY(float y)
 	shift *= y;
 
 	state.posW += shift;
+	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
 	notify(UpdateType::Translation);
@@ -82,6 +95,7 @@ void FrameOfReferenceState::moveAlongAxisZ(float z)
 	shift *= z;
 
 	state.posW += shift;
+	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
 	notify(UpdateType::Translation);
@@ -92,6 +106,21 @@ void FrameOfReferenceState::rotateAlongAxisX(float x)
 	dPos = makeRotate<float>(state.axis0, x);
 	state.axis1 = state.axis1 * dPos;
 	state.axis2 = state.axis2 * dPos;
+
+	spheric_state.axis1 = state.axis1;
+	spheric_state.axis2 = state.axis2;
+
+	spheric_state.axis1.normalize();
+	spheric_state.axis2.normalize();
+
+	flt3 pt = state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Rotation);
 }
 
@@ -100,6 +129,21 @@ void FrameOfReferenceState::rotateAlongAxisY(float y)
 	dPos = makeRotate<float>(state.axis1, y);
 	state.axis0 = state.axis0 * dPos;
 	state.axis2 = state.axis2 * dPos;
+
+	spheric_state.axis0 = state.axis0;
+	spheric_state.axis2 = state.axis2;
+
+	spheric_state.axis0.normalize();
+	spheric_state.axis2.normalize();
+
+	flt3 pt = state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Rotation);
 }
 
@@ -108,24 +152,42 @@ void FrameOfReferenceState::rotateAlongAxisZ(float z)
 	dPos = makeRotate<float>(state.axis2, z);
 	state.axis0 = state.axis0 * dPos;
 	state.axis1 = state.axis1 * dPos;
+
+	spheric_state.axis0 = state.axis0;
+	spheric_state.axis1 = state.axis1;
+
+	spheric_state.axis0.normalize();
+	spheric_state.axis1.normalize();
+
+	flt3 pt = state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Rotation);
 }
 
 void FrameOfReferenceState::scaleAlongAxisX(float x)
 {
 	state.axis0 *= x;
+	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis0.length());
 	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisY(float y)
 {
 	state.axis1 *= y;
+	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis1.length());
 	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisZ(float z)
 {
 	state.axis2 *= z;
+	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis2.length());
 	notify(UpdateType::Scaling);
 }
 
@@ -137,6 +199,21 @@ void FrameOfReferenceState::release()
 void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfReference)
 {
 	state = frameOfReference;
+
+	spheric_state.posW = state.posW;
+
+	spheric_state.axis0 = state.axis0;
+	spheric_state.axis0.normalize();
+
+	spheric_state.axis1 = state.axis1;
+	spheric_state.axis1.normalize();
+
+	spheric_state.axis2 = state.axis2;
+	spheric_state.axis2.normalize();
+
+	spheric_state.radius = std::max<float>(
+		std::max<float>(state.axis0.length(), state.axis1.length()), state.axis2.length());
+
 	notify(UpdateType::SetFrameOfReference);
 }
 
@@ -161,6 +238,12 @@ void FrameOfReferenceState::draw()
 {
 	if (bTurnedOn)
 		GraphicsCore::instance()->draw(framesOfReferences);
+}
+
+void FrameOfReferenceState::drawSpheric()
+{
+	if (bTurnedOn)
+		GraphicsCore::instance()->draw(sphericFramesOfReferences);
 }
 
 IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float mousePosY)
@@ -210,6 +293,28 @@ IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float 
 		return IntersectedAxis::AXIS_Z;
 
 	return IntersectedAxis::NONE;
+}
+
+IntersectedCircleAxis FrameOfReferenceState::checkCircleIntersection(float mousePosX, float mousePosY)
+{
+	float threshold = 0.01;
+
+	flt2 i = this->intersectWithOxy(mousePosX, mousePosY);
+	float r = sqrt(i.x() * i.x() + i.y() * i.y());
+	if (std::fabs(r - spheric_state.radius) < threshold)
+		return IntersectedCircleAxis::PLAIN_XY;
+
+	i = this->intersectWithOxz(mousePosX, mousePosY);
+	r = sqrt(i.x() * i.x() + i.y() * i.y());
+	if (std::fabs(r - spheric_state.radius) < threshold)
+		return IntersectedCircleAxis::PLAIN_XZ;
+
+	i = this->intersectWithOyz(mousePosX, mousePosY);
+	r = sqrt(i.x() * i.x() + i.y() * i.y());
+	if (std::fabs(r - spheric_state.radius) < threshold)
+		return IntersectedCircleAxis::PLAIN_YZ;
+
+	return IntersectedCircleAxis::NONE;
 }
 
 float FrameOfReferenceState::projectOnXaxis(float mousePosX, float mousePosY)
@@ -312,6 +417,27 @@ float FrameOfReferenceState::projectOnZaxis(float mousePosX, float mousePosY)
 	distanceBetweenLines(pt, dir, origin, axisZ, &t0, &t1);
 
 	return t1;
+}
+
+float FrameOfReferenceState::projectOnXYcircle(float mousePosX, float mousePosY)
+{
+	flt2 i = this->intersectWithOxy(mousePosX, mousePosY);
+	float angle = atan2(i.y(), i.x()) * 180.0f / M_PI;
+	return angle;
+}
+
+float FrameOfReferenceState::projectOnXZcircle(float mousePosX, float mousePosY)
+{
+	flt2 i = this->intersectWithOxz(mousePosX, mousePosY);
+	float angle = atan2(i.y(), i.x()) * 180.0f / M_PI;
+	return angle;
+}
+
+float FrameOfReferenceState::projectOnYZcircle(float mousePosX, float mousePosY)
+{
+	flt2 i = this->intersectWithOyz(mousePosX, mousePosY);
+	float angle = atan2(i.y(), i.x()) * 180.0f / M_PI;
+	return angle;
 }
 
 flt2 FrameOfReferenceState::intersectWithOxy(float mousePosX, float mousePosY)

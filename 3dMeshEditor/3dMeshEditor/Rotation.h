@@ -5,7 +5,7 @@
 
 class Rotation :public Modifier
 {
-	IntersectedAxis grabbedAxis = IntersectedAxis::NONE;
+	IntersectedCircleAxis grabbedAxis = IntersectedCircleAxis::NONE;
 	float paramOnAxis;
 
 	float mousePosX = 0;

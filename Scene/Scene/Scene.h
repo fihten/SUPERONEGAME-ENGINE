@@ -204,4 +204,5 @@ public:
 	void* getNode(NodeID id);
 
 	void updateTransformWithTranslation(NodeID id, flt4x4& translation);
+	void updateTransformWithRotation(NodeID id, flt4x4& rotation);
 };

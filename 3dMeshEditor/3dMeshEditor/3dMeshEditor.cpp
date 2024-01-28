@@ -9,10 +9,12 @@
 #include "SelectionObjectsTesting.h"
 #include "FrameOfReferenceState.h"
 #include "Transition.h"
+#include "Rotation.h"
 #include <Windows.h>
 #include <windef.h>
 
 Transition transitionModifier;
+Rotation rotationModifier;
 DrawVisitor drawVisitor;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -130,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 		cameras()[i].processMessage(msg,wparam,lparam, dt);
 
-	transitionModifier.processWindowMessage(msg, wparam, lparam);
+	rotationModifier.processWindowMessage(msg, wparam, lparam);
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }
@@ -140,7 +142,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 	graphicsCore->startFrame();
 	MainScene::instance()->accept(&drawVisitor);
 	Selector::instance()->draw();
-	FrameOfReferenceState::instance()->draw();
+	FrameOfReferenceState::instance()->drawSpheric();
 	graphicsCore->endFrame();
 }
 
@@ -151,6 +153,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	fillSceneForObjectsSelectionTesting();
 	transitionModifier.setWindow(GraphicsCore::instance()->getWindow());
+	rotationModifier.setWindow(GraphicsCore::instance()->getWindow());
 
 	return GraphicsCore::instance()->run();
 }
