@@ -212,6 +212,10 @@ void MainScene::update(UpdateType updateType)
 			posW4 = posW4 * FrameOfReferenceState::instance()->getDiffPosition();
 			selectedObjectBox.posW = posW4.xyz();
 
+			selectedObjectBox.axis0 = selectedObjectBox.axis0 * FrameOfReferenceState::instance()->getDiffPosition();
+			selectedObjectBox.axis1 = selectedObjectBox.axis1 * FrameOfReferenceState::instance()->getDiffPosition();
+			selectedObjectBox.axis2 = selectedObjectBox.axis2 * FrameOfReferenceState::instance()->getDiffPosition();
+
 			flt4 spherePos(boundingSpheres[isphere].xyz(), 1);
 			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
 			boundingSpheres[isphere].xyz() = spherePos.xyz();

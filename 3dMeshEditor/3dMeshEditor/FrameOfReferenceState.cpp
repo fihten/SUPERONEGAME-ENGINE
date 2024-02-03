@@ -297,7 +297,7 @@ IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float 
 
 IntersectedCircleAxis FrameOfReferenceState::checkCircleIntersection(float mousePosX, float mousePosY)
 {
-	float threshold = 0.01;
+	float threshold = 0.1;
 
 	flt2 i = this->intersectWithOxy(mousePosX, mousePosY);
 	float r = sqrt(i.x() * i.x() + i.y() * i.y());

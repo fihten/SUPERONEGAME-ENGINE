@@ -1,6 +1,6 @@
 #include "Rotation.h"
 
-void Rotation::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
+Modifier::Behaviour Rotation::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
@@ -29,20 +29,24 @@ void Rotation::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 		case IntersectedCircleAxis::PLAIN_XY:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnXYcircle(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		case IntersectedCircleAxis::PLAIN_XZ:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnXZcircle(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		case IntersectedCircleAxis::PLAIN_YZ:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnYZcircle(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		}
 	}
 	break;
 
 	case WM_LBUTTONUP:
-		grabbedAxis = IntersectedCircleAxis::NONE;
 		FrameOfReferenceState::instance()->release();
+		if (grabbedAxis != IntersectedCircleAxis::NONE)
+		{
+			grabbedAxis = IntersectedCircleAxis::NONE;
+			return Behaviour::FINISH;
+		}
 		break;
 
 	case WM_MOUSEMOVE:
@@ -79,11 +83,11 @@ void Rotation::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 			break;
 		case IntersectedCircleAxis::PLAIN_XZ:
 			param = FrameOfReferenceState::instance()->projectOnXZcircle(mousePosX, mousePosY);
-			FrameOfReferenceState::instance()->rotateAlongAxisY(param - paramOnAxis);
+			FrameOfReferenceState::instance()->rotateAlongAxisY(paramOnAxis - param);
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnXZcircle(mousePosX, mousePosY);
 			break;
 		}
-
-		break;
+		return Behaviour::FINISH;
 	}
+	return Behaviour::CONTINUE;
 }

@@ -27,6 +27,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	static bool bMarginSelection = false;
 
+	auto behaviour = rotationModifier.processWindowMessage(msg, wparam, lparam);
+	if (behaviour == Modifier::Behaviour::FINISH)
+		return 0;
+
 	switch (msg)
 	{
 	case WM_LBUTTONDOWN:
@@ -131,8 +135,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	float dt = Timer::Instance()->elapsedTime();
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 		cameras()[i].processMessage(msg,wparam,lparam, dt);
-
-	rotationModifier.processWindowMessage(msg, wparam, lparam);
 
 	return DefWindowProc(hwnd, msg, wparam, lparam);
 }

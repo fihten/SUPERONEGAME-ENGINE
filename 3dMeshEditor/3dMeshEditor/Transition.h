@@ -11,5 +11,5 @@ class Transition :public Modifier
 	float mousePosY = 0;
 
 public:
-	void processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
+	Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
 };

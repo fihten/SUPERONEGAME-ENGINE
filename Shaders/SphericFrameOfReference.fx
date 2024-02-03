@@ -38,10 +38,10 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(39)]
+[maxvertexcount(99)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
-	int segments = 12;
+	int segments = 32;
 	float phi = 6.28 / segments;
 
 	GeometryOut gout;

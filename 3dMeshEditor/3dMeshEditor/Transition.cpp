@@ -1,6 +1,6 @@
 #include "Transition.h"
 
-void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
+Modifier::Behaviour Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
@@ -29,20 +29,24 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 		{
 		case IntersectedAxis::AXIS_X:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnXaxis(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		case IntersectedAxis::AXIS_Y:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnYaxis(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		case IntersectedAxis::AXIS_Z:
 			paramOnAxis = FrameOfReferenceState::instance()->projectOnZaxis(mousePosX, mousePosY);
-			break;
+			return Behaviour::FINISH;
 		}
 	}
 		break;
 
 	case WM_LBUTTONUP:
-		grabbedAxis = IntersectedAxis::NONE;
 		FrameOfReferenceState::instance()->release();
+		if (grabbedAxis != IntersectedAxis::NONE)
+		{
+			grabbedAxis = IntersectedAxis::NONE;
+			return Behaviour::FINISH;
+		}
 		break;
 
 	case WM_MOUSEMOVE:
@@ -84,6 +88,7 @@ void Transition::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 			break;
 		}
 
-		break;
+		return Behaviour::FINISH;
 	}
+	return Behaviour::CONTINUE;
 }
