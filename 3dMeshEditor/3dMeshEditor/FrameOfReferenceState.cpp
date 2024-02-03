@@ -32,6 +32,17 @@ FrameOfReferenceState::FrameOfReferenceState()
 	sphericFramesOfReferences.setDepthStencilState(StringManager::toStringId(depth_stencil_state));
 
 	sphericFramesOfReferences.verticesCount = 1;
+
+	// Initialization of scale frames of references
+	scaleFramesOfReferences.setTechnique(scale_frame_of_reference_id);
+	scaleFramesOfReferences.setPass(p0_pass_id);
+
+	scaleFramesOfReferences.gpuReadyData = &scale_state;
+	scaleFramesOfReferences.elementSize = sizeof ScaleFrameOfReference;
+
+	scaleFramesOfReferences.setDepthStencilState(StringManager::toStringId(depth_stencil_state));
+
+	scaleFramesOfReferences.verticesCount = 1;
 }
 
 void FrameOfReferenceState::attach(FrameOfReferenceStateObserver* observer)
@@ -63,6 +74,7 @@ void FrameOfReferenceState::moveAlongAxisX(float x)
 	shift *= x;
 
 	state.posW += shift;
+	scale_state.posW = state.posW;
 	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
@@ -79,6 +91,7 @@ void FrameOfReferenceState::moveAlongAxisY(float y)
 	shift *= y;
 
 	state.posW += shift;
+	scale_state.posW = state.posW;
 	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
@@ -95,6 +108,7 @@ void FrameOfReferenceState::moveAlongAxisZ(float z)
 	shift *= z;
 
 	state.posW += shift;
+	scale_state.posW = state.posW;
 	spheric_state.posW = state.posW;
 	dPos = makeTranslation(shift);
 
@@ -104,8 +118,12 @@ void FrameOfReferenceState::moveAlongAxisZ(float z)
 void FrameOfReferenceState::rotateAlongAxisX(float x)
 {
 	dPos = makeRotate<float>(state.axis0, x);
+	
 	state.axis1 = state.axis1 * dPos;
 	state.axis2 = state.axis2 * dPos;
+
+	scale_state.axis1 = scale_state.axis1 * dPos;
+	scale_state.axis2 = scale_state.axis2 * dPos;
 
 	spheric_state.axis1 = state.axis1;
 	spheric_state.axis2 = state.axis2;
@@ -127,8 +145,12 @@ void FrameOfReferenceState::rotateAlongAxisX(float x)
 void FrameOfReferenceState::rotateAlongAxisY(float y)
 {
 	dPos = makeRotate<float>(state.axis1, y);
+	
 	state.axis0 = state.axis0 * dPos;
 	state.axis2 = state.axis2 * dPos;
+
+	scale_state.axis0 = scale_state.axis0 * dPos;
+	scale_state.axis2 = scale_state.axis2 * dPos;
 
 	spheric_state.axis0 = state.axis0;
 	spheric_state.axis2 = state.axis2;
@@ -150,8 +172,12 @@ void FrameOfReferenceState::rotateAlongAxisY(float y)
 void FrameOfReferenceState::rotateAlongAxisZ(float z)
 {
 	dPos = makeRotate<float>(state.axis2, z);
+	
 	state.axis0 = state.axis0 * dPos;
 	state.axis1 = state.axis1 * dPos;
+
+	scale_state.axis0 = scale_state.axis0 * dPos;
+	scale_state.axis1 = scale_state.axis1 * dPos;
 
 	spheric_state.axis0 = state.axis0;
 	spheric_state.axis1 = state.axis1;
@@ -173,21 +199,57 @@ void FrameOfReferenceState::rotateAlongAxisZ(float z)
 void FrameOfReferenceState::scaleAlongAxisX(float x)
 {
 	state.axis0 *= x;
+	scale_state.axis0 *= x;
 	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis0.length());
+
+	flt3 pt = scale_state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	flt3 scale(x, 1, 1);
+	dPos = makeScale<float>(scale);
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisY(float y)
 {
 	state.axis1 *= y;
+	scale_state.axis1 *= y;
 	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis1.length());
+
+	flt3 pt = scale_state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	flt3 scale(1, y, 1);
+	dPos = makeScale<float>(scale);
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Scaling);
 }
 
 void FrameOfReferenceState::scaleAlongAxisZ(float z)
 {
 	state.axis2 *= z;
+	scale_state.axis2 *= z;
 	spheric_state.radius = std::max<float>(spheric_state.radius, state.axis2.length());
+
+	flt3 pt = scale_state.posW;
+	pt *= -1;
+	auto t0 = makeTranslation(pt);
+	pt *= -1;
+	auto t1 = makeTranslation(pt);
+
+	flt3 scale(1, 1, z);
+	dPos = makeScale<float>(scale);
+	dPos = t0 * dPos * t1;
+
 	notify(UpdateType::Scaling);
 }
 
@@ -213,6 +275,12 @@ void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfR
 
 	spheric_state.radius = std::max<float>(
 		std::max<float>(state.axis0.length(), state.axis1.length()), state.axis2.length());
+
+	scale_state.posW = state.posW;
+
+	scale_state.axis0 = state.axis0;
+	scale_state.axis1 = state.axis1;
+	scale_state.axis2 = state.axis2;
 
 	notify(UpdateType::SetFrameOfReference);
 }
@@ -315,6 +383,80 @@ IntersectedCircleAxis FrameOfReferenceState::checkCircleIntersection(float mouse
 		return IntersectedCircleAxis::PLAIN_YZ;
 
 	return IntersectedCircleAxis::NONE;
+}
+
+IntersectedAxis FrameOfReferenceState::checkHandleIntersection(float mousePosX, float mousePosY)
+{
+	auto& camera = cameras()[MAIN_CAMERA];
+
+	float nearZ = camera.getNear();
+	float fovY = camera.getFov() * M_PI / 180;
+	float h = 2 * nearZ * std::tan(0.5 * fovY);
+
+	float ar = camera.getAspectRatio();
+	float w = ar * h;
+
+	mousePosX *= 0.5 * w;
+	mousePosY *= 0.5 * h;
+
+	flt3 pt(mousePosX, mousePosY, nearZ);
+
+	float farZ = camera.getFar();
+	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
+
+	/////////////////////////////////////////////////////////////////
+
+	flt3 endOfAxis = scale_state.posW - scale_state.axis0;
+	float distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_X;
+
+	endOfAxis = scale_state.posW + scale_state.axis0;
+	distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_X;
+
+	/////////////////////////////////////////////////////////////////
+
+	endOfAxis = scale_state.posW - scale_state.axis1;
+	distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_Y;
+
+	endOfAxis = scale_state.posW + scale_state.axis1;
+	distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_Y;
+
+	/////////////////////////////////////////////////////////////////
+
+	endOfAxis = scale_state.posW - scale_state.axis2;
+	distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_Z;
+
+	endOfAxis = scale_state.posW + scale_state.axis2;
+	distance = distanceBetweenLineAndPoint(
+		pt, dir,
+		endOfAxis
+	);
+	if (distance < scale_state.handleRadius)
+		return IntersectedAxis::AXIS_Z;
 }
 
 float FrameOfReferenceState::projectOnXaxis(float mousePosX, float mousePosY)

@@ -270,5 +270,16 @@ Matrix4x4<value_type> makeTranslation(Vec3d<value_type>& r)
 		);
 }
 
+template<class value_type>
+Matrix4x4<value_type> makeScale(Vec3d<value_type>& scale)
+{
+	return Matrix4x4<value_type>(
+		scale.x(), 0.0f, 0.0f, 0.0f,
+		0.0f, scale.y(), 0.0f, 0.0f,
+		0.0f, 0.0f, scale.z(), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+		);
+}
+
 typedef Matrix4x4<float> flt4x4;
 typedef Matrix4x4<double> dbl4x4;

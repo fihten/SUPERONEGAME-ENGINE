@@ -34,6 +34,7 @@ extern string_id selected_objects_box_id;
 
 extern string_id frame_of_reference_id;
 extern string_id spheric_frame_of_reference_id;
+extern string_id scale_frame_of_reference_id;
 
 struct StringManager
 {

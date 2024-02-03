@@ -205,4 +205,5 @@ public:
 
 	void updateTransformWithTranslation(NodeID id, flt4x4& translation);
 	void updateTransformWithRotation(NodeID id, flt4x4& rotation);
+	void updateTransformWithScaling(NodeID id, flt4x4& scaling);
 };

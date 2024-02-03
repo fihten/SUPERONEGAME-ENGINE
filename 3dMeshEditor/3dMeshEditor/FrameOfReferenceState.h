@@ -1,6 +1,7 @@
 #pragma once
 #include "FrameOfReference.h"
 #include "SphericFrameOfReference.h"
+#include "ScaleFrameOfReference.h"
 #include "Mesh.h"
 #include <list>
 #include <memory>
@@ -56,7 +57,8 @@ public:
 	void drawSpheric();
 	IntersectedAxis checkIntersection(float mousePosX, float mousePosY);
 	IntersectedCircleAxis checkCircleIntersection(float mousePosX, float mousePosY);
-	
+	IntersectedAxis checkHandleIntersection(float mousePosX, float mousePosY);
+
 	float projectOnXaxis(float mousePosX, float mousePosY);
 	float projectOnYaxis(float mousePosX, float mousePosY);
 	float projectOnZaxis(float mousePosX, float mousePosY);
@@ -78,9 +80,11 @@ private:
 	std::list<FrameOfReferenceStateObserver*> observers;
 	FrameOfReference state;
 	SphericFrameOfReference spheric_state;
+	ScaleFrameOfReference scale_state;
 
 	Mesh framesOfReferences;
 	Mesh sphericFramesOfReferences;
+	Mesh scaleFramesOfReferences;
 
 	static std::shared_ptr<FrameOfReferenceState> ptr;
 
