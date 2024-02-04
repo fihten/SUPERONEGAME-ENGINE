@@ -15,25 +15,26 @@ void buildFrameOfReferences(
 	axis2 = pt1 - pt0;
 	normalize(axis2);
 
-	int i = 0;
+	axis0 = 0;
+	axis0.x = 1;
+
 	float m = abs(axis2.x);
 	
 	float m0 = abs(axis2.y);
 	if (m0 < m)
 	{
-		i = 1;
+		axis0 = 0;
+		axis0.y = 1;
 		m = m0;
 	}
 
 	m0 = abs(axis2.z);
 	if (m0 < m)
 	{
-		i = 2;
+		axis0 = 0;
+		axis0.z = 1;
 		m = m0;
 	}
-
-	axis0 = 0;
-	axis0[i] = 1.0f;
 
 	axis1 = cross(axis2, axis0);
 	axis1 = normalize(axis1);
@@ -125,11 +126,11 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(6)]
+[maxvertexcount(84)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
 	GeometryOut gout;
-	int segments = 32;
+	int segments = 12;
 
 	float3 pt = gin[0].posW + gin[0].axis0;
 
@@ -146,7 +147,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW - gin[0].axis0,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream
@@ -154,7 +155,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW + gin[0].axis0,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream
@@ -177,7 +178,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW - gin[0].axis1,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream
@@ -185,7 +186,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW + gin[0].axis1,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream
@@ -208,7 +209,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW - gin[0].axis2,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream
@@ -216,7 +217,7 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	buildSphere(
 		eyePosW,
 		gin[0].posW + gin[0].axis2,
-		gin[0].radius,
+		gin[0].handleRadius,
 		segments,
 		gout.color,
 		lineStream

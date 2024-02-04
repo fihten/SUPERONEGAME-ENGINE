@@ -10,11 +10,13 @@
 #include "FrameOfReferenceState.h"
 #include "Transition.h"
 #include "Rotation.h"
+#include "Scaling.h"
 #include <Windows.h>
 #include <windef.h>
 
 Transition transitionModifier;
 Rotation rotationModifier;
+Scaling scalingModifier;
 DrawVisitor drawVisitor;
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -27,7 +29,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	static bool bMarginSelection = false;
 
-	auto behaviour = rotationModifier.processWindowMessage(msg, wparam, lparam);
+	auto behaviour = scalingModifier.processWindowMessage(msg, wparam, lparam);
 	if (behaviour == Modifier::Behaviour::FINISH)
 		return 0;
 
@@ -144,7 +146,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 	graphicsCore->startFrame();
 	MainScene::instance()->accept(&drawVisitor);
 	Selector::instance()->draw();
-	FrameOfReferenceState::instance()->drawSpheric();
+	FrameOfReferenceState::instance()->drawScale();
 	graphicsCore->endFrame();
 }
 
@@ -154,8 +156,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
 
 	fillSceneForObjectsSelectionTesting();
+	
 	transitionModifier.setWindow(GraphicsCore::instance()->getWindow());
 	rotationModifier.setWindow(GraphicsCore::instance()->getWindow());
+	scalingModifier.setWindow(GraphicsCore::instance()->getWindow());
 
 	return GraphicsCore::instance()->run();
 }

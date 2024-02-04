@@ -55,6 +55,8 @@ public:
 public:
 	void draw();
 	void drawSpheric();
+	void drawScale();
+
 	IntersectedAxis checkIntersection(float mousePosX, float mousePosY);
 	IntersectedCircleAxis checkCircleIntersection(float mousePosX, float mousePosY);
 	IntersectedAxis checkHandleIntersection(float mousePosX, float mousePosY);

@@ -314,6 +314,12 @@ void FrameOfReferenceState::drawSpheric()
 		GraphicsCore::instance()->draw(sphericFramesOfReferences);
 }
 
+void FrameOfReferenceState::drawScale()
+{
+	if (bTurnedOn)
+		GraphicsCore::instance()->draw(scaleFramesOfReferences);
+}
+
 IntersectedAxis FrameOfReferenceState::checkIntersection(float mousePosX, float mousePosY)
 {
 	auto& camera = cameras()[MAIN_CAMERA];
@@ -457,6 +463,8 @@ IntersectedAxis FrameOfReferenceState::checkHandleIntersection(float mousePosX, 
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_Z;
+
+	return IntersectedAxis::NONE;
 }
 
 float FrameOfReferenceState::projectOnXaxis(float mousePosX, float mousePosY)
