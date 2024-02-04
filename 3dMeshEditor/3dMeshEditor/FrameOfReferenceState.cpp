@@ -412,54 +412,62 @@ IntersectedAxis FrameOfReferenceState::checkHandleIntersection(float mousePosX, 
 
 	/////////////////////////////////////////////////////////////////
 
-	flt3 endOfAxis = scale_state.posW - scale_state.axis0;
+	auto view = camera.getView();
+
+	flt4 endOfAxis = flt4(scale_state.posW - scale_state.axis0, 1);
+	endOfAxis = endOfAxis * view;
 	float distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_X;
 
-	endOfAxis = scale_state.posW + scale_state.axis0;
+	endOfAxis = flt4(scale_state.posW + scale_state.axis0, 1);
+	endOfAxis = endOfAxis * view;
 	distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_X;
 
 	/////////////////////////////////////////////////////////////////
 
-	endOfAxis = scale_state.posW - scale_state.axis1;
+	endOfAxis = flt4(scale_state.posW - scale_state.axis1, 1);
+	endOfAxis = endOfAxis * view;
 	distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_Y;
 
-	endOfAxis = scale_state.posW + scale_state.axis1;
+	endOfAxis = flt4(scale_state.posW + scale_state.axis1, 1);
+	endOfAxis = endOfAxis * view;
 	distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_Y;
 
 	/////////////////////////////////////////////////////////////////
 
-	endOfAxis = scale_state.posW - scale_state.axis2;
+	endOfAxis = flt4(scale_state.posW - scale_state.axis2, 1);
+	endOfAxis = endOfAxis * view;
 	distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_Z;
 
-	endOfAxis = scale_state.posW + scale_state.axis2;
+	endOfAxis = flt4(scale_state.posW + scale_state.axis2, 1);
+	endOfAxis = endOfAxis * view;
 	distance = distanceBetweenLineAndPoint(
 		pt, dir,
-		endOfAxis
+		endOfAxis.xyz()
 	);
 	if (distance < scale_state.handleRadius)
 		return IntersectedAxis::AXIS_Z;
