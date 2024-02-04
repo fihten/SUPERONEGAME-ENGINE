@@ -1628,3 +1628,24 @@ void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
 			sphere.w() = r;
 	}
 }
+
+void Mesh::save(std::ofstream s)
+{
+	s << "mesh name: " << name << std::endl;
+	s << "technique: " << StringManager::toString(technique_name_id) << std::endl;
+	s << "pass: " << StringManager::toString(pass_name_id) << std::endl;
+	s << "blend state: " << StringManager::toString(blend_state_id) << std::endl;
+	s << "depth/stencil state: " << StringManager::toString(depth_stencil_state_id) << std::endl;
+	s << "float streams:" << std::endl;
+	s << "streams count: " << flt1_streams.size() << std::endl;
+	for (auto& stream : flt1_streams)
+	{
+		s << "stream name: " << stream.first << std::endl;
+		s << "elements count: " << stream.second.size() << std::endl;
+		s << "elements: " << std::endl;
+		for (auto& f : stream.second)
+		{
+			s << std::string(f) << std::endl;
+		}
+	}
+}

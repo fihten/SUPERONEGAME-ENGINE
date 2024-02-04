@@ -3,6 +3,7 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include "Vec1d.h"
 #include "Vec2d.h"
@@ -233,6 +234,8 @@ public:
 	friend Mesh createMeshForTestingDefinitionOfTheSamePoints();
 	friend Mesh createMeshVisualizingAreaOfIntegration();
 	friend Mesh createHistogram(float y[], int N);
+
+	void save(std::ofstream s);
 
 public:
 	uint32_t id;
