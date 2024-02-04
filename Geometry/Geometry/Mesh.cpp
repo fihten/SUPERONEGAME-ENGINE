@@ -1648,4 +1648,40 @@ void Mesh::save(std::ofstream s)
 			s << std::string(f) << std::endl;
 		}
 	}
+	s << "float2 streams:" << std::endl;
+	s << "streams count: " << flt2_streams.size() << std::endl;
+	for (auto& stream : flt2_streams)
+	{
+		s << "stream name: " << stream.first << std::endl;
+		s << "elements count: " << stream.second.size() << std::endl;
+		s << "elements: " << std::endl;
+		for (auto& f2 : stream.second)
+		{
+			s << std::string(f2) << std::endl;
+		}
+	}
+	s << "float3 streams:" << std::endl;
+	s << "streams count: " << flt3_streams.size() << std::endl;
+	for (auto& stream : flt3_streams)
+	{
+		s << "stream name: " << stream.first << std::endl;
+		s << "elements count: " << stream.second.size() << std::endl;
+		s << "elements: " << std::endl;
+		for (auto& f3 : stream.second)
+		{
+			s << std::string(f3) << std::endl;
+		}
+	}
+	s << "float4 streams:" << std::endl;
+	s << "streams count: " << flt4_streams.size() << std::endl;
+	for (auto& stream : flt4_streams)
+	{
+		s << "stream name: " << stream.first << std::endl;
+		s << "elements count: " << stream.second.size() << std::endl;
+		s << "elements: " << std::endl;
+		for (auto& f4 : stream.second)
+		{
+			s << std::string(f4) << std::endl;
+		}
+	}
 }
