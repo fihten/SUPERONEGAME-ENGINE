@@ -1684,4 +1684,19 @@ void Mesh::save(std::ofstream s)
 			s << std::string(f4) << std::endl;
 		}
 	}
+	s << "indicies: " << std::endl;
+	s << "indicies count: " << indicies.size() << std::endl;
+	for (auto& index : indicies)
+	{
+		s << index << std::endl;
+	}
+	s << "params: " << std::endl;
+	s << "params count: " << params.size() << std::endl;
+	for (const auto& param : params)
+	{
+		s << "param key: " << std::endl;
+		s << "name: " << StringManager::toString(param.first.name) << std::endl;
+		s << "index: " << param.first.index << std::endl;
+		s << "field: " << StringManager::toString(param.first.field) << std::endl;
+	}
 }
