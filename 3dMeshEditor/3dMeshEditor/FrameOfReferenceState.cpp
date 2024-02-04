@@ -208,8 +208,8 @@ void FrameOfReferenceState::scaleAlongAxisX(float x)
 	pt *= -1;
 	auto t1 = makeTranslation(pt);
 
-	flt3 scale(x, 1, 1);
-	dPos = makeScale<float>(scale);
+	flt3 scale = x * spheric_state.axis0;
+	dPos = makeScaleAlongAxis<float>(scale);
 	dPos = t0 * dPos * t1;
 
 	notify(UpdateType::Scaling);
@@ -227,8 +227,8 @@ void FrameOfReferenceState::scaleAlongAxisY(float y)
 	pt *= -1;
 	auto t1 = makeTranslation(pt);
 
-	flt3 scale(1, y, 1);
-	dPos = makeScale<float>(scale);
+	flt3 scale = y * spheric_state.axis1;
+	dPos = makeScaleAlongAxis<float>(scale);
 	dPos = t0 * dPos * t1;
 
 	notify(UpdateType::Scaling);
@@ -246,8 +246,8 @@ void FrameOfReferenceState::scaleAlongAxisZ(float z)
 	pt *= -1;
 	auto t1 = makeTranslation(pt);
 
-	flt3 scale(1, 1, z);
-	dPos = makeScale<float>(scale);
+	flt3 scale = z * spheric_state.axis2;
+	dPos = makeScaleAlongAxis<float>(scale);
 	dPos = t0 * dPos * t1;
 
 	notify(UpdateType::Scaling);

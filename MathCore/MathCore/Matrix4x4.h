@@ -281,5 +281,20 @@ Matrix4x4<value_type> makeScale(Vec3d<value_type>& scale)
 		);
 }
 
+template<class value_type>
+Matrix4x4<value_type> makeScaleAlongAxis(Vec3d<value_type>& scale)
+{
+	auto& s = scale;
+	float s_len = s.length();
+	float c = (1.0f - 1.0f / s_len) / s_len;
+
+	return Matrix4x4<value_type>(
+		1 + c * s.x() * s.x(), c * s.x() * s.y(), c * s.x() * s.z(), 0.0f,
+		c * s.y() * s.x(), 1 + c * s.y() * s.y(), c * s.y() * s.z(), 0.0f,
+		c * s.z() * s.x(), c * s.z() * s.y(), 1 + c * s.z() * s.z(), 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+		);
+}
+
 typedef Matrix4x4<float> flt4x4;
 typedef Matrix4x4<double> dbl4x4;
