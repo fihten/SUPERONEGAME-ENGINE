@@ -1856,4 +1856,63 @@ void Mesh::load(std::ifstream s)
 			stream.push_back(flt4(tmp));
 		}
 	}
+
+	// indices
+	s >> tmp;
+
+	int indicesCount;
+	s >> tmp >> tmp >> indicesCount;
+
+	indicies.resize(indicesCount);
+	for (int ii = 0; ii < indicesCount; ii++)
+	{
+		s >> indicies[ii];
+	}
+
+	// params
+	s >> tmp;
+
+	int paramsCount;
+	s >> tmp >> tmp >> paramsCount;
+
+	params.resize(paramsCount);
+	for (int pi = 0; pi < paramsCount; pi++)
+	{
+		// key
+		s >> tmp >> tmp;
+		s >> tmp >> params[pi].first.name;
+		s >> tmp >> params[pi].first.index;
+
+		std::string sField;
+		s >> tmp >> sField;
+		params[pi].first.field = StringManager::toStringId(sField);
+
+		// value
+		s >> tmp >> tmp;
+
+		std::string ss;
+		s >> tmp >> ss;
+		params[pi].second.s = StringManager::toStringId(ss);
+
+		s >> tmp >> params[pi].second.f;
+
+		s >> tmp >> tmp;
+		params[pi].second.f2 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f3 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f4 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f4x4 = tmp;
+
+		s >> tmp >> params[pi].second.i;
+
+		s >> tmp >> tmp;
+		params[pi].second.i2 = tmp;
+
+		s >> tmp >> params[pi].second.valid;
+	}
 }
