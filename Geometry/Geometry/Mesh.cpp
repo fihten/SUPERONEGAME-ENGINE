@@ -1698,5 +1698,162 @@ void Mesh::save(std::ofstream s)
 		s << "name: " << StringManager::toString(param.first.name) << std::endl;
 		s << "index: " << param.first.index << std::endl;
 		s << "field: " << StringManager::toString(param.first.field) << std::endl;
+		s << "param value: " << std::endl;
+		s << "string: " << StringManager::toString(param.second.s) << std::endl;
+		s << "float: " << param.second.f << std::endl;
+		s << "float2: " << std::string(param.second.f2) << std::endl;
+		s << "float3: " << std::string(param.second.f3) << std::endl;
+		s << "float4: " << std::string(param.second.f4) << std::endl;
+		s << "float4x4: " << std::string(param.second.f4x4) << std::endl;
+		s << "int: " << param.second.i << std::endl;
+		s << "int2: " << std::string(param.second.i2) << std::endl;
+		s << "validity: " << param.second.valid << std::endl;
+	}
+}
+
+void Mesh::load(std::ifstream s)
+{
+	std::string tmp;
+
+	s >> tmp >> tmp >> name;
+	
+	s >> tmp >> tmp;
+	technique_name_id = StringManager::toStringId(tmp);
+	
+	s >> tmp >> tmp;
+	pass_name_id = StringManager::toStringId(tmp);
+
+	s >> tmp >> tmp >> tmp;
+	blend_state_id = StringManager::toStringId(tmp);
+
+	s >> tmp >> tmp >> tmp;
+	depth_stencil_state_id = StringManager::toStringId(tmp);
+
+	// float streams
+
+	s >> tmp >> tmp;
+
+	int streamsCount = 0;
+	s >> tmp >> tmp >> streamsCount;
+
+	flt1_streams.clear();
+	flt1_streams.resize(streamsCount);
+
+	for (int si = 0; si < streamsCount; si++)
+	{
+		std::string streamName;
+		s >> tmp >> tmp >> streamName;
+
+		flt1_streams[si].first = StringManager::toStringId(streamName);
+
+		int elementsCount;
+		s >> tmp >> tmp >> elementsCount;
+
+		auto& stream = flt1_streams[si].second;
+		stream.reserve(elementsCount);
+
+		s >> tmp;
+
+		for (int ei = 0; ei < elementsCount; ei++)
+		{
+			s >> tmp;
+			stream.push_back(flt1(tmp));
+		}
+	}
+
+	// float2 streams
+
+	s >> tmp >> tmp;
+
+	streamsCount = 0;
+	s >> tmp >> tmp >> streamsCount;
+
+	flt2_streams.clear();
+	flt2_streams.resize(streamsCount);
+
+	for (int si = 0; si < streamsCount; si++)
+	{
+		std::string streamName;
+		s >> tmp >> tmp >> streamName;
+
+		flt2_streams[si].first = StringManager::toStringId(streamName);
+
+		int elementsCount;
+		s >> tmp >> tmp >> elementsCount;
+
+		auto& stream = flt2_streams[si].second;
+		stream.reserve(elementsCount);
+
+		s >> tmp;
+
+		for (int ei = 0; ei < elementsCount; ei++)
+		{
+			s >> tmp;
+			stream.push_back(flt2(tmp));
+		}
+	}
+
+	// float3 streams
+
+	s >> tmp >> tmp;
+
+	streamsCount = 0;
+	s >> tmp >> tmp >> streamsCount;
+
+	flt3_streams.clear();
+	flt3_streams.resize(streamsCount);
+
+	for (int si = 0; si < streamsCount; si++)
+	{
+		std::string streamName;
+		s >> tmp >> tmp >> streamName;
+
+		flt3_streams[si].first = StringManager::toStringId(streamName);
+
+		int elementsCount;
+		s >> tmp >> tmp >> elementsCount;
+
+		auto& stream = flt3_streams[si].second;
+		stream.reserve(elementsCount);
+
+		s >> tmp;
+
+		for (int ei = 0; ei < elementsCount; ei++)
+		{
+			s >> tmp;
+			stream.push_back(flt3(tmp));
+		}
+	}
+
+	// float4 streams
+
+	s >> tmp >> tmp;
+
+	streamsCount = 0;
+	s >> tmp >> tmp >> streamsCount;
+
+	flt4_streams.clear();
+	flt4_streams.resize(streamsCount);
+
+	for (int si = 0; si < streamsCount; si++)
+	{
+		std::string streamName;
+		s >> tmp >> tmp >> streamName;
+
+		flt4_streams[si].first = StringManager::toStringId(streamName);
+
+		int elementsCount;
+		s >> tmp >> tmp >> elementsCount;
+
+		auto& stream = flt4_streams[si].second;
+		stream.reserve(elementsCount);
+
+		s >> tmp;
+
+		for (int ei = 0; ei < elementsCount; ei++)
+		{
+			s >> tmp;
+			stream.push_back(flt4(tmp));
+		}
 	}
 }

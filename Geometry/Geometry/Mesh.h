@@ -236,6 +236,7 @@ public:
 	friend Mesh createHistogram(float y[], int N);
 
 	void save(std::ofstream s);
+	void load(std::ifstream s);
 
 public:
 	uint32_t id;
