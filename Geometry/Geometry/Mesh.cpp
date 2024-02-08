@@ -1629,7 +1629,7 @@ void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
 	}
 }
 
-void Mesh::save(std::ofstream s)
+void Mesh::save(std::ofstream& s) const
 {
 	s << "mesh name: " << name << std::endl;
 	s << "technique: " << StringManager::toString(technique_name_id) << std::endl;
@@ -1711,7 +1711,7 @@ void Mesh::save(std::ofstream s)
 	}
 }
 
-void Mesh::load(std::ifstream s)
+void Mesh::load(std::ifstream& s) 
 {
 	std::string tmp;
 

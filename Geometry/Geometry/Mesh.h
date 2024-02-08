@@ -235,8 +235,8 @@ public:
 	friend Mesh createMeshVisualizingAreaOfIntegration();
 	friend Mesh createHistogram(float y[], int N);
 
-	void save(std::ofstream s);
-	void load(std::ifstream s);
+	void save(std::ofstream& s) const;
+	void load(std::ifstream& s);
 
 public:
 	uint32_t id;

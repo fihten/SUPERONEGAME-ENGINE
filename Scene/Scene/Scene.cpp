@@ -1431,3 +1431,146 @@ void Scene::updateTransformWithScaling(NodeID id, flt4x4& scaling)
 	auto transformNode = static_cast<TransformNode*>(currentNode);
 	transformNode->pos *= scaling;
 }
+
+class SaveVisitor :public Scene::Visitor
+{
+public:
+	SaveVisitor(std::ofstream& s) :s(s) {}
+
+	void startVisit(const Scene::TransformNode* node)
+	{
+		s << "transform node:" << std::endl;
+		s << "node id: " << node->ID << std::endl;
+		s << "transform matrix: " << std::string(node->pos) << std::endl;
+		s << "childs:" << std::endl;
+		s << "childs count: " << node->childs.size() << std::endl;
+	}
+
+	void startVisit(const Scene::MeshNode* node) 
+	{
+		s << "mesh node:" << std::endl;
+		s << "node id: " << node->ID << std::endl;
+		int meshIndex = this->meshIndex++;
+		auto it = mapMeshToIndex.find(node->mesh);
+		if (it != mapMeshToIndex.end()) 
+		{
+			meshIndex = it->second;
+			this->meshIndex--;
+		}
+		s << "mesh index: " << meshIndex;
+	}
+
+	std::ofstream& s;
+	std::map<const Mesh*, int> mapMeshToIndex;
+	int meshIndex = 0;
+};
+
+void Scene::save(std::ofstream& s) const
+{
+	s << "nodes count: " << nodes.size() << std::endl;
+
+	SaveVisitor saveVisitor{s};
+	accept(&saveVisitor);
+
+	s << "meshes: " << std::endl;
+
+	int n = saveVisitor.mapMeshToIndex.size();
+	s << "meshes count: " << n << std::endl;
+
+	std::vector<const Mesh*> meshes(n);
+	for (auto& m : saveVisitor.mapMeshToIndex)
+	{
+		meshes[m.second] = m.first;
+	}
+	
+	for (auto mesh : meshes)
+	{
+		mesh->save(s);
+	}
+
+	s << "params locations:" << std::endl;
+
+	n = paramsLocations.size();
+	s << "params locations count: " << n << std::endl;
+	for (int i = 0; i < n; i++)
+	{
+		s << "referencing node id: " << i << std::endl;
+
+		int m = paramsLocations[i].location.size();
+		s << "params count: " << m << std::endl;
+		for (int j = 0; j < m; j++)
+		{
+			auto& k = paramsLocations[i].location[j].first;
+			s << "param key: " << std::endl;
+			s << "name: " << StringManager::toString(k.name) << std::endl;
+			s << "index: " << k.index << std::endl;
+			s << "field: " << StringManager::toString(k.field) << std::endl;
+
+			s << "referenced node id: " << paramsLocations[i].location[j].second << std::endl;
+		}
+	}
+}
+
+void Scene::clear()
+{
+	nextId = 0;
+	for (auto n : nodes)
+		delete n;
+	root = nullptr;
+	paramsLocations.clear();
+}
+
+void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evaluatedNodesCount)
+{
+	if (nodesCount == evaluatedNodesCount)
+		return;
+
+	std::string tmp;
+	std::string nodeType;
+	s >> nodeType >> tmp;
+
+	NodeID id = 0;
+	s >> tmp >> tmp >> id;
+
+	if (nodeType == std::string("transform"))
+	{
+		s >> tmp >> tmp >> tmp;
+		auto node = new TransformNode(parent, tmp);
+		node->ID = id;
+
+		nodes[id] = node;
+		nodes[parent]->addChild(node);
+
+		s >> tmp;
+
+		int childsCount;
+		s >> tmp >> tmp >> childsCount;
+		for (int chi = 0; chi < childsCount; chi++)
+		{
+			loadNode(s, id, nodesCount, evaluatedNodesCount);
+		}
+	}
+	if (nodeType == std::string("mesh"))
+	{
+
+	}
+	evaluatedNodesCount++;
+}
+
+void Scene::load(std::ifstream& s)
+{
+	clear();
+
+	std::string tmp;
+
+	int nodesCount;
+	s >> tmp >> tmp >> nodesCount;
+
+	int evaluatedNodesCount = 0;
+
+
+	s >> tmp;
+
+	int meshesCount;
+	s >> tmp >> tmp >> meshesCount;
+}

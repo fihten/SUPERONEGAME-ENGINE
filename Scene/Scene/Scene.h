@@ -3,6 +3,9 @@
 #include "Mesh.h"
 #include <vector>
 #include <string>
+#include <fstream>
+
+class SaveVisitor;
 
 typedef int NodeID;
 class Scene
@@ -11,9 +14,11 @@ public:
 	class Visitor;
 	class Node
 	{
-		std::vector<Node*> childs;
 		friend Scene;
+		friend SaveVisitor;
 	protected:
+		std::vector<Node*> childs;
+
 		enum class type :uint32_t
 		{
 			ROOT,
@@ -99,6 +104,8 @@ public:
 	class TransformNode : public Node
 	{
 		friend Scene;
+		friend SaveVisitor;
+
 		flt4x4 pos;
 	public:
 		TransformNode(NodeID id, const flt4x4& pos) :Node(id, type::TRANSFORM), pos(pos) {}
@@ -114,6 +121,7 @@ public:
 
 	class MeshNode : public Node
 	{
+		friend SaveVisitor;
 	public:
 		MeshNode(NodeID id, const Mesh* mesh) :Node(id, type::MESH), mesh(mesh) {}
 		virtual void accept(Visitor* visitor) const;
@@ -148,6 +156,8 @@ private:
 
 private:
 	std::vector<Node*> nodes;
+	void clear();
+	void loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evaluatedNodesCount);
 
 public:
 	Scene();
@@ -206,4 +216,7 @@ public:
 	void updateTransformWithTranslation(NodeID id, flt4x4& translation);
 	void updateTransformWithRotation(NodeID id, flt4x4& rotation);
 	void updateTransformWithScaling(NodeID id, flt4x4& scaling);
+
+	void save(std::ofstream& s) const;
+	void load(std::ifstream& s);
 };
