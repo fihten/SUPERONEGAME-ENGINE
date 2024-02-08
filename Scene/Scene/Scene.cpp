@@ -1441,6 +1441,34 @@ public:
 	{
 		s << "transform node:" << std::endl;
 		s << "node id: " << node->ID << std::endl;
+
+		s << "params: " << std::endl;
+
+		int n = node->params.size();
+		s << "params count: " << n << std::endl;
+		for (auto& param : node->params)
+		{
+			s << "param key: " << std::endl;
+
+			auto& k = param.first;
+			s << "name: " << StringManager::toString(k.name) << std::endl;
+			s << "index: " << k.index << std::endl;
+			s << "field: " << StringManager::toString(k.field) << std::endl;
+
+			s << "param value: " << std::endl;
+
+			auto& pv = param.second;
+			s << "string: " << StringManager::toString(pv.s) << std::endl;
+			s << "float: " << pv.f << std::endl;
+			s << "float2: " << std::string(pv.f2) << std::endl;
+			s << "float3: " << std::string(pv.f3) << std::endl;
+			s << "float4: " << std::string(pv.f4) << std::endl;
+			s << "float4x4: " << std::string(pv.f4x4) << std::endl;
+			s << "int: " << pv.i << std::endl;
+			s << "int2: " << std::string(pv.i2) << std::endl;
+			s << "validity: " << pv.valid << std::endl;
+		}
+
 		s << "transform matrix: " << std::string(node->pos) << std::endl;
 		s << "childs:" << std::endl;
 		s << "childs count: " << node->childs.size() << std::endl;
@@ -1450,6 +1478,34 @@ public:
 	{
 		s << "mesh node:" << std::endl;
 		s << "node id: " << node->ID << std::endl;
+
+		s << "params: " << std::endl;
+
+		int n = node->params.size();
+		s << "params count: " << n << std::endl;
+		for (auto& param : node->params)
+		{
+			s << "param key: " << std::endl;
+
+			auto& k = param.first;
+			s << "name: " << StringManager::toString(k.name) << std::endl;
+			s << "index: " << k.index << std::endl;
+			s << "field: " << StringManager::toString(k.field) << std::endl;
+
+			s << "param value: " << std::endl;
+
+			auto& pv = param.second;
+			s << "string: " << StringManager::toString(pv.s) << std::endl;
+			s << "float: " << pv.f << std::endl;
+			s << "float2: " << std::string(pv.f2) << std::endl;
+			s << "float3: " << std::string(pv.f3) << std::endl;
+			s << "float4: " << std::string(pv.f4) << std::endl;
+			s << "float4x4: " << std::string(pv.f4x4) << std::endl;
+			s << "int: " << pv.i << std::endl;
+			s << "int2: " << std::string(pv.i2) << std::endl;
+			s << "validity: " << pv.valid << std::endl;
+		}
+
 		int meshIndex = this->meshIndex++;
 		auto it = mapMeshToIndex.find(node->mesh);
 		if (it != mapMeshToIndex.end()) 
@@ -1537,7 +1593,8 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 		s >> tmp >> tmp >> tmp;
 		auto node = new TransformNode(parent, tmp);
 		node->ID = id;
-
+		node->scene = this;
+		
 		nodes[id] = node;
 		nodes[parent]->addChild(node);
 
@@ -1552,7 +1609,15 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 	}
 	if (nodeType == std::string("mesh"))
 	{
+		int meshIndex;
+		s >> tmp >> tmp >> meshIndex;
 
+		auto node = new MeshNode(parent, (const Mesh*)meshIndex);
+		node->ID = id;
+		node->scene = this;
+
+		nodes[id] = node;
+		nodes[parent]->addChild(node);
 	}
 	evaluatedNodesCount++;
 }
