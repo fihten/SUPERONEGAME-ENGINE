@@ -328,6 +328,17 @@ void MainScene::load(std::string& path)
 	scene.load(s);
 	s.close();
 
+	clear();
+
 	MainSceneUpdatingVisitor visitor;
 	scene.accept(&visitor);
+
+	updateGpu();
+}
+
+void MainScene::clear()
+{
+	spheresCount = 0;
+	verticesCount = 0;
+	indicesCount = 0;
 }

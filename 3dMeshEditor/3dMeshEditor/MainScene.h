@@ -64,4 +64,5 @@ public:
 private:
 	Scene scene;
 	static MainScene* pMainScene;
+	void clear();
 };
