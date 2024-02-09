@@ -1570,10 +1570,17 @@ void Scene::save(std::ofstream& s) const
 void Scene::clear()
 {
 	nextId = 0;
+	
 	for (auto n : nodes)
 		delete n;
+	nodes.clear();
+
 	root = nullptr;
 	paramsLocations.clear();
+
+	for (auto m : meshes)
+		delete m;
+	meshes.clear();
 }
 
 void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evaluatedNodesCount)
@@ -1587,6 +1594,53 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 
 	NodeID id = 0;
 	s >> tmp >> tmp >> id;
+
+	// params
+	s >> tmp;
+
+	int paramsCount;
+	s >> tmp >> tmp >> paramsCount;
+
+	std::vector<std::pair<ParamKey, ParamValue>> params(paramsCount);
+	for (int pi = 0; pi < paramsCount; pi++)
+	{
+		// key
+		s >> tmp >> tmp;
+		s >> tmp >> params[pi].first.name;
+		s >> tmp >> params[pi].first.index;
+
+		std::string sField;
+		s >> tmp >> sField;
+		params[pi].first.field = StringManager::toStringId(sField);
+
+		// value
+		s >> tmp >> tmp;
+
+		std::string ss;
+		s >> tmp >> ss;
+		params[pi].second.s = StringManager::toStringId(ss);
+
+		s >> tmp >> params[pi].second.f;
+
+		s >> tmp >> tmp;
+		params[pi].second.f2 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f3 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f4 = tmp;
+
+		s >> tmp >> tmp;
+		params[pi].second.f4x4 = tmp;
+
+		s >> tmp >> params[pi].second.i;
+
+		s >> tmp >> tmp;
+		params[pi].second.i2 = tmp;
+
+		s >> tmp >> params[pi].second.valid;
+	}
 
 	if (nodeType == std::string("transform"))
 	{
@@ -1631,11 +1685,70 @@ void Scene::load(std::ifstream& s)
 	int nodesCount;
 	s >> tmp >> tmp >> nodesCount;
 
-	int evaluatedNodesCount = 0;
+	nodes.resize(nodesCount);
 
+	root = new Scene::RootNode(nextId++);
+	root->scene = this;
+	nodes[0] = root;
+
+	int evaluatedNodesCount = 0;
+	loadNode(s, 0, nodesCount, evaluatedNodesCount);
 
 	s >> tmp;
 
 	int meshesCount;
 	s >> tmp >> tmp >> meshesCount;
+
+	meshes.resize(meshesCount);
+	for (int mi = 0; mi < meshesCount; mi++)
+	{
+		meshes[mi] = new Mesh();
+		meshes[mi]->load(s);
+	}
+
+	for (auto n : nodes)
+	{
+		if (n->nodeType != Node::type::MESH)
+			continue;
+		auto meshNode = (MeshNode*)n;
+		meshNode->mesh = meshes[(int)meshNode->mesh];
+	}
+
+	s >> tmp >> tmp;
+
+	int paramsLocationsCount;
+	s >> tmp >> tmp >> tmp >> paramsLocationsCount;
+	paramsLocations.resize(paramsLocationsCount);
+
+	for (int pli = 0; pli < paramsLocationsCount; pli++)
+	{
+		int referencingNodeId;
+		s >> tmp >> tmp >> tmp >> referencingNodeId;
+
+		int paramsCount;
+		s >> tmp >> tmp >> paramsCount;
+		paramsLocations[pli].location.resize(paramsCount);
+
+		for (int pi = 0; pi < paramsCount; pi++)
+		{
+			auto& k = paramsLocations[pli].location[pi].first;
+			
+			s >> tmp >> tmp;
+
+			// name
+			s >> tmp >> tmp;
+			k.name = StringManager::toStringId(tmp);
+
+			// index
+			s >> tmp >> k.index;
+
+			// field
+			s >> tmp >> tmp;
+			k.field = StringManager::toStringId(tmp);
+
+			// referenced node id
+			s >> tmp >> tmp >> tmp >> paramsLocations[pli].location[pi].second;
+		}
+	}
+
 }

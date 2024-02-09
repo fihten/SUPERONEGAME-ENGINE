@@ -6,6 +6,7 @@
 #include <fstream>
 
 class SaveVisitor;
+class MainSceneUpdatingVisitor;
 
 typedef int NodeID;
 class Scene
@@ -122,6 +123,7 @@ public:
 	class MeshNode : public Node
 	{
 		friend SaveVisitor;
+		friend MainSceneUpdatingVisitor;
 	public:
 		MeshNode(NodeID id, const Mesh* mesh) :Node(id, type::MESH), mesh(mesh) {}
 		virtual void accept(Visitor* visitor) const;
@@ -158,6 +160,8 @@ private:
 	std::vector<Node*> nodes;
 	void clear();
 	void loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evaluatedNodesCount);
+
+	std::vector<Mesh*> meshes;
 
 public:
 	Scene();

@@ -5,8 +5,10 @@
 #include "GraphicsCore.h"
 #include "FrameOfReferenceStateObserver.h"
 
+class MainSceneUpdatingVisitor;
 class MainScene : public FrameOfReferenceStateObserver
 {
+	friend MainSceneUpdatingVisitor;
 	MainScene();
 public:
 	static MainScene* instance();
@@ -55,6 +57,9 @@ public:
 
 public:
 	void update(UpdateType updateType);
+	
+	void save(std::string& path) const;
+	void load(std::string& path);
 
 private:
 	Scene scene;

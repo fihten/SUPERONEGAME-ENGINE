@@ -246,3 +246,88 @@ void MainScene::update(UpdateType updateType)
 	}
 	Selector::instance()->updateSelectedObjectsBoxes();
 }
+
+void MainScene::save(std::string& path) const
+{
+	std::ofstream s(path);
+	scene.save(s);
+	s.close();
+}
+
+class MainSceneUpdatingVisitor:public Scene::Visitor
+{
+public:
+	void startVisit(const Scene::MeshNode* node) 
+	{
+		auto& selectedObjectsBoxes = MainScene::instance()->selectedObjectsBoxes;
+		auto& spheresCount = MainScene::instance()->spheresCount;
+		auto& scene = MainScene::instance()->scene;
+		auto& boundingSpheres = MainScene::instance()->boundingSpheres;
+		auto& boundingSphereToNode = MainScene::instance()->boundingSphereToNode;
+		auto& meshIDtoStartIndex = MainScene::instance()->meshIDtoStartIndex;
+		auto& vertices = MainScene::instance()->vertices;
+		auto& verticesCount = MainScene::instance()->verticesCount;
+		auto& meshIDtoStartVertex = MainScene::instance()->meshIDtoStartVertex;
+		auto& indices = MainScene::instance()->indices;
+		auto& indicesCount = MainScene::instance()->indicesCount;
+		auto& objectsInfo = MainScene::instance()->objectsInfo;
+
+		NodeID meshNode = node->ID;
+
+		auto& selectedObjectBox = selectedObjectsBoxes[spheresCount];
+
+		auto mesh = node->mesh;
+		flt3 min = mesh->getBottomBorder();
+		flt3 max = mesh->getTopBorder();
+
+		flt4 posL(0.5f * (min + max), 1.0f);
+
+		flt4x4& pos = scene.getNodePosition4x4(node->ID);
+		selectedObjectBox.posW = (posL * pos).xyz();
+
+		selectedObjectBox.axis0 = 0.5f * (max.x() - min.x()) * flt3(1.1f, 0, 0);
+		selectedObjectBox.axis0 = selectedObjectBox.axis0 * pos;
+
+		selectedObjectBox.axis1 = 0.5f * (max.y() - min.y()) * flt3(0, 1.1f, 0);
+		selectedObjectBox.axis1 = selectedObjectBox.axis1 * pos;
+
+		selectedObjectBox.axis2 = 0.5f * (max.z() - min.z()) * flt3(0, 0, 1.1f);
+		selectedObjectBox.axis2 = selectedObjectBox.axis2 * pos;
+
+		selectedObjectBox.color = flt3(1, 0, 0);
+		selectedObjectBox.size = 0.5f;
+
+		mesh->getBoundingSphere(boundingSpheres[spheresCount], pos);
+		boundingSphereToNode[spheresCount] = meshNode;
+
+		if (meshIDtoStartIndex[mesh->id] == uint32_t(-1))
+		{
+			const std::vector<flt3>& verts = *(const std::vector<flt3>*)mesh->getStream(StringManager::toStringId("POSITION"), StreamType::FLT3);
+			std::memcpy(vertices + verticesCount, verts.data(), verts.size() * sizeof(flt3));
+			meshIDtoStartVertex[mesh->id] = verticesCount;
+			verticesCount += verts.size();
+
+			const std::vector<uint32_t>& inds = *mesh->getIndicies();
+			std::memcpy(indices + indicesCount, inds.data(), inds.size() * sizeof(uint32_t));
+			meshIDtoStartIndex[mesh->id] = indicesCount;
+			indicesCount += inds.size();
+		}
+
+		objectsInfo[spheresCount].verticesOffset = meshIDtoStartVertex[mesh->id];
+		objectsInfo[spheresCount].indicesOffset = meshIDtoStartIndex[mesh->id];
+		objectsInfo[spheresCount].trianglesCount = mesh->getIndicesCount() / 3;
+		objectsInfo[spheresCount].world = pos.transpose();
+
+		++spheresCount;
+	}
+};
+
+void MainScene::load(std::string& path)
+{
+	std::ifstream s(path);
+	scene.load(s);
+	s.close();
+
+	MainSceneUpdatingVisitor visitor;
+	scene.accept(&visitor);
+}
