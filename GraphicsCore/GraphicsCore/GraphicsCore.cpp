@@ -20,7 +20,7 @@ GraphicsCore* GraphicsCore::instance()
 	return pGraphicsCore;
 }
 
-void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
+void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND_CREATOR windowCreator, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa)
 {
 	this->drawFunc = drawFunc;
 
@@ -34,8 +34,10 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRA
 	mEnable4xMsaa = enable4xMsaa;
 
 	mWindowed = windowed;
-
-	initWindow(instanceHandle, show, WndProc);
+	if (windowCreator == nullptr)
+		initWindow(instanceHandle, show, WndProc);
+	else
+		mWindow = windowCreator(instanceHandle, mWidth, mHeight, show, WndProc);
 
 	// 1. Create the ID3D11Device and ID3D11DeviceContext interfaces using the D3D11CreateDevice function.
 
@@ -375,11 +377,6 @@ void GraphicsCore::resize(UINT width, UINT height)
 	// Set cameras aspects
 	for (int i = 0; i < CAMERAS_NUMBER; ++i)
 		cameras()[i].setAspectRatio((float)mWidth / (float)mHeight);
-}
-
-HWND GraphicsCore::getWindow()
-{
-	return mWindow;
 }
 
 const flt4x4* GraphicsCore::getFloat4x4(Mesh& mesh, string_id var, const VariableLocation& location) const

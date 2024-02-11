@@ -11,6 +11,7 @@
 #include "Transition.h"
 #include "Rotation.h"
 #include "Scaling.h"
+#include "Resource.h"
 #include <Windows.h>
 #include <windef.h>
 
@@ -18,6 +19,73 @@ Transition transitionModifier;
 Rotation rotationModifier;
 Scaling scalingModifier;
 DrawVisitor drawVisitor;
+
+HWND hwnd;
+
+HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
+{
+	// The first task to creating a window is to describe some of its
+	// characteristics by filling out a WNDCLASS structure.
+	WNDCLASS wc;
+
+	wc.style = CS_HREDRAW | CS_VREDRAW;
+	wc.lpfnWndProc = WndProc;
+	wc.cbClsExtra = 0;
+	wc.cbWndExtra = 0;
+	wc.hInstance = instanceHandle;
+	wc.hIcon = LoadIcon(0, IDI_APPLICATION);
+	wc.hCursor = LoadCursor(0, IDC_ARROW);
+	wc.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);
+	wc.lpszMenuName = L"MY3DMESHEDITOR";
+	wc.lpszClassName = L"CANVAS";
+
+	// Next we register this WNDCLASS instance with Windows so
+	// that we can create a window based on it.
+	if (!RegisterClass(&wc))
+	{
+		MessageBox(0, L"RegisterClass FAILED", 0, 0);
+		return false;
+	}
+
+	// With our WNDCLASS instance registered, we can create a
+	// window with the CreateWindow function. This function
+	// returns a handle to the window it creates (an HWND).
+	// If the creation failed, the handle will have the value
+	// of zero. A window handle is a way to refer to the window,
+	// which is internally managed by Windows. Many of the Win32 API
+	// functions that operate on windows require an HWND so that
+	// they know what window to act on.
+
+	hwnd = CreateWindow(
+		L"CANVAS", // Registered WNDCLASS instance to use
+		L"3d mesh editor", // window title
+		WS_OVERLAPPEDWINDOW, // style flags
+		CW_USEDEFAULT, // x-coordinate
+		CW_USEDEFAULT, // y-coordinate
+		width, // width
+		height, // height
+		0, // parent window
+		0, // menu handle
+		instanceHandle, // app instance
+		0 // extra creation parameters
+	);
+	if (hwnd == 0)
+	{
+		MessageBox(0, L"CreateWindow FAILED", 0, 0);
+		return false;
+	}
+
+	// Even though we just created a window, it is not initially
+	// shown. Therefore, the final step is to show and update the
+	// window we just created, which can be done with the following
+	// two function calls. Observe that we pass the handle to the
+	// window we want to show and update so that these functions know
+	// which window to show and update.
+	ShowWindow(hwnd, show);
+	UpdateWindow(hwnd);
+
+	return hwnd;
+}
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
@@ -153,13 +221,13 @@ void drawFunc(GraphicsCore* graphicsCore)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine, int iCmdShow)
 {
 	StringManager::init();
-	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, drawFunc, 640, 480, true, false);
+	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, windowCreator, drawFunc, 640, 480, true, false);
 
 	fillSceneForObjectsSelectionTesting();
 	
-	transitionModifier.setWindow(GraphicsCore::instance()->getWindow());
-	rotationModifier.setWindow(GraphicsCore::instance()->getWindow());
-	scalingModifier.setWindow(GraphicsCore::instance()->getWindow());
+	transitionModifier.setWindow(hwnd);
+	rotationModifier.setWindow(hwnd);
+	scalingModifier.setWindow(hwnd);
 
 	return GraphicsCore::instance()->run();
 }

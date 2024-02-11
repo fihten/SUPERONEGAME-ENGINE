@@ -24,8 +24,8 @@
 
 class GraphicsCore;
 
-typedef LRESULT (*(CALLBACK WNDPROC))(HWND, UINT, WPARAM, LPARAM);
 typedef void (*DRAW_FUNC)(GraphicsCore*);
+typedef HWND(*WND_CREATOR)(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc);
 
 class SelectedObjectVisitor
 {
@@ -43,7 +43,7 @@ class GraphicsCore
 public:
 	static GraphicsCore* instance();
 
-	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
+	void init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND_CREATOR windowCreator, DRAW_FUNC drawFunc, UINT width, UINT height, bool windowed, bool enable4xMsaa);
 
 	void startFrame();
 	void endFrame();
@@ -52,8 +52,6 @@ public:
 	
 	int run();
 	void resize(UINT width, UINT height);
-
-	HWND getWindow();
 
 public:
 	void updateBoundingSpheres(flt4 spheres[]);
