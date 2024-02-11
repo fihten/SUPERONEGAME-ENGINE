@@ -13,7 +13,11 @@
 #include "Scaling.h"
 #include "Resource.h"
 #include <Windows.h>
+#include <commdlg.h>
 #include <windef.h>
+#include <sstream>
+
+#pragma warning(disable : 4996)
 
 Transition transitionModifier;
 Rotation rotationModifier;
@@ -21,6 +25,69 @@ Scaling scalingModifier;
 DrawVisitor drawVisitor;
 
 HWND hwnd;
+static OPENFILENAME ofn;
+
+WCHAR fileTitle[MAX_PATH];
+WCHAR title[MAX_PATH];
+
+bool needSave = false;
+
+void PopFileInitialize(HWND hwnd)
+{
+	static TCHAR szFilter[] = TEXT("Scenes (*.SCN)\0*.scn\0\0");
+	ofn.lStructSize = sizeof(OPENFILENAME);
+	ofn.hwndOwner = hwnd;
+	ofn.hInstance = NULL;
+	ofn.lpstrFilter = szFilter;
+	ofn.lpstrCustomFilter = NULL;
+	ofn.nMaxCustFilter = 0;
+	ofn.nFilterIndex = 0;
+	ofn.lpstrFile = NULL; 
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrFileTitle = NULL; 
+	ofn.nMaxFileTitle = MAX_PATH;
+	ofn.lpstrInitialDir = NULL;
+	ofn.lpstrTitle = NULL;
+	ofn.Flags = 0; 
+	ofn.nFileOffset = 0;
+	ofn.nFileExtension = 0;
+	ofn.lpstrDefExt = TEXT("scn");
+	ofn.lCustData = 0L;
+	ofn.lpfnHook = NULL;
+	ofn.lpTemplateName = NULL;
+}
+
+BOOL PopFileOpenDlg(HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName)
+{
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = pstrFileName;
+	ofn.lpstrFileTitle = pstrTitleName;
+	ofn.Flags = OFN_HIDEREADONLY | OFN_CREATEPROMPT;
+	return GetOpenFileName(&ofn);
+}
+
+BOOL PopFileSaveDlg(HWND hwnd, PTSTR pstrFileName, PTSTR pstrTitleName)
+{
+	ofn.hwndOwner = hwnd;
+	ofn.lpstrFile = pstrFileName;
+	ofn.lpstrFileTitle = pstrTitleName;
+	ofn.Flags = OFN_OVERWRITEPROMPT;
+	return GetSaveFileName(&ofn);
+}
+
+short AskAboutSave(HWND hwnd, TCHAR* szTitleName)
+{
+	TCHAR szBuffer[64 + MAX_PATH];
+	int iReturn;
+	wsprintf(szBuffer, TEXT("Save current changes in %s?"),
+		szTitleName[0] ? szTitleName : L"");
+	iReturn = MessageBox(hwnd, szBuffer, L"",
+		MB_YESNOCANCEL | MB_ICONQUESTION);
+	if (iReturn == IDYES)
+		if (!SendMessage(hwnd, WM_COMMAND, ID_FILE_SAVE, 0))
+			iReturn = IDCANCEL;
+	return iReturn;
+}
 
 HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
 {
@@ -195,6 +262,66 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 		break;
 	}
+	case WM_COMMAND:
+	{
+		switch (LOWORD(wparam))
+		{
+		case ID_FILE_NEW:
+		{
+			if (needSave && IDCANCEL == AskAboutSave(hwnd, title))
+				return 0;
+
+			fileTitle[0] = L'\0';
+			title[0] = L'\0';
+
+			MainScene::instance()->clear();
+			MainScene::instance()->updateGpu();
+
+			return 0;
+		}
+		case ID_FILE_OPEN:
+		{
+			if (needSave && IDCANCEL == AskAboutSave(hwnd, title))
+				return 0;
+
+			PopFileOpenDlg(hwnd, fileTitle, title);
+
+			char fileTitleA[MAX_PATH];
+			wcstombs(fileTitleA, fileTitle, MAX_PATH);
+			MainScene::instance()->load(fileTitleA);
+
+			return 0;
+		}
+		case ID_FILE_SAVE:
+		{
+			if (fileTitle[0] == L'\0')
+				PopFileSaveDlg(hwnd, fileTitle, title);
+
+			char fileTitleA[MAX_PATH];
+			wcstombs(fileTitleA, fileTitle, MAX_PATH);
+			MainScene::instance()->save(fileTitleA);
+
+			needSave = false;
+
+			return 0;
+		}
+		case ID_FILE_SAVEAS:
+		{
+			PopFileSaveDlg(hwnd, fileTitle, title);
+
+			char fileTitleA[MAX_PATH];
+			wcstombs(fileTitleA, fileTitle, MAX_PATH);
+			MainScene::instance()->save(fileTitleA);
+
+			needSave = false;
+
+			return 0;
+		}
+		case IDM_EXIT:
+
+			return 0;
+		}
+	}
 	case WM_DESTROY:
 	{
 		PostQuitMessage(0);
@@ -228,6 +355,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	transitionModifier.setWindow(hwnd);
 	rotationModifier.setWindow(hwnd);
 	scalingModifier.setWindow(hwnd);
+
+	PopFileInitialize(hwnd);
 
 	return GraphicsCore::instance()->run();
 }

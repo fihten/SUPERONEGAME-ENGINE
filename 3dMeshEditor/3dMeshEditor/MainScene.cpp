@@ -247,7 +247,7 @@ void MainScene::update(UpdateType updateType)
 	Selector::instance()->updateSelectedObjectsBoxes();
 }
 
-void MainScene::save(std::string& path) const
+void MainScene::save(const std::string& path) const
 {
 	std::ofstream s(path);
 	scene.save(s);
@@ -322,13 +322,13 @@ public:
 	}
 };
 
-void MainScene::load(std::string& path)
+void MainScene::load(const std::string& path)
 {
+	clear();
+
 	std::ifstream s(path);
 	scene.load(s);
 	s.close();
-
-	clear();
 
 	MainSceneUpdatingVisitor visitor;
 	scene.accept(&visitor);
@@ -338,6 +338,7 @@ void MainScene::load(std::string& path)
 
 void MainScene::clear()
 {
+	scene.clear();
 	spheresCount = 0;
 	verticesCount = 0;
 	indicesCount = 0;

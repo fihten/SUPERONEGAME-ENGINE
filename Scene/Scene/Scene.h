@@ -158,7 +158,6 @@ private:
 
 private:
 	std::vector<Node*> nodes;
-	void clear();
 	void loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evaluatedNodesCount);
 
 	std::vector<Mesh*> meshes;
@@ -223,4 +222,6 @@ public:
 
 	void save(std::ofstream& s) const;
 	void load(std::ifstream& s);
+
+	void clear();
 };

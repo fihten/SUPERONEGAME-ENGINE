@@ -35,8 +35,6 @@ public:
 	void accept(Scene::Visitor* visitor) const;
 	void* getNode(NodeID id);
 
-	void updateGpu();
-
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	
 	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];
@@ -58,11 +56,13 @@ public:
 public:
 	void update(UpdateType updateType);
 	
-	void save(std::string& path) const;
-	void load(std::string& path);
+	void save(const std::string& path) const;
+	void load(const std::string& path);
+
+	void clear();
+	void updateGpu();
 
 private:
 	Scene scene;
 	static MainScene* pMainScene;
-	void clear();
 };

@@ -1370,6 +1370,8 @@ flt4x4& Scene::getNodeInvTrPosition(NodeID id)
 
 void Scene::accept(Visitor* visitor) const
 {
+	if (root == nullptr)
+		return;
 	root->accept(visitor);
 }
 
@@ -1453,7 +1455,15 @@ public:
 			auto& k = param.first;
 			s << "name: " << StringManager::toString(k.name) << std::endl;
 			s << "index: " << k.index << std::endl;
-			s << "field: " << StringManager::toString(k.field) << std::endl;
+
+			int fieldValidity = 0;
+			std::string field = "";
+			if (k.field != string_id(-1))
+			{
+				fieldValidity = 1;
+				field = StringManager::toString(k.field);
+			}
+			s << "field: " << fieldValidity << " " << field << std::endl;
 
 			s << "param value: " << std::endl;
 
@@ -1490,12 +1500,29 @@ public:
 			auto& k = param.first;
 			s << "name: " << StringManager::toString(k.name) << std::endl;
 			s << "index: " << k.index << std::endl;
-			s << "field: " << StringManager::toString(k.field) << std::endl;
+			
+			int fieldValidity = 0;
+			std::string field = "";
+			if (k.field != string_id(-1))
+			{
+				fieldValidity = 1;
+				field = StringManager::toString(k.field);
+			}
+			s << "field: " << fieldValidity << " " << field << std::endl;
 
 			s << "param value: " << std::endl;
 
 			auto& pv = param.second;
-			s << "string: " << StringManager::toString(pv.s) << std::endl;
+			
+			int stringValidity = 0;
+			std::string stringField = "";
+			if (pv.s != string_id(-1))
+			{
+				stringValidity = 1;
+				stringField = StringManager::toString(pv.s);
+			}
+			s << "string: " << stringValidity << " " << stringField << std::endl;
+
 			s << "float: " << pv.f << std::endl;
 			s << "float2: " << std::string(pv.f2) << std::endl;
 			s << "float3: " << std::string(pv.f3) << std::endl;
@@ -1560,7 +1587,15 @@ void Scene::save(std::ofstream& s) const
 			s << "param key: " << std::endl;
 			s << "name: " << StringManager::toString(k.name) << std::endl;
 			s << "index: " << k.index << std::endl;
-			s << "field: " << StringManager::toString(k.field) << std::endl;
+			
+			int fieldValidity = 0;
+			std::string field = "";
+			if (k.field != string_id(-1))
+			{
+				fieldValidity = 1;
+				field = StringManager::toString(k.field);
+			}
+			s << "field: " << fieldValidity << " " << field << std::endl;
 
 			s << "referenced node id: " << paramsLocations[i].location[j].second << std::endl;
 		}
@@ -1570,12 +1605,12 @@ void Scene::save(std::ofstream& s) const
 void Scene::clear()
 {
 	nextId = 0;
-	
-	for (auto n : nodes)
-		delete n;
+
 	nodes.clear();
 
+	delete root;
 	root = nullptr;
+
 	paramsLocations.clear();
 
 	for (auto m : meshes)
@@ -1609,16 +1644,26 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 		s >> tmp >> params[pi].first.name;
 		s >> tmp >> params[pi].first.index;
 
-		std::string sField;
-		s >> tmp >> sField;
-		params[pi].first.field = StringManager::toStringId(sField);
+		int fieldValidity = 0;
+		s >> tmp >> fieldValidity;
+		if (fieldValidity == 1)
+		{
+			std::string sField;
+			s >> sField;
+			params[pi].first.field = StringManager::toStringId(sField);
+		}
 
 		// value
 		s >> tmp >> tmp;
 
-		std::string ss;
-		s >> tmp >> ss;
-		params[pi].second.s = StringManager::toStringId(ss);
+		int stringValidity = 0;
+		s >> tmp >> stringValidity;
+		if (stringValidity == 1)
+		{
+			std::string ss;
+			s >> ss;
+			params[pi].second.s = StringManager::toStringId(ss);
+		}
 
 		s >> tmp >> params[pi].second.f;
 
@@ -1645,7 +1690,7 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 	if (nodeType == std::string("transform"))
 	{
 		s >> tmp >> tmp >> tmp;
-		auto node = new TransformNode(parent, tmp);
+		auto node = new TransformNode(parent, flt4x4(tmp));
 		node->ID = id;
 		node->scene = this;
 		
@@ -1743,8 +1788,14 @@ void Scene::load(std::ifstream& s)
 			s >> tmp >> k.index;
 
 			// field
-			s >> tmp >> tmp;
-			k.field = StringManager::toStringId(tmp);
+			int fieldValidity = 0;
+			s >> tmp >> fieldValidity;
+			if (fieldValidity == 1)
+			{
+				std::string sField;
+				s >> sField;
+				k.field = StringManager::toStringId(sField);
+			}
 
 			// referenced node id
 			s >> tmp >> tmp >> tmp >> paramsLocations[pli].location[pi].second;

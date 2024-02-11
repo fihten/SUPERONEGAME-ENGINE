@@ -1697,9 +1697,27 @@ void Mesh::save(std::ofstream& s) const
 		s << "param key: " << std::endl;
 		s << "name: " << StringManager::toString(param.first.name) << std::endl;
 		s << "index: " << param.first.index << std::endl;
-		s << "field: " << StringManager::toString(param.first.field) << std::endl;
+		
+		int fieldValidity = 0;
+		std::string field = "";
+		if (param.first.field != string_id(-1))
+		{
+			fieldValidity = 1;
+			field = StringManager::toString(param.first.field);
+		}
+		s << "field: " << fieldValidity << " " << field << std::endl;
+
 		s << "param value: " << std::endl;
-		s << "string: " << StringManager::toString(param.second.s) << std::endl;
+		
+		int stringValidity = 0;
+		std::string stringField = "";
+		if (param.second.s != string_id(-1))
+		{
+			stringValidity = 1;
+			stringField = StringManager::toString(param.second.s);
+		}
+		s << "string: " << stringValidity << " " << stringField << std::endl;
+		
 		s << "float: " << param.second.f << std::endl;
 		s << "float2: " << std::string(param.second.f2) << std::endl;
 		s << "float3: " << std::string(param.second.f3) << std::endl;
@@ -1883,16 +1901,26 @@ void Mesh::load(std::ifstream& s)
 		s >> tmp >> params[pi].first.name;
 		s >> tmp >> params[pi].first.index;
 
-		std::string sField;
-		s >> tmp >> sField;
-		params[pi].first.field = StringManager::toStringId(sField);
+		int fieldValidity = 0;
+		s >> tmp >> fieldValidity;
+		if (fieldValidity == 1)
+		{
+			std::string sField;
+			s >> sField;
+			params[pi].first.field = StringManager::toStringId(sField);
+		}
 
 		// value
 		s >> tmp >> tmp;
 
-		std::string ss;
-		s >> tmp >> ss;
-		params[pi].second.s = StringManager::toStringId(ss);
+		int stringValidity = 0;
+		s >> tmp >> stringValidity;
+		if (stringValidity == 1)
+		{
+			std::string ss;
+			s >> ss;
+			params[pi].second.s = StringManager::toStringId(ss);
+		}
 
 		s >> tmp >> params[pi].second.f;
 
