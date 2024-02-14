@@ -1631,16 +1631,37 @@ void Mesh::getBoundingSphere(flt4& sphere, const flt4x4& transform) const
 
 void Mesh::save(std::ofstream& s) const
 {
-	s << "mesh name: " << name << std::endl;
-	s << "technique: " << StringManager::toString(technique_name_id) << std::endl;
-	s << "pass: " << StringManager::toString(pass_name_id) << std::endl;
-	s << "blend state: " << StringManager::toString(blend_state_id) << std::endl;
-	s << "depth/stencil state: " << StringManager::toString(depth_stencil_state_id) << std::endl;
+	s << "mesh name: ";
+
+	if (name.length() == 0)
+		s << "0" << std::endl;
+	else
+		s << "1 " << name << std::endl;
+	
+	s << "technique: "; 
+	StringManager::save(s, technique_name_id);
+	s << std::endl;
+	
+	s << "pass: ";
+	StringManager::save(s, pass_name_id);
+	s << std::endl;
+
+	s << "blend state: ";
+	StringManager::save(s, blend_state_id);
+	s << std::endl;
+
+	s << "depth/stencil state: ";
+	StringManager::save(s, depth_stencil_state_id);
+	s << std::endl;
+
 	s << "float streams:" << std::endl;
 	s << "streams count: " << flt1_streams.size() << std::endl;
 	for (auto& stream : flt1_streams)
 	{
-		s << "stream name: " << stream.first << std::endl;
+		s << "stream name: ";
+		StringManager::save(s, stream.first);
+		s << std::endl;
+
 		s << "elements count: " << stream.second.size() << std::endl;
 		s << "elements: " << std::endl;
 		for (auto& f : stream.second)
@@ -1652,7 +1673,10 @@ void Mesh::save(std::ofstream& s) const
 	s << "streams count: " << flt2_streams.size() << std::endl;
 	for (auto& stream : flt2_streams)
 	{
-		s << "stream name: " << stream.first << std::endl;
+		s << "stream name: ";
+		StringManager::save(s, stream.first);
+		s << std::endl;
+
 		s << "elements count: " << stream.second.size() << std::endl;
 		s << "elements: " << std::endl;
 		for (auto& f2 : stream.second)
@@ -1664,7 +1688,10 @@ void Mesh::save(std::ofstream& s) const
 	s << "streams count: " << flt3_streams.size() << std::endl;
 	for (auto& stream : flt3_streams)
 	{
-		s << "stream name: " << stream.first << std::endl;
+		s << "stream name: ";
+		StringManager::save(s, stream.first);
+		s << std::endl;
+
 		s << "elements count: " << stream.second.size() << std::endl;
 		s << "elements: " << std::endl;
 		for (auto& f3 : stream.second)
@@ -1676,7 +1703,10 @@ void Mesh::save(std::ofstream& s) const
 	s << "streams count: " << flt4_streams.size() << std::endl;
 	for (auto& stream : flt4_streams)
 	{
-		s << "stream name: " << stream.first << std::endl;
+		s << "stream name: ";
+		StringManager::save(s, stream.first);
+		s << std::endl;
+
 		s << "elements count: " << stream.second.size() << std::endl;
 		s << "elements: " << std::endl;
 		for (auto& f4 : stream.second)
@@ -1695,29 +1725,23 @@ void Mesh::save(std::ofstream& s) const
 	for (const auto& param : params)
 	{
 		s << "param key: " << std::endl;
-		s << "name: " << StringManager::toString(param.first.name) << std::endl;
+		
+		s << "name: ";
+		StringManager::save(s, param.first.name);
+		s << std::endl;
+
 		s << "index: " << param.first.index << std::endl;
 		
-		int fieldValidity = 0;
-		std::string field = "";
-		if (param.first.field != string_id(-1))
-		{
-			fieldValidity = 1;
-			field = StringManager::toString(param.first.field);
-		}
-		s << "field: " << fieldValidity << " " << field << std::endl;
+		s << "field: ";
+		StringManager::save(s, param.first.field);
+		s << std::endl;
 
 		s << "param value: " << std::endl;
 		
-		int stringValidity = 0;
-		std::string stringField = "";
-		if (param.second.s != string_id(-1))
-		{
-			stringValidity = 1;
-			stringField = StringManager::toString(param.second.s);
-		}
-		s << "string: " << stringValidity << " " << stringField << std::endl;
-		
+		s << "string: ";
+		StringManager::save(s, param.second.s);
+		s << std::endl;
+
 		s << "float: " << param.second.f << std::endl;
 		s << "float2: " << std::string(param.second.f2) << std::endl;
 		s << "float3: " << std::string(param.second.f3) << std::endl;
@@ -1733,19 +1757,22 @@ void Mesh::load(std::ifstream& s)
 {
 	std::string tmp;
 
-	s >> tmp >> tmp >> name;
+	int validity = 0;
+	s >> tmp >> tmp >> validity;
+	if (validity == 1)
+		s >> name;
 	
-	s >> tmp >> tmp;
-	technique_name_id = StringManager::toStringId(tmp);
+	s >> tmp;
+	technique_name_id = StringManager::load(s);
 	
+	s >> tmp;
+	pass_name_id = StringManager::load(s);
+
 	s >> tmp >> tmp;
-	pass_name_id = StringManager::toStringId(tmp);
+	blend_state_id = StringManager::load(s);
 
-	s >> tmp >> tmp >> tmp;
-	blend_state_id = StringManager::toStringId(tmp);
-
-	s >> tmp >> tmp >> tmp;
-	depth_stencil_state_id = StringManager::toStringId(tmp);
+	s >> tmp >> tmp;
+	depth_stencil_state_id = StringManager::load(s);
 
 	// float streams
 
@@ -1760,9 +1787,9 @@ void Mesh::load(std::ifstream& s)
 	for (int si = 0; si < streamsCount; si++)
 	{
 		std::string streamName;
-		s >> tmp >> tmp >> streamName;
+		s >> tmp >> tmp;
 
-		flt1_streams[si].first = StringManager::toStringId(streamName);
+		flt1_streams[si].first = StringManager::load(s);
 
 		int elementsCount;
 		s >> tmp >> tmp >> elementsCount;
@@ -1792,9 +1819,9 @@ void Mesh::load(std::ifstream& s)
 	for (int si = 0; si < streamsCount; si++)
 	{
 		std::string streamName;
-		s >> tmp >> tmp >> streamName;
+		s >> tmp >> tmp;
 
-		flt2_streams[si].first = StringManager::toStringId(streamName);
+		flt2_streams[si].first = StringManager::load(s);
 
 		int elementsCount;
 		s >> tmp >> tmp >> elementsCount;
@@ -1824,9 +1851,9 @@ void Mesh::load(std::ifstream& s)
 	for (int si = 0; si < streamsCount; si++)
 	{
 		std::string streamName;
-		s >> tmp >> tmp >> streamName;
+		s >> tmp >> tmp;
 
-		flt3_streams[si].first = StringManager::toStringId(streamName);
+		flt3_streams[si].first = StringManager::load(s);
 
 		int elementsCount;
 		s >> tmp >> tmp >> elementsCount;
@@ -1856,9 +1883,9 @@ void Mesh::load(std::ifstream& s)
 	for (int si = 0; si < streamsCount; si++)
 	{
 		std::string streamName;
-		s >> tmp >> tmp >> streamName;
+		s >> tmp >> tmp;
 
-		flt4_streams[si].first = StringManager::toStringId(streamName);
+		flt4_streams[si].first = StringManager::load(s);
 
 		int elementsCount;
 		s >> tmp >> tmp >> elementsCount;
@@ -1898,29 +1925,20 @@ void Mesh::load(std::ifstream& s)
 	{
 		// key
 		s >> tmp >> tmp;
-		s >> tmp >> params[pi].first.name;
+		
+		s >> tmp;
+		params[pi].first.name = StringManager::load(s);
+		
 		s >> tmp >> params[pi].first.index;
 
-		int fieldValidity = 0;
-		s >> tmp >> fieldValidity;
-		if (fieldValidity == 1)
-		{
-			std::string sField;
-			s >> sField;
-			params[pi].first.field = StringManager::toStringId(sField);
-		}
+		s >> tmp;
+		params[pi].first.field = StringManager::load(s);
 
 		// value
 		s >> tmp >> tmp;
 
-		int stringValidity = 0;
-		s >> tmp >> stringValidity;
-		if (stringValidity == 1)
-		{
-			std::string ss;
-			s >> ss;
-			params[pi].second.s = StringManager::toStringId(ss);
-		}
+		s >> tmp;
+		params[pi].second.s = StringManager::load(s);
 
 		s >> tmp >> params[pi].second.f;
 

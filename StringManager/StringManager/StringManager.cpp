@@ -147,3 +147,25 @@ const char* StringManager::toString(string_id str_id)
 {
 	return stringManager->hash[str_id];
 }
+
+void StringManager::save(std::ofstream& s, string_id str_id)
+{
+	if (str_id == string_id(-1))
+	{
+		s << "0 ";
+		return;
+	}
+	s << "1 " << toString(str_id);
+}
+
+string_id StringManager::load(std::ifstream& s)
+{
+	int validity = 0;
+	s >> validity;
+	if (validity == 0)
+		return string_id(-1);
+	
+	std::string str;
+	s >> str;
+	return toStringId(str);
+}

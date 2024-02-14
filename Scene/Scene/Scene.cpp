@@ -1439,6 +1439,53 @@ class SaveVisitor :public Scene::Visitor
 public:
 	SaveVisitor(std::ofstream& s) :s(s) {}
 
+	void startVisit(const Scene::RootNode* node)
+	{
+		s << "root node:" << std::endl;
+		s << "node id: " << node->ID << std::endl;
+
+		s << "params: " << std::endl;
+
+		int n = node->params.size();
+		s << "params count: " << n << std::endl;
+		for (auto& param : node->params)
+		{
+			s << "param key: " << std::endl;
+
+			auto& k = param.first;
+
+			s << "name: ";
+			StringManager::save(s, k.name);
+			s << std::endl;
+
+			s << "index: " << k.index << std::endl;
+
+			s << "field: ";
+			StringManager::save(s, k.field);
+			s << std::endl;
+
+			s << "param value: " << std::endl;
+
+			auto& pv = param.second;
+
+			s << "string: ";
+			StringManager::save(s, pv.s);
+			s << std::endl;
+
+			s << "float: " << pv.f << std::endl;
+			s << "float2: " << std::string(pv.f2) << std::endl;
+			s << "float3: " << std::string(pv.f3) << std::endl;
+			s << "float4: " << std::string(pv.f4) << std::endl;
+			s << "float4x4: " << std::string(pv.f4x4) << std::endl;
+			s << "int: " << pv.i << std::endl;
+			s << "int2: " << std::string(pv.i2) << std::endl;
+			s << "validity: " << pv.valid << std::endl;
+		}
+
+		s << "childs:" << std::endl;
+		s << "childs count: " << node->childs.size() << std::endl;
+	}
+
 	void startVisit(const Scene::TransformNode* node)
 	{
 		s << "transform node:" << std::endl;
@@ -1453,22 +1500,25 @@ public:
 			s << "param key: " << std::endl;
 
 			auto& k = param.first;
-			s << "name: " << StringManager::toString(k.name) << std::endl;
+
+			s << "name: ";
+			StringManager::save(s, k.name);
+			s << std::endl;
+
 			s << "index: " << k.index << std::endl;
 
-			int fieldValidity = 0;
-			std::string field = "";
-			if (k.field != string_id(-1))
-			{
-				fieldValidity = 1;
-				field = StringManager::toString(k.field);
-			}
-			s << "field: " << fieldValidity << " " << field << std::endl;
+			s << "field: ";
+			StringManager::save(s, k.field);
+			s << std::endl;
 
 			s << "param value: " << std::endl;
 
 			auto& pv = param.second;
-			s << "string: " << StringManager::toString(pv.s) << std::endl;
+
+			s << "string: ";
+			StringManager::save(s, pv.s);
+			s << std::endl;
+
 			s << "float: " << pv.f << std::endl;
 			s << "float2: " << std::string(pv.f2) << std::endl;
 			s << "float3: " << std::string(pv.f3) << std::endl;
@@ -1498,31 +1548,25 @@ public:
 			s << "param key: " << std::endl;
 
 			auto& k = param.first;
-			s << "name: " << StringManager::toString(k.name) << std::endl;
+
+			s << "name: ";
+			StringManager::save(s, k.name);
+			s << std::endl;
+
 			s << "index: " << k.index << std::endl;
 			
-			int fieldValidity = 0;
-			std::string field = "";
-			if (k.field != string_id(-1))
-			{
-				fieldValidity = 1;
-				field = StringManager::toString(k.field);
-			}
-			s << "field: " << fieldValidity << " " << field << std::endl;
-
+			s << "field: ";
+			StringManager::save(s, k.field);
+			s << std::endl;
+			
 			s << "param value: " << std::endl;
 
 			auto& pv = param.second;
 			
-			int stringValidity = 0;
-			std::string stringField = "";
-			if (pv.s != string_id(-1))
-			{
-				stringValidity = 1;
-				stringField = StringManager::toString(pv.s);
-			}
-			s << "string: " << stringValidity << " " << stringField << std::endl;
-
+			s << "string: ";
+			StringManager::save(s, pv.s);
+			s << std::endl;
+			
 			s << "float: " << pv.f << std::endl;
 			s << "float2: " << std::string(pv.f2) << std::endl;
 			s << "float3: " << std::string(pv.f3) << std::endl;
@@ -1533,14 +1577,10 @@ public:
 			s << "validity: " << pv.valid << std::endl;
 		}
 
-		int meshIndex = this->meshIndex++;
 		auto it = mapMeshToIndex.find(node->mesh);
-		if (it != mapMeshToIndex.end()) 
-		{
-			meshIndex = it->second;
-			this->meshIndex--;
-		}
-		s << "mesh index: " << meshIndex;
+		if (it == mapMeshToIndex.end())
+			mapMeshToIndex[node->mesh] = this->meshIndex++;
+		s << "mesh index: " << mapMeshToIndex[node->mesh] << std::endl;
 	}
 
 	std::ofstream& s;
@@ -1585,17 +1625,16 @@ void Scene::save(std::ofstream& s) const
 		{
 			auto& k = paramsLocations[i].location[j].first;
 			s << "param key: " << std::endl;
-			s << "name: " << StringManager::toString(k.name) << std::endl;
+
+			s << "name: ";
+			StringManager::save(s, k.name);
+			s << std::endl;
+
 			s << "index: " << k.index << std::endl;
 			
-			int fieldValidity = 0;
-			std::string field = "";
-			if (k.field != string_id(-1))
-			{
-				fieldValidity = 1;
-				field = StringManager::toString(k.field);
-			}
-			s << "field: " << fieldValidity << " " << field << std::endl;
+			s << "field: ";
+			StringManager::save(s, k.field);
+			s << std::endl;
 
 			s << "referenced node id: " << paramsLocations[i].location[j].second << std::endl;
 		}
@@ -1641,29 +1680,20 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 	{
 		// key
 		s >> tmp >> tmp;
-		s >> tmp >> params[pi].first.name;
+		
+		s >> tmp; 
+		params[pi].first.name = StringManager::load(s);
+		
 		s >> tmp >> params[pi].first.index;
 
-		int fieldValidity = 0;
-		s >> tmp >> fieldValidity;
-		if (fieldValidity == 1)
-		{
-			std::string sField;
-			s >> sField;
-			params[pi].first.field = StringManager::toStringId(sField);
-		}
+		s >> tmp;
+		params[pi].first.field = StringManager::load(s);
 
 		// value
 		s >> tmp >> tmp;
 
-		int stringValidity = 0;
-		s >> tmp >> stringValidity;
-		if (stringValidity == 1)
-		{
-			std::string ss;
-			s >> ss;
-			params[pi].second.s = StringManager::toStringId(ss);
-		}
+		s >> tmp;
+		params[pi].second.s = StringManager::load(s);
 
 		s >> tmp >> params[pi].second.f;
 
@@ -1693,9 +1723,28 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 		auto node = new TransformNode(parent, flt4x4(tmp));
 		node->ID = id;
 		node->scene = this;
-		
+		node->params = std::move(params);
+
 		nodes[id] = node;
 		nodes[parent]->addChild(node);
+
+		s >> tmp;
+
+		int childsCount;
+		s >> tmp >> tmp >> childsCount;
+		for (int chi = 0; chi < childsCount; chi++)
+		{
+			loadNode(s, id, nodesCount, evaluatedNodesCount);
+		}
+	}
+	if (nodeType == std::string("root"))
+	{
+		auto node = new RootNode(parent);
+		node->ID = id;
+		node->scene = this;
+		node->params = std::move(params);
+
+		nodes[id] = node;
 
 		s >> tmp;
 
@@ -1714,6 +1763,7 @@ void Scene::loadNode(std::ifstream& s, NodeID parent, int nodesCount, int& evalu
 		auto node = new MeshNode(parent, (const Mesh*)meshIndex);
 		node->ID = id;
 		node->scene = this;
+		node->params = std::move(params);
 
 		nodes[id] = node;
 		nodes[parent]->addChild(node);
@@ -1732,12 +1782,9 @@ void Scene::load(std::ifstream& s)
 
 	nodes.resize(nodesCount);
 
-	root = new Scene::RootNode(nextId++);
-	root->scene = this;
-	nodes[0] = root;
-
 	int evaluatedNodesCount = 0;
-	loadNode(s, 0, nodesCount, evaluatedNodesCount);
+	loadNode(s, -1, nodesCount, evaluatedNodesCount);
+	root = dynamic_cast<RootNode*>(nodes[0]);
 
 	s >> tmp;
 
@@ -1749,6 +1796,7 @@ void Scene::load(std::ifstream& s)
 	{
 		meshes[mi] = new Mesh();
 		meshes[mi]->load(s);
+		meshes[mi]->scene = this;
 	}
 
 	for (auto n : nodes)
@@ -1781,21 +1829,15 @@ void Scene::load(std::ifstream& s)
 			s >> tmp >> tmp;
 
 			// name
-			s >> tmp >> tmp;
-			k.name = StringManager::toStringId(tmp);
+			s >> tmp;
+			k.name = StringManager::load(s);
 
 			// index
 			s >> tmp >> k.index;
 
 			// field
-			int fieldValidity = 0;
-			s >> tmp >> fieldValidity;
-			if (fieldValidity == 1)
-			{
-				std::string sField;
-				s >> sField;
-				k.field = StringManager::toStringId(sField);
-			}
+			s >> tmp;
+			k.field = StringManager::load(s);
 
 			// referenced node id
 			s >> tmp >> tmp >> tmp >> paramsLocations[pli].location[pi].second;

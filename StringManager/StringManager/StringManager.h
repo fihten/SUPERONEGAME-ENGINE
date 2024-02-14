@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <fstream>
 
 typedef unsigned int string_id;
 
@@ -44,7 +45,8 @@ struct StringManager
 	static string_id toStringId(const std::string& str);
 
 	static const char* toString(string_id str_id);
-
+	static void save(std::ofstream& s, string_id str_id);
+	static string_id load(std::ifstream& s);
 private:
 	StringManager();
 	
