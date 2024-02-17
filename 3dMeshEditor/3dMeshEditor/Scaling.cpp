@@ -91,3 +91,8 @@ Modifier::Behaviour Scaling::processWindowMessage(UINT msg, WPARAM wparam, LPARA
 	}
 	return Behaviour::CONTINUE;
 }
+
+void Scaling::draw()
+{
+	FrameOfReferenceState::instance()->drawScale();
+}

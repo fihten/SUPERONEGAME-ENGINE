@@ -92,3 +92,8 @@ Modifier::Behaviour Transition::processWindowMessage(UINT msg, WPARAM wparam, LP
 	}
 	return Behaviour::CONTINUE;
 }
+
+void Transition::draw()
+{
+	FrameOfReferenceState::instance()->draw();
+}

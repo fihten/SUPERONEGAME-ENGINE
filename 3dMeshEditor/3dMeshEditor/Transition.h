@@ -12,4 +12,5 @@ class Transition :public Modifier
 
 public:
 	Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
+	void draw();
 };

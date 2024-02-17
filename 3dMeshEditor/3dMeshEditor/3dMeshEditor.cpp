@@ -22,6 +22,9 @@
 Transition transitionModifier;
 Rotation rotationModifier;
 Scaling scalingModifier;
+
+Modifier* modifier;
+
 DrawVisitor drawVisitor;
 
 HWND hwnd;
@@ -94,7 +97,7 @@ short AskAboutSave(HWND hwnd, TCHAR* szTitleName)
 			iReturn = IDCANCEL;
 	return iReturn;
 }
-INT_PTR CALLBACK toolsDlg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam){	return 0;}
+INT_PTR CALLBACK toolsDlg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (wparam)		{		case IDC_TRANSLATION:		{			modifier = &transitionModifier;			break;		}		case IDC_ROTATION:		{			modifier = &rotationModifier;			break;		}		case IDC_SCALING:		{			modifier = &scalingModifier;			break;		}		}		break;	}	}	return 0;}
 
 HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
 {
@@ -149,6 +152,12 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 		return false;
 	}
 
+	transitionModifier.setWindow(hwnd);
+	rotationModifier.setWindow(hwnd);
+	scalingModifier.setWindow(hwnd);
+
+	modifier = &transitionModifier;
+
 	// Even though we just created a window, it is not initially
 	// shown. Therefore, the final step is to show and update the
 	// window we just created, which can be done with the following
@@ -183,9 +192,12 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 
 	static bool bMarginSelection = false;
 
-	auto behaviour = scalingModifier.processWindowMessage(msg, wparam, lparam);
-	if (behaviour == Modifier::Behaviour::FINISH)
-		return 0;
+	if (modifier != nullptr)
+	{
+		auto behaviour = modifier->processWindowMessage(msg, wparam, lparam);
+		if (behaviour == Modifier::Behaviour::FINISH)
+			return 0;
+	}
 
 	switch (msg)
 	{
@@ -360,7 +372,7 @@ void drawFunc(GraphicsCore* graphicsCore)
 	graphicsCore->startFrame();
 	MainScene::instance()->accept(&drawVisitor);
 	Selector::instance()->draw();
-	FrameOfReferenceState::instance()->drawScale();
+	modifier->draw();
 	graphicsCore->endFrame();
 }
 
@@ -370,11 +382,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, windowCreator, drawFunc, 640, 480, true, false);
 
 	fillSceneForObjectsSelectionTesting();
-	
-	transitionModifier.setWindow(hwnd);
-	rotationModifier.setWindow(hwnd);
-	scalingModifier.setWindow(hwnd);
-
 	PopFileInitialize(hwnd);
 
 	return GraphicsCore::instance()->run();

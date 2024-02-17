@@ -91,3 +91,8 @@ Modifier::Behaviour Rotation::processWindowMessage(UINT msg, WPARAM wparam, LPAR
 	}
 	return Behaviour::CONTINUE;
 }
+
+void Rotation::draw()
+{
+	FrameOfReferenceState::instance()->drawSpheric();
+}

@@ -12,4 +12,5 @@ class Rotation :public Modifier
 	float mousePosY = 0;
 public:
 	Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
+	void draw();
 };

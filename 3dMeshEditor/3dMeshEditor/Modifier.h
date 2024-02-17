@@ -15,4 +15,5 @@ public:
 
 	void setWindow(HWND hWnd) { this->hWnd = hWnd; }
 	virtual Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam) { return Behaviour::CONTINUE; };
+	virtual void draw() {};
 };
