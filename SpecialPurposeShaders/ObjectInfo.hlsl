@@ -7,6 +7,7 @@ struct ObjectInfo
 	uint verticesOffset;
 	uint indicesOffset;
 	uint trianglesCount;
+	uint verticesCount;
 };
 
 #endif
