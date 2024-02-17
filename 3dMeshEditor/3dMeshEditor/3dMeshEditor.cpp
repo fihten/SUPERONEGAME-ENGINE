@@ -25,6 +25,12 @@ Scaling scalingModifier;
 DrawVisitor drawVisitor;
 
 HWND hwnd;
+HWND toolsHwnd;
+
+HICON hTranslationIcon;
+HICON hRotationIcon;
+HICON hScalingIcon;
+
 static OPENFILENAME ofn;
 
 WCHAR fileTitle[MAX_PATH];
@@ -88,6 +94,7 @@ short AskAboutSave(HWND hwnd, TCHAR* szTitleName)
 			iReturn = IDCANCEL;
 	return iReturn;
 }
+INT_PTR CALLBACK toolsDlg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam){	return 0;}
 
 HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
 {
@@ -126,7 +133,7 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	hwnd = CreateWindow(
 		L"CANVAS", // Registered WNDCLASS instance to use
 		L"3d mesh editor", // window title
-		WS_OVERLAPPEDWINDOW, // style flags
+		WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, // style flags
 		CW_USEDEFAULT, // x-coordinate
 		CW_USEDEFAULT, // y-coordinate
 		width, // width
@@ -150,6 +157,18 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	// which window to show and update.
 	ShowWindow(hwnd, show);
 	UpdateWindow(hwnd);
+
+	toolsHwnd = CreateDialog(instanceHandle, (LPCTSTR)IDD_TOOLS, hwnd, toolsDlg);
+	ShowWindow(toolsHwnd, SW_SHOW);
+
+	hTranslationIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_TRANSLATION);
+	SendMessage(GetDlgItem(toolsHwnd, IDC_TRANSLATION), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hTranslationIcon);
+
+	hRotationIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_ROTATION);
+	SendMessage(GetDlgItem(toolsHwnd, IDC_ROTATION), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hRotationIcon);
+
+	hScalingIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_SCALING);
+	SendMessage(GetDlgItem(toolsHwnd, IDC_SCALING), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hScalingIcon);
 
 	return hwnd;
 }
