@@ -97,7 +97,7 @@ short AskAboutSave(HWND hwnd, TCHAR* szTitleName)
 			iReturn = IDCANCEL;
 	return iReturn;
 }
-INT_PTR CALLBACK toolsDlg(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (wparam)		{		case IDC_TRANSLATION:		{			modifier = &transitionModifier;			break;		}		case IDC_ROTATION:		{			modifier = &rotationModifier;			break;		}		case IDC_SCALING:		{			modifier = &scalingModifier;			break;		}		}		break;	}	}	return 0;}
+INT_PTR CALLBACK toolsDlg(HWND, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (wparam)		{		case IDC_TRANSLATION:		{			modifier = &transitionModifier;			SetFocus(hwnd);			break;		}		case IDC_ROTATION:		{			modifier = &rotationModifier;			SetFocus(hwnd);			break;		}		case IDC_SCALING:		{			modifier = &scalingModifier;			SetFocus(hwnd);			break;		}		}		break;	}	}	return 0;}
 
 HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
 {
