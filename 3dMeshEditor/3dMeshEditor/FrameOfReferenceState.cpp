@@ -267,11 +267,11 @@ void FrameOfReferenceState::setFrameOfReference(const FrameOfReference& frameOfR
 	spheric_state.axis0 = state.axis0;
 	spheric_state.axis0.normalize();
 
-	spheric_state.axis1 = state.axis1;
-	spheric_state.axis1.normalize();
-
-	spheric_state.axis2 = state.axis2;
+	spheric_state.axis2 = cross(state.axis0, state.axis1);
 	spheric_state.axis2.normalize();
+
+	spheric_state.axis1 = cross(spheric_state.axis2, spheric_state.axis0);
+	spheric_state.axis1.normalize();
 
 	spheric_state.radius = std::max<float>(
 		std::max<float>(state.axis0.length(), state.axis1.length()), state.axis2.length());
