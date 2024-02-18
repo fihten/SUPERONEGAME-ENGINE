@@ -219,6 +219,70 @@ void GraphicsCore::draw(Mesh& mesh, bool forceUpdatingOfGeometryOnGPU)
 		context->DrawIndexed(mesh.getIndicesCount(), 0, 0);
 }
 
+void GraphicsCore::initBoundingSpheresCalculation()
+{
+	auto& bsc = boundingSpheresCalculation;
+
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sBoundingSpheresCalculation = std::string(shadersFolder) + "\\CalculateSpheres.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sBoundingSpheresCalculation.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &bsc.mCalculateSpheresFX);
+
+	bsc.mClearRadiusTech = bsc.mCalculateSpheresFX->GetTechniqueByName("ClearRadius");
+	bsc.mCalculateRadiusTech = bsc.mCalculateSpheresFX->GetTechniqueByName("CalculateRadius");
+	bsc.mCalculateRadius_checkSelectionStatusTech = bsc.mCalculateSpheresFX->GetTechniqueByName("CalculateRadius_checkSelectionStatus");
+	bsc.mCalculateSpheresTech = bsc.mCalculateSpheresFX->GetTechniqueByName("CalculateSpheres");
+	bsc.mCalculateSpheres_checkSelectionStatusTech = bsc.mCalculateSpheresFX->GetTechniqueByName("CalculateSpheres_checkSelectionStatus");
+
+	bsc.mBoundingSpheresUavH = bsc.mCalculateSpheresFX->GetVariableByName("boundingSpheres")->AsUnorderedAccessView();
+	bsc.mRadiusesUavH = bsc.mCalculateSpheresFX->GetVariableByName("radiuses")->AsUnorderedAccessView();
+	bsc.mSpheresCountH = bsc.mCalculateSpheresFX->GetVariableByName("spheresCount");
+	bsc.mConvertToUINTH = bsc.mCalculateSpheresFX->GetVariableByName("convertToUINT");
+	bsc.mVerticesSrvH = bsc.mCalculateSpheresFX->GetVariableByName("vertices")->AsShaderResource();
+	bsc.mObjectsInfoSrvH = bsc.mCalculateSpheresFX->GetVariableByName("objectsInfo")->AsShaderResource();
+	bsc.mObjectsCountH = bsc.mCalculateSpheresFX->GetVariableByName("objectsCount");
+	bsc.mRoughlySelectedObjectsSrvH = bsc.mCalculateSpheresFX->GetVariableByName("roughlySelectedObjects")->AsShaderResource();
+
+	D3D11_BUFFER_DESC bufferDesc;
+	bufferDesc.ByteWidth = spheresCount * sizeof(uint32_t);
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(uint32_t);
+	device->CreateBuffer(&bufferDesc, nullptr, &bsc.mRadiuses);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.NumElements = spheresCount;
+	uavDesc.Buffer.Flags = 0;
+	device->CreateUnorderedAccessView(bsc.mRadiuses, &uavDesc, &bsc.mRadiusesUav);
+}
+
+void GraphicsCore::calculateBoundingSpheres(bool bCheckSelectionStatus)
+{
+
+}
+
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)
 {
 	// The first task to creating a window is to describe some of its

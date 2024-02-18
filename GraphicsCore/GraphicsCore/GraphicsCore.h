@@ -542,6 +542,37 @@ private:
 
 	const int numberOfElementsInFourierRow = 1000;
 
+	private:
+		struct BoundingSpheresCalculation
+		{
+			ID3DX11Effect* mCalculateSpheresFX = nullptr;
+			ID3DX11EffectTechnique* mClearRadiusTech = nullptr;
+			ID3DX11EffectTechnique* mCalculateRadiusTech = nullptr;
+			ID3DX11EffectTechnique* mCalculateRadius_checkSelectionStatusTech = nullptr;
+			ID3DX11EffectTechnique* mCalculateSpheresTech = nullptr;
+			ID3DX11EffectTechnique* mCalculateSpheres_checkSelectionStatusTech = nullptr;
+
+			ID3DX11EffectUnorderedAccessViewVariable* mBoundingSpheresUavH = nullptr;
+			ID3DX11EffectUnorderedAccessViewVariable* mRadiusesUavH = nullptr;
+
+			ID3DX11EffectVariable* mSpheresCountH = nullptr;
+			ID3DX11EffectVariable* mConvertToUINTH = nullptr;
+
+			ID3DX11EffectShaderResourceVariable* mVerticesSrvH = nullptr;
+			ID3DX11EffectShaderResourceVariable* mObjectsInfoSrvH = nullptr;
+			ID3DX11EffectVariable* mObjectsCountH = nullptr;
+
+			ID3DX11EffectShaderResourceVariable* mRoughlySelectedObjectsSrvH = nullptr;
+
+			ID3D11Buffer* mRadiuses = nullptr;
+			ID3D11UnorderedAccessView* mRadiusesUav = nullptr;
+
+			float mConvertToUINT = 1000000.0f;
+		};
+		BoundingSpheresCalculation boundingSpheresCalculation;
+		void initBoundingSpheresCalculation();
+		void calculateBoundingSpheres(bool bCheckSelectionStatus);
+
 private:
 	bool initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc);
 

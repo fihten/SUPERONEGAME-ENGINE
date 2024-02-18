@@ -7,6 +7,8 @@ StructuredBuffer<float3> vertices;
 StructuredBuffer<ObjectInfo> objectsInfo;
 uint objectsCount;
 
+StructuredBuffer<uint> roughlySelectedObjects;
+
 [numthreads(256, 1, 1)]
 void CS_clearRadius(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -17,11 +19,20 @@ void CS_clearRadius(uint3 dispatchThreadID : SV_DispatchThreadID)
 }
 
 [numthreads(1, 256, 1)]
-void CS_calculateRadius(uint3 dispatchThreadID : SV_DispatchThreadID)
+void CS_calculateRadius(
+	uint3 dispatchThreadID : SV_DispatchThreadID,
+	uniform bool bCheckSelectionStatus
+)
 {
 	uint objectIndex = dispatchThreadID.x;
 	if (objectIndex >= objectsCount)
 		return;
+
+	if (bCheckSelectionStatus)
+	{
+		if (roughlySelectedObjects[objectIndex] == 0)
+			return;
+	}
 
 	uint vertexIndex = dispatchThreadID.y;
 	if (vertexIndex >= objectsInfo[objectIndex].verticesCount)
@@ -40,11 +51,20 @@ void CS_calculateRadius(uint3 dispatchThreadID : SV_DispatchThreadID)
 }
 
 [numthreads(256, 1, 1)]
-void CS_calculateSpheres(uint3 dispatchThreadID : SV_DispatchThreadID)
+void CS_calculateSpheres(
+	uint3 dispatchThreadID : SV_DispatchThreadID,
+	uniform bool bCheckSelectionStatus
+	)
 {
 	uint objectIndex = dispatchThreadID.x;
 	if (objectIndex >= objectsCount)
 		return;
+
+	if (bCheckSelectionStatus)
+	{
+		if (roughlySelectedObjects[objectIndex] == 0)
+			return;
+	}
 
 	boundingSpheres[objectIndex] = mul(float4(0.0f, 0.0f, 0.0f, 1.0f), objectsInfo[objectIndex].world);
 	boundingSpheres[objectIndex].w = (float)radiuses[objectIndex] / convertToUINT;
@@ -66,7 +86,17 @@ technique11 CalculateRadius
 	{
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, CS_calculateRadius()));
+		SetComputeShader(CompileShader(cs_5_0, CS_calculateRadius(false)));
+	}
+};
+
+technique11 CalculateRadius_checkSelectionStatus
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_calculateRadius(true)));
 	}
 };
 
@@ -76,6 +106,16 @@ technique11 CalculateSpheres
 	{
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, CS_calculateSpheres()));
+		SetComputeShader(CompileShader(cs_5_0, CS_calculateSpheres(false)));
+	}
+};
+
+technique11 CalculateSpheres_checkSelectionStatus
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_calculateSpheres(true)));
 	}
 };
