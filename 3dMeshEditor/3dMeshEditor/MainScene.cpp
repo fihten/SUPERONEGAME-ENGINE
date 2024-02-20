@@ -49,7 +49,6 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 	selectedObjectBox.color = flt3(1, 0, 0);
 	selectedObjectBox.size = 0.5f;
 
-	mesh->getBoundingSphere(boundingSpheres[spheresCount], pos);
 	boundingSphereToNode[spheresCount] = meshNode;
 	
 	if (meshIDtoStartIndex[mesh->id] == uint32_t(-1))
@@ -68,6 +67,7 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 	objectsInfo[spheresCount].verticesOffset = meshIDtoStartVertex[mesh->id];
 	objectsInfo[spheresCount].indicesOffset = meshIDtoStartIndex[mesh->id];
 	objectsInfo[spheresCount].trianglesCount = mesh->getIndicesCount() / 3;
+	objectsInfo[spheresCount].verticesCount = mesh->getVerticesCount();
 	objectsInfo[spheresCount].world = pos.transpose();
 
 	++spheresCount;
@@ -77,13 +77,15 @@ NodeID MainScene::addMeshNode(Mesh* mesh, NodeID id)
 
 void MainScene::updateGpu()
 {
-	GraphicsCore::instance()->updateBoundingSpheres(boundingSpheres);
-	GraphicsCore::instance()->setSpheresCount(spheresCount);
-
 	GraphicsCore::instance()->updateVertices(vertices);
 	GraphicsCore::instance()->updateIndices(indices);
 	GraphicsCore::instance()->updateObjectsInfo(objectsInfo, spheresCount);
 	GraphicsCore::instance()->setObjectsCount(spheresCount);
+
+	bool bCheckSelectionStatus = Selector::instance()->selectedObjectsCount > 0;
+	GraphicsCore::instance()->calculateBoundingSpheres(bCheckSelectionStatus);
+
+	GraphicsCore::instance()->setSpheresCount(spheresCount);
 
 	GraphicsCore::instance()->setBoundingSpheresCountRoughBySegments(spheresCount);
 	GraphicsCore::instance()->setObjectsCountFineBySegments(spheresCount);
@@ -190,10 +192,6 @@ void MainScene::update(UpdateType updateType)
 			posW4 = posW4 * FrameOfReferenceState::instance()->getDiffPosition();
 			selectedObjectBox.posW = posW4.xyz();
 
-			flt4 spherePos(boundingSpheres[isphere].xyz(), 1);
-			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
-			boundingSpheres[isphere].xyz() = spherePos.xyz();
-
 			scene.updateTransformWithTranslation(nodeId, FrameOfReferenceState::instance()->getDiffPosition());
 
 			flt4x4& pos = scene.getNodePosition4x4(nodeId);
@@ -211,10 +209,6 @@ void MainScene::update(UpdateType updateType)
 			selectedObjectBox.axis1 = selectedObjectBox.axis1 * FrameOfReferenceState::instance()->getDiffPosition();
 			selectedObjectBox.axis2 = selectedObjectBox.axis2 * FrameOfReferenceState::instance()->getDiffPosition();
 
-			flt4 spherePos(boundingSpheres[isphere].xyz(), 1);
-			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
-			boundingSpheres[isphere].xyz() = spherePos.xyz();
-
 			scene.updateTransformWithScaling(nodeId, FrameOfReferenceState::instance()->getDiffPosition());
 
 			flt4x4& pos = scene.getNodePosition4x4(nodeId);
@@ -231,10 +225,6 @@ void MainScene::update(UpdateType updateType)
 			selectedObjectBox.axis0 = selectedObjectBox.axis0 * FrameOfReferenceState::instance()->getDiffPosition();
 			selectedObjectBox.axis1 = selectedObjectBox.axis1 * FrameOfReferenceState::instance()->getDiffPosition();
 			selectedObjectBox.axis2 = selectedObjectBox.axis2 * FrameOfReferenceState::instance()->getDiffPosition();
-
-			flt4 spherePos(boundingSpheres[isphere].xyz(), 1);
-			spherePos = spherePos * FrameOfReferenceState::instance()->getDiffPosition();
-			boundingSpheres[isphere].xyz() = spherePos.xyz();
 
 			scene.updateTransformWithRotation(nodeId, FrameOfReferenceState::instance()->getDiffPosition());
 
@@ -262,7 +252,6 @@ public:
 		auto& selectedObjectsBoxes = MainScene::instance()->selectedObjectsBoxes;
 		auto& spheresCount = MainScene::instance()->spheresCount;
 		auto& scene = MainScene::instance()->scene;
-		auto& boundingSpheres = MainScene::instance()->boundingSpheres;
 		auto& boundingSphereToNode = MainScene::instance()->boundingSphereToNode;
 		auto& meshIDtoStartIndex = MainScene::instance()->meshIDtoStartIndex;
 		auto& vertices = MainScene::instance()->vertices;
@@ -297,7 +286,6 @@ public:
 		selectedObjectBox.color = flt3(1, 0, 0);
 		selectedObjectBox.size = 0.5f;
 
-		mesh->getBoundingSphere(boundingSpheres[spheresCount], pos);
 		boundingSphereToNode[spheresCount] = meshNode;
 
 		if (meshIDtoStartIndex[mesh->id] == uint32_t(-1))
@@ -316,6 +304,7 @@ public:
 		objectsInfo[spheresCount].verticesOffset = meshIDtoStartVertex[mesh->id];
 		objectsInfo[spheresCount].indicesOffset = meshIDtoStartIndex[mesh->id];
 		objectsInfo[spheresCount].trianglesCount = mesh->getIndicesCount() / 3;
+		objectsInfo[spheresCount].verticesCount = mesh->getVerticesCount();
 		objectsInfo[spheresCount].world = pos.transpose();
 
 		++spheresCount;

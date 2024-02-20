@@ -1,3 +1,5 @@
+#include "ObjectInfo.hlsl"
+
 RWStructuredBuffer<float4> boundingSpheres;
 RWStructuredBuffer<uint> radiuses;
 uint spheresCount;

@@ -7,4 +7,5 @@ struct ObjectInfo
 	uint32_t verticesOffset;
 	uint32_t indicesOffset;
 	uint32_t trianglesCount;
+	uint32_t verticesCount;
 };

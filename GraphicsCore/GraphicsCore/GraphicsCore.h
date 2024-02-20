@@ -54,7 +54,6 @@ public:
 	void resize(UINT width, UINT height);
 
 public:
-	void updateBoundingSpheres(flt4 spheres[]);
 	void setBoundingSpheresRoughByFrustum();
 	void setSpheresCount(uint32_t spheresCount);
 	void setSelectorFrustumRough(Frustum& selectorFrustum);
@@ -82,6 +81,7 @@ private:
 
 	ID3D11Buffer* mBoundingSpheresBuffer = nullptr;
 	ID3D11ShaderResourceView* mBoundingSpheresBufferSRV = nullptr;
+	ID3D11UnorderedAccessView* mBoundingSpheresBufferUAV = nullptr;
 
 public:
 	void setSelectorFrustumFine(Frustum& selectorFrustum);
@@ -571,6 +571,7 @@ private:
 		};
 		BoundingSpheresCalculation boundingSpheresCalculation;
 		void initBoundingSpheresCalculation();
+public:
 		void calculateBoundingSpheres(bool bCheckSelectionStatus);
 
 private:

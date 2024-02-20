@@ -36,8 +36,6 @@ public:
 	void* getNode(NodeID id);
 
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
-	
-	flt4 boundingSpheres[MAX_BOUNDING_SPHERES_COUNT];
 	ObjectInfo objectsInfo[MAX_BOUNDING_SPHERES_COUNT];
 	
 	NodeID boundingSphereToNode[MAX_BOUNDING_SPHERES_COUNT];

@@ -176,6 +176,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initFineObjectsSelection();
 	initRoughObjectsSelectionBySegments();
 	initFineObjectsSelectionBySegments();
+	initBoundingSpheresCalculation();
 
 	// 12. Init photogrammetry
 /*	initCalculationOfTextureIntegrals();
@@ -261,7 +262,7 @@ void GraphicsCore::initBoundingSpheresCalculation()
 	bsc.mRoughlySelectedObjectsSrvH = bsc.mCalculateSpheresFX->GetVariableByName("roughlySelectedObjects")->AsShaderResource();
 
 	D3D11_BUFFER_DESC bufferDesc;
-	bufferDesc.ByteWidth = spheresCount * sizeof(uint32_t);
+	bufferDesc.ByteWidth = MAX_BOUNDING_SPHERES_COUNT * sizeof(uint32_t);
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	bufferDesc.CPUAccessFlags = 0;
@@ -273,14 +274,69 @@ void GraphicsCore::initBoundingSpheresCalculation()
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
-	uavDesc.Buffer.NumElements = spheresCount;
+	uavDesc.Buffer.NumElements = MAX_BOUNDING_SPHERES_COUNT;
 	uavDesc.Buffer.Flags = 0;
 	device->CreateUnorderedAccessView(bsc.mRadiuses, &uavDesc, &bsc.mRadiusesUav);
 }
 
 void GraphicsCore::calculateBoundingSpheres(bool bCheckSelectionStatus)
 {
+	auto& bsc = boundingSpheresCalculation;
+	bsc.mRadiusesUavH->SetUnorderedAccessView(bsc.mRadiusesUav);
+	bsc.mObjectsCountH->SetRawValue(&spheresCount, 0, sizeof(uint32_t));
 
+	bsc.mClearRadiusTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t threadGroupsX = std::ceil((float)spheresCount / 256);
+	uint32_t threadGroupsY = 1;
+	uint32_t threadGroupsZ = 1;
+
+	context->Dispatch(threadGroupsX, threadGroupsY, threadGroupsZ);
+
+	bsc.mConvertToUINTH->SetRawValue(&bsc.mConvertToUINT, 0, sizeof(float));
+	bsc.mVerticesSrvH->SetResource(mVerticesBufferSRV);
+	bsc.mObjectsInfoSrvH->SetResource(mObjectsInfoBufferSRV);
+
+	threadGroupsX = spheresCount;
+	threadGroupsY = std::ceil((float)MAX_VERTICES_COUNT / 256);
+	threadGroupsZ = 1;
+
+	if (bCheckSelectionStatus)
+	{
+		bsc.mRoughlySelectedObjectsSrvH->SetResource(mSelectedObjectsSRV);
+
+		bsc.mCalculateRadius_checkSelectionStatusTech->GetPassByName("P0")->Apply(0, context);
+		context->Dispatch(threadGroupsX, threadGroupsY, threadGroupsZ);
+
+		threadGroupsX = std::ceil((float)spheresCount / 256);
+		threadGroupsY = 1;
+		threadGroupsZ = 1;
+
+		bsc.mBoundingSpheresUavH->SetUnorderedAccessView(mBoundingSpheresBufferUAV);
+
+		bsc.mCalculateSpheres_checkSelectionStatusTech->GetPassByName("P0")->Apply(0, context);
+		context->Dispatch(threadGroupsX, threadGroupsY, threadGroupsZ);
+	}
+	else
+	{
+		bsc.mCalculateRadiusTech->GetPassByName("P0")->Apply(0, context);
+		context->Dispatch(threadGroupsX, threadGroupsY, threadGroupsZ);
+
+		threadGroupsX = std::ceil((float)spheresCount / 256);
+		threadGroupsY = 1;
+		threadGroupsZ = 1;
+
+		bsc.mBoundingSpheresUavH->SetUnorderedAccessView(mBoundingSpheresBufferUAV);
+
+		bsc.mCalculateSpheresTech->GetPassByName("P0")->Apply(0, context);
+		context->Dispatch(threadGroupsX, threadGroupsY, threadGroupsZ);
+	}
+
+	ID3D11ShaderResourceView* nullSRV[3] = { 0,0,0 };
+	context->CSSetShaderResources(0, 3, nullSRV);
+
+	ID3D11UnorderedAccessView* nullUAV[2] = { 0,0 };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAV, nullptr);
 }
 
 bool GraphicsCore::initWindow(HINSTANCE instanceHandle, int show, WNDPROC WndProc)
@@ -1271,7 +1327,7 @@ void GraphicsCore::initRoughObjectsSelection()
 
 	inputDesc.Usage = D3D11_USAGE_DEFAULT;
 	inputDesc.ByteWidth = MAX_BOUNDING_SPHERES_COUNT * sizeof(flt4);
-	inputDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	inputDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	inputDesc.CPUAccessFlags = 0;
 	inputDesc.StructureByteStride = sizeof flt4;
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
@@ -1283,11 +1339,13 @@ void GraphicsCore::initRoughObjectsSelection()
 	srvDesc.BufferEx.Flags = 0;
 	srvDesc.BufferEx.NumElements = MAX_BOUNDING_SPHERES_COUNT;
 	device->CreateShaderResourceView(mBoundingSpheresBuffer, &srvDesc, &mBoundingSpheresBufferSRV);
-}
 
-void GraphicsCore::updateBoundingSpheres(flt4 spheres[])
-{
-	context->UpdateSubresource(mBoundingSpheresBuffer, 0, 0, spheres, 0, 0);
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.Flags = 0;
+	uavDesc.Buffer.NumElements = MAX_BOUNDING_SPHERES_COUNT;
+	device->CreateUnorderedAccessView(mBoundingSpheresBuffer, &uavDesc, &mBoundingSpheresBufferUAV);
 }
 
 void GraphicsCore::setBoundingSpheresRoughByFrustum()
@@ -1322,6 +1380,12 @@ void GraphicsCore::findRoughlySelectedObjects()
 
 	uint32_t threads_x = std::ceil(float(spheresCount) / 256.0f);
 	context->Dispatch(threads_x, 1, 1);
+
+	ID3D11ShaderResourceView* nullSRV[1] = { 0 };
+	context->CSSetShaderResources(0, 1, nullSRV);
+	ID3D11UnorderedAccessView* nullUAV[1] = { 0 };
+	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
+
 	context->CSSetShader(0, 0, 0);
 }
 
@@ -1553,6 +1617,12 @@ void GraphicsCore::checkIntersection()
 	uint32_t threads_x = std::ceil(float(spheresCount) / 1.0f);
 	uint32_t threads_y = std::ceil(float(maxTrianglesCount) / 256.0f);
 	context->Dispatch(threads_x, threads_y, 1);
+
+	ID3D11ShaderResourceView* nullSRV[5] = { 0,0,0,0,0 };
+	context->CSSetShaderResources(0, 5, nullSRV);
+
+	ID3D11UnorderedAccessView* nullUAV[1] = { 0 };
+	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
 }
 
 void GraphicsCore::traverseFineSelectedObjects(SelectedObjectVisitor* visitor)
@@ -1692,6 +1762,13 @@ void GraphicsCore::findRoughlySelectedObjectsBySegments()
 	uint32_t threads_y = std::ceil(float(spheresCount) / 256.0f);
 	uint32_t threads_z = 1.0f;
 	context->Dispatch(threads_x, threads_y, threads_z);
+
+	ID3D11ShaderResourceView* nullSRV[2] = { 0,0 };
+	context->CSSetShaderResources(0, 2, nullSRV);
+
+	ID3D11UnorderedAccessView* nullUAV[1] = { 0 };
+	context->CSSetUnorderedAccessViews(0, 1, nullUAV, 0);
+
 	context->CSSetShader(0, 0, 0);
 }
 
@@ -1857,6 +1934,12 @@ void GraphicsCore::findSelectedObjectsFineBySegments()
 	threads_y = std::ceil(float(spheresCount) / 1.0f);
 	threads_z = std::ceil(float(selectingSegmentsCount) / 4.0f);
 	context->Dispatch(threads_x, threads_y, threads_z);
+
+	ID3D11ShaderResourceView* nullSRV[5] = { 0,0,0,0,0 };
+	context->CSSetShaderResources(0, 5, nullSRV);
+
+	ID3D11UnorderedAccessView* nullUAV[2] = { 0,0 };
+	context->CSSetUnorderedAccessViews(0, 2, nullUAV, 0);
 	context->CSSetShader(0, 0, 0);
 }
 
