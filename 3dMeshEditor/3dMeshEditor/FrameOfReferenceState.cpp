@@ -117,7 +117,7 @@ void FrameOfReferenceState::moveAlongAxisZ(float z)
 
 void FrameOfReferenceState::rotateAlongAxisX(float x)
 {
-	dPos = makeRotate<float>(state.axis0, x);
+	dPos = makeRotate<float>(spheric_state.axis0, x);
 	
 	state.axis1 = state.axis1 * dPos;
 	state.axis2 = state.axis2 * dPos;
@@ -125,8 +125,8 @@ void FrameOfReferenceState::rotateAlongAxisX(float x)
 	scale_state.axis1 = scale_state.axis1 * dPos;
 	scale_state.axis2 = scale_state.axis2 * dPos;
 
-	spheric_state.axis1 = state.axis1;
-	spheric_state.axis2 = state.axis2;
+	spheric_state.axis1 = spheric_state.axis1 * dPos;
+	spheric_state.axis2 = spheric_state.axis2 * dPos;
 
 	spheric_state.axis1.normalize();
 	spheric_state.axis2.normalize();
@@ -144,7 +144,7 @@ void FrameOfReferenceState::rotateAlongAxisX(float x)
 
 void FrameOfReferenceState::rotateAlongAxisY(float y)
 {
-	dPos = makeRotate<float>(state.axis1, y);
+	dPos = makeRotate<float>(spheric_state.axis1, y);
 	
 	state.axis0 = state.axis0 * dPos;
 	state.axis2 = state.axis2 * dPos;
@@ -152,8 +152,8 @@ void FrameOfReferenceState::rotateAlongAxisY(float y)
 	scale_state.axis0 = scale_state.axis0 * dPos;
 	scale_state.axis2 = scale_state.axis2 * dPos;
 
-	spheric_state.axis0 = state.axis0;
-	spheric_state.axis2 = state.axis2;
+	spheric_state.axis0 = spheric_state.axis0 * dPos;
+	spheric_state.axis2 = spheric_state.axis2 * dPos;
 
 	spheric_state.axis0.normalize();
 	spheric_state.axis2.normalize();
@@ -171,7 +171,7 @@ void FrameOfReferenceState::rotateAlongAxisY(float y)
 
 void FrameOfReferenceState::rotateAlongAxisZ(float z)
 {
-	dPos = makeRotate<float>(state.axis2, z);
+	dPos = makeRotate<float>(spheric_state.axis2, z);
 	
 	state.axis0 = state.axis0 * dPos;
 	state.axis1 = state.axis1 * dPos;
@@ -179,8 +179,8 @@ void FrameOfReferenceState::rotateAlongAxisZ(float z)
 	scale_state.axis0 = scale_state.axis0 * dPos;
 	scale_state.axis1 = scale_state.axis1 * dPos;
 
-	spheric_state.axis0 = state.axis0;
-	spheric_state.axis1 = state.axis1;
+	spheric_state.axis0 = spheric_state.axis0 * dPos;
+	spheric_state.axis1 = spheric_state.axis1 * dPos;
 
 	spheric_state.axis0.normalize();
 	spheric_state.axis1.normalize();
@@ -617,15 +617,15 @@ flt2 FrameOfReferenceState::intersectWithOxy(float mousePosX, float mousePosY)
 	float farZ = camera.getFar();
 	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
 
-	flt4 posW4(state.posW, 1.0f);
+	flt4 posW4(spheric_state.posW, 1.0f);
 	auto v = camera.getView();
 	flt3 origin = (posW4 * v).xyz();
-
-	flt3 axisX = state.axis0;
+	
+	flt3 axisX = spheric_state.axis0;
 	axisX = axisX * v;
 	axisX.normalize();
 
-	flt3 axisY = state.axis1;
+	flt3 axisY = spheric_state.axis1;
 	axisY = axisY * v;
 	axisY.normalize();
 	
@@ -653,15 +653,15 @@ flt2 FrameOfReferenceState::intersectWithOxz(float mousePosX, float mousePosY)
 	float farZ = camera.getFar();
 	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
 
-	flt4 posW4(state.posW, 1.0f);
+	flt4 posW4(spheric_state.posW, 1.0f);
 	auto v = camera.getView();
 	flt3 origin = (posW4 * v).xyz();
 
-	flt3 axisX = state.axis0;
+	flt3 axisX = spheric_state.axis0;
 	axisX = axisX * v;
 	axisX.normalize();
 
-	flt3 axisZ = state.axis2;
+	flt3 axisZ = spheric_state.axis2;
 	axisZ = axisZ * v;
 	axisZ.normalize();
 
@@ -689,15 +689,15 @@ flt2 FrameOfReferenceState::intersectWithOyz(float mousePosX, float mousePosY)
 	float farZ = camera.getFar();
 	flt3 dir(mousePosX * (farZ / nearZ - 1), mousePosY * (farZ / nearZ - 1), farZ - nearZ);
 
-	flt4 posW4(state.posW, 1.0f);
+	flt4 posW4(spheric_state.posW, 1.0f);
 	auto v = camera.getView();
 	flt3 origin = (posW4 * v).xyz();
 
-	flt3 axisY = state.axis1;
+	flt3 axisY = spheric_state.axis1;
 	axisY = axisY * v;
 	axisY.normalize();
 
-	flt3 axisZ = state.axis2;
+	flt3 axisZ = spheric_state.axis2;
 	axisZ = axisZ * v;
 	axisZ.normalize();
 
