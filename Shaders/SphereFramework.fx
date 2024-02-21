@@ -115,6 +115,44 @@ void addBox(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	lineStream.Append(gout);
 
 	lineStream.RestartStrip();
+
+	// side edges
+
+	// first 
+	gout.posH = mul(float4(gin.posW - gin.axis2 - gin.axis0 - gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	gout.posH = mul(float4(gin.posW + gin.axis2 - gin.axis0 - gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	lineStream.RestartStrip();
+
+	// second 
+	gout.posH = mul(float4(gin.posW - gin.axis2 - gin.axis0 + gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	gout.posH = mul(float4(gin.posW + gin.axis2 - gin.axis0 + gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	lineStream.RestartStrip();
+
+	// third 
+	gout.posH = mul(float4(gin.posW - gin.axis2 + gin.axis0 - gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	gout.posH = mul(float4(gin.posW + gin.axis2 + gin.axis0 - gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	lineStream.RestartStrip();
+
+	// fourth 
+	gout.posH = mul(float4(gin.posW - gin.axis2 + gin.axis0 + gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	gout.posH = mul(float4(gin.posW + gin.axis2 + gin.axis0 + gin.axis1), gViewProj);
+	lineStream.Append(gout);
+
+	lineStream.RestartStrip();
 }
 
 void addSphere(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
