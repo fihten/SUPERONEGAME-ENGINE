@@ -14,24 +14,8 @@ StructuredBuffer<uint> indicies;
 StructuredBuffer<ObjectInfo> objectsInfo;
 
 RWStructuredBuffer<uint> distancesToClosestObjects;
-
-struct IntersectedTriangleInfo
-{
-	uint objectIndex;
-	uint triangleIndex;
-	uint packedBarycentricCoords;
-};
-RWStructuredBuffer<IntersectedTriangleInfo> closestTriangles;
-
-uint packBarycentricCoords(float2 barycentricCoords, uint digitsCount)
-{
-	uint maxBarycentricCoord = 1 << digitsCount - 1;
-	
-	uint u = floor(barycentricCoords.x * maxBarycentricCoord);
-	uint v = floor(barycentricCoords.y * maxBarycentricCoord);
-
-	return (u << digitsCount) | v;
-}
+RWStructuredBuffer<uint> closestObjects;
+RWStructuredBuffer<uint> closestTriangles;
 
 [numthreads(256, 1, 4)]
 void CS_distance_to_object(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -114,21 +98,57 @@ void CS_closest_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	Segment seg = selectingSegments[segmentIndex];
 	float t = 0;
-	float2 barycentricCoords = 0;
-	if (!checkIntersection(tri, seg, t, barycentricCoords))
+	if (!checkIntersection(tri, seg, t))
 		return;
-	uint packedBarycentricCoords = packBarycentricCoords(barycentricCoords, 16);
 
 	uint distance = length(seg.v1 - seg.v0) * t * 1000000;
 	uint objectIndexOriginal = 0;
-	uint triangleIndexOriginal = 0;
-	uint packedBarycentricCoordsOriginal = 0;
 	if (distance == distancesToClosestObjects[segmentIndex])
-	{
-		InterlockedExchange(closestTriangles[segmentIndex].objectIndex, objectIndex, objectIndexOriginal);
-		InterlockedExchange(closestTriangles[segmentIndex].triangleIndex, triangleIndex, triangleIndexOriginal);
-		InterlockedExchange(closestTriangles[segmentIndex].packedBarycentricCoords, packedBarycentricCoords, packedBarycentricCoordsOriginal);
-	}
+		InterlockedExchange(closestObjects[segmentIndex], objectIndex, objectIndexOriginal);
+}
+
+[numthreads(256, 4, 1)]
+void CS_closest_triangle(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint segmentIndex = dispatchThreadID.y;
+	if (segmentIndex >= selectingSegmentsCount)
+		return;
+
+	uint objectIndex = closestObjects[segmentIndex];
+	if (objectIndex >= objectsCount)
+		return;
+
+	uint triangleIndex = dispatchThreadID.x;
+	if (triangleIndex >= objectsInfo[objectIndex].trianglesCount)
+		return;
+
+	uint ii0 = objectsInfo[objectIndex].indicesOffset + 3 * triangleIndex + 0;
+	uint ii1 = objectsInfo[objectIndex].indicesOffset + 3 * triangleIndex + 1;
+	uint ii2 = objectsInfo[objectIndex].indicesOffset + 3 * triangleIndex + 2;
+
+	uint vi0 = objectsInfo[objectIndex].verticesOffset + indicies[ii0];
+	uint vi1 = objectsInfo[objectIndex].verticesOffset + indicies[ii1];
+	uint vi2 = objectsInfo[objectIndex].verticesOffset + indicies[ii2];
+
+	Triangle tri;
+	tri.v0 = vertices[vi0];
+	tri.v1 = vertices[vi1];
+	tri.v2 = vertices[vi2];
+
+	float4x4 w = objectsInfo[objectIndex].world;
+	tri.v0 = mul(float4(tri.v0, 1), w).xyz;
+	tri.v1 = mul(float4(tri.v1, 1), w).xyz;
+	tri.v2 = mul(float4(tri.v2, 1), w).xyz;
+
+	Segment seg = selectingSegments[segmentIndex];
+	float t = 0;
+	if (!checkIntersection(tri, seg, t))
+		return;
+
+	uint distance = length(seg.v1 - seg.v0) * t * 1000000;
+	uint triangleIndexOriginal = 0;
+	if (distance == distancesToClosestObjects[segmentIndex])
+		InterlockedExchange(closestTriangles[segmentIndex], triangleIndex, triangleIndexOriginal);
 }
 
 technique11 FineObjectsSelectionBySegments
@@ -144,5 +164,11 @@ technique11 FineObjectsSelectionBySegments
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, CS_closest_object()));
+	}
+	pass SearchOfClosestTriangles
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, CS_closest_triangle()));
 	}
 };

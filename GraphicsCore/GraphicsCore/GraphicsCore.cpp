@@ -1809,6 +1809,7 @@ void GraphicsCore::initFineObjectsSelectionBySegments()
 	mObjectsInfoFineBySegments = mFineObjectsSelectionBySegmentsFX->GetVariableByName("objectsInfo")->AsShaderResource();
 
 	mDistancesToClosestObjects = mFineObjectsSelectionBySegmentsFX->GetVariableByName("distancesToClosestObjects")->AsUnorderedAccessView();
+	mClosestObjects = mFineObjectsSelectionBySegmentsFX->GetVariableByName("closestObjects")->AsUnorderedAccessView();
 	mClosestTriangles = mFineObjectsSelectionBySegmentsFX->GetVariableByName("closestTriangles")->AsUnorderedAccessView();
 
 	D3D11_BUFFER_DESC inputDesc;
@@ -1832,8 +1833,9 @@ void GraphicsCore::initFineObjectsSelectionBySegments()
 	inputDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	inputDesc.ByteWidth = sizeof(uint32_t) * MAX_SELECTING_SEGMENTS_COUNT;
 	inputDesc.CPUAccessFlags = 0;
-	inputDesc.StructureByteStride = sizeof(IntersectedTriangleInfo);
+	inputDesc.StructureByteStride = sizeof(uint32_t);
 	inputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	device->CreateBuffer(&inputDesc, 0, &mClosestObjectsBuffer);
 	device->CreateBuffer(&inputDesc, 0, &mClosestTrianglesBuffer);
 
 	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
@@ -1841,6 +1843,7 @@ void GraphicsCore::initFineObjectsSelectionBySegments()
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.Flags = 0;
 	uavDesc.Buffer.NumElements = MAX_SELECTING_SEGMENTS_COUNT;
+	device->CreateUnorderedAccessView(mClosestObjectsBuffer, &uavDesc, &mClosestObjectsUAV);
 	device->CreateUnorderedAccessView(mClosestTrianglesBuffer, &uavDesc, &mClosestTrianglesUAV);
 
 	D3D11_BUFFER_DESC outputDesc;
@@ -1848,8 +1851,9 @@ void GraphicsCore::initFineObjectsSelectionBySegments()
 	outputDesc.BindFlags = 0;
 	outputDesc.ByteWidth = sizeof(uint32_t) * MAX_SELECTING_SEGMENTS_COUNT;
 	outputDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	outputDesc.StructureByteStride = sizeof(IntersectedTriangleInfo);
+	outputDesc.StructureByteStride = sizeof uint32_t;
 	outputDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	device->CreateBuffer(&outputDesc, 0, &mOutputClosestObjectsBuffer);
 	device->CreateBuffer(&outputDesc, 0, &mOutputClosestTrianglesBuffer);
 }
 
@@ -1895,6 +1899,11 @@ void GraphicsCore::setDistancesToClosestObjects()
 	mDistancesToClosestObjects->SetUnorderedAccessView(mDistancesToClosestObjectsUAV);
 }
 
+void GraphicsCore::setClosestObjects()
+{
+	mClosestObjects->SetUnorderedAccessView(mClosestObjectsUAV);
+}
+
 void GraphicsCore::setClosestTriangles()
 {
 	mClosestTriangles->SetUnorderedAccessView(mClosestTrianglesUAV);
@@ -1909,16 +1918,16 @@ void GraphicsCore::initDistancesToClosestObjects()
 	context->UpdateSubresource(mDistancesToClosestObjectsBuffer, 0, 0, maxInts, 0, 0);
 }
 
-void GraphicsCore::initClosestTriangles()
+void GraphicsCore::initClosestObjects()
 {
 	uint32_t invalidObjects[MAX_SELECTING_SEGMENTS_COUNT];
 	for (int i = 0; i < MAX_SELECTING_SEGMENTS_COUNT; i++)
 		invalidObjects[i] = uint32_t(-1);
 
-	context->UpdateSubresource(mClosestTrianglesBuffer, 0, 0, invalidObjects, 0, 0);
+	context->UpdateSubresource(mClosestObjectsBuffer, 0, 0, invalidObjects, 0, 0);
 }
 
-void GraphicsCore::findSelectedObjectsFineBySegments()
+void GraphicsCore::findSelectedObjectsFineBySegments(bool findTriangles)
 {
 	mFineObjectsSelectionBySegmentsTech->GetPassByName("CalculationOfDistancesToClosestObjects")->Apply(0, context);
 
@@ -1934,16 +1943,41 @@ void GraphicsCore::findSelectedObjectsFineBySegments()
 	threads_y = std::ceil(float(spheresCount) / 1.0f);
 	threads_z = std::ceil(float(selectingSegmentsCount) / 4.0f);
 	context->Dispatch(threads_x, threads_y, threads_z);
+	
+	if (findTriangles)
+	{
+		context->CSSetShader(0, 0, 0);
+
+		mFineObjectsSelectionBySegmentsTech->GetPassByName("SearchOfClosestTriangles")->Apply(0, context);
+
+		threads_x = std::ceil(float(maxTrianglesCount) / 256.0f);
+		threads_y = std::ceil(float(spheresCount) / 1.0f);
+		threads_z = std::ceil(float(selectingSegmentsCount) / 4.0f);
+		context->Dispatch(threads_x, threads_y, threads_z);
+	}
 
 	ID3D11ShaderResourceView* nullSRV[5] = { 0,0,0,0,0 };
 	context->CSSetShaderResources(0, 5, nullSRV);
 
-	ID3D11UnorderedAccessView* nullUAV[2] = { 0,0 };
-	context->CSSetUnorderedAccessViews(0, 2, nullUAV, 0);
+	ID3D11UnorderedAccessView* nullUAV[3] = { 0,0 };
+	context->CSSetUnorderedAccessViews(0, 3, nullUAV, 0);
 	context->CSSetShader(0, 0, 0);
 }
 
-void GraphicsCore::getSelectedObjectsFineBySegments(IntersectedTriangleInfo objects[], uint32_t count)
+void GraphicsCore::getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t count)
+{
+	context->CopyResource(mOutputClosestObjectsBuffer, mClosestObjectsBuffer);
+
+	D3D11_MAPPED_SUBRESOURCE mappedData;
+	context->Map(mOutputClosestObjectsBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
+
+	for (int i = 0; i < count; i++)
+		objects[i] = ((uint32_t*)mappedData.pData)[i];
+	
+	context->Unmap(mOutputClosestObjectsBuffer, 0);
+}
+
+void GraphicsCore::getSelectedObjectsTrianglesFineBySegments(uint32_t triangles[], uint32_t count)
 {
 	context->CopyResource(mOutputClosestTrianglesBuffer, mClosestTrianglesBuffer);
 
@@ -1951,8 +1985,8 @@ void GraphicsCore::getSelectedObjectsFineBySegments(IntersectedTriangleInfo obje
 	context->Map(mOutputClosestTrianglesBuffer, 0, D3D11_MAP_READ, 0, &mappedData);
 
 	for (int i = 0; i < count; i++)
-		objects[i] = ((IntersectedTriangleInfo*)mappedData.pData)[i];
-	
+		triangles[i] = ((uint32_t*)mappedData.pData)[i];
+
 	context->Unmap(mOutputClosestTrianglesBuffer, 0);
 }
 

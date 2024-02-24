@@ -12,7 +12,6 @@
 #include "InputLayoutResource.h"
 #include "VariableResources.h"
 #include "OBjectInfo.h"
-#include "IntersectedTriangleInfo.h"
 
 #define MAX_BOUNDING_SPHERES_COUNT 1024
 #define MAX_VERTICES_COUNT 16384
@@ -190,13 +189,15 @@ public:
 	void setObjectsInfoFineBySegments();
 
 	void setDistancesToClosestObjects();
+	void setClosestObjects();
 	void setClosestTriangles();
 
 	void initDistancesToClosestObjects();
-	void initClosestTriangles();
+	void initClosestObjects();
 
-	void findSelectedObjectsFineBySegments();
-	void getSelectedObjectsFineBySegments(IntersectedTriangleInfo intersectedTriangles[], uint32_t count);
+	void findSelectedObjectsFineBySegments(bool findTriangles);
+	void getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t count);
+	void getSelectedObjectsTrianglesFineBySegments(uint32_t triangles[], uint32_t count);
 private:
 	void initFineObjectsSelectionBySegments();
 
@@ -214,10 +215,15 @@ private:
 	ID3DX11EffectShaderResourceVariable* mObjectsInfoFineBySegments = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* mDistancesToClosestObjects = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* mClosestObjects = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mClosestTriangles = nullptr;
 
 	ID3D11Buffer* mDistancesToClosestObjectsBuffer = nullptr;
 	ID3D11UnorderedAccessView* mDistancesToClosestObjectsUAV = nullptr;
+
+	ID3D11Buffer* mClosestObjectsBuffer = nullptr;
+	ID3D11UnorderedAccessView* mClosestObjectsUAV = nullptr;
+	ID3D11Buffer* mOutputClosestObjectsBuffer = nullptr;
 
 	ID3D11Buffer* mClosestTrianglesBuffer = nullptr;
 	ID3D11UnorderedAccessView* mClosestTrianglesUAV = nullptr;
