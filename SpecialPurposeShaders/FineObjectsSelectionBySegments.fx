@@ -14,7 +14,24 @@ StructuredBuffer<uint> indicies;
 StructuredBuffer<ObjectInfo> objectsInfo;
 
 RWStructuredBuffer<uint> distancesToClosestObjects;
-RWStructuredBuffer<uint> closestObjects;
+
+struct IntersectedTriangleInfo
+{
+	uint objectIndex;
+	uint triangleIndex;
+	uint packedBarycentricCoords;
+};
+RWStructuredBuffer<IntersectedTriangleInfo> closestTriangles;
+
+uint packBarycentricCoords(float2 barycentricCoords, uint digitsCount)
+{
+	uint maxBarycentricCoord = 1 << digitsCount - 1;
+	
+	uint u = floor(barycentricCoords.x * maxBarycentricCoord);
+	uint v = floor(barycentricCoords.y * maxBarycentricCoord);
+
+	return (u << digitsCount) | v;
+}
 
 [numthreads(256, 1, 4)]
 void CS_distance_to_object(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -97,13 +114,21 @@ void CS_closest_object(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	Segment seg = selectingSegments[segmentIndex];
 	float t = 0;
-	if (!checkIntersection(tri, seg, t))
+	float2 barycentricCoords = 0;
+	if (!checkIntersection(tri, seg, t, barycentricCoords))
 		return;
+	uint packedBarycentricCoords = packBarycentricCoords(barycentricCoords, 16);
 
 	uint distance = length(seg.v1 - seg.v0) * t * 1000000;
 	uint objectIndexOriginal = 0;
+	uint triangleIndexOriginal = 0;
+	uint packedBarycentricCoordsOriginal = 0;
 	if (distance == distancesToClosestObjects[segmentIndex])
-		InterlockedExchange(closestObjects[segmentIndex], objectIndex, objectIndexOriginal);
+	{
+		InterlockedExchange(closestTriangles[segmentIndex].objectIndex, objectIndex, objectIndexOriginal);
+		InterlockedExchange(closestTriangles[segmentIndex].triangleIndex, triangleIndex, triangleIndexOriginal);
+		InterlockedExchange(closestTriangles[segmentIndex].packedBarycentricCoords, packedBarycentricCoords, packedBarycentricCoordsOriginal);
+	}
 }
 
 technique11 FineObjectsSelectionBySegments
