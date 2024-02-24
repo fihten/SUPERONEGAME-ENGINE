@@ -31,7 +31,7 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(117)]
+[maxvertexcount(18)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
 	SeedOfFramework seed;
@@ -41,7 +41,6 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	seed.axis2 = gin[0].axis2;
 
 	addBox(seed, lineStream);
-	addSphere(seed, lineStream);
 }
 
 float4 PS(GeometryOut pin) : SV_TARGET
@@ -49,7 +48,7 @@ float4 PS(GeometryOut pin) : SV_TARGET
 	return float4(pin.color,1);
 }
 
-technique11 SphereFramework
+technique11 CubeFramework
 {
 	pass P0
 	{
