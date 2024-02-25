@@ -629,7 +629,8 @@ flt2 FrameOfReferenceState::intersectWithOxy(float mousePosX, float mousePosY)
 	axisY = axisY * v;
 	axisY.normalize();
 	
-	flt3 i = linePlaneIntersection(pt, dir, origin, axisX, axisY);
+	flt3 i;
+	linePlaneIntersection(pt, dir, origin, axisX, axisY, i);
 
 	return flt2(i.x(), i.y());
 }
@@ -665,7 +666,8 @@ flt2 FrameOfReferenceState::intersectWithOxz(float mousePosX, float mousePosY)
 	axisZ = axisZ * v;
 	axisZ.normalize();
 
-	flt3 i = linePlaneIntersection(pt, dir, origin, axisX, axisZ);
+	flt3 i;
+	linePlaneIntersection(pt, dir, origin, axisX, axisZ, i);
 
 	return flt2(i.x(), i.y());
 }
@@ -701,7 +703,8 @@ flt2 FrameOfReferenceState::intersectWithOyz(float mousePosX, float mousePosY)
 	axisZ = axisZ * v;
 	axisZ.normalize();
 
-	flt3 i = linePlaneIntersection(pt, dir, origin, axisY, axisZ);
+	flt3 i; 
+	linePlaneIntersection(pt, dir, origin, axisY, axisZ, i);
 
 	return flt2(i.x(), i.y());
 }

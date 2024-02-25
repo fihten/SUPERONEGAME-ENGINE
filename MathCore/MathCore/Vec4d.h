@@ -44,6 +44,7 @@ public:
 	value_type& w() { return v[3]; };
 
 	Vec3d<value_type>& xyz() { return *((Vec3d<value_type>*)this); };
+	Vec3d<value_type> const& xyz() const { return *((Vec3d<value_type>*)this); };
 
 	friend value_type dot<>(const Vec4d<value_type>& v1, const Vec4d<value_type>& v2);
 };

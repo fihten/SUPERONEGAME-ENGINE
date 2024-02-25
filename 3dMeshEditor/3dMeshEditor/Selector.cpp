@@ -204,7 +204,7 @@ void Selector::selectObjects(
 	FrameOfReferenceState::instance()->turnOn();
 }
 
-void Selector::selectObject(float mousePosX, float mousePosY)
+void Selector::selectObject(float mousePosX, float mousePosY, bool findTriangle)
 {
 	if (bProcessOfMultipleSelection)
 		return;
@@ -257,11 +257,12 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 
 	GraphicsCore::instance()->setDistancesToClosestObjects();
 	GraphicsCore::instance()->setClosestObjects();
+	GraphicsCore::instance()->setClosestTriangles();
 
 	GraphicsCore::instance()->initDistancesToClosestObjects();
 	GraphicsCore::instance()->initClosestObjects();
 
-	GraphicsCore::instance()->findSelectedObjectsFineBySegments();
+	GraphicsCore::instance()->findSelectedObjectsFineBySegments(findTriangle);
 	
 	if (bPopSelectedObject)
 	{
@@ -278,6 +279,10 @@ void Selector::selectObject(float mousePosX, float mousePosY)
 	}
 	
 	GraphicsCore::instance()->getSelectedObjectsFineBySegments(&selectedObject, 1);
+	if (findTriangle)
+	{
+		GraphicsCore::instance()->getSelectedObjectsTrianglesFineBySegments(&selectedTriangle, 1);
+	}
 
 	if (selectedObject == uint32_t(-1))
 		return;

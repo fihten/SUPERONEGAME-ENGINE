@@ -35,6 +35,12 @@ public:
 	void accept(Scene::Visitor* visitor) const;
 	void* getNode(NodeID id);
 
+	void getTriangle(
+		uint32_t objectIndex,
+		uint32_t triangleIndex,
+		flt3& v0, flt3& v1, flt3& v2
+	);
+
 	SelectedObjectBox selectedObjectsBoxes[MAX_BOUNDING_SPHERES_COUNT];
 	ObjectInfo objectsInfo[MAX_BOUNDING_SPHERES_COUNT];
 	
