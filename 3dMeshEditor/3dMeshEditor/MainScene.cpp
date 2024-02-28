@@ -183,17 +183,17 @@ void MainScene::getTriangle(
 	uint32_t ii1 = ii0 + 1;
 	uint32_t ii2 = ii1 + 1;
 
-	uint32_t i0 = indices[ii0];
-	uint32_t i1 = indices[ii1];
-	uint32_t i2 = indices[ii2];
+	uint32_t i0 = oi.verticesOffset + indices[ii0];
+	uint32_t i1 = oi.verticesOffset + indices[ii1];
+	uint32_t i2 = oi.verticesOffset + indices[ii2];
 
 	auto v04 = flt4(vertices[i0], 1);
 	auto v14 = flt4(vertices[i1], 1);
 	auto v24 = flt4(vertices[i2], 1);
 
-	v0 = (v04 * oi.world).xyz();
-	v1 = (v14 * oi.world).xyz();
-	v2 = (v24 * oi.world).xyz();
+	v0 = (oi.world * v04).xyz();
+	v1 = (oi.world * v14).xyz();
+	v2 = (oi.world * v24).xyz();
 }
 
 void MainScene::update(UpdateType updateType)

@@ -21,10 +21,10 @@ class SphereCreator :public Modifier
 		Insertion
 	};
 	State currentState = State::Initial;
+	bool bInitialized = false;
 
 public:
-	SphereCreator();
-
 	Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
 	void draw();
+	void init();
 };

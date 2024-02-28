@@ -1,10 +1,5 @@
 #include "FrameworkUtils.fx"
 
-cbuffer cbPerFrame
-{
-	float4x4 gViewProj;
-};
-
 struct VertexIn
 {
 	float3 posW : POSITION;

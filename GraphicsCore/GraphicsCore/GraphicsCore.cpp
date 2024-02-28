@@ -1927,6 +1927,15 @@ void GraphicsCore::initClosestObjects()
 	context->UpdateSubresource(mClosestObjectsBuffer, 0, 0, invalidObjects, 0, 0);
 }
 
+void GraphicsCore::initClosestTriangles()
+{
+	uint32_t invalidTriangles[MAX_SELECTING_SEGMENTS_COUNT];
+	for (int i = 0; i < MAX_SELECTING_SEGMENTS_COUNT; i++)
+		invalidTriangles[i] = uint32_t(-1);
+
+	context->UpdateSubresource(mClosestTrianglesBuffer, 0, 0, invalidTriangles, 0, 0);
+}
+
 void GraphicsCore::findSelectedObjectsFineBySegments(bool findTriangles)
 {
 	mFineObjectsSelectionBySegmentsTech->GetPassByName("CalculationOfDistancesToClosestObjects")->Apply(0, context);
@@ -1959,7 +1968,7 @@ void GraphicsCore::findSelectedObjectsFineBySegments(bool findTriangles)
 	ID3D11ShaderResourceView* nullSRV[5] = { 0,0,0,0,0 };
 	context->CSSetShaderResources(0, 5, nullSRV);
 
-	ID3D11UnorderedAccessView* nullUAV[3] = { 0,0 };
+	ID3D11UnorderedAccessView* nullUAV[3] = { 0,0,0 };
 	context->CSSetUnorderedAccessViews(0, 3, nullUAV, 0);
 	context->CSSetShader(0, 0, 0);
 }

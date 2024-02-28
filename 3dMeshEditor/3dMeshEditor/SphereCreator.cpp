@@ -4,7 +4,7 @@
 #include "MainScene.h"
 #include "cameras.h"
 
-SphereCreator::SphereCreator()
+void SphereCreator::init()
 {
 	sphereFrameworkGeo.setTechnique(StringManager::toStringId("SphereFramework"));
 	sphereFrameworkGeo.setPass(p0_pass_id);
@@ -15,13 +15,15 @@ SphereCreator::SphereCreator()
 	sphereFrameworkGeo.gpuReadyData = &sphereFramework;
 	sphereFrameworkGeo.elementSize = sizeof SphereFramework;
 	sphereFrameworkGeo.verticesCount = 1;
+
+	bInitialized = true;
 }
 
 Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)
 	{
-	case WM_MBUTTONDOWN:
+	case WM_LBUTTONDOWN:
 	{
 		switch (currentState)
 		{
@@ -93,8 +95,8 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 				flt3 s1 = v2 - v0;
 
 				axis2 = cross(s1, s0);
-				axis0 = cross(flt3(0.0f, 0.0f, 1.0f), sphereFramework.axis2);
-				axis1 = cross(sphereFramework.axis2, sphereFramework.axis0);
+				axis0 = cross(flt3(0.0f, 1.0f, 0.0f), axis2);
+				axis1 = cross(axis2, axis0);
 
 				axis0.normalize();
 				axis1.normalize();
@@ -105,26 +107,33 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 				sphereFramework.axis2 = flt3(0.0f, 0.0f, 0.0f);
 
 				currentState = State::DeterminingOfOxyProjection;
+
+				return Behaviour::FINISH;
 			}
-			else if (!linePlaneIntersection(
+			else if (linePlaneIntersection(
 				segV0, segV1 - segV0,
-				flt3(0.0f, 0.0f, 0.0f), flt3(1.0f, 0.0f, 0.0f), flt3(0.0f, 1.0f, 0.0f),
+				flt3(0.0f, 0.0f, 0.0f), flt3(1.0f, 0.0f, 0.0f), flt3(0.0f, 0.0f, 1.0f),
 				sphereFramework.posW
 			))
 			{
-				sphereFramework.posW.z() = 0.0f;
-
 				axis0 = flt3(1.0f, 0.0f, 0.0f);
-				axis1 = flt3(0.0f, 1.0f, 0.0f);
-				axis2 = flt3(0.0f, 0.0f, 1.0f);
+				axis1 = flt3(0.0f, 0.0f, 1.0f);
+				axis2 = flt3(0.0f, 1.0f, 0.0f);
+
+				sphereFramework.posW =
+					sphereFramework.posW.x() * axis0 +
+					sphereFramework.posW.y() * axis1;
 
 				sphereFramework.axis0 = flt3(0.0f, 0.0f, 0.0f);
 				sphereFramework.axis1 = flt3(0.0f, 0.0f, 0.0f);
 				sphereFramework.axis2 = flt3(0.0f, 0.0f, 0.0f);
 
 				currentState = State::DeterminingOfOxyProjection;
+
+				return Behaviour::FINISH;
 			}
-			break;
+			
+			return Behaviour::CONTINUE;
 		}
 		case State::DeterminingOfHeight:
 		{
@@ -132,10 +141,10 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 
 			currentState = State::Initial;
 
-			break;
+			return Behaviour::FINISH;
 		}
 		}
-		break;
+		return Behaviour::CONTINUE;
 	}
 	case WM_MOUSEMOVE:
 	{
@@ -190,45 +199,59 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 				pointOfIntersection
 			);
 
-			sphereFramework.axis0 = pointOfIntersection.x() * axis0;
-			sphereFramework.axis1 = pointOfIntersection.y() * axis1;
+			sphereFramework.axis0 = axis0;
+			sphereFramework.axis0 *= pointOfIntersection.x();
 
-			break;
+			sphereFramework.axis1 = axis1;
+			sphereFramework.axis1 *= pointOfIntersection.y();
+
+			return Behaviour::FINISH;
 		}
 		case State::DeterminingOfHeight:
 		{
 			float t = 0;
 			distanceBetweenLines(
-				sphereFramework.posW, axis2,
+				sphereFramework.posW +
+				sphereFramework.axis0 +
+				sphereFramework.axis1, axis2,
 				segV0, segV1 - segV0,
 				&t
 			);
-			sphereFramework.axis2 = t * axis2;
 
-			break;
+			sphereFramework.axis2 = axis2;
+			sphereFramework.axis2 *= t;
+
+			return Behaviour::FINISH;
 		}
+		default:
+			return Behaviour::CONTINUE;
 		}
-		break;
+		return Behaviour::CONTINUE;
 	}
-	case WM_MBUTTONUP:
+	case WM_LBUTTONUP:
 	{
 		switch (currentState)
 		{
 		case State::DeterminingOfOxyProjection:
 		{
 			currentState = State::DeterminingOfHeight;
-			break;
+			return Behaviour::FINISH;
 		}
 		// case...
 		}
 
-		break;
+		return Behaviour::CONTINUE;;
 	}
+	default:
+		return Behaviour::CONTINUE;
 	}
 	return Behaviour::FINISH;
 }
 
 void SphereCreator::draw()
 {
-	GraphicsCore::instance()->draw(sphereFrameworkGeo);
+	if (currentState != State::Initial)
+	{
+		GraphicsCore::instance()->draw(sphereFrameworkGeo);
+	}
 }

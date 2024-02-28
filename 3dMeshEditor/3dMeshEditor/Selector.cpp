@@ -261,6 +261,7 @@ void Selector::selectObject(float mousePosX, float mousePosY, bool findTriangle)
 
 	GraphicsCore::instance()->initDistancesToClosestObjects();
 	GraphicsCore::instance()->initClosestObjects();
+	GraphicsCore::instance()->initClosestTriangles();
 
 	GraphicsCore::instance()->findSelectedObjectsFineBySegments(findTriangle);
 	

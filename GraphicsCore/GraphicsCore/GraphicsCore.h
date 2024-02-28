@@ -194,6 +194,7 @@ public:
 
 	void initDistancesToClosestObjects();
 	void initClosestObjects();
+	void initClosestTriangles();
 
 	void findSelectedObjectsFineBySegments(bool findTriangles);
 	void getSelectedObjectsFineBySegments(uint32_t objects[], uint32_t count);

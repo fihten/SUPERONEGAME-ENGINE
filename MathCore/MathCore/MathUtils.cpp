@@ -112,8 +112,8 @@ bool checkIntersection(
 	float b = d1 / d;
 	float c = 1.0f - a - b;
 
-	barycentricCoords.x = a;
-	barycentricCoords.y = b;
+	barycentricCoords.x() = a;
+	barycentricCoords.y() = b;
 
 	return
 		0.0f <= a && a <= 1.0f &&
@@ -129,7 +129,7 @@ uint32_t findIntersection(
 {
 	t = 0;
 
-	float N = dot(plane.xyz(), segV0) + plane.w;
+	float N = dot(plane.xyz(), segV0) + plane.w();
 	float D = dot(plane.xyz(), segV1 - segV0);
 
 	if (N == 0 && D == 0)

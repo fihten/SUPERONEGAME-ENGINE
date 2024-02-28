@@ -100,6 +100,7 @@ ID3DX11Effect* createEffect(ID3D11Device* device, LPCTSTR shader_path)
 	if (res != S_OK)
 	{
 		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		OutputDebugStringA((char*)compilationMsgs->GetBufferPointer());
 		return nullptr;
 	}
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mShader);

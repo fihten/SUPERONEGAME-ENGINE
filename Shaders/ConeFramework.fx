@@ -1,10 +1,5 @@
 #include "FrameworkUtils.fx"
 
-cbuffer cbPerFrame
-{
-	float4x4 gViewProj;
-};
-
 struct VertexIn
 {
 	float3 posW : POSITION;
@@ -34,7 +29,7 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(148)]
+[maxvertexcount(84)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
 	float k = max(1, gin[0].scaleFromBottomToTop);
@@ -51,6 +46,11 @@ void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 	seed.axis0 = gin[0].axis0;
 	seed.axis1 = gin[0].axis1;
 	addCone(seed, lineStream);
+}
+
+float4 PS(GeometryOut pin) : SV_TARGET
+{
+	return float4(pin.color,1);
 }
 
 technique11 ConeFramework

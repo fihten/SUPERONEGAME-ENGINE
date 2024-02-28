@@ -43,6 +43,11 @@ public:
 	value_type& z() { return v[2]; };
 	value_type& w() { return v[3]; };
 
+	const value_type& x() const { return v[0]; };
+	const value_type& y() const { return v[1]; };
+	const value_type& z() const { return v[2]; };
+	const value_type& w() const { return v[3]; };
+
 	Vec3d<value_type>& xyz() { return *((Vec3d<value_type>*)this); };
 	Vec3d<value_type> const& xyz() const { return *((Vec3d<value_type>*)this); };
 
