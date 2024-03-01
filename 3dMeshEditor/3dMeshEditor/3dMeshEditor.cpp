@@ -12,6 +12,7 @@
 #include "Rotation.h"
 #include "Scaling.h"
 #include "SphereCreator.h"
+#include "CubeCreator.h"
 #include "Resource.h"
 #include <Windows.h>
 #include <commdlg.h>
@@ -24,6 +25,7 @@ Transition transitionModifier;
 Rotation rotationModifier;
 Scaling scalingModifier;
 SphereCreator sphereCreator;
+CubeCreator cubeCreator;
 
 Modifier* modifier;
 
@@ -158,8 +160,9 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	rotationModifier.setWindow(hwnd);
 	scalingModifier.setWindow(hwnd);
 	sphereCreator.setWindow(hwnd);
+	cubeCreator.setWindow(hwnd);
 
-	modifier = &sphereCreator;
+	modifier = &cubeCreator;
 
 	// Even though we just created a window, it is not initially
 	// shown. Therefore, the final step is to show and update the
@@ -385,6 +388,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	GraphicsCore::instance()->init(hInstance, iCmdShow, WndProc, windowCreator, drawFunc, 640, 480, true, false);
 
 	sphereCreator.init();
+	cubeCreator.init();
 
 	fillSceneForObjectsSelectionTesting();
 	PopFileInitialize(hwnd);
