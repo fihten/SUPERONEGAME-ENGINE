@@ -204,38 +204,13 @@ void Selector::selectObjects(
 	FrameOfReferenceState::instance()->turnOn();
 }
 
-void Selector::selectObject(float mousePosX, float mousePosY, bool findTriangle)
+void Selector::selectObject(const flt3& segV0, const flt3& segV1, bool findTriangle)
 {
-	if (bProcessOfMultipleSelection)
-		return;
-
-	auto& camera = cameras()[MAIN_CAMERA];
-
-	float nearZ = camera.getNear();
-	float fovY = camera.getFov() * M_PI / 180;
-	float h = 2 * nearZ * std::tan(0.5 * fovY);
-
-	float ar = camera.getAspectRatio();
-	float w = ar * h;
-
-	mousePosX *= 0.5 * w;
-	mousePosY *= 0.5 * h;
-
 	Segment selectingSegments[MAX_SELECTING_SEGMENTS_COUNT];
+	
 	auto& seg = selectingSegments[0];
-
-	seg.v0 = flt3(mousePosX, mousePosY, nearZ);
-
-	float farZ = camera.getFar();
-	seg.v1 = flt3(farZ * mousePosX / nearZ, farZ * mousePosY / nearZ, farZ);
-
-	flt4x4 viewInv = camera.getView().inverse();
-
-	flt4 v0(seg.v0, 1);
-	seg.v0 = (v0 * viewInv).xyz();
-
-	flt4 v1(seg.v1, 1);
-	seg.v1 = (v1 * viewInv).xyz();
+	seg.v0 = segV0;
+	seg.v1 = segV1;
 
 	GraphicsCore::instance()->updateSelectingSegments(selectingSegments);
 	GraphicsCore::instance()->setSelectingSegmentsRoughBySegments();
@@ -264,7 +239,7 @@ void Selector::selectObject(float mousePosX, float mousePosY, bool findTriangle)
 	GraphicsCore::instance()->initClosestTriangles();
 
 	GraphicsCore::instance()->findSelectedObjectsFineBySegments(findTriangle);
-	
+
 	if (bPopSelectedObject)
 	{
 		selectedObjectsCount--;
@@ -278,7 +253,7 @@ void Selector::selectObject(float mousePosX, float mousePosY, bool findTriangle)
 		uint32_t selectedObjectBox = pSelectedObject - selectedObjects;
 		selectedObjectsBoxes[selectedObjectBox].color = flt3(1, 0, 0);
 	}
-	
+
 	GraphicsCore::instance()->getSelectedObjectsFineBySegments(&selectedObject, 1);
 	if (findTriangle)
 	{

@@ -13,7 +13,9 @@
 #include "Scaling.h"
 #include "SphereCreator.h"
 #include "CubeCreator.h"
+#include "ConeCreator.h"
 #include "Resource.h"
+#include "Utils.h"
 #include <Windows.h>
 #include <commdlg.h>
 #include <windef.h>
@@ -26,6 +28,7 @@ Rotation rotationModifier;
 Scaling scalingModifier;
 SphereCreator sphereCreator;
 CubeCreator cubeCreator;
+ConeCreator coneCreator;
 
 Modifier* modifier;
 
@@ -161,8 +164,9 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	scalingModifier.setWindow(hwnd);
 	sphereCreator.setWindow(hwnd);
 	cubeCreator.setWindow(hwnd);
+	coneCreator.setWindow(hwnd);
 
-	modifier = &cubeCreator;
+	modifier = &coneCreator;
 
 	// Even though we just created a window, it is not initially
 	// shown. Therefore, the final step is to show and update the
@@ -240,22 +244,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 	}
 	case WM_MOUSEMOVE:
 	{
-		float mousePosX = LOWORD(lparam) + 0.5f;
-		float mousePosY = HIWORD(lparam) + 0.5f;
-
-		RECT rect;
-		GetClientRect(hwnd, &rect);
-
-		float width = rect.right - rect.left;
-		float height = rect.bottom - rect.top;
-
-		mousePosX /= width;
-		mousePosY /= height;
-
-		mousePosX = 2 * (mousePosX - 0.5);
-		mousePosY = 2 * (0.5 - mousePosY);
-
-		Selector::instance()->selectObject(mousePosX, mousePosY);
+		flt3 segV0;
+		flt3 segV1;
+		calculateRay(hwnd, lparam, segV0, segV1);
+		Selector::instance()->selectObject(segV0, segV1);
 	}
 	case WM_LBUTTONUP:
 	{
@@ -389,6 +381,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 
 	sphereCreator.init();
 	cubeCreator.init();
+	coneCreator.init();
 
 	fillSceneForObjectsSelectionTesting();
 	PopFileInitialize(hwnd);

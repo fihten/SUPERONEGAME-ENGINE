@@ -1,11 +1,13 @@
 #pragma once
 #include <windows.h>
 #include <stdint.h>
+#include "Vec3d.h"
 
 class Modifier
 {
 protected:
 	HWND hWnd;
+
 public:
 	enum class Behaviour :uint32_t
 	{

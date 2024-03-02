@@ -29,23 +29,26 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(84)]
+[maxvertexcount(102)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
-	float k = max(1, gin[0].scaleFromBottomToTop);
-
 	SeedOfFramework seed;
 	seed.posW = gin[0].posW;
-	seed.axis0 = k * gin[0].axis0;
-	seed.axis1 = k * gin[0].axis1;
+	seed.axis0 = gin[0].axis0;
+	seed.axis1 = gin[0].axis1;
 	seed.axis2 = gin[0].axis2;
 	seed.scaleFromBottomToTop = gin[0].scaleFromBottomToTop;
 
 	addBox(seed, lineStream);
 
-	seed.axis0 = gin[0].axis0;
-	seed.axis1 = gin[0].axis1;
 	addCone(seed, lineStream);
+
+	float k = gin[0].scaleFromBottomToTop;
+	seed.posW += 0.5f * (1 - k) * gin[0].axis0;
+	seed.posW += 0.5f * (1 - k) * gin[0].axis1;
+	seed.axis0 = k * gin[0].axis0;
+	seed.axis1 = k * gin[0].axis1;
+	addBox(seed, lineStream);
 }
 
 float4 PS(GeometryOut pin) : SV_TARGET

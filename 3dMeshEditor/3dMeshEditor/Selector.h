@@ -15,7 +15,7 @@ public:
 		float mousePosX0, float mousePosY0,
 		float mousePosX1, float mousePosY1
 	);
-	void selectObject(float mousePosX, float mousePosY, bool findTriangle = false);
+	void selectObject(const flt3& segV0, const flt3& segV1, bool findTriangle = false);
 	void draw();
 	bool turnOnMultipleSelection();
 	void turnOffMultipleSelection();

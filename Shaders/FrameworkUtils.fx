@@ -113,7 +113,7 @@ void addSphere(SeedOfFramework seed, inout LineStream<GeometryOut> lineStream)
 	float phi = 6.28 / segments;
 
 	GeometryOut gout;
-	gout.color = float4(0, 1, 0, 0);
+	gout.color = float3(0, 1, 0);
 
 	float3 axis0 = 0.5f * seed.axis0;
 	float3 axis1 = 0.5f * seed.axis1;
@@ -160,11 +160,11 @@ void addSphere(SeedOfFramework seed, inout LineStream<GeometryOut> lineStream)
 
 void addCone(SeedOfFramework seed, inout LineStream<GeometryOut> lineStream)
 {
-	int segments = 32;
+	int segments = 16;
 	float phi = 6.28 / segments;
 
 	GeometryOut gout;
-	gout.color = float4(0, 1, 0, 0);
+	gout.color = float3(0, 1, 0);
 
 	float3 axis0 = 0.5f * seed.axis0;
 	float3 axis1 = 0.5f * seed.axis1;
