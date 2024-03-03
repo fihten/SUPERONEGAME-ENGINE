@@ -2,7 +2,7 @@
 
 #include "Vec3d.h"
 
-class BaseOfFramework
+struct BaseOfFramework
 {
 	flt3 posW;
 	flt3 axis0;

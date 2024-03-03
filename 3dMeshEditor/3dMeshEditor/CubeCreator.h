@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modifier.h"
+#include "Creator.h"
 #include "Mesh.h"
 #include "CubeFramework.h"
 
-class CubeCreator :public Modifier
+class CubeCreator :public Creator
 {
 	Mesh cubeFrameworkGeo;
 	CubeFramework cubeFramework;

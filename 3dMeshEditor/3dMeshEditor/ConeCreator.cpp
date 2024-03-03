@@ -8,6 +8,8 @@
 
 void ConeCreator::init()
 {
+	Creator::init();
+
 	coneFrameworkGeo.setTechnique(StringManager::toStringId("ConeFramework"));
 	coneFrameworkGeo.setPass(p0_pass_id);
 
@@ -177,6 +179,70 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 
 			return Behaviour::FINISH;
 		}
+		case State::Initial:
+		{
+			if(!bInitialized)
+				return Behaviour::FINISH;
+
+			bDrawBase = false;
+			Selector::instance()->selectObject(segV0, segV1, true);
+			if (Selector::instance()->selectedObjectsCount > 0)
+			{
+				uint32_t objectIndex = Selector::instance()->selectedObject;
+				uint32_t triangleIndex = Selector::instance()->selectedTriangle;
+
+				flt3 v0;
+				flt3 v1;
+				flt3 v2;
+				MainScene::instance()->getTriangle(
+					objectIndex, triangleIndex, v0, v1, v2);
+
+				float t = 0;
+				flt2 barycentricCoords;
+				checkIntersection(v0, v1, v2, segV0, segV1, t, barycentricCoords);
+
+				baseOfFramework.posW =
+					barycentricCoords.x() * v0 +
+					barycentricCoords.y() * v1 +
+					(1 - barycentricCoords.x() - barycentricCoords.y()) * v2;
+
+				flt3 s0 = v1 - v0;
+				flt3 s1 = v2 - v0;
+
+				baseOfFramework.axis2 = cross(s1, s0);
+				baseOfFramework.axis0 =
+					cross(flt3(0.0f, 1.0f, 0.0f), baseOfFramework.axis2);
+				baseOfFramework.axis1 =
+					cross(baseOfFramework.axis2, baseOfFramework.axis0);
+
+				baseOfFramework.axis0.normalize();
+				baseOfFramework.axis1.normalize();
+				baseOfFramework.axis2.normalize();
+
+				bDrawBase = true;
+
+				return Behaviour::FINISH;
+			}
+			else if (linePlaneIntersection(
+				segV0, segV1 - segV0,
+				flt3(0.0f, 0.0f, 0.0f), flt3(1.0f, 0.0f, 0.0f), flt3(0.0f, 0.0f, 1.0f),
+				baseOfFramework.posW
+			))
+			{
+				baseOfFramework.axis0 = flt3(1.0f, 0.0f, 0.0f);
+				baseOfFramework.axis1 = flt3(0.0f, 0.0f, 1.0f);
+				baseOfFramework.axis2 = flt3(0.0f, 1.0f, 0.0f);
+
+				baseOfFramework.posW =
+					baseOfFramework.posW.x() * baseOfFramework.axis0 +
+					baseOfFramework.posW.y() * baseOfFramework.axis1;
+
+				bDrawBase = true;
+
+				return Behaviour::FINISH;
+			}
+			return Behaviour::CONTINUE;
+		}
 		}
 		return Behaviour::CONTINUE;
 	}
@@ -205,8 +271,12 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 
 void ConeCreator::draw()
 {
-	if (currentState != State::Initial)
+	switch (currentState)
 	{
+	case State::Initial:
+		Creator::draw();
+		break;
+	default:
 		GraphicsCore::instance()->draw(coneFrameworkGeo);
 	}
 }

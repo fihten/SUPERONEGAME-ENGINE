@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modifier.h"
+#include "Creator.h"
 #include "Mesh.h"
 #include "ConeFramework.h"
 
-class ConeCreator :public Modifier
+class ConeCreator :public Creator
 {
 	Mesh coneFrameworkGeo;
 	ConeFramework coneFramework;

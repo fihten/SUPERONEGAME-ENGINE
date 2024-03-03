@@ -23,6 +23,7 @@ struct GeometryOut
 {
 	float4 posH : SV_POSITION;
 	float4 color : COLOR;
+	float alpha : ALPHA;
 };
 
 VertexOut VS(VertexIn vin)
@@ -35,48 +36,56 @@ VertexOut VS(VertexIn vin)
 	return vout;
 }
 
-[maxvertexcount(102)]
+[maxvertexcount(84)]
 void GS(point VertexOut gin[1], inout LineStream<GeometryOut> lineStream)
 {
-	const int n = 10;
-	const float h = 1.0f;
+	int n = 10;
+	float h = 0.1f;
 	
-	for (int i = -n; i <= n; ++i)
+	for (int i = -n; i < n + 1; ++i)
 	{
+		float alpha = (float)(i + n) / (2 * n);
+
 		float3 posW = gin[0].posW - n * h * gin[0].axis1 + i * h * gin[0].axis0;
 		
 		GeometryOut gout;
 		
 		gout.posH = mul(float4(posW, 1.0f), gViewProj);
 		gout.color = float4(0.0f, 1.0f, 0.0f, 0.0f);
+		gout.alpha = alpha;
 		lineStream.Append(gout);
 
 		posW = gin[0].posW + n * h * gin[0].axis1 + i * h * gin[0].axis0;
 
 		gout.posH = mul(float4(posW, 1.0f), gViewProj);
 		gout.color = float4(0.0f, 1.0f, 0.0f, 1.0f);
+		gout.alpha = alpha;
 		lineStream.Append(gout);
 
-		lineStream.RestartStream();
+		lineStream.RestartStrip();
 	}
 
-	for (int i = -n; i <= n; ++i)
+	for (int i = -n; i < n + 1; ++i)
 	{
+		float alpha = (float)(i + n) / (2 * n);
+
 		float3 posW = gin[0].posW - n * h * gin[0].axis0 + i * h * gin[0].axis1;
 
 		GeometryOut gout;
 
 		gout.posH = mul(float4(posW, 1.0f), gViewProj);
 		gout.color = float4(0.0f, 1.0f, 0.0f, 0.0f);
+		gout.alpha = alpha;
 		lineStream.Append(gout);
 
 		posW = gin[0].posW + n * h * gin[0].axis0 + i * h * gin[0].axis1;
 
 		gout.posH = mul(float4(posW, 1.0f), gViewProj);
 		gout.color = float4(0.0f, 1.0f, 0.0f, 1.0f);
+		gout.alpha = alpha;
 		lineStream.Append(gout);
 
-		lineStream.RestartStream();
+		lineStream.RestartStrip();
 	}
 }
 
@@ -84,6 +93,12 @@ float4 PS(GeometryOut pin) : SV_TARGET
 {
 	float a = pin.color.w;
 	pin.color.w = pow(sin(3.14 * a), 2);
+
+	a = pin.alpha;
+	pin.color.w *= pow(sin(3.14 * a), 2);
+
+	pin.color.w = 1 - pin.color.w;
+
 	return pin.color;
 }
 

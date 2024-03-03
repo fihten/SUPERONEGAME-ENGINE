@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Modifier.h"
+#include "Creator.h"
 #include "Mesh.h"
 #include "SphereFramework.h"
 
-class SphereCreator :public Modifier
+class SphereCreator :public Creator
 {
 	Mesh sphereFrameworkGeo;
 	SphereFramework sphereFramework;
