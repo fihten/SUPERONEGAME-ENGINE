@@ -12,14 +12,15 @@
 #include "Matrix4x4.h"
 #include "StringManager.h"
 #include "Param.h"
+#include "Vec3d.h"
 
 enum StreamType;
 
 class Mesh;
-Mesh createCube();
+Mesh createCube(const flt3& dimensions);
 Mesh createTrees();
 Mesh createSelectionBoxes();
-Mesh createSphere(int latitudes, int longitudes);
+Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes);
 Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 Mesh createPlane(float width, float height, float m, float n);
 Mesh createAreaOfSelection();
@@ -224,10 +225,10 @@ public:
 
 	virtual void getBoundingSphere(flt4& sphere, const flt4x4& transform) const;
 
-	friend Mesh createCube();
+	friend Mesh createCube(const flt3& dimensions);
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();
-	friend Mesh createSphere(int latitudes, int longitudes);
+	friend Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes);
 	friend Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
 	friend Mesh createPlane(float width, float height, float m, float n);
 	friend Mesh createAreaOfSelection();

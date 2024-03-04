@@ -10,6 +10,9 @@ class Creator :public Modifier
 protected:
 	BaseOfFramework baseOfFramework;
 	bool bDrawBase;
+
+	std::vector<Mesh> meshes;
+
 public:
 	virtual void init();
 	void draw();

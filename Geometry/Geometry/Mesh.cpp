@@ -8,7 +8,7 @@
 
 uint32_t Mesh::instanceNumber = 0;
 
-Mesh createCube()
+Mesh createCube(const flt3& dimensions)
 {
 	Mesh m;
 
@@ -21,41 +21,45 @@ Mesh createCube()
 
 	auto& pts = m.flt3_streams.back().second;
 	
+	float dx = dimensions.x();
+	float dy = dimensions.y();
+	float dz = dimensions.z();
+
 	// bottom
-	pts.push_back(flt3(-0.5, -0.5, -0.5));
-	pts.push_back(flt3(-0.5, 0.5, -0.5));
-	pts.push_back(flt3(0.5, 0.5, -0.5));
-	pts.push_back(flt3(0.5, -0.5, -0.5));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, -0.5 * dz));
 
 	// top
-	pts.push_back(flt3(-0.5, -0.5, 0.5));
-	pts.push_back(flt3(-0.5, 0.5, 0.5));
-	pts.push_back(flt3(0.5, 0.5, 0.5));
-	pts.push_back(flt3(0.5, -0.5, 0.5));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, 0.5 * dz));
 
 	// left
-	pts.push_back(flt3(-0.5, -0.5, -0.5));
-	pts.push_back(flt3(-0.5, -0.5, 0.5));
-	pts.push_back(flt3(0.5, -0.5, 0.5));
-	pts.push_back(flt3(0.5, -0.5, -0.5));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, -0.5 * dz));
 
 	// right
-	pts.push_back(flt3(-0.5, 0.5, -0.5));
-	pts.push_back(flt3(-0.5, 0.5, 0.5));
-	pts.push_back(flt3(0.5, 0.5, 0.5));
-	pts.push_back(flt3(0.5, 0.5, -0.5));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, -0.5 * dz));
 
 	// back
-	pts.push_back(flt3(-0.5, -0.5, -0.5));
-	pts.push_back(flt3(-0.5, -0.5, 0.5));
-	pts.push_back(flt3(-0.5, 0.5, 0.5));
-	pts.push_back(flt3(-0.5, 0.5, -0.5));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, -0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(-0.5 * dx, 0.5 * dy, -0.5 * dz));
 
 	// front
-	pts.push_back(flt3(0.5, -0.5, -0.5));
-	pts.push_back(flt3(0.5, -0.5, 0.5));
-	pts.push_back(flt3(0.5, 0.5, 0.5));
-	pts.push_back(flt3(0.5, 0.5, -0.5));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, -0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, -0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, 0.5 * dz));
+	pts.push_back(flt3(0.5 * dx, 0.5 * dy, -0.5 * dz));
 
 	// vertices normals
 	m.flt3_streams.push_back(
@@ -249,14 +253,8 @@ Mesh createCube()
 	inds.push_back(22);
 	inds.push_back(23);
 
-	m.setTechnique(StringManager::toStringId("Light0Tex"));
-	m.setPass(StringManager::toStringId("P0"));
-
-	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	m.setParam(diffuse_map_key, StringManager::toStringId("test.dds"));
-
-	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
-	m.setParam(tex_transform_key, flt4x4());
+	m.setTechnique(geometry_of_editor_id);
+	m.setPass(p0_pass_id);
 
 	return m;
 }
@@ -422,8 +420,12 @@ Mesh createSelectionBoxes()
 	return m;
 }
 
-Mesh createSphere(int latitudes, int longitudes)
+Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes)
 {
+	float dx = dimensions.x();
+	float dy = dimensions.y();
+	float dz = dimensions.z();
+
 	int vertices = latitudes * (longitudes + 1) - 2;
 	int triangles = 2 * (latitudes - 2) * longitudes;
 	int indices = 3 * triangles;
@@ -471,28 +473,23 @@ Mesh createSphere(int latitudes, int longitudes)
 	auto& inds = sphere.indicies;
 	inds.reserve(indices);
 
-	float radius = 1;
-
 	double dh = 2 * M_PI / longitudes;
 	double dv = M_PI / (latitudes - 1);
 
 	for (int hi = 0; hi < longitudes; ++hi)
 	{
-		flt3 n(0, 1, 0);
-		pts.push_back(radius * n);
-		nms.push_back(n);
-		flt4 c(0, 1, 0, 0);
-		clrs.push_back(c);
-		uvs.push_back(flt2(hi * dh / 2 / M_PI, 0));
+		pts.emplace_back(0, dy, 0);
+		nms.emplace_back(0, 1, 0);
+		clrs.emplace_back(0, 1, 0, 0);
+		uvs.emplace_back(hi * dh / 2 / M_PI, 0);
 	}
 	for (int hi = 0; hi < longitudes + 1; ++hi)
 	{
-		flt3 n(sin(dv) * cos(hi * dh), cos(dv), sin(dv) * sin(hi * dh));
-		pts.push_back(radius * n);
-		nms.push_back(n);
-		flt4 c(0, 1, 0, 0);
-		clrs.push_back(c);
-		uvs.push_back(flt2(hi * dh / 2 / M_PI, dv / M_PI));
+		pts.emplace_back(dx * sin(dv) * cos(hi * dh), dy * cos(dv), dz * sin(dv) * sin(hi * dh));
+		nms.emplace_back(dy * dz * sin(dv) * sin(dv) * cos(hi * dh), dx * dz * cos(dv) * sin(dv), dx * dy * sin(dv) * sin(dv) * sin(hi * dh));
+		nms.back().normalize();
+		clrs.emplace_back(0, 1, 0, 0);
+		uvs.emplace_back(hi * dh / 2 / M_PI, dv / M_PI);
 
 		if (hi < longitudes)
 		{
@@ -505,12 +502,11 @@ Mesh createSphere(int latitudes, int longitudes)
 	{
 		for (int hi = 0; hi < longitudes + 1; ++hi)
 		{
-			flt3 n(sin(vi * dv) * cos(hi * dh), cos(vi * dv), sin(vi * dv) * sin(hi * dh));
-			pts.push_back(radius * n);
-			nms.push_back(n);
-			flt4 c(0, 1, 0, 0);
-			clrs.push_back(c);
-			uvs.push_back(flt2(hi * dh / 2 / M_PI, vi * dv / M_PI));
+			pts.emplace_back(dx * sin(vi * dv) * cos(hi * dh), dy * cos(vi * dv), dz * sin(vi * dv) * sin(hi * dh));
+			nms.emplace_back(dy * dz * sin(vi * dv) * sin(vi * dv) * cos(hi * dh), dx * dz * cos(vi * dv) * sin(vi * dv), dx * dy * sin(vi * dv) * sin(vi * dv) * sin(hi * dh));
+			nms.back().normalize();
+			clrs.emplace_back(0, 1, 0, 0);
+			uvs.emplace_back(hi * dh / 2 / M_PI, vi * dv / M_PI);
 
 			if (hi < longitudes)
 			{
@@ -526,26 +522,18 @@ Mesh createSphere(int latitudes, int longitudes)
 	}
 	for (int hi = 0; hi < longitudes; ++hi)
 	{
-		flt3 n(0, -1, 0);
-		pts.push_back(radius * n);
-		nms.push_back(n);
-		flt4 c(0, 1, 0, 0);
-		clrs.push_back(c);
-		uvs.push_back(flt2(hi * dh / 2 / M_PI, 1));
+		pts.emplace_back(0, -dy, 0);
+		nms.emplace_back(0, -1, 0);
+		clrs.emplace_back(0, 1, 0, 0);
+		uvs.emplace_back(hi* dh / 2 / M_PI, 1);
 
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi);
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 2) + hi);
 		inds.push_back(longitudes + (longitudes + 1) * (latitudes - 3) + hi + 1);
 	}
 
-	sphere.setTechnique(StringManager::toStringId("Light0Tex"));
-	sphere.setPass(StringManager::toStringId("P0"));
-
-	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	sphere.setParam(diffuse_map_key, StringManager::toStringId("earth.jpg"));
-
-	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
-	sphere.setParam(tex_transform_key, flt4x4());
+	sphere.setTechnique(geometry_of_editor_id);
+	sphere.setPass(p0_pass_id);
 
 	return sphere;
 }
@@ -677,14 +665,8 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 		inds.push_back(2 * edgesNumbers + 1 + vi);
 	}
 
-	cone.setTechnique(StringManager::toStringId("Light0Tex"));
-	cone.setPass(StringManager::toStringId("P0"));
-
-	ParamKey diffuse_map_key{ StringManager::toStringId("gDiffuseMap"),-1,string_id(-1) };
-	cone.setParam(diffuse_map_key, StringManager::toStringId("vase.jpg"));
-
-	ParamKey tex_transform_key{ StringManager::toStringId("gTexTransform"),-1,string_id(-1) };
-	cone.setParam(tex_transform_key, flt4x4());
+	cone.setTechnique(geometry_of_editor_id);
+	cone.setPass(p0_pass_id);
 
 	return cone;
 }

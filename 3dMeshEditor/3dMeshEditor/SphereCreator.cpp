@@ -105,6 +105,22 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 		{
 			currentState = State::Insertion;
 
+			auto& posW = sphereFramework.posW;
+			flt4x4 transform(axis0.x(), axis0.y(), axis0.z(), 0.0f,
+				axis1.x(), axis1.y(), axis1.z(), 0.0f,
+				axis2.x(), axis2.y(), axis2.z(), 0.0f,
+				posW.x(), posW.y(), posW.z(), 1.0f);
+			auto meshNode = MainScene::instance()->addTransformNode(transform);
+
+			flt3 dimensions(
+				sphereFramework.axis0.length(),
+				sphereFramework.axis1.length(),
+				sphereFramework.axis2.length()
+			);
+			meshes.push_back(createSphere(dimensions, 24, 12));
+
+			MainScene::instance()->addMeshNode(&meshes.back(), meshNode);
+
 			currentState = State::Initial;
 
 			return Behaviour::FINISH;

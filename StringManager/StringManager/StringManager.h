@@ -37,6 +37,8 @@ extern string_id frame_of_reference_id;
 extern string_id spheric_frame_of_reference_id;
 extern string_id scale_frame_of_reference_id;
 
+extern string_id geometry_of_editor_id;
+
 struct StringManager
 {
 	static void init();

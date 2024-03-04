@@ -40,6 +40,8 @@ string_id frame_of_reference_id;
 string_id spheric_frame_of_reference_id;
 string_id scale_frame_of_reference_id;
 
+string_id geometry_of_editor_id;
+
 StringManager* StringManager::stringManager = nullptr;
 
 StringManager::StringManager()
@@ -86,6 +88,8 @@ void StringManager::init()
 	frame_of_reference_id = toStringId("FrameOfReference");
 	spheric_frame_of_reference_id = toStringId("SphericFrameOfReference");
 	scale_frame_of_reference_id = toStringId("ScaleFrameOfReference");
+
+	string_id geometry_of_editor_id = toStringId("GeometryOfEditor");
 }
 
 string_id StringManager::toStringId(const char* str)

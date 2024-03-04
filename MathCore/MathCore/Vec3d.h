@@ -46,6 +46,10 @@ public:
 		return numbersToString((float*)(v), sizeof v / sizeof * v);
 	};
 
+	value_type const& x() const { return v[0]; };
+	value_type const& y() const { return v[1]; };
+	value_type const& z() const { return v[2]; };
+
 	value_type& x() { return v[0]; };
 	value_type& y() { return v[1]; };
 	value_type& z() { return v[2]; };
