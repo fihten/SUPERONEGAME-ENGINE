@@ -383,7 +383,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, PSTR szCmdLine,
 	cubeCreator.init();
 	coneCreator.init();
 
-	fillSceneForObjectsSelectionTesting();
+//	fillSceneForObjectsSelectionTesting();
 	PopFileInitialize(hwnd);
 
 	return GraphicsCore::instance()->run();

@@ -105,7 +105,11 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 		{
 			currentState = State::Insertion;
 
-			auto& posW = sphereFramework.posW;
+			auto posW = sphereFramework.posW;
+			posW += 0.5f * sphereFramework.axis0;
+			posW += 0.5f * sphereFramework.axis1;
+			posW += 0.5f * sphereFramework.axis2;
+
 			flt4x4 transform(axis0.x(), axis0.y(), axis0.z(), 0.0f,
 				axis1.x(), axis1.y(), axis1.z(), 0.0f,
 				axis2.x(), axis2.y(), axis2.z(), 0.0f,
@@ -120,6 +124,7 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 			meshes.push_back(createSphere(dimensions, 24, 12));
 
 			MainScene::instance()->addMeshNode(&meshes.back(), meshNode);
+			MainScene::instance()->updateGpu();
 
 			currentState = State::Initial;
 

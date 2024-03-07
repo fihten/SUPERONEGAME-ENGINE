@@ -105,6 +105,27 @@ Modifier::Behaviour CubeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 		{
 			currentState = State::Insertion;
 
+			auto posW = cubeFramework.posW;
+			posW += 0.5f * cubeFramework.axis0;
+			posW += 0.5f * cubeFramework.axis1;
+			posW += 0.5f * cubeFramework.axis2;
+
+			flt4x4 transform(axis0.x(), axis0.y(), axis0.z(), 0.0f,
+				axis1.x(), axis1.y(), axis1.z(), 0.0f,
+				axis2.x(), axis2.y(), axis2.z(), 0.0f,
+				posW.x(), posW.y(), posW.z(), 1.0f);
+			auto meshNode = MainScene::instance()->addTransformNode(transform);
+
+			flt3 dimensions(
+				cubeFramework.axis0.length(),
+				cubeFramework.axis1.length(),
+				cubeFramework.axis2.length()
+			);
+			meshes.push_back(createCube(dimensions));
+
+			MainScene::instance()->addMeshNode(&meshes.back(), meshNode);
+			MainScene::instance()->updateGpu();
+
 			currentState = State::Initial;
 
 			return Behaviour::FINISH;

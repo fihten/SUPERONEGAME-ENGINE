@@ -1,7 +1,7 @@
 #include "SelectionObjectsTesting.h"
 #include "MainScene.h"
 
-void fillSceneForObjectsSelectionTesting()
+/*void fillSceneForObjectsSelectionTesting()
 {
 	static Mesh cube = createCube();
 	static Mesh sphere = createSphere(10, 10);
@@ -66,4 +66,4 @@ void fillSceneForObjectsSelectionTesting()
 		}
 	}
 	MainScene::instance()->updateGpu();
-}
+}*/

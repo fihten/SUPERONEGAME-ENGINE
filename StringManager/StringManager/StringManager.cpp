@@ -89,7 +89,7 @@ void StringManager::init()
 	spheric_frame_of_reference_id = toStringId("SphericFrameOfReference");
 	scale_frame_of_reference_id = toStringId("ScaleFrameOfReference");
 
-	string_id geometry_of_editor_id = toStringId("GeometryOfEditor");
+	geometry_of_editor_id = toStringId("GeometryOfEditor");
 }
 
 string_id StringManager::toStringId(const char* str)

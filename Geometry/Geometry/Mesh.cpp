@@ -422,9 +422,9 @@ Mesh createSelectionBoxes()
 
 Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes)
 {
-	float dx = dimensions.x();
-	float dy = dimensions.y();
-	float dz = dimensions.z();
+	float dx = 0.5f * dimensions.x();
+	float dy = 0.5f * dimensions.y();
+	float dz = 0.5f * dimensions.z();
 
 	int vertices = latitudes * (longitudes + 1) - 2;
 	int triangles = 2 * (latitudes - 2) * longitudes;
