@@ -15,6 +15,8 @@ void Creator::init()
 	baseOfFrameworkGeo.gpuReadyData = &baseOfFramework;
 	baseOfFrameworkGeo.elementSize = sizeof BaseOfFramework;
 	baseOfFrameworkGeo.verticesCount = 1;
+
+	meshes.reserve(1000);
 }
 
 void Creator::draw()
