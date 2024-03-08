@@ -212,6 +212,10 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 				baseOfFramework.axis2 = cross(s1, s0);
 				baseOfFramework.axis0 =
 					cross(flt3(0.0f, 1.0f, 0.0f), baseOfFramework.axis2);
+				if (baseOfFramework.axis0.length() == 0) {
+					baseOfFramework.axis0 =
+						cross(flt3(1.0f, 0.0f, 0.0f), baseOfFramework.axis2);
+				}
 				baseOfFramework.axis1 =
 					cross(baseOfFramework.axis2, baseOfFramework.axis0);
 
@@ -270,10 +274,13 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 				posW.x(), posW.y(), posW.z(), 1.0f);
 			auto meshNode = MainScene::instance()->addTransformNode(transform);
 
-			float bottomRadius = 0.5f * coneFramework.axis0.length();
-			float height = coneFramework.axis1.length();
-			float topRadius = bottomRadius * coneFramework.scaleFromBottomToTop;
-			meshes.push_back(createCone(topRadius, bottomRadius, height, 24));
+			auto bottomRadius = flt2(
+				0.5f * coneFramework.axis0.length(),
+				0.5f * coneFramework.axis2.length()
+			);
+			float height = coneFramework.axis2.length();
+			flt2 topRadius = coneFramework.scaleFromBottomToTop * bottomRadius;
+			meshes.push_back(createCone(bottomRadius, topRadius, height, 24));
 
 			MainScene::instance()->addMeshNode(&meshes.back(), meshNode);
 			MainScene::instance()->updateGpu();

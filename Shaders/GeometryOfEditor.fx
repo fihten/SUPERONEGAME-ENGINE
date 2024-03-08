@@ -40,20 +40,7 @@ float4 ps(VertexOut pin) : SV_TARGET
 	float cosFactor = -dot(eyeDirW, normal);
 	cosFactor = saturate(cosFactor);
 
-	float4 resColor = 0.0f;
-	resColor += geoColor * lightColor * cosFactor;
-
-	float3 reflected = reflect(normal, eyeDirW);
-
-	float3 pt = pin.posH.xyz / pin.posH.w;
-	float3 toEye = eyePosW - pt;
-	normalize(toEye);
-
-	cosFactor = dot(reflected, toEye);
-	cosFactor = saturate(cosFactor);
-
-//	resColor += geoColor * lightColor * cosFactor;
-//	resColor *= 0.5;
+	float4 resColor = geoColor * lightColor * cosFactor;
 
 	return resColor;
 }

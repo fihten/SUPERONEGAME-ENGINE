@@ -111,15 +111,15 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 			posW += 0.5f * sphereFramework.axis2;
 
 			flt4x4 transform(axis0.x(), axis0.y(), axis0.z(), 0.0f,
-				axis1.x(), axis1.y(), axis1.z(), 0.0f,
 				axis2.x(), axis2.y(), axis2.z(), 0.0f,
+				axis1.x(), axis1.y(), axis1.z(), 0.0f,
 				posW.x(), posW.y(), posW.z(), 1.0f);
 			auto meshNode = MainScene::instance()->addTransformNode(transform);
 
 			flt3 dimensions(
 				sphereFramework.axis0.length(),
-				sphereFramework.axis1.length(),
-				sphereFramework.axis2.length()
+				sphereFramework.axis2.length(),
+				sphereFramework.axis1.length()
 			);
 			meshes.push_back(createSphere(dimensions, 24, 12));
 
@@ -207,6 +207,10 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 				baseOfFramework.axis2 = cross(s1, s0);
 				baseOfFramework.axis0 = 
 					cross(flt3(0.0f, 1.0f, 0.0f), baseOfFramework.axis2);
+				if (baseOfFramework.axis0.length() == 0) {
+					baseOfFramework.axis0 =
+						cross(flt3(1.0f, 0.0f, 0.0f), baseOfFramework.axis2);
+				}
 				baseOfFramework.axis1 = 
 					cross(baseOfFramework.axis2, baseOfFramework.axis0);
 

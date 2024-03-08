@@ -21,7 +21,7 @@ Mesh createCube(const flt3& dimensions);
 Mesh createTrees();
 Mesh createSelectionBoxes();
 Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes);
-Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
+Mesh createCone(flt2 bottomRadius, flt2 topRadius, float height, int edgesNumbers);
 Mesh createPlane(float width, float height, float m, float n);
 Mesh createAreaOfSelection();
 Mesh createMeshForTestingDefinitionOfTheSamePoints();
@@ -229,7 +229,7 @@ public:
 	friend Mesh createTrees();
 	friend Mesh createSelectionBoxes();
 	friend Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes);
-	friend Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers);
+	friend Mesh createCone(flt2 bottomRadius, flt2 topRadius, float height, int edgesNumbers);
 	friend Mesh createPlane(float width, float height, float m, float n);
 	friend Mesh createAreaOfSelection();
 	friend Mesh createMeshForTestingDefinitionOfTheSamePoints();

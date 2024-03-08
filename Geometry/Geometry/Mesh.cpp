@@ -538,10 +538,10 @@ Mesh createSphere(const flt3& dimensions, int latitudes, int longitudes)
 	return sphere;
 }
 
-Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumbers)
+Mesh createCone(flt2 bottomRadius, flt2 topRadius, float height, int edgesNumbers)
 {
 	int vertices = 2 * (2 * edgesNumbers + 1);
-	int triangles = 4 * edgesNumbers;
+	int triangles = 2 * (2 * edgesNumbers - 1);
 	int indices = 3 * triangles;
 
 	Mesh cone;
@@ -566,80 +566,45 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 	auto& nms = cone.flt3_streams.back().second;
 	nms.reserve(vertices);
 
-	// vertices colors
-	cone.flt4_streams.push_back(
-		std::pair<string_id, std::vector<flt4>>(
-			StringManager::toStringId("COLOR"),
-			std::vector<flt4>())
-	);
-	auto& clrs = cone.flt4_streams.back().second;
-	clrs.reserve(vertices);
-
-	// uv-coordinates
-	cone.flt2_streams.push_back(
-		std::pair<string_id, std::vector<flt2>>(
-			StringManager::toStringId("TEXCOORD"),
-			std::vector<flt2>())
-	);
-	auto& uvs = cone.flt2_streams.back().second;
-	uvs.reserve(vertices);
-
 	auto& inds = cone.indicies;
 	inds.reserve(indices);
 
 	float dv = 2 * M_PI / edgesNumbers;
 
+	float k = topRadius.x() / bottomRadius.x();
+
 	for (int vi = 0; vi < edgesNumbers; ++vi)
 	{
-		pts.push_back(flt3(0, height / 2, 0));
-		nms.push_back(flt3(0, 1, 0));
-		clrs.push_back(flt4(0, 0, 1, 0));
-		uvs.push_back(flt2((float)vi / (float)edgesNumbers, 0));
-	}
+		pts.emplace_back(topRadius.x() * cos(vi * dv), height / 2, topRadius.y() * sin(vi * dv));
+		nms.emplace_back(0, 1, 0);
 
-	float v = 0.5 - std::atan(height / 2 / topRadius) / M_PI;
-	
-	float side = sqrt(pow(height, 2) + pow(topRadius - bottomRadius, 2));
-	
-	float nX = height / side;
-	float nY = abs(topRadius - bottomRadius) / side + 1;
-
-	side = sqrt(nX * nX + nY * nY);
-	nX /= side;
-	nY /= side;
-
-	for (int vi = 0; vi < edgesNumbers + 1; ++vi)
-	{
-		pts.push_back(flt3(topRadius * cos(vi * dv), height / 2, topRadius * sin(vi * dv)));
-		nms.push_back(flt3(nX * cos(vi * dv), nY, nX * sin(vi * dv)));
-		clrs.push_back(flt4(0, 0, 1, 0));
-		uvs.push_back(flt2((float)vi / (float)edgesNumbers, v));
-
-		if (vi < edgesNumbers)
+		if (vi < edgesNumbers - 1)
 		{
+			inds.push_back(0);
 			inds.push_back(vi);
-			inds.push_back(edgesNumbers + vi);
-			inds.push_back(edgesNumbers + vi + 1);
+			inds.push_back(vi + 1);
 		}
 	}
 
-	v = 0.5 - std::atan(- height / 2 / bottomRadius) / M_PI;
-
-	side = sqrt(pow(height, 2) + pow(topRadius - bottomRadius, 2));
-
-	nX = height / side;
-	nY = abs(topRadius - bottomRadius) / side - 1;
-
-	side = sqrt(nX * nX + nY * nY);
-	nX /= side;
-	nY /= side;
+	for (int vi = 0; vi < edgesNumbers + 1; ++vi)
+	{
+		pts.emplace_back(topRadius.x() * cos(vi * dv), height / 2, topRadius.y() * sin(vi * dv));
+		nms.emplace_back(
+			topRadius.y() * cos(vi * dv),
+			-topRadius.x() * bottomRadius.y() * (k - 1) / height,
+			topRadius.x() * sin(vi * dv));
+		nms.back().normalize();
+	}
 
 	for (int vi = 0; vi < edgesNumbers + 1; ++vi)
 	{
-		pts.push_back(flt3(bottomRadius * cos(vi * dv), - height / 2, bottomRadius * sin(vi * dv)));
-		nms.push_back(flt3(nX * cos(vi * dv), nY, nX * sin(vi * dv)));
-		clrs.push_back(flt4(0, 0, 1, 0));
-		uvs.push_back(flt2((float)vi / (float)edgesNumbers, v));
+		pts.emplace_back(bottomRadius.x() * cos(vi * dv), - height / 2, bottomRadius.y() * sin(vi * dv));
+		nms.emplace_back(
+			bottomRadius.y() * cos(vi * dv),
+			-bottomRadius.x() * bottomRadius.y() * (k - 1) / height,
+			bottomRadius.x() * sin(vi * dv)
+		);
+		nms.back().normalize();
 
 		if (vi < edgesNumbers)
 		{
@@ -655,14 +620,15 @@ Mesh createCone(float topRadius, float bottomRadius, float height, int edgesNumb
 
 	for (int vi = 0; vi < edgesNumbers; ++vi)
 	{
-		pts.push_back(flt3(0, -height / 2, 0));
-		nms.push_back(flt3(0, -1, 0));
-		clrs.push_back(flt4(0, 0, 1, 0));
-		uvs.push_back(flt2((float)vi / (float)edgesNumbers, 1));
+		pts.emplace_back(bottomRadius.x() * cos(vi * dv), -height / 2, bottomRadius.y() * sin(vi * dv));
+		nms.emplace_back(0, -1, 0);
 
-		inds.push_back(3 * edgesNumbers + 2 + vi);
-		inds.push_back(2 * edgesNumbers + 2 + vi);
-		inds.push_back(2 * edgesNumbers + 1 + vi);
+		if (vi < edgesNumbers - 1)
+		{
+			inds.push_back(3 * edgesNumbers + 2 + 0);
+			inds.push_back(3 * edgesNumbers + 2 + vi + 1);
+			inds.push_back(3 * edgesNumbers + 2 + vi);
+		}
 	}
 
 	cone.setTechnique(geometry_of_editor_id);

@@ -3,6 +3,21 @@
 #include "NumbersToString.h"
 
 template<class value_type>
+class Vec2d;
+
+template<class value_type>
+value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+
+template<class value_type>
+value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+
+template<class value_type>
+Vec2d<value_type> operator*(const Vec2d<value_type>& vec, const value_type& x);
+
+template<class value_type>
+Vec2d<value_type> operator*(const value_type& x, const Vec2d<value_type>& vec);
+
+template<class value_type>
 class Vec2d
 {
 	value_type v[2];
@@ -23,8 +38,10 @@ public:
 	value_type& x() { return v[0]; };
 	value_type& y() { return v[1]; };
 
-	friend value_type dot(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
-	friend value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+	friend value_type dot<>(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+	friend value_type cross<>(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2);
+	friend Vec2d<value_type> operator*<>(const Vec2d<value_type>& v, const value_type& f);
+	friend Vec2d<value_type> operator*<>(const value_type& f, const Vec2d<value_type>& v);
 };
 
 template<class value_type>
@@ -55,6 +72,18 @@ template<class value_type>
 value_type cross(const Vec2d<value_type>& v1, const Vec2d<value_type>& v2)
 {
 	return v1.v[0] * v2.v[1] - v1.v[1] * v2.v[0];
+}
+
+template<class value_type>
+Vec2d<value_type> operator*(const Vec2d<value_type>& v, const value_type& f)
+{
+	return Vec2d<value_type>(v.v[0] * f, v.v[1] * f);
+}
+
+template<class value_type>
+Vec2d<value_type> operator*(const value_type& f, const Vec2d<value_type>& v)
+{
+	return Vec2d<value_type>(v.v[0] * f, v.v[1] * f);
 }
 
 typedef Vec2d<float> flt2;
