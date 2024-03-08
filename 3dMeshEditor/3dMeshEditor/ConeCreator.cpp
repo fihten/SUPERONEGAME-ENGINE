@@ -63,6 +63,9 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 
 				axis2 = cross(s1, s0);
 				axis0 = cross(flt3(0.0f, 1.0f, 0.0f), axis2);
+				if (axis0.length() == 0) {
+					axis0 = cross(flt3(1.0f, 0.0f, 0.0f), axis2);
+				}
 				axis1 = cross(axis2, axis0);
 
 				axis0.normalize();
@@ -276,7 +279,7 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 
 			auto bottomRadius = flt2(
 				0.5f * coneFramework.axis0.length(),
-				0.5f * coneFramework.axis2.length()
+				0.5f * coneFramework.axis1.length()
 			);
 			float height = coneFramework.axis2.length();
 			flt2 topRadius = coneFramework.scaleFromBottomToTop * bottomRadius;
