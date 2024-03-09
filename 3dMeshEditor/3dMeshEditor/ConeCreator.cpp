@@ -110,7 +110,7 @@ Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 		case State::DeterminingOfHeight:
 		{
 			currentState = State::DeterminingOfOxyProjectionOfTop;
-			return Behaviour::CONTINUE;
+			return Behaviour::FINISH;
 		}
 		}
 	}
