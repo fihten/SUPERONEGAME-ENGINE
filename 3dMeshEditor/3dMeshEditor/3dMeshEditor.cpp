@@ -166,7 +166,7 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	cubeCreator.setWindow(hwnd);
 	coneCreator.setWindow(hwnd);
 
-	modifier = &cubeCreator;
+	modifier = &coneCreator;
 
 	// Even though we just created a window, it is not initially
 	// shown. Therefore, the final step is to show and update the

@@ -65,7 +65,7 @@ Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam,
 				if (axis0.length() == 0) {
 					axis0 = cross(flt3(1.0f, 0.0f, 0.0f), axis2);
 				}
-				axis1 = cross(axis2, axis0);
+				axis1 = cross(axis0, axis2);
 
 				axis0.normalize();
 				axis1.normalize();
