@@ -31,11 +31,16 @@ CubeCreator cubeCreator;
 ConeCreator coneCreator;
 
 Modifier* modifier;
+Creator* currentCreator;
 
 DrawVisitor drawVisitor;
 
+HINSTANCE hInstanceHandle;
 HWND hwnd;
 HWND toolsHwnd;
+
+HWND geometryPaletteHwnd;
+bool bGeometryPalette;
 
 HICON hTranslationIcon;
 HICON hRotationIcon;
@@ -103,11 +108,16 @@ short AskAboutSave(HWND hwnd, TCHAR* szTitleName)
 		if (!SendMessage(hwnd, WM_COMMAND, ID_FILE_SAVE, 0))
 			iReturn = IDCANCEL;
 	return iReturn;
-}
-INT_PTR CALLBACK toolsDlg(HWND, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (wparam)		{		case IDC_TRANSLATION:		{			modifier = &transitionModifier;			SetFocus(hwnd);			break;		}		case IDC_ROTATION:		{			modifier = &rotationModifier;			SetFocus(hwnd);			break;		}		case IDC_SCALING:		{			modifier = &scalingModifier;			SetFocus(hwnd);			break;		}		}		break;	}	}	return 0;}
+}INT_PTR CALLBACK geometryPaletteDlg(HWND, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (LOWORD(wparam))		{		case IDC_SPHERE:		{			currentCreator = &sphereCreator;			modifier = currentCreator;			auto hAddGeometryIcon = LoadIcon(hInstanceHandle, (LPCTSTR)currentCreator->getIcon());
+			SendMessage(GetDlgItem(toolsHwnd, IDC_ADD_GEOMETRY), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hAddGeometryIcon);			ShowWindow(geometryPaletteHwnd, SW_HIDE);			SetFocus(hwnd);			break;		}		case IDC_CUBE:		{			currentCreator = &cubeCreator;			modifier = currentCreator;			auto hAddGeometryIcon = LoadIcon(hInstanceHandle, (LPCTSTR)currentCreator->getIcon());
+			SendMessage(GetDlgItem(toolsHwnd, IDC_ADD_GEOMETRY), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hAddGeometryIcon);			ShowWindow(geometryPaletteHwnd, SW_HIDE);			SetFocus(hwnd);			break;		}		case IDC_CONE:		{			currentCreator = &coneCreator;			modifier = currentCreator;			auto hAddGeometryIcon = LoadIcon(hInstanceHandle, (LPCTSTR)currentCreator->getIcon());
+			SendMessage(GetDlgItem(toolsHwnd, IDC_ADD_GEOMETRY), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hAddGeometryIcon);			ShowWindow(geometryPaletteHwnd, SW_HIDE);			SetFocus(hwnd);			break;		}		}	}	}	return 0;}
+INT_PTR CALLBACK toolsDlg(HWND, UINT msg, WPARAM wparam, LPARAM lparam){	switch (msg)	{	case WM_COMMAND:	{		switch (LOWORD(wparam))		{		case IDC_TRANSLATION:		{			modifier = &transitionModifier;			SetFocus(hwnd);			break;		}		case IDC_ROTATION:		{			modifier = &rotationModifier;			SetFocus(hwnd);			break;		}		case IDC_SCALING:		{			modifier = &scalingModifier;			SetFocus(hwnd);			break;		}		case IDC_ADD_GEOMETRY:		{			modifier = currentCreator;			if (!bGeometryPalette)			{				ShowWindow(geometryPaletteHwnd, SW_SHOW);				bGeometryPalette = true;			}			else			{				ShowWindow(geometryPaletteHwnd, SW_HIDE);				bGeometryPalette = false;			}			SetFocus(hwnd);			break;		}		}		break;	}	}	return 0;}
 
 HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc)
 {
+	hInstanceHandle = instanceHandle;
+
 	// The first task to creating a window is to describe some of its
 	// characteristics by filling out a WNDCLASS structure.
 	WNDCLASS wc;
@@ -166,7 +176,8 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 	cubeCreator.setWindow(hwnd);
 	coneCreator.setWindow(hwnd);
 
-	modifier = &coneCreator;
+	modifier = &transitionModifier;
+	currentCreator = &sphereCreator;
 
 	// Even though we just created a window, it is not initially
 	// shown. Therefore, the final step is to show and update the
@@ -188,6 +199,22 @@ HWND windowCreator(HINSTANCE instanceHandle, int width, int height, int show, WN
 
 	hScalingIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_SCALING);
 	SendMessage(GetDlgItem(toolsHwnd, IDC_SCALING), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hScalingIcon);
+
+	auto hAddGeometryIcon = LoadIcon(instanceHandle, (LPCTSTR)currentCreator->getIcon());
+	SendMessage(GetDlgItem(toolsHwnd, IDC_ADD_GEOMETRY), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hAddGeometryIcon);
+
+	geometryPaletteHwnd = CreateDialog(instanceHandle, (LPCTSTR)IDD_GEOMETRY_PALETTE, hwnd, geometryPaletteDlg);
+	ShowWindow(geometryPaletteHwnd, SW_HIDE);
+	bGeometryPalette = false;
+
+	auto hCubeIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_ADD_CUBE);
+	SendMessage(GetDlgItem(geometryPaletteHwnd, IDC_CUBE), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hCubeIcon);
+
+	auto hSphereIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_ADD_SPHERE);
+	SendMessage(GetDlgItem(geometryPaletteHwnd, IDC_SPHERE), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hSphereIcon);
+
+	auto hConeIcon = LoadIcon(instanceHandle, (LPCTSTR)IDI_ADD_CONE);
+	SendMessage(GetDlgItem(geometryPaletteHwnd, IDC_CONE), BM_SETIMAGE, (WPARAM)IMAGE_ICON, (LPARAM)hConeIcon);
 
 	return hwnd;
 }

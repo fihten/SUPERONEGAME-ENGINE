@@ -268,6 +268,11 @@ Modifier::Behaviour CubeCreator::processWindowMessage(UINT msg, WPARAM wparam, L
 	return Behaviour::FINISH;
 }
 
+uint32_t CubeCreator::getIcon()
+{
+	return IDI_ADD_CUBE;
+}
+
 void CubeCreator::draw()
 {
 	switch (currentState)

@@ -3,6 +3,7 @@
 #include "Modifier.h"
 #include "Mesh.h"
 #include "BaseOfFramework.h"
+#include "resource.h"
 
 class Creator :public Modifier
 {
@@ -15,5 +16,6 @@ protected:
 
 public:
 	virtual void init();
+	virtual uint32_t getIcon();
 	void draw();
 };

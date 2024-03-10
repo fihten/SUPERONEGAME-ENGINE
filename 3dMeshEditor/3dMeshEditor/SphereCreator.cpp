@@ -22,6 +22,11 @@ void SphereCreator::init()
 	bInitialized = true;
 }
 
+uint32_t SphereCreator::getIcon()
+{
+	return IDI_ADD_SPHERE;
+}
+
 Modifier::Behaviour SphereCreator::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)

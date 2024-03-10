@@ -23,6 +23,11 @@ void ConeCreator::init()
 	bInitialized = true;
 }
 
+uint32_t ConeCreator::getIcon()
+{
+	return IDI_ADD_CONE;
+}
+
 Modifier::Behaviour ConeCreator::processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam)
 {
 	switch (msg)

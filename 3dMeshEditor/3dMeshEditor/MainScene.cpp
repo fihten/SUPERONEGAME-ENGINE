@@ -82,7 +82,7 @@ void MainScene::updateGpu()
 	GraphicsCore::instance()->updateObjectsInfo(objectsInfo, spheresCount);
 	GraphicsCore::instance()->setObjectsCount(spheresCount);
 
-	bool bCheckSelectionStatus = Selector::instance()->selectedObjectsCount > 0;
+	bool bCheckSelectionStatus = false;// Selector::instance()->selectedObjectsCount > 0;
 	GraphicsCore::instance()->calculateBoundingSpheres(bCheckSelectionStatus);
 
 	GraphicsCore::instance()->setSpheresCount(spheresCount);

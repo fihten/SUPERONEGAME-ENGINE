@@ -27,5 +27,6 @@ class ConeCreator :public Creator
 public:
 	Behaviour processWindowMessage(UINT msg, WPARAM wparam, LPARAM lparam);
 	void draw();
+	uint32_t getIcon();
 	void init();
 };

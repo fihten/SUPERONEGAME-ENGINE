@@ -21,13 +21,24 @@
 #define IDB_TRANSLATION                 137
 #define IDI_ROTATION                    138
 #define IDI_SCALING                     139
+#define IDI_ADD_SPHERE                  140
+#define IDI_ADD_CUBE                    141
+#define IDI_ICON1                       142
+#define IDI_ADD_CONE                    142
+#define IDD_GEOMETRY_PALETTE            143
 #define IDC_BUTTON1                     1011
 #define IDC_TRANSLATION                 1011
+#define IDC_TRANSLATION2                1012
+#define IDC_CUBE                        1012
 #define IDC_BUTTON2                     1013
 #define IDC_ROTATION                    1013
+#define IDC_TRANSLATION3                1013
+#define IDC_SPHERE                      1013
 #define IDC_BUTTON3                     1014
 #define IDC_SCALING                     1014
+#define IDC_ADD_GEOMETRY                1015
 #define IDC_LIST1                       1016
+#define IDC_CONE                        1018
 #define ID_FILE_NEW                     32771
 #define ID_FILE_SAVE                    32772
 #define ID_FILE_SAVEAS                  32773
@@ -38,9 +49,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        140
+#define _APS_NEXT_RESOURCE_VALUE        144
 #define _APS_NEXT_COMMAND_VALUE         32775
-#define _APS_NEXT_CONTROL_VALUE         1018
+#define _APS_NEXT_CONTROL_VALUE         1019
 #define _APS_NEXT_SYMED_VALUE           110
 #endif
 #endif

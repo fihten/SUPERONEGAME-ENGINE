@@ -24,3 +24,8 @@ void Creator::draw()
 	if (bDrawBase)
 		GraphicsCore::instance()->draw(baseOfFrameworkGeo);
 }
+
+uint32_t Creator::getIcon()
+{
+	return (uint32_t)(-1);
+}
