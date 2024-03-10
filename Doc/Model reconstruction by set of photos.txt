@@ -1,0 +1,7 @@
+TODO:
+1. fix build
+2. restore last successful test
+3. try check not a linearness but linearness AND equalness of linear coefficient to transformation jacobian
+4. try to calculate linear coefficient based on photo samples relative to its average values
+5. try to optimize calculation time
+6. write test for searching the same points on two diffrent photos
