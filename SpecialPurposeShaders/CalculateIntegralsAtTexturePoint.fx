@@ -151,7 +151,7 @@ void cs_variance(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint meanValue1 = Integrals[4 * varianceIndex + 1] / area;
 	uint meanValue2 = Integrals[4 * varianceIndex + 2] / area;
 
-	uint4 color = round(255 * tex[int2(x, y)]);
+	uint4 color = round(255 * srgbToRaw(tex[int2(x, y)]));
 	uint value0 = color.x;
 	uint value1 = color.y;
 	uint value2 = color.z;

@@ -1,5 +1,5 @@
 TODO:
-1. fix build
+1. fix build - done
 2. restore last successful test
 3. try check not a linearness but linearness AND equalness of linear coefficient to transformation jacobian
 4. try to calculate linear coefficient based on photo samples relative to its average values

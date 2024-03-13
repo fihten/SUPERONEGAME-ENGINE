@@ -179,11 +179,11 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initBoundingSpheresCalculation();
 
 	// 12. Init photogrammetry
-/*	initCalculationOfTextureIntegrals();
+	initCalculationOfTextureIntegrals();
 	initDefinitionOfTheSamePoints();
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
-	initFourierTransform();*/
+	initFourierTransform();
 }
 
 void GraphicsCore::startFrame()
@@ -2623,28 +2623,6 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		variances
 	);
 
-	float integralsAlongRadiusA[3 * INTEGRALS_ALONG_RADIUS];
-	calculateIntegralsAtTexturePoint(
-		mTextureToIntegrateAsrv,
-		xA, yA,
-		0, 1,
-		0, 1,
-		1, INTEGRALS_ALONG_RADIUS,
-		integralsAlongRadiusA,
-		variances
-	);
-
-	float integralsAlongSectorsA[3 * INTEGRALS_ALONG_SECTORS];
-	calculateIntegralsAtTexturePoint(
-		mTextureToIntegrateAsrv,
-		xA, yA,
-		0, 1,
-		0, 1,
-		INTEGRALS_ALONG_SECTORS, 1,
-		integralsAlongSectorsA,
-		variances
-	);
-
 	float integralsB[3 * INTEGRALS];
 
 	float a[4] = {
@@ -2669,103 +2647,79 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	int index[4] = { 0,0,0,0 };
 
 	float maxStep = FLT_MAX;
-	float threshold = 1e-8;
+	float threshold = 1e-5;
 	
-	float e0 = FLT_MAX;
-	float e1 = FLT_MAX;
+	float err = FLT_MAX;
 
 	while (maxStep > threshold)
 	{
-		float prevError = FLT_MAX;
-		float currError = FLT_MAX;
-		float diffError = FLT_MAX;
-		while (diffError != 0)
+		while (
+			index[0] <= numberOfSteps[0] ||
+			index[1] <= numberOfSteps[1] ||
+			index[2] <= numberOfSteps[2] ||
+			index[3] <= numberOfSteps[3]
+			)
 		{
-			prevError = currError;
-
-			findMinimumForAngle0(xB, yB, integralsAlongSectorsA, index, a, b, step);
-			currError = findMinimumForAngle1(xB, yB, integralsAlongSectorsA, index, a, b, step);
-
-			diffError = std::abs(currError - prevError);
-		}
-
-		prevError = FLT_MAX;
-		currError = FLT_MAX;
-		diffError = FLT_MAX;
-		while (diffError != 0)
-		{
-			prevError = currError;
-
-			findMinimumForScale0(xB, yB, integralsAlongRadiusA, index, a, b, step);
-			currError = findMinimumForScale1(xB, yB, integralsAlongRadiusA, index, a, b, step);
-
-			diffError = std::abs(currError - prevError);
-		}
-
-		float angle0 = a[0] + index[0] * step[0];
-		float scale0 = a[1] + index[1] * step[1];
-
-		float angle1 = a[2] + index[2] * step[2];
-		float scale1 = a[3] + index[3] * step[3];
-		calculateIntegralsAtTexturePoint(
-			mTextureToIntegrateBsrv,
-			xB, yB,
-			angle0, scale0,
-			angle1, scale1,
-			integralsB,
-			variances
-		);
-		flt2 J = leastSquaresMethode(
-			integralsA,
-			integralsB
-		);
-
-		e0 = e1;
-		e1 = J.y();
-		if (e1 <= e0 && e0 - e1 < e0 * 0.1f)
-		{
-			maxStep = 0;
 			for (int i = 0; i < 4; i++)
 			{
-				a[i] = std::max<float>(a[i] + (index[i] - 1) * step[i], a[i]);
-				b[i] = std::min<float>(a[i] + 2 * step[i], b[i]);
-				step[i] = (b[i] - a[i]) / numberOfSteps[i];
-				index[i] = 0;
-
-				maxStep = std::max<float>(maxStep, step[i]);
+				index[i] %= numberOfSteps[i] + 1;
 			}
+
+			float a0 = a[0] + index[0] * step[0];
+			float s0 = a[1] + index[1] * step[1];
+			float a1 = a[2] + index[2] * step[2];
+			float s1 = a[3] + index[3] * step[3];
+
+			calculateIntegralsAtTexturePoint(
+				mTextureToIntegrateBsrv,
+				xB, yB,
+				a0, s0,
+				a1, s1,
+				integralsB,
+				variances
+			);
+
+			flt2 J = leastSquaresMethode(
+				integralsA,
+				integralsB
+			);
+			if (J.y() < err)
+			{
+				err = J.y();
+				angle0 = a0;
+				scale0 = s0;
+				angle1 = a1;
+				scale1 = s1;
+			}
+
+			index[0]++;
+			for (int i = 1; i < 4; i++)
+			{
+				if (index[i - 1] == numberOfSteps[i - 1] + 1)
+				{
+					index[i]++;
+				}
+			}
+		}
+
+		a[0] = angle0 - step[0];
+		a[1] = scale0 - step[1];
+		a[2] = angle1 - step[2];
+		a[3] = scale1 - step[3];
+
+		b[0] = angle0 + step[0];
+		b[1] = scale0 + step[1];
+		b[2] = angle1 + step[2];
+		b[3] = scale1 + step[3];
+
+		maxStep = 0;
+		for (int i = 0; i < 4; ++i)
+		{
+			index[i] = 0;
+			step[i] = (b[i] - a[i]) / numberOfSteps[i];
+			maxStep = std::max<float>(maxStep, step[i]);
 		}
 	}
-
-/*	float maxStep = FLT_MAX;
-	float threshold = 1e-8;
-	float minError = FLT_MAX;
-	while (maxStep > threshold)
-	{
-		findMinimumAlongAxis(xB, yB, integralsA, 0, index, a, b, step);
-		findMinimumAlongAxis(xB, yB, integralsA, 1, index, a, b, step);
-		findMinimumAlongAxis(xB, yB, integralsA, 2, index, a, b, step);
-		float error = findMinimumAlongAxis(xB, yB, integralsA, 3, index, a, b, step);
-		if (error == minError)
-		{
-			maxStep = 0;
-			for (int i = 0; i < 4; i++)
-			{
-				a[i] = std::max<float>(a[i] + (index[i] - 1) * step[i], a[i]);
-				b[i] = std::min<float>(a[i] + 2 * step[i], b[i]);
-				step[i] = (b[i] - a[i]) / numberOfSteps[i];
-				index[i] = 0;
-
-				maxStep = std::max<float>(maxStep, step[i]);
-			}
-		}
-		minError = error;
-	}*/
-
-	angle0 = 0.5f * (a[0] + b[0]);
-	scale0 = 0.5f * (a[1] + b[1]);
-	angle1 = 0.5f * (a[2] + b[2]);
-	scale1 = 0.5f * (a[3] + b[3]);
 
 	calculateIntegralsAtTexturePoint(
 		mTextureToIntegrateBsrv,
@@ -2810,7 +2764,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 	char buffer[2048];
 	sprintf(buffer, "\nminError = %f, a0 = %f, s0 = %f, a1 = %f, s1 = %f, distance from bell curve = %f\n",
-		e1, angle0 * 180.0f / M_PI, scale0, angle1 * 180.0f / M_PI, scale1, distFromBellCurve);
+		err, angle0 * 180.0f / M_PI, scale0, angle1 * 180.0f / M_PI, scale1, distFromBellCurve);
 	OutputDebugStringA(buffer);
 }
 
