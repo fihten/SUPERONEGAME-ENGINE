@@ -26,6 +26,7 @@ class GraphicsCore;
 
 typedef void (*DRAW_FUNC)(GraphicsCore*);
 typedef HWND(*WND_CREATOR)(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc);
+typedef void(*INTEGRAL_MODIFIER)(float fIntegrals[3], uint32_t uiIntegrals[4]);
 
 class SelectedObjectVisitor
 {
@@ -339,53 +340,6 @@ public:
 	);
 
 private:
-	float findMinimumAlongAxis(
-		int xB, int yB,
-		float integralsA[],
-		int axis,
-		int index[],
-		float leftBorder[],
-		float rightBorder[],
-		float step[]
-	);
-
-	float findMinimumForAngle0(
-		int xB, int yB,
-		float integralsA[],
-		int index[],
-		float leftBorder[],
-		float rightBorder[],
-		float step[]
-	);
-
-	float findMinimumForScale0(
-		int xB, int yB,
-		float integralsA[],
-		int index[],
-		float leftBorder[],
-		float rightBorder[],
-		float step[]
-	);
-
-	float findMinimumForAngle1(
-		int xB, int yB,
-		float integralsA[],
-		int index[],
-		float leftBorder[],
-		float rightBorder[],
-		float step[]
-	);
-
-	float findMinimumForScale1(
-		int xB, int yB,
-		float integralsA[],
-		int index[],
-		float leftBorder[],
-		float rightBorder[],
-		float step[]
-	);
-
-private:
 	void initManualDefinitionOfTheSamePoint();
 	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
 
@@ -424,15 +378,17 @@ private:
 	ID3D11Buffer* mVariancesBufferCopyMDSP = nullptr;
 	ID3D11UnorderedAccessView* mVariancesBufferMDSPuav = nullptr;
 
+	template<typename INTEGRAL_MODIFIER>
 	void calculateIntegralsAtTexturePoint(
 		ID3D11ShaderResourceView* texSRV,
 		int x, int y,
 		float angle0, float scale0,
 		float angle1, float scale1,
 		float integrals[],
-		float variances[]
+		INTEGRAL_MODIFIER modifier
 	);
 
+	template<typename INTEGRAL_MODIFIER>
 	void calculateIntegralsAtTexturePoint(
 		ID3D11ShaderResourceView* texSRV,
 		int x, int y,
@@ -440,7 +396,7 @@ private:
 		float angle1, float scale1,
 		int sectors, int sectorElements,
 		float integrals[],
-		float variances[]
+		INTEGRAL_MODIFIER modifier 
 	);
 
 	flt2 leastSquaresMethode(
