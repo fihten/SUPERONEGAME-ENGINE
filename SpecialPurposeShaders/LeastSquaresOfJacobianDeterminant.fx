@@ -13,6 +13,22 @@ int width;
 int height;
 int texturesCount;
 
+float angle0;
+float scale0;
+
+float angle1;
+float scale1;
+
+int offsetX;
+int offsetY;
+
+int cellRadius;
+int unitX;
+int unitY;
+
+RWTexture2DArray<float> error;
+RWTexture2DArray<uint4> AtoB;
+
 [numthreads(16, 16, 4)]
 void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -54,4 +70,34 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
+
+	int cellDiameterX = (2 * cellRadius + 1) * unitX;
+	int cellDiameterY = (2 * cellRadius + 1) * unitY;
+
+	int x_ = ((float)x + 0.5f) * cellDiameterX;
+	int y_ = ((float)y + 0.5f) * cellDiameterY;
+
+	uint4 mapping;
+	mapping.xy = uint2(x_, y_);
+
+	float2x2 m;
+	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
+	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
+
+	mapping.zw = uint2(x_ - offsetX, y_ - offsetY);
+	mapping.zw = mul(mapping.zw, m);
+
+	uint3 locationOut = locationIn;
+	error[locationOut] = err;
+	AtoB[locationOut] = mapping;
 }
+
+technique11 ApplyLeastSquareMethod
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_error()));
+	}
+};
