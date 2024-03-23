@@ -111,6 +111,66 @@ void OperationsOnGridIntegrals::init()
 	hCellRadius = hOperationsOnGridIntegralsFX->GetVariableByName("cellRadius");
 }
 
+void LeastSquaresOfJacobianDeterminant::init()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sLeastSquaresOfJacobianDeterminant = std::string(shadersFolder) + "\\LeastSquaresOfJacobianDeterminant.fx";
+
+	DWORD shaderFlags = 0;
+#if defined(DEBUG) || defined(_DEBUG)
+	shaderFlags |= D3D10_SHADER_DEBUG;
+	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sLeastSquaresOfJacobianDeterminant.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	auto device = GraphicsCore::instance()->device;
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &hLeastSquaresOfJacobianDeterminantFX);
+
+	hClearTech = hLeastSquaresOfJacobianDeterminantFX->GetTechniqueByName("Clear");
+	hApplyLeastSquareMethodTech = hLeastSquaresOfJacobianDeterminantFX->GetTechniqueByName("ApplyLeastSquareMethod");
+
+	hAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("AA")->AsShaderResource();
+	hAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("AB")->AsShaderResource();
+	hBB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("BB")->AsShaderResource();
+
+	hAAfraction = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("AAfraction")->AsShaderResource();
+	hABfraction = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("ABfraction")->AsShaderResource();
+	hBBfraction = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("BBfraction")->AsShaderResource();
+
+	hMaxA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxA")->AsShaderResource();
+	hMaxB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxB")->AsShaderResource();
+
+	hWidth = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("width");
+	hHeight = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("height");
+	hTexturesCount = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("texturesCount");
+
+	hAngle0 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("angle0");
+	hScale0 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("scale0");
+
+	hAngle1 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("angle1");
+	hScale1 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("scale1");
+
+	hOffsetX = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offsetX");
+	hOffsetY = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offsetY");
+
+	hCellRadius = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("cellRadius");
+	hUnitX = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("unitX");
+	hUnitY = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("unitY");
+
+	hError = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("error")->AsUnorderedAccessView();
+	hAtoB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("AtoB")->AsUnorderedAccessView();
+}
+
 void ModelMaker::init()
 {
 

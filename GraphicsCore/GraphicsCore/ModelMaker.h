@@ -96,6 +96,8 @@ struct LeastSquaresOfJacobianDeterminant
 
 	ID3DX11EffectUnorderedAccessViewVariable* hError = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hAtoB = nullptr;
+
+	void init();
 };
 
 class ModelMaker
