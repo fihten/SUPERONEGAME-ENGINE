@@ -21,6 +21,58 @@ int texturesCount;
 int cellRadius;
 
 [numthreads(16, 16, 4)]
+void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int cellDiameter = 2 * cellRadius + 1;
+	int cellsAlongX = ceil((float)width / cellDiameter);
+	int cellsAlongY = ceil((float)height / cellDiameter);
+
+	int x = dispatchThreadID.x;
+	if (x >= cellsAlongX)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= cellsAlongY)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 location = uint3(x, y, indexOfPhoto);
+	AA[location].r = 0;
+	AAfraction[location].r = 0;
+	maxA[location].r = 0;
+}
+
+[numthreads(16, 16, 4)]
+void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int cellDiameter = 2 * cellRadius + 1;
+	int cellsAlongX = ceil((float)width / cellDiameter);
+	int cellsAlongY = ceil((float)height / cellDiameter);
+
+	int x = dispatchThreadID.x;
+	if (x >= cellsAlongX)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= cellsAlongY)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 location = uint3(x, y, indexOfPhoto);
+	BB[location].r = 0;
+	BBfraction[location].r = 0;
+	AB[location].r = 0;
+	ABfraction[location].r = 0;
+	maxB[location].r = 0;
+}
+
+[numthreads(16, 16, 4)]
 void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
@@ -109,6 +161,18 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 technique11 MakeOperationsOnGridIntegrals
 {
+	pass clear_AA_maxA
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear_AA_maxA()));
+	}
+	pass clear_BB_AB_maxB
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear_BB_AB_maxB()));
+	}
 	pass AA_maxA
 	{
 		SetVertexShader(NULL);

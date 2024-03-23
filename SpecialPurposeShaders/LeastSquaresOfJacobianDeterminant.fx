@@ -30,6 +30,26 @@ RWTexture2DArray<float> error;
 RWTexture2DArray<uint4> AtoB;
 
 [numthreads(16, 16, 4)]
+void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int x = dispatchThreadID.x;
+	if (x >= width)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= height)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 location = uint3(x, y, indexOfPhoto);
+	error[location] = 0xFFFFFFFF;
+	AtoB[location] = uint4(0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFF);
+}
+
+[numthreads(16, 16, 4)]
 void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
@@ -91,6 +111,16 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	error[locationOut] = err;
 	AtoB[locationOut] = mapping;
 }
+
+technique11 Clear
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear()));
+	}
+};
 
 technique11 ApplyLeastSquareMethod
 {

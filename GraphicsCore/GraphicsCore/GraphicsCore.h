@@ -23,6 +23,10 @@
 #define INTEGRALS INTEGRALS_ALONG_RADIUS * INTEGRALS_ALONG_SECTORS
 
 class GraphicsCore;
+class ModelMaker;
+struct GridIntegrals;
+struct OperationsOnGridIntegrals;
+struct LeastSquaresOfJacobianDeterminant;
 
 typedef void (*DRAW_FUNC)(GraphicsCore*);
 typedef HWND(*WND_CREATOR)(HINSTANCE instanceHandle, int width, int height, int show, WNDPROC WndProc);
@@ -36,6 +40,11 @@ public:
 
 class GraphicsCore
 {
+	friend class ModelMaker;
+	friend struct GridIntegrals;
+	friend struct OperationsOnGridIntegrals;
+	friend struct LeastSquaresOfJacobianDeterminant;
+
 	ID3D11Device* device = 0;
 	ID3D11DeviceContext* context = 0;
 

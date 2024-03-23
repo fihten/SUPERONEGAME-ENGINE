@@ -18,6 +18,27 @@ int cellDimensionX;
 int cellDimensionY;
 
 [numthreads(16, 16, 4)]
+void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int cellsAlongX = ceil((float)width / cellDimensionX);
+	int cellsAlongY = ceil((float)height / cellDimensionY);
+
+	int x = dispatchThreadID.x;
+	if (x >= cellsAlongX)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= cellsAlongY)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	photosIntegrals[int3(x, y, indexOfPhoto)].xyzw = uint4(0, 0, 0, 0);
+}
+
+[numthreads(16, 16, 4)]
 void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
@@ -63,15 +84,25 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint originalValue;
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexX, indexOfPhoto)].x,
+		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].x,
 		color.x, originalValue);
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexX, indexOfPhoto)].y,
+		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].y,
 		color.y, originalValue);
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexX, indexOfPhoto)].z,
+		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].z,
 		color.z, originalValue);
 }
+
+technique11 ClearGridIntegrals
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear()));
+	}
+};
 
 technique11 CalculateGridIntegrals
 {
