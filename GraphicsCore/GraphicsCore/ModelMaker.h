@@ -56,6 +56,8 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
 	ID3DX11EffectVariable* hCellRadius = nullptr;
+
+	void init();
 };
 
 struct LeastSquaresOfJacobianDeterminant
