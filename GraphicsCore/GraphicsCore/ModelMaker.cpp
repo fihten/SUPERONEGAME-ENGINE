@@ -259,6 +259,24 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 		BBfractionSRV->Release();
 		BBfractionSRV = nullptr;
+
+		maxA->Release();
+		maxA = nullptr;
+
+		maxB->Release();
+		maxB = nullptr;
+
+		maxAsrv->Release();
+		maxAsrv = nullptr;
+
+		maxBsrv->Release();
+		maxBsrv = nullptr;
+
+		maxAuav->Release();
+		maxAuav = nullptr;
+
+		maxBuav->Release();
+		maxBuav = nullptr;
 	}
 
 	auto device = GraphicsCore::instance()->device;
@@ -398,6 +416,8 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	device->CreateTexture2D(&texArrayDesc, nullptr, &AAfraction);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &ABfraction);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &BBfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &maxA);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &maxB);
 
 	uav_desc.Format = DXGI_FORMAT_R32_UINT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
@@ -410,4 +430,21 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	device->CreateUnorderedAccessView(AAfraction, &uav_desc, &AAfractionUAV);
 	device->CreateUnorderedAccessView(ABfraction, &uav_desc, &ABfractionUAV);
 	device->CreateUnorderedAccessView(BBfraction, &uav_desc, &BBfractionUAV);
+	device->CreateUnorderedAccessView(maxA, &uav_desc, &maxAuav);
+	device->CreateUnorderedAccessView(maxB, &uav_desc, &maxBuav);
+
+	srv_desc.Format = DXGI_FORMAT_R32_UINT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(AA, &srv_desc, &AAsrv);
+	device->CreateShaderResourceView(AB, &srv_desc, &ABsrv);
+	device->CreateShaderResourceView(BB, &srv_desc, &BBsrv);
+	device->CreateShaderResourceView(AAfraction, &srv_desc, &AAfractionSRV);
+	device->CreateShaderResourceView(ABfraction, &srv_desc, &ABfractionSRV);
+	device->CreateShaderResourceView(BBfraction, &srv_desc, &BBfractionSRV);
+	device->CreateShaderResourceView(maxA, &srv_desc, &maxAsrv);
+	device->CreateShaderResourceView(maxB, &srv_desc, &maxBsrv);
 }

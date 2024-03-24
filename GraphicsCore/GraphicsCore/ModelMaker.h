@@ -155,6 +155,15 @@ class ModelMaker
 	ID3D11ShaderResourceView* ABfractionSRV = nullptr;
 	ID3D11ShaderResourceView* BBfractionSRV = nullptr;
 
+	ID3D11Texture2D* maxA = nullptr;
+	ID3D11Texture2D* maxB = nullptr;
+
+	ID3D11UnorderedAccessView* maxAuav = nullptr;
+	ID3D11UnorderedAccessView* maxBuav = nullptr;
+
+	ID3D11ShaderResourceView* maxAsrv = nullptr;
+	ID3D11ShaderResourceView* maxBsrv = nullptr;
+
 public:
 	static ModelMaker* instance();
 	static void init();
