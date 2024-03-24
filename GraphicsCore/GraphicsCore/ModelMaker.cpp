@@ -173,5 +173,102 @@ void LeastSquaresOfJacobianDeterminant::init()
 
 void ModelMaker::init()
 {
+	ptr->gridIntegrals.init();
+	ptr->operationsOnGridIntegrals.init();
+	ptr->leastSquaresOfJacobianDeterminant.init();
+}
 
+void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
+{
+	if (bSetOfPhotosIsLoaded)
+	{
+		setOfPhotos->Release();
+		setOfPhotos = nullptr;
+
+		setOfPhotosSRV->Release();
+		setOfPhotosSRV = nullptr;
+	}
+
+	auto device = GraphicsCore::instance()->device;
+	auto context = GraphicsCore::instance()->context;
+
+	int count = paths.size();
+	std::vector<ID3D11Texture2D*> photos(count);
+	for (int i = 0; i < count; i++)
+	{
+		const std::string& path = paths[i];
+
+		D3DX11_IMAGE_LOAD_INFO loadInfo;
+		loadInfo.Width = D3DX11_FROM_FILE;
+		loadInfo.Height = D3DX11_FROM_FILE;
+		loadInfo.Depth = D3DX11_FROM_FILE;
+		loadInfo.FirstMipLevel = 0;
+		loadInfo.MipLevels = D3DX11_FROM_FILE;
+		loadInfo.Usage = D3D11_USAGE_STAGING;
+		loadInfo.BindFlags = 0;
+		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+		loadInfo.MiscFlags = 0;
+		loadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		loadInfo.Filter = D3DX11_FILTER_LINEAR;
+		loadInfo.MipFilter = D3DX11_FILTER_LINEAR;
+		loadInfo.pSrcInfo = 0;
+		D3DX11CreateTextureFromFileA(
+			device,
+			path.c_str(),
+			&loadInfo,
+			0,
+			(ID3D11Resource * *)& photos[i],
+			0
+		);
+	}
+
+	D3D11_TEXTURE2D_DESC texElementDesc;
+	photos[0]->GetDesc(&texElementDesc);
+	D3D11_TEXTURE2D_DESC texArrayDesc;
+	texArrayDesc.Width = texElementDesc.Width;
+	texArrayDesc.Height = texElementDesc.Height;
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = texElementDesc.Format;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, 0, &setOfPhotos);
+
+	for (int texElement = 0; texElement < count; ++texElement)
+	{
+		int mipLevel = 0;
+		
+		D3D11_MAPPED_SUBRESOURCE mappedTex2D;
+		context->Map(photos[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D);
+		context->UpdateSubresource(
+			setOfPhotos,
+			D3D11CalcSubresource(
+				mipLevel,
+				texElement,
+				texElementDesc.MipLevels
+			),
+			0,
+			mappedTex2D.pData,
+			mappedTex2D.RowPitch,
+			mappedTex2D.DepthPitch
+		);
+		context->Unmap(photos[texElement], mipLevel);
+	}
+
+	width = texElementDesc.Width;
+	height = texElementDesc.Height;
+	texturesCount = count;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	srv_desc.Format = texElementDesc.Format;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(setOfPhotos, &srv_desc, &setOfPhotosSRV);
 }

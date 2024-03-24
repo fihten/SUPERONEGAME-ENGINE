@@ -1,6 +1,8 @@
 #pragma once
 #include <d3dx11effect.h>
 #include <memory>
+#include <vector>
+#include <string>
 
 struct GridIntegrals
 {
@@ -56,7 +58,7 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
 	ID3DX11EffectVariable* hCellRadius = nullptr;
-
+public:
 	void init();
 };
 
@@ -96,7 +98,7 @@ struct LeastSquaresOfJacobianDeterminant
 
 	ID3DX11EffectUnorderedAccessViewVariable* hError = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hAtoB = nullptr;
-
+public:
 	void init();
 };
 
@@ -104,8 +106,20 @@ class ModelMaker
 {
 	static std::unique_ptr<ModelMaker> ptr;
 
+	GridIntegrals gridIntegrals;
+	OperationsOnGridIntegrals operationsOnGridIntegrals;
+	LeastSquaresOfJacobianDeterminant leastSquaresOfJacobianDeterminant;
+
+	ID3D11Texture2D* setOfPhotos = nullptr;
+	ID3D11ShaderResourceView* setOfPhotosSRV = nullptr;
+	int width = 0;
+	int height = 0;
+	int texturesCount = 0;
+
+	bool bSetOfPhotosIsLoaded = false;
 public:
 	static ModelMaker* instance();
 	static void init();
 
+	void loadPhotos(const std::vector<std::string>& paths);
 };
