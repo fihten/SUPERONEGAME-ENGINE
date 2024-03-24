@@ -4,6 +4,11 @@
 #include <vector>
 #include <string>
 
+#define CELL_DIMENSION_X 32 // for spheres this is 36
+#define CELL_DIMENSION_Y 32 // for spheres this is 36
+
+#define RADIUS_IN_CELLS 7 
+
 struct GridIntegrals
 {
 	ID3DX11Effect* hGridIntegralsFX = nullptr;
@@ -117,6 +122,39 @@ class ModelMaker
 	int texturesCount = 0;
 
 	bool bSetOfPhotosIsLoaded = false;
+
+	ID3D11Texture2D* photosIntegralsA = nullptr;
+	ID3D11UnorderedAccessView* photosIntegralsAuav = nullptr;
+	ID3D11ShaderResourceView* photosIntegralsAsrv = nullptr;
+
+	ID3D11Texture2D* photosIntegralsB = nullptr;
+	ID3D11UnorderedAccessView* photosIntegralsBuav = nullptr;
+	ID3D11ShaderResourceView* photosIntegralsBsrv = nullptr;
+
+	ID3D11Texture2D* AA = nullptr;
+	ID3D11Texture2D* AB = nullptr;
+	ID3D11Texture2D* BB = nullptr;
+
+	ID3D11Texture2D* AAfraction = nullptr;
+	ID3D11Texture2D* ABfraction = nullptr;
+	ID3D11Texture2D* BBfraction = nullptr;
+
+	ID3D11UnorderedAccessView* AAuav = nullptr;
+	ID3D11UnorderedAccessView* ABuav = nullptr;
+	ID3D11UnorderedAccessView* BBuav = nullptr;
+
+	ID3D11UnorderedAccessView* AAfractionUAV = nullptr;
+	ID3D11UnorderedAccessView* ABfractionUAV = nullptr;
+	ID3D11UnorderedAccessView* BBfractionUAV = nullptr;
+
+	ID3D11ShaderResourceView* AAsrv = nullptr;
+	ID3D11ShaderResourceView* ABsrv = nullptr;
+	ID3D11ShaderResourceView* BBsrv = nullptr;
+
+	ID3D11ShaderResourceView* AAfractionSRV = nullptr;
+	ID3D11ShaderResourceView* ABfractionSRV = nullptr;
+	ID3D11ShaderResourceView* BBfractionSRV = nullptr;
+
 public:
 	static ModelMaker* instance();
 	static void init();

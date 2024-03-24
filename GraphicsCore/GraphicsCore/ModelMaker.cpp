@@ -187,6 +187,78 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 		setOfPhotosSRV->Release();
 		setOfPhotosSRV = nullptr;
+
+		photosIntegralsA->Release();
+		photosIntegralsA = nullptr;
+
+		photosIntegralsAuav->Release();
+		photosIntegralsAuav = nullptr;
+
+		photosIntegralsAsrv->Release();
+		photosIntegralsAsrv = nullptr;
+
+		photosIntegralsB->Release();
+		photosIntegralsB = nullptr;
+
+		photosIntegralsBuav->Release();
+		photosIntegralsBuav = nullptr;
+
+		photosIntegralsBsrv->Release();
+		photosIntegralsBsrv = nullptr;
+
+		AA->Release();
+		AA = nullptr;
+
+		AB->Release();
+		AB = nullptr;
+
+		BB->Release();
+		BB = nullptr;
+
+		AAfraction->Release();
+		AAfraction = nullptr;
+
+		ABfraction->Release();
+		ABfraction = nullptr;
+
+		BBfraction->Release();
+		BBfraction = nullptr;
+
+		AAuav->Release();
+		AAuav = nullptr;
+
+		ABuav->Release();
+		ABuav = nullptr;
+
+		BBuav->Release();
+		BBuav = nullptr;
+
+		AAfractionUAV->Release();
+		AAfractionUAV = nullptr;
+
+		ABfractionUAV->Release();
+		ABfractionUAV = nullptr;
+
+		BBfractionUAV->Release();
+		BBfractionUAV = nullptr;
+
+		AAsrv->Release();
+		AAsrv = nullptr;
+
+		ABsrv->Release();
+		ABsrv = nullptr;
+
+		BBsrv->Release();
+		BBsrv = nullptr;
+
+		AAfractionSRV->Release();
+		AAfractionSRV = nullptr;
+
+		ABfractionSRV->Release();
+		ABfractionSRV = nullptr;
+
+		BBfractionSRV->Release();
+		BBfractionSRV = nullptr;
 	}
 
 	auto device = GraphicsCore::instance()->device;
@@ -271,4 +343,71 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = count;
 	device->CreateShaderResourceView(setOfPhotos, &srv_desc, &setOfPhotosSRV);
+
+	int cellsAlongX = std::ceil((float)(width) / CELL_DIMENSION_X);
+	int cellsAlongY = std::ceil((float)(height) / CELL_DIMENSION_Y);
+
+	texArrayDesc.Width = cellsAlongX;
+	texArrayDesc.Height = cellsAlongY;
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsA);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsB);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = count;
+	device->CreateUnorderedAccessView(photosIntegralsA, &uav_desc, &photosIntegralsAuav);
+	device->CreateUnorderedAccessView(photosIntegralsB, &uav_desc, &photosIntegralsBuav);
+
+	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(photosIntegralsA, &srv_desc, &photosIntegralsAsrv);
+	device->CreateShaderResourceView(photosIntegralsB, &srv_desc, &photosIntegralsBsrv);
+
+	int diameterInCells = 2 * RADIUS_IN_CELLS + 1;
+
+	texArrayDesc.Width = std::ceil(cellsAlongX / diameterInCells);
+	texArrayDesc.Height = std::ceil(cellsAlongY / diameterInCells);
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AA);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &BB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AAfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &ABfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &BBfraction);
+
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = count;
+	device->CreateUnorderedAccessView(AA, &uav_desc, &AAuav);
+	device->CreateUnorderedAccessView(AB, &uav_desc, &ABuav);
+	device->CreateUnorderedAccessView(BB, &uav_desc, &BBuav);
+	device->CreateUnorderedAccessView(AAfraction, &uav_desc, &AAfractionUAV);
+	device->CreateUnorderedAccessView(ABfraction, &uav_desc, &ABfractionUAV);
+	device->CreateUnorderedAccessView(BBfraction, &uav_desc, &BBfractionUAV);
 }
