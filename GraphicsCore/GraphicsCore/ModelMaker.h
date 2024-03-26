@@ -35,6 +35,18 @@ struct GridIntegrals
 	ID3DX11EffectVariable* hCellDimensionY = nullptr;
 public:
 	void init();
+	void clearPhotosIntegrals(
+		ID3D11UnorderedAccessView* photosIntegrals,
+		int width, int height, int count
+	);
+	void calculatePhotosIntegrals(
+		ID3D11ShaderResourceView* photos,
+		ID3D11UnorderedAccessView* photosIntegrals,
+		int width, int height, int count,
+		float angle0, float scale0,
+		float angle1, float scale1,
+		int offsetX, int offsetY
+	);
 };
 
 struct OperationsOnGridIntegrals
@@ -65,6 +77,27 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectVariable* hCellRadius = nullptr;
 public:
 	void init();
+	void clearA(
+		ID3D11UnorderedAccessView* AA,
+		ID3D11UnorderedAccessView* AAfraction,
+		ID3D11UnorderedAccessView* maxA,
+		int width, int height, int count
+	);
+	void clearAB(
+		ID3D11UnorderedAccessView* AB,
+		ID3D11UnorderedAccessView* ABfraction,
+		ID3D11UnorderedAccessView* BB,
+		ID3D11UnorderedAccessView* BBfraction,
+		ID3D11UnorderedAccessView* maxB,
+		int width, int height, int count
+	);
+	void calculateA(
+		ID3D11ShaderResourceView* photosIntegralsA,
+		ID3D11UnorderedAccessView* AA,
+		ID3D11UnorderedAccessView* AAfraction,
+		ID3D11UnorderedAccessView* maxA,
+		int width, int height, int count
+	);
 };
 
 struct LeastSquaresOfJacobianDeterminant
@@ -83,6 +116,8 @@ struct LeastSquaresOfJacobianDeterminant
 
 	ID3DX11EffectShaderResourceVariable* hMaxA = nullptr;
 	ID3DX11EffectShaderResourceVariable* hMaxB = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* hMapAtoB = nullptr;
 
 	ID3DX11EffectVariable* hWidth = nullptr;
 	ID3DX11EffectVariable* hHeight = nullptr;
@@ -163,6 +198,9 @@ class ModelMaker
 
 	ID3D11ShaderResourceView* maxAsrv = nullptr;
 	ID3D11ShaderResourceView* maxBsrv = nullptr;
+
+	ID3D11Buffer* mapAtoB = nullptr;
+	ID3D11ShaderResourceView* mapAtoBsrv = nullptr;
 
 public:
 	static ModelMaker* instance();

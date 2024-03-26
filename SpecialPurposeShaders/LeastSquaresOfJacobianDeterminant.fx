@@ -9,6 +9,8 @@ Texture2DArray<uint> BBfraction;
 Texture2DArray<uint> maxA;
 Texture2DArray<uint> maxB;
 
+StructuredBuffer<uint> mapAtoB;
+
 int width;
 int height;
 int texturesCount;
@@ -97,15 +99,20 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int x_ = ((float)x + 0.5f) * cellDiameterX;
 	int y_ = ((float)y + 0.5f) * cellDiameterY;
 
-	uint4 mapping;
-	mapping.xy = uint2(x_, y_);
+	int2 posInA = int2(x_, y_);
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	mapping.zw = uint2(x_ - offsetX, y_ - offsetY);
-	mapping.zw = mul(mapping.zw, m);
+	int2 posInB = int2(x_ - offsetX, y_ - offsetY);
+	posInB = max(mul(posInB, m), int2(0, 0));
+
+	uint4 mapping;
+	mapping.x = (posInA.x << 16) | (posInA.y & 0xffff);
+	mapping.y = indexOfPhoto;
+	mapping.z = (posInB.x << 16) | (posInB.y & 0xffff);
+	mapping.w = mapAtoB[indexOfPhoto];
 
 	uint3 locationOut = locationIn;
 	error[locationOut] = err;

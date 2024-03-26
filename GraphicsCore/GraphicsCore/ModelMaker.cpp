@@ -61,6 +61,85 @@ void GridIntegrals::init()
 	hCellDimensionY = hGridIntegralsFX->GetVariableByName("cellDimensionY");
 }
 
+void GridIntegrals::clearPhotosIntegrals(
+	ID3D11UnorderedAccessView* photosIntegrals,
+	int width, int height, int count
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	// Set shader variables
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
+
+	int cellDimensionX = CELL_DIMENSION_X;
+	hCellDimensionX->SetRawValue(&cellDimensionX, 0, sizeof(cellDimensionX));
+
+	int cellDimensionY = CELL_DIMENSION_Y;
+	hCellDimensionY->SetRawValue(&cellDimensionY, 0, sizeof(cellDimensionY));
+
+	hPhotosIntegrals->SetUnorderedAccessView(photosIntegrals);
+
+	// define number of thread groups
+
+	int cellsAlongX = std::ceil((float)width / cellDimensionX);
+	int cellsAlongY = std::ceil((float)height / cellDimensionY);
+
+	uint32_t groups_x = std::ceil((float)(cellsAlongX) / 16);
+	uint32_t groups_y = std::ceil((float)(cellsAlongY) / 16);
+	uint32_t groups_z = std::ceil((float)(count) / 4);
+
+	hClearGridIntegralsTech->GetPassByName("P0")->Apply(0, context);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hPhotosIntegrals->SetUnorderedAccessView(nullptr);
+}
+
+void GridIntegrals::calculatePhotosIntegrals(
+	ID3D11ShaderResourceView* photos,
+	ID3D11UnorderedAccessView* photosIntegrals,
+	int width, int height, int count,
+	float angle0, float scale0,
+	float angle1, float scale1,
+	int offsetX, int offsetY
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hPhotos->SetResource(photos);
+	hPhotosIntegrals->SetUnorderedAccessView(photosIntegrals);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
+
+	hAngle0->SetRawValue(&angle0, 0, sizeof(angle0));
+	hScale0->SetRawValue(&scale0, 0, sizeof(scale0));
+
+	hAngle1->SetRawValue(&angle1, 0, sizeof(angle1));
+	hScale1->SetRawValue(&scale1, 0, sizeof(scale1));
+
+	hOffsetX->SetRawValue(&offsetX, 0, sizeof(offsetX));
+	hOffsetY->SetRawValue(&offsetY, 0, sizeof(offsetY));
+
+	int cellDimensionX = CELL_DIMENSION_X;
+	hCellDimensionX->SetRawValue(&cellDimensionX, 0, sizeof(cellDimensionX));
+
+	int cellDimensionY = CELL_DIMENSION_Y;
+	hCellDimensionY->SetRawValue(&cellDimensionY, 0, sizeof(cellDimensionY));
+
+	hCalculateGridIntegralsTech->GetPassByName("P0")->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(width) / 16);
+	uint32_t groups_y = std::ceil((float)(height) / 16);
+	uint32_t groups_z = std::ceil((float)(count) / 4);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hPhotos->SetResource(nullptr);
+	hPhotosIntegrals->SetUnorderedAccessView(nullptr);
+}
+
 void OperationsOnGridIntegrals::init()
 {
 	char shadersFolder[200];
@@ -111,6 +190,136 @@ void OperationsOnGridIntegrals::init()
 	hCellRadius = hOperationsOnGridIntegralsFX->GetVariableByName("cellRadius");
 }
 
+void OperationsOnGridIntegrals::clearA(
+	ID3D11UnorderedAccessView* AA,
+	ID3D11UnorderedAccessView* AAfraction,
+	ID3D11UnorderedAccessView* maxA,
+	int width, int height, int count
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hAA->SetUnorderedAccessView(AA);
+	hAAfraction->SetUnorderedAccessView(AAfraction);
+	hMaxA->SetUnorderedAccessView(maxA);
+
+	width = std::ceil((float)width / CELL_DIMENSION_X);
+	height = std::ceil((float)height / CELL_DIMENSION_Y);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
+
+	int cellRadius = RADIUS_IN_CELLS;
+	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(0)->Apply(0, context);
+
+	int cellDiameter = 2 * cellRadius + 1;
+	width = std::ceil((float)width / cellDiameter);
+	height = std::ceil((float)height / cellDiameter);
+
+	uint32_t groups_x = std::ceil((float)width / 16);
+	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_z = std::ceil((float)count / 4);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAA->SetUnorderedAccessView(nullptr);
+	hAAfraction->SetUnorderedAccessView(nullptr);
+	hMaxA->SetUnorderedAccessView(nullptr);
+}
+
+void OperationsOnGridIntegrals::clearAB(
+	ID3D11UnorderedAccessView* AB,
+	ID3D11UnorderedAccessView* ABfraction,
+	ID3D11UnorderedAccessView* BB,
+	ID3D11UnorderedAccessView* BBfraction,
+	ID3D11UnorderedAccessView* maxB,
+	int width, int height, int count
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hAB->SetUnorderedAccessView(AB);
+	hABfraction->SetUnorderedAccessView(ABfraction);
+
+	hBB->SetUnorderedAccessView(BB);
+	hBBfraction->SetUnorderedAccessView(BBfraction);
+
+	hMaxB->SetUnorderedAccessView(maxB);
+
+	width = std::ceil((float)width / CELL_DIMENSION_X);
+	height = std::ceil((float)height / CELL_DIMENSION_Y);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
+
+	int cellRadius = RADIUS_IN_CELLS;
+	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(1)->Apply(0, context);
+
+	int cellDiameter = 2 * cellRadius + 1;
+	width = std::ceil((float)width / cellDiameter);
+	height = std::ceil((float)height / cellDiameter);
+
+	uint32_t groups_x = std::ceil((float)width / 16);
+	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_z = std::ceil((float)count / 4);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAB->SetUnorderedAccessView(nullptr);
+	hABfraction->SetUnorderedAccessView(nullptr);
+
+	hBB->SetUnorderedAccessView(nullptr);
+	hBBfraction->SetUnorderedAccessView(nullptr);
+
+	hMaxB->SetUnorderedAccessView(nullptr);
+}
+
+void OperationsOnGridIntegrals::calculateA(
+	ID3D11ShaderResourceView* photosIntegralsA,
+	ID3D11UnorderedAccessView* AA,
+	ID3D11UnorderedAccessView* AAfraction,
+	ID3D11UnorderedAccessView* maxA,
+	int width, int height, int count
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hPhotosIntegralsA->SetResource(photosIntegralsA);
+	hAA->SetUnorderedAccessView(AA);
+	hAAfraction->SetUnorderedAccessView(AAfraction);
+	hMaxA->SetUnorderedAccessView(maxA);
+
+	width = std::ceil((float)width / CELL_DIMENSION_X);
+	height = std::ceil((float)height / CELL_DIMENSION_Y);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
+
+	int cellRadius = RADIUS_IN_CELLS;
+	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(2)->Apply(0, context);
+
+	int cellDiameter = 2 * cellRadius + 1;
+	width = std::ceil((float)width / cellDiameter);
+	height = std::ceil((float)height / cellDiameter);
+
+	uint32_t groups_x = std::ceil((float)width / 16);
+	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_z = std::ceil((float)count / 4);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hPhotosIntegralsA->SetResource(nullptr);
+	hAA->SetUnorderedAccessView(nullptr);
+	hAAfraction->SetUnorderedAccessView(nullptr);
+	hMaxA->SetUnorderedAccessView(nullptr);
+}
+
 void LeastSquaresOfJacobianDeterminant::init()
 {
 	char shadersFolder[200];
@@ -149,6 +358,8 @@ void LeastSquaresOfJacobianDeterminant::init()
 
 	hMaxA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxA")->AsShaderResource();
 	hMaxB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxB")->AsShaderResource();
+
+	hMapAtoB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("mapAtoB")->AsShaderResource();
 
 	hWidth = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("width");
 	hHeight = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("height");
@@ -277,6 +488,12 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 		maxBuav->Release();
 		maxBuav = nullptr;
+
+		mapAtoB->Release();
+		mapAtoB = nullptr;
+
+		mapAtoBsrv->Release();
+		mapAtoBsrv = nullptr;
 	}
 
 	auto device = GraphicsCore::instance()->device;
@@ -447,4 +664,19 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	device->CreateShaderResourceView(BBfraction, &srv_desc, &BBfractionSRV);
 	device->CreateShaderResourceView(maxA, &srv_desc, &maxAsrv);
 	device->CreateShaderResourceView(maxB, &srv_desc, &maxBsrv);
+
+	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.ByteWidth = count * sizeof(uint32_t);
+	buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+	buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	buffer_desc.StructureByteStride = sizeof(uint32_t);
+	device->CreateBuffer(&buffer_desc, nullptr, &mapAtoB);
+
+	srv_desc.Format = DXGI_FORMAT_R32_UINT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srv_desc.Buffer.FirstElement = 0;
+	srv_desc.Buffer.NumElements = count;
+	device->CreateShaderResourceView(mapAtoB, &srv_desc, &mapAtoBsrv);
 }

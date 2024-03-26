@@ -1,5 +1,6 @@
 Texture2DArray<uint4> photosIntegralsA;
 Texture2DArray<uint4> photosIntegralsB;
+StructuredBuffer<uint> mapAtoB;
 
 RWTexture2DArray<uint> AA;
 RWTexture2DArray<uint> AB;
@@ -11,8 +12,6 @@ RWTexture2DArray<uint> BBfraction;
 
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
-
-StructuredBuffer<uint> mapAtoB;
 
 int width;
 int height;
