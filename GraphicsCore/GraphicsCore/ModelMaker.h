@@ -98,6 +98,17 @@ public:
 		ID3D11UnorderedAccessView* maxA,
 		int width, int height, int count
 	);
+	void calculateAB(
+		ID3D11ShaderResourceView* photosIntegralsA,
+		ID3D11ShaderResourceView* photosIntegralsB,
+		ID3D11ShaderResourceView* mapAtoB,
+		ID3D11UnorderedAccessView* AB,
+		ID3D11UnorderedAccessView* ABfraction,
+		ID3D11UnorderedAccessView* BB,
+		ID3D11UnorderedAccessView* BBfraction,
+		ID3D11UnorderedAccessView* maxB,
+		int width, int height, int count
+	);
 };
 
 struct LeastSquaresOfJacobianDeterminant
@@ -140,6 +151,28 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectUnorderedAccessViewVariable* hAtoB = nullptr;
 public:
 	void init();
+	void clear(
+		ID3D11UnorderedAccessView* error,
+		ID3D11UnorderedAccessView* AtoB,
+		int width, int height, int count
+	);
+	void calculateErrors(
+		ID3D11ShaderResourceView* AA,
+		ID3D11ShaderResourceView* AB,
+		ID3D11ShaderResourceView* BB,
+		ID3D11ShaderResourceView* AAfraction,
+		ID3D11ShaderResourceView* ABfraction,
+		ID3D11ShaderResourceView* BBfraction,
+		ID3D11ShaderResourceView* maxA,
+		ID3D11ShaderResourceView* maxB,
+		ID3D11ShaderResourceView* mapAtoB,
+		ID3D11UnorderedAccessView* error,
+		ID3D11UnorderedAccessView* AtoB,
+		int width, int height, int count,
+		float angle0, float scale0,
+		float angle1, float scale1,
+		int offsetX, int offsetY
+	);
 };
 
 class ModelMaker
