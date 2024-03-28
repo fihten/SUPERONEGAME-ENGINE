@@ -660,6 +660,18 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 		mapAtoBsrv->Release();
 		mapAtoBsrv = nullptr;
+
+		error->Release();
+		error = nullptr;
+
+		errorUAV->Release();
+		errorUAV = nullptr;
+
+		AtoB->Release();
+		AtoB = nullptr;
+
+		AtoBuav->Release();
+		AtoBuav = nullptr;
 	}
 
 	auto device = GraphicsCore::instance()->device;
@@ -845,4 +857,62 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	srv_desc.Buffer.FirstElement = 0;
 	srv_desc.Buffer.NumElements = count;
 	device->CreateShaderResourceView(mapAtoB, &srv_desc, &mapAtoBsrv);
+
+	texArrayDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &error);
+
+	texArrayDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AtoB);
+
+	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	device->CreateUnorderedAccessView(error, &uav_desc, &errorUAV);
+
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	device->CreateUnorderedAccessView(AtoB, &uav_desc, &AtoBuav);
+}
+
+void ModelMaker::defineTheSamePointsOnSetOfPhotos() 
+{
+	gridIntegrals.clearPhotosIntegrals(photosIntegralsAuav, width, height, texturesCount);
+	gridIntegrals.calculatePhotosIntegrals(
+		setOfPhotosSRV, photosIntegralsAuav,
+		width, height, texturesCount,
+		0, 1,
+		0, 1,
+		0, 0
+	);
+
+	operationsOnGridIntegrals.clearA(AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
+	operationsOnGridIntegrals.calculateA(
+		photosIntegralsAsrv, AAuav, AAfractionUAV, maxAuav,
+		width, height, texturesCount
+	);
+
+	leastSquaresOfJacobianDeterminant.clear(errorUAV, AtoBuav, width, height, texturesCount);
+
+	int maxOffset = 10;
+	int N = 10;
+	for (int offsetX = -maxOffset; offsetX <= maxOffset; offsetX++)
+	{
+		for (int offsetY = -maxOffset; offsetY <= maxOffset; offsetY++)
+		{
+			for (int a0i = 0; a0i <= N; a0i++)
+			{
+				for (int s0i = 0; s0i <= N; s0i++)
+				{
+					for (int a1i = 0; a1i <= N; a1i++)
+					{
+						for (int s1i = 0; s1i <= N; s1i++)
+						{
+
+						}
+					}
+				}
+			}
+		}
+	}
 }

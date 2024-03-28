@@ -235,9 +235,16 @@ class ModelMaker
 	ID3D11Buffer* mapAtoB = nullptr;
 	ID3D11ShaderResourceView* mapAtoBsrv = nullptr;
 
+	ID3D11Texture2D* error = nullptr;
+	ID3D11UnorderedAccessView* errorUAV = nullptr;
+
+	ID3D11Texture2D* AtoB = nullptr;
+	ID3D11UnorderedAccessView* AtoBuav = nullptr;
+
 public:
 	static ModelMaker* instance();
 	static void init();
 
 	void loadPhotos(const std::vector<std::string>& paths);
+	void defineTheSamePointsOnSetOfPhotos();
 };
