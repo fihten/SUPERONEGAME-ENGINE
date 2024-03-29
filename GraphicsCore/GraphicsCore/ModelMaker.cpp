@@ -850,7 +850,15 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	buffer_desc.StructureByteStride = sizeof(uint32_t);
-	device->CreateBuffer(&buffer_desc, nullptr, &mapAtoB);
+
+	D3D11_SUBRESOURCE_DATA data;
+	std::vector<uint32_t> vMapAtoB(texturesCount);
+	for (uint32_t i = 0; i < texturesCount; i++)
+	{
+		vMapAtoB[i] = i;
+	}
+	data.pSysMem = vMapAtoB.data();
+	device->CreateBuffer(&buffer_desc, &data, &mapAtoB);
 
 	srv_desc.Format = DXGI_FORMAT_R32_UINT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
@@ -896,6 +904,15 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 
 	int maxOffset = 10;
 	int N = 10;
+
+	float scaleMin = 0.8f;
+	float scaleMax = 1.2f;
+	float scaleStep = (scaleMax - scaleMin) / N;
+
+	float angleMin = -M_PI / 12;
+	float angleMax = M_PI / 12;
+	float angleStep = (angleMax - angleMin) / N;
+	
 	for (int offsetX = -maxOffset; offsetX <= maxOffset; offsetX++)
 	{
 		for (int offsetY = -maxOffset; offsetY <= maxOffset; offsetY++)
@@ -908,7 +925,22 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 					{
 						for (int s1i = 0; s1i <= N; s1i++)
 						{
+							float angle0 = angleMin + a0i * angleStep;
+							float scale0 = scaleMin + s0i * scaleStep;
 
+							float angle1 = angleMin + a1i * angleStep;
+							float scale1 = scaleMin + s1i * scaleStep;
+
+							leastSquaresOfJacobianDeterminant.calculateErrors(
+								AAsrv, ABsrv, BBsrv,
+								AAfractionSRV, ABfractionSRV, BBfractionSRV,
+								maxAsrv, maxBsrv, mapAtoBsrv,
+								errorUAV, AtoBuav,
+								width, height, texturesCount,
+								angle0, scale0,
+								angle1 + angle0, scale1,
+								offsetX, offsetY
+							);
 						}
 					}
 				}
