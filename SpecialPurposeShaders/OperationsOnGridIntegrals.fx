@@ -1,5 +1,11 @@
-Texture2DArray<uint4> photosIntegralsA;
-Texture2DArray<uint4> photosIntegralsB;
+Texture2DArray<uint> photosIntegralsAx;
+Texture2DArray<uint> photosIntegralsAy;
+Texture2DArray<uint> photosIntegralsAz;
+
+Texture2DArray<uint> photosIntegralsBx;
+Texture2DArray<uint> photosIntegralsBy;
+Texture2DArray<uint> photosIntegralsBz;
+
 StructuredBuffer<uint> mapAtoB;
 
 RWTexture2DArray<uint> AA;
@@ -13,25 +19,32 @@ RWTexture2DArray<uint> BBfraction;
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
 
-int width;
-int height;
+int widthAA;
+int heightAA;
+
+int widthAB;
+int heightAB;
+
+int widthBB;
+int heightBB;
+
 int texturesCount;
 
-int cellRadius;
+int2 cellDimension;
+int2 offsetRange;
+int2 offset0;
+
+int radius;
 
 [numthreads(16, 16, 4)]
 void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int cellDiameter = 2 * cellRadius + 1;
-	int cellsAlongX = ceil((float)width / cellDiameter);
-	int cellsAlongY = ceil((float)height / cellDiameter);
-
 	int x = dispatchThreadID.x;
-	if (x >= cellsAlongX)
+	if (x >= widthAA)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= cellsAlongY)
+	if (y >= heightAA)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
@@ -47,16 +60,12 @@ void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int cellDiameter = 2 * cellRadius + 1;
-	int cellsAlongX = ceil((float)width / cellDiameter);
-	int cellsAlongY = ceil((float)height / cellDiameter);
-
 	int x = dispatchThreadID.x;
-	if (x >= cellsAlongX)
+	if (x >= widthAB)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= cellsAlongY)
+	if (y >= heightAB)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
@@ -64,10 +73,16 @@ void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 location = uint3(x, y, indexOfPhoto);
-	BB[location].r = 0;
-	BBfraction[location].r = 0;
 	AB[location].r = 0;
 	ABfraction[location].r = 0;
+	
+	if (x >= widthBB)
+		return;
+	if (y >= heightBB)
+		return;
+
+	BB[location].r = 0;
+	BBfraction[location].r = 0;
 	maxB[location].r = 0;
 }
 
@@ -75,11 +90,11 @@ void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width)
+	if (x >= widthAA)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= height)
+	if (y >= heightAA)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
@@ -87,7 +102,11 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 locationIn = uint3(x, y, indexOfPhoto);
-	uint4 colorA = photosIntegralsA[locationIn].xyzw;
+	uint3 colorA = float3(
+		photosIntegralsAx[locationIn].r,
+		photosIntegralsAy[locationIn].r,
+		photosIntegralsAz[locationIn].r
+		);
 
 	uint uiAA = dot(colorA, colorA);
 	float fAA = (float)(uiAA) / 65025.0f;
@@ -97,11 +116,14 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint maxA_ = max(colorA.x, max(colorA.y, colorA.z));
 
-	int cellDiameter = 2 * cellRadius + 1;
-	x = x / cellDiameter;
-	y = y / cellDiameter;
+	int diameter = 2 * radius + 1;
+	int2 m = int2(x, y);
+	int2 n = m % cellDimension;
+	m = m / (diameter * cellDimension);
 
-	uint3 locationOut = uint3(x, y, indexOfPhoto);
+	uint3 locationOut;
+	locationOut.xy = m * cellDimension + n;
+	locationOut.z = indexOfPhoto;
 
 	uint originalValue = 0;
 	InterlockedAdd(AA[locationOut].r, uiAA, originalValue);
@@ -112,23 +134,46 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int x = dispatchThreadID.x;
-	if (x >= width)
-		return;
-
-	int y = dispatchThreadID.y;
-	if (y >= height)
-		return;
-
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 
+	int2 m = int2(x, y);
+	m += offset0;
+	int2 n = m % offsetRange;
+	n -= offset0;
+	uint3 locationInA;
+	locationInA.z = indexOfPhoto;
+	locationInA.xy = m / offsetRange;
+	locationInA.xy *= cellDimension;
+	locationInA.xy += n;
+
+	if (locationInA.x < 0)
+		return;
+	if (locationInA.y < 0)
+		return;
+	if (locationInA.x >= widthAB)
+		return;
+	if (locationInA.y >= heightAB)
+		return;
+
+	uint3 colorA = float3(
+		photosIntegralsAx[locationInA].r,
+		photosIntegralsAy[locationInA].r,
+		photosIntegralsAz[locationInA].r
+		);
+
 	indexOfPhoto = mapAtoB[indexOfPhoto];
 
-	uint3 locationIn = uint3(x, y, indexOfPhoto);
-	uint4 colorA = photosIntegralsA[locationIn].xyzw;
-	uint4 colorB = photosIntegralsB[locationIn].xyzw;
+	uint3 locationInB;
+	locationInB.z = indexOfPhoto;
+	locationInB.xy = m / offsetRange;
+
+	uint3 colorB = float3(
+		photosIntegralsBx[locationInB].r,
+		photosIntegralsBy[locationInB].r,
+		photosIntegralsBz[locationInB].r
+		);
 	
 	uint uiBB = dot(colorB, colorB);
 	float fBB = (float)(uiBB) / 65025.0f;
@@ -144,18 +189,28 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint maxB_ = max(colorB.x, max(colorB.y, colorB.z));
 
-	int cellDiameter = 2 * cellRadius + 1;
-	x = x / cellDiameter;
-	y = y / cellDiameter;
-	
-	uint3 locationOut = uint3(x, y, indexOfPhoto);
+	int diameter = 2 * radius + 1;
+	uint3 locationOutAB;
+	locationOutAB.z = indexOfPhoto;
+	locationOutAB.xy = m / (diameter * offsetRange);
+	locationOutAB.xy *= offsetRange;
+	locationOutAB.xy += n;
 	
 	uint originalValue = 0;
-	InterlockedAdd(BB[locationOut].r, uiBB, originalValue);
-	InterlockedAdd(BBfraction[locationOut].r, uiBBfraction, originalValue);
-	InterlockedAdd(AB[locationOut].r, uiAB, originalValue);
-	InterlockedAdd(ABfraction[locationOut].r, uiABfraction, originalValue);
-	InterlockedMax(maxB[locationOut].r, maxB_, originalValue);
+	InterlockedAdd(AB[locationOutAB].r, uiAB, originalValue);
+	InterlockedAdd(ABfraction[locationOutAB].r, uiABfraction, originalValue);
+	
+	if (n.x != 0)
+		return;
+	if (n.y != 0)
+		return;
+
+	uint3 locationOutBB = locationInB;
+	locationOutBB.xy /= diameter;
+
+	InterlockedAdd(BB[locationOutBB].r, uiBB, originalValue);
+	InterlockedAdd(BBfraction[locationOutBB].r, uiBBfraction, originalValue);
+	InterlockedMax(maxB[locationOutBB].r, maxB_, originalValue);
 }
 
 technique11 MakeOperationsOnGridIntegrals

@@ -5,6 +5,7 @@
 #include "auto_ptr.h"
 #include "ParseBlendState.h"
 #include "ParseDepthStencilState.h"
+#include "ModelMaker.h"
 #include <algorithm>
 #include <sstream>
 #include <D3DX11tex.h>
@@ -184,6 +185,17 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
 	initFourierTransform();
+	{
+		ModelMaker::instance()->init();
+
+		std::vector<std::string> paths;
+		paths.emplace_back("C:\\3dEngine\\Textures\\imageA.jpg");
+		paths.emplace_back("C:\\3dEngine\\Textures\\imageB.jpg");
+		ModelMaker::instance()->loadPhotos(paths);
+
+		ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
+	}
+	
 }
 
 void GraphicsCore::startFrame()

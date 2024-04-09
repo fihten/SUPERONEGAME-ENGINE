@@ -1,5 +1,9 @@
+#include "ColorSpace.hlsl"
+
 Texture2DArray<float4> photos;
-RWTexture2DArray<uint4> photosIntegrals;
+RWTexture2DArray<uint> photosIntegralsX;
+RWTexture2DArray<uint> photosIntegralsY;
+RWTexture2DArray<uint> photosIntegralsZ;
 
 int width;
 int height;
@@ -10,9 +14,6 @@ float scale0;
 
 float angle1;
 float scale1;
-
-int offsetX;
-int offsetY;
 
 int cellDimensionX;
 int cellDimensionY;
@@ -35,7 +36,9 @@ void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (indexOfPhoto >= texturesCount)
 		return;
 
-	photosIntegrals[int3(x, y, indexOfPhoto)].xyzw = uint4(0, 0, 0, 0);
+	photosIntegralsX[int3(x, y, indexOfPhoto)].r = 0;
+	photosIntegralsY[int3(x, y, indexOfPhoto)].r = 0;
+	photosIntegralsZ[int3(x, y, indexOfPhoto)].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -57,17 +60,15 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	float det = m00 * m11 - m01 * m10;
+	float det = m[0][0] * m[1][1] - m[0][1] * m[1][0];
 	float2x2 mInv = float2x2(
-		m11, -m01,
-		-m10, m00
+		m[1][1], -m[0][1],
+		-m[1][0], m[0][0]
 		);
 	mInv /= det;
 
 	float2 r = float2(x, y);
 	float2 r_ = mul(r, mInv);
-	r_.x += offsetX;
-	r_.y += offsetY;
 
 	int cellIndexX = floor(r_.x / cellDimensionX);
 	int cellIndexY = floor(r_.y / cellDimensionY);
@@ -84,13 +85,13 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint originalValue;
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].x,
+		photosIntegralsX[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
 		color.x, originalValue);
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].y,
+		photosIntegralsY[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
 		color.y, originalValue);
 	InterlockedAdd(
-		photosIntegrals[int3(cellIndexX, cellIndexY, indexOfPhoto)].z,
+		photosIntegralsZ[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
 		color.z, originalValue);
 }
 

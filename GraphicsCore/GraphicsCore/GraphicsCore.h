@@ -41,6 +41,7 @@ public:
 class GraphicsCore
 {
 	friend class ModelMaker;
+	friend struct GridIntegralsA;
 	friend struct GridIntegrals;
 	friend struct OperationsOnGridIntegrals;
 	friend struct LeastSquaresOfJacobianDeterminant;

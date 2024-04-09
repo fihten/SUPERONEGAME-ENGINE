@@ -1,5 +1,6 @@
 #include "ModelMaker.h"
 #include "GraphicsCore.h"
+#include "Timer.h"
 #include <D3DX11.h>
 
 std::unique_ptr<ModelMaker> ModelMaker::ptr;
@@ -13,6 +14,175 @@ ModelMaker* ModelMaker::instance()
 	return ptr.get();
 }
 
+void GridIntegralsA::init()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sGridIntegrals = std::string(shadersFolder) + "\\GridIntegralsA.fx";
+
+	DWORD shaderFlags = 0;
+	//#if defined(DEBUG) || defined(_DEBUG)
+	//	shaderFlags |= D3D10_SHADER_DEBUG;
+	//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+	//#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sGridIntegrals.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	auto device = GraphicsCore::instance()->device;
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &hGridIntegralsFX);
+
+	hClearGridIntegrals = hGridIntegralsFX->GetTechniqueByName("ClearGridIntegrals");
+	hCalculateGridIntegrals = hGridIntegralsFX->GetTechniqueByName("CalculateGridIntegrals");
+
+	hPhotos = hGridIntegralsFX->GetVariableByName("photos")->AsShaderResource();
+
+	hPhotosIntegralsXho = hGridIntegralsFX->GetVariableByName("photosIntegralsXho")->AsUnorderedAccessView();
+	hPhotosIntegralsYho = hGridIntegralsFX->GetVariableByName("photosIntegralsYho")->AsUnorderedAccessView();
+	hPhotosIntegralsZho = hGridIntegralsFX->GetVariableByName("photosIntegralsZho")->AsUnorderedAccessView();
+
+	hPhotosIntegralsXhi = hGridIntegralsFX->GetVariableByName("photosIntegralsXhi")->AsShaderResource();
+	hPhotosIntegralsYhi = hGridIntegralsFX->GetVariableByName("photosIntegralsYhi")->AsShaderResource();
+	hPhotosIntegralsZhi = hGridIntegralsFX->GetVariableByName("photosIntegralsZhi")->AsShaderResource();
+
+	hPhotosIntegralsX = hGridIntegralsFX->GetVariableByName("photosIntegralsX")->AsUnorderedAccessView();
+	hPhotosIntegralsY = hGridIntegralsFX->GetVariableByName("photosIntegralsY")->AsUnorderedAccessView();
+	hPhotosIntegralsZ = hGridIntegralsFX->GetVariableByName("photosIntegralsZ")->AsUnorderedAccessView();
+
+	hWidth = hGridIntegralsFX->GetVariableByName("width");
+	hHeight = hGridIntegralsFX->GetVariableByName("height");
+	hTexturesCount = hGridIntegralsFX->GetVariableByName("texturesCount");
+
+	hCellDimensionX = hGridIntegralsFX->GetVariableByName("cellDimensionX");
+	hCellDimensionY = hGridIntegralsFX->GetVariableByName("cellDimensionY");
+}
+
+void GridIntegralsA::clearPhotosIntegrals(
+	ID3D11UnorderedAccessView* photosIntegralsXh,
+	ID3D11UnorderedAccessView* photosIntegralsYh,
+	ID3D11UnorderedAccessView* photosIntegralsZh,
+	ID3D11UnorderedAccessView* photosIntegralsX,
+	ID3D11UnorderedAccessView* photosIntegralsY,
+	ID3D11UnorderedAccessView* photosIntegralsZ,
+	int width, int height, int textureCount
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hPhotosIntegralsXho->SetUnorderedAccessView(photosIntegralsXh);
+	hPhotosIntegralsYho->SetUnorderedAccessView(photosIntegralsYh);
+	hPhotosIntegralsZho->SetUnorderedAccessView(photosIntegralsZh);
+
+	hPhotosIntegralsX->SetUnorderedAccessView(photosIntegralsX);
+	hPhotosIntegralsY->SetUnorderedAccessView(photosIntegralsY);
+	hPhotosIntegralsZ->SetUnorderedAccessView(photosIntegralsZ);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&textureCount, 0, sizeof(textureCount));
+
+	int cellDimensionX = CELL_DIMENSION_X;
+	hCellDimensionX->SetRawValue(&cellDimensionX, 0, sizeof(cellDimensionX));
+
+	int cellDimensionY = CELL_DIMENSION_Y;
+	hCellDimensionY->SetRawValue(&cellDimensionY, 0, sizeof(cellDimensionY));
+
+	hClearGridIntegrals->GetPassByIndex(0)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(width - cellDimensionX + 1) / 16);
+	uint32_t groupsY = std::ceil((float)(height) / 16);
+	uint32_t groupsZ = std::ceil((float)(textureCount) / 4);
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	hClearGridIntegrals->GetPassByIndex(1)->Apply(0, context);
+
+	groupsX = std::ceil((float)(width - cellDimensionX + 1) / 16);
+	groupsY = std::ceil((float)(height - cellDimensionY + 1) / 16);
+	groupsZ = std::ceil((float)(textureCount) / 4);
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	ID3D11ShaderResourceView* nullSRVs[4] = { nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 4, nullSRVs);
+
+	ID3D11UnorderedAccessView* nullUAVs[6] = { nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 6, nullUAVs, 0);
+}
+
+void GridIntegralsA::calculatePhotosIntegrals(
+	ID3D11ShaderResourceView* photos,
+	ID3D11UnorderedAccessView* photosIntegralsXho,
+	ID3D11UnorderedAccessView* photosIntegralsYho,
+	ID3D11UnorderedAccessView* photosIntegralsZho,
+	ID3D11ShaderResourceView* photosIntegralsXhi,
+	ID3D11ShaderResourceView* photosIntegralsYhi,
+	ID3D11ShaderResourceView* photosIntegralsZhi,
+	ID3D11UnorderedAccessView* photosIntegralsX,
+	ID3D11UnorderedAccessView* photosIntegralsY,
+	ID3D11UnorderedAccessView* photosIntegralsZ,
+	int width, int height, int textureCount
+)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	hPhotos->SetResource(photos);
+
+	hPhotosIntegralsXho->SetUnorderedAccessView(photosIntegralsXho);
+	hPhotosIntegralsYho->SetUnorderedAccessView(photosIntegralsYho);
+	hPhotosIntegralsZho->SetUnorderedAccessView(photosIntegralsZho);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hTexturesCount->SetRawValue(&textureCount, 0, sizeof(textureCount));
+
+	int cellDimensionX = CELL_DIMENSION_X;
+	hCellDimensionX->SetRawValue(&cellDimensionX, 0, sizeof(cellDimensionX));
+
+	int cellDimensionY = CELL_DIMENSION_Y;
+	hCellDimensionY->SetRawValue(&cellDimensionY, 0, sizeof(cellDimensionY));
+
+	hCalculateGridIntegrals->GetPassByIndex(0)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(width - cellDimensionX + 1) / 16);
+	uint32_t groupsY = std::ceil((float)(height) / 16);
+	uint32_t groupsZ = std::ceil((float)(textureCount) / 4);
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	ID3D11ShaderResourceView* nullSRVs[4] = { nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 4, nullSRVs);
+
+	ID3D11UnorderedAccessView* nullUAVs[6] = { nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetUnorderedAccessViews(0, 6, nullUAVs, 0);
+
+	hPhotosIntegralsXhi->SetResource(photosIntegralsXhi);
+	hPhotosIntegralsYhi->SetResource(photosIntegralsYhi);
+	hPhotosIntegralsZhi->SetResource(photosIntegralsZhi);
+
+	hPhotosIntegralsX->SetUnorderedAccessView(photosIntegralsX);
+	hPhotosIntegralsY->SetUnorderedAccessView(photosIntegralsY);
+	hPhotosIntegralsZ->SetUnorderedAccessView(photosIntegralsZ);
+
+	hCalculateGridIntegrals->GetPassByIndex(1)->Apply(0, context);
+
+	groupsX = std::ceil((float)(width - cellDimensionX + 1) / 16);
+	groupsY = std::ceil((float)(height - cellDimensionY + 1) / 16);
+	groupsZ = std::ceil((float)(textureCount) / 4);
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	context->CSSetShaderResources(0, 4, nullSRVs);
+	context->CSSetUnorderedAccessViews(0, 6, nullUAVs, 0);
+}
+
 void GridIntegrals::init()
 {
 	char shadersFolder[200];
@@ -22,10 +192,10 @@ void GridIntegrals::init()
 	std::string sGridIntegrals = std::string(shadersFolder) + "\\GridIntegrals.fx";
 
 	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
+//#if defined(DEBUG) || defined(_DEBUG)
+//	shaderFlags |= D3D10_SHADER_DEBUG;
+//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+//#endif
 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
@@ -42,7 +212,9 @@ void GridIntegrals::init()
 	hCalculateGridIntegralsTech = hGridIntegralsFX->GetTechniqueByName("CalculateGridIntegrals");
 	
 	hPhotos = hGridIntegralsFX->GetVariableByName("photos")->AsShaderResource();
-	hPhotosIntegrals = hGridIntegralsFX->GetVariableByName("photosIntegrals")->AsUnorderedAccessView();
+	hPhotosIntegralsX = hGridIntegralsFX->GetVariableByName("photosIntegralsX")->AsUnorderedAccessView();
+	hPhotosIntegralsY = hGridIntegralsFX->GetVariableByName("photosIntegralsY")->AsUnorderedAccessView();
+	hPhotosIntegralsZ = hGridIntegralsFX->GetVariableByName("photosIntegralsZ")->AsUnorderedAccessView();
 
 	hWidth = hGridIntegralsFX->GetVariableByName("width");
 	hHeight = hGridIntegralsFX->GetVariableByName("height");
@@ -62,7 +234,9 @@ void GridIntegrals::init()
 }
 
 void GridIntegrals::clearPhotosIntegrals(
-	ID3D11UnorderedAccessView* photosIntegrals,
+	ID3D11UnorderedAccessView* photosIntegralsX,
+	ID3D11UnorderedAccessView* photosIntegralsY,
+	ID3D11UnorderedAccessView* photosIntegralsZ,
 	int width, int height, int count
 )
 {
@@ -79,7 +253,9 @@ void GridIntegrals::clearPhotosIntegrals(
 	int cellDimensionY = CELL_DIMENSION_Y;
 	hCellDimensionY->SetRawValue(&cellDimensionY, 0, sizeof(cellDimensionY));
 
-	hPhotosIntegrals->SetUnorderedAccessView(photosIntegrals);
+	hPhotosIntegralsX->SetUnorderedAccessView(photosIntegralsX);
+	hPhotosIntegralsY->SetUnorderedAccessView(photosIntegralsY);
+	hPhotosIntegralsZ->SetUnorderedAccessView(photosIntegralsZ);
 
 	// define number of thread groups
 
@@ -93,12 +269,17 @@ void GridIntegrals::clearPhotosIntegrals(
 	hClearGridIntegralsTech->GetPassByName("P0")->Apply(0, context);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hPhotosIntegrals->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = { nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull = nullptr;
+	context->CSSetShaderResources(0, 1, &srvsNull);
+	context->CSSetUnorderedAccessViews(0, 3, uavsNull, nullptr);
 }
 
 void GridIntegrals::calculatePhotosIntegrals(
 	ID3D11ShaderResourceView* photos,
-	ID3D11UnorderedAccessView* photosIntegrals,
+	ID3D11UnorderedAccessView* photosIntegralsX,
+	ID3D11UnorderedAccessView* photosIntegralsY,
+	ID3D11UnorderedAccessView* photosIntegralsZ,
 	int width, int height, int count,
 	float angle0, float scale0,
 	float angle1, float scale1,
@@ -108,7 +289,9 @@ void GridIntegrals::calculatePhotosIntegrals(
 	auto context = GraphicsCore::instance()->context;
 
 	hPhotos->SetResource(photos);
-	hPhotosIntegrals->SetUnorderedAccessView(photosIntegrals);
+	hPhotosIntegralsX->SetUnorderedAccessView(photosIntegralsX);
+	hPhotosIntegralsY->SetUnorderedAccessView(photosIntegralsY);
+	hPhotosIntegralsZ->SetUnorderedAccessView(photosIntegralsZ);
 
 	hWidth->SetRawValue(&width, 0, sizeof(width));
 	hHeight->SetRawValue(&height, 0, sizeof(height));
@@ -136,8 +319,10 @@ void GridIntegrals::calculatePhotosIntegrals(
 	uint32_t groups_z = std::ceil((float)(count) / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hPhotos->SetResource(nullptr);
-	hPhotosIntegrals->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = { nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull = nullptr;
+	context->CSSetShaderResources(0, 1, &srvsNull);
+	context->CSSetUnorderedAccessViews(0, 3, uavsNull, nullptr);
 }
 
 void OperationsOnGridIntegrals::init()
@@ -149,10 +334,10 @@ void OperationsOnGridIntegrals::init()
 	std::string sOperationsOnGridIntegrals = std::string(shadersFolder) + "\\OperationsOnGridIntegrals.fx";
 
 	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
+//#if defined(DEBUG) || defined(_DEBUG)
+//	shaderFlags |= D3D10_SHADER_DEBUG;
+//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+//#endif
 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
@@ -167,8 +352,13 @@ void OperationsOnGridIntegrals::init()
 
 	hMakeOperationsOnGridIntegralsTech = hOperationsOnGridIntegralsFX->GetTechniqueByName("MakeOperationsOnGridIntegrals");
 
-	hPhotosIntegralsA = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsA")->AsShaderResource();
-	hPhotosIntegralsB = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsB")->AsShaderResource();
+	hPhotosIntegralsAx = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsAx")->AsShaderResource();
+	hPhotosIntegralsAy = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsAy")->AsShaderResource();
+	hPhotosIntegralsAz = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsAz")->AsShaderResource();
+
+	hPhotosIntegralsBx = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsBx")->AsShaderResource();
+	hPhotosIntegralsBy = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsBy")->AsShaderResource();
+	hPhotosIntegralsBz = hOperationsOnGridIntegralsFX->GetVariableByName("photosIntegralsBz")->AsShaderResource();
 
 	hAA = hOperationsOnGridIntegralsFX->GetVariableByName("AA")->AsUnorderedAccessView();
 	hAB = hOperationsOnGridIntegralsFX->GetVariableByName("AB")->AsUnorderedAccessView();
@@ -220,9 +410,12 @@ void OperationsOnGridIntegrals::clearA(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hAA->SetUnorderedAccessView(nullptr);
-	hAAfraction->SetUnorderedAccessView(nullptr);
-	hMaxA->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 7, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 8, uavsNull, nullptr);
 }
 
 void OperationsOnGridIntegrals::clearAB(
@@ -261,17 +454,18 @@ void OperationsOnGridIntegrals::clearAB(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hAB->SetUnorderedAccessView(nullptr);
-	hABfraction->SetUnorderedAccessView(nullptr);
-
-	hBB->SetUnorderedAccessView(nullptr);
-	hBBfraction->SetUnorderedAccessView(nullptr);
-
-	hMaxB->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 7, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 8, uavsNull, nullptr);
 }
 
 void OperationsOnGridIntegrals::calculateA(
-	ID3D11ShaderResourceView* photosIntegralsA,
+	ID3D11ShaderResourceView* photosIntegralsAx,
+	ID3D11ShaderResourceView* photosIntegralsAy,
+	ID3D11ShaderResourceView* photosIntegralsAz,
 	ID3D11UnorderedAccessView* AA,
 	ID3D11UnorderedAccessView* AAfraction,
 	ID3D11UnorderedAccessView* maxA,
@@ -280,7 +474,10 @@ void OperationsOnGridIntegrals::calculateA(
 {
 	auto context = GraphicsCore::instance()->context;
 
-	hPhotosIntegralsA->SetResource(photosIntegralsA);
+	hPhotosIntegralsAx->SetResource(photosIntegralsAx);
+	hPhotosIntegralsAy->SetResource(photosIntegralsAy);
+	hPhotosIntegralsAz->SetResource(photosIntegralsAz);
+
 	hAA->SetUnorderedAccessView(AA);
 	hAAfraction->SetUnorderedAccessView(AAfraction);
 	hMaxA->SetUnorderedAccessView(maxA);
@@ -302,15 +499,21 @@ void OperationsOnGridIntegrals::calculateA(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hPhotosIntegralsA->SetResource(nullptr);
-	hAA->SetUnorderedAccessView(nullptr);
-	hAAfraction->SetUnorderedAccessView(nullptr);
-	hMaxA->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 7, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 8, uavsNull, nullptr);
 }
 
 void OperationsOnGridIntegrals::calculateAB(
-	ID3D11ShaderResourceView* photosIntegralsA,
-	ID3D11ShaderResourceView* photosIntegralsB,
+	ID3D11ShaderResourceView* photosIntegralsAx,
+	ID3D11ShaderResourceView* photosIntegralsAy,
+	ID3D11ShaderResourceView* photosIntegralsAz,
+	ID3D11ShaderResourceView* photosIntegralsBx,
+	ID3D11ShaderResourceView* photosIntegralsBy,
+	ID3D11ShaderResourceView* photosIntegralsBz,
 	ID3D11ShaderResourceView* mapAtoB,
 	ID3D11UnorderedAccessView* AB,
 	ID3D11UnorderedAccessView* ABfraction,
@@ -322,8 +525,14 @@ void OperationsOnGridIntegrals::calculateAB(
 {
 	auto context = GraphicsCore::instance()->context;
 
-	hPhotosIntegralsA->SetResource(photosIntegralsA);
-	hPhotosIntegralsB->SetResource(photosIntegralsB);
+	hPhotosIntegralsAx->SetResource(photosIntegralsAx);
+	hPhotosIntegralsAy->SetResource(photosIntegralsAy);
+	hPhotosIntegralsAz->SetResource(photosIntegralsAz);
+
+	hPhotosIntegralsBx->SetResource(photosIntegralsBx);
+	hPhotosIntegralsBy->SetResource(photosIntegralsBy);
+	hPhotosIntegralsBz->SetResource(photosIntegralsBz);
+
 	hMapAtoB->SetResource(mapAtoB);
 
 	hAB->SetUnorderedAccessView(AB);
@@ -351,17 +560,12 @@ void OperationsOnGridIntegrals::calculateAB(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hPhotosIntegralsA->SetResource(nullptr);
-	hPhotosIntegralsB->SetResource(nullptr);
-	hMapAtoB->SetResource(nullptr);
-
-	hAB->SetUnorderedAccessView(nullptr);
-	hABfraction->SetUnorderedAccessView(nullptr);
-
-	hBB->SetUnorderedAccessView(nullptr);
-	hBBfraction->SetUnorderedAccessView(nullptr);
-
-	hMaxB->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 7, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 8, uavsNull, nullptr);
 }
 
 void LeastSquaresOfJacobianDeterminant::init()
@@ -373,10 +577,10 @@ void LeastSquaresOfJacobianDeterminant::init()
 	std::string sLeastSquaresOfJacobianDeterminant = std::string(shadersFolder) + "\\LeastSquaresOfJacobianDeterminant.fx";
 
 	DWORD shaderFlags = 0;
-#if defined(DEBUG) || defined(_DEBUG)
-	shaderFlags |= D3D10_SHADER_DEBUG;
-	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
-#endif
+//#if defined(DEBUG) || defined(_DEBUG)
+//	shaderFlags |= D3D10_SHADER_DEBUG;
+//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+//#endif
 
 	ID3D10Blob* compiledShader = 0;
 	ID3D10Blob* compilationMsgs = 0;
@@ -455,8 +659,12 @@ void LeastSquaresOfJacobianDeterminant::clear(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hError->SetUnorderedAccessView(nullptr);
-	hAtoB->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 9, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 2, uavsNull, nullptr);
 }
 
 void LeastSquaresOfJacobianDeterminant::calculateErrors(
@@ -531,21 +739,12 @@ void LeastSquaresOfJacobianDeterminant::calculateErrors(
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
-	hAA->SetResource(nullptr);
-	hAB->SetResource(nullptr);
-	hBB->SetResource(nullptr);
-
-	hAAfraction->SetResource(nullptr);
-	hABfraction->SetResource(nullptr);
-	hBBfraction->SetResource(nullptr);
-
-	hMaxA->SetResource(nullptr);
-	hMaxB->SetResource(nullptr);
-
-	hMapAtoB->SetResource(nullptr);
-
-	hError->SetUnorderedAccessView(nullptr);
-	hAtoB->SetUnorderedAccessView(nullptr);
+	ID3D11UnorderedAccessView* uavsNull[] = {
+		nullptr,nullptr };
+	ID3D11ShaderResourceView* srvsNull[] = {
+		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
+	context->CSSetShaderResources(0, 9, srvsNull);
+	context->CSSetUnorderedAccessViews(0, 2, uavsNull, nullptr);
 }
 
 void ModelMaker::init()
@@ -565,23 +764,59 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 		setOfPhotosSRV->Release();
 		setOfPhotosSRV = nullptr;
 
-		photosIntegralsA->Release();
-		photosIntegralsA = nullptr;
+		photosIntegralsAx->Release();
+		photosIntegralsAx = nullptr;
 
-		photosIntegralsAuav->Release();
-		photosIntegralsAuav = nullptr;
+		photosIntegralsAy->Release();
+		photosIntegralsAy = nullptr;
 
-		photosIntegralsAsrv->Release();
-		photosIntegralsAsrv = nullptr;
+		photosIntegralsAz->Release();
+		photosIntegralsAz = nullptr;
 
-		photosIntegralsB->Release();
-		photosIntegralsB = nullptr;
+		photosIntegralsAxUAV->Release();
+		photosIntegralsAxUAV = nullptr;
 
-		photosIntegralsBuav->Release();
-		photosIntegralsBuav = nullptr;
+		photosIntegralsAyUAV->Release();
+		photosIntegralsAyUAV = nullptr;
 
-		photosIntegralsBsrv->Release();
-		photosIntegralsBsrv = nullptr;
+		photosIntegralsAzUAV->Release();
+		photosIntegralsAzUAV = nullptr;
+
+		photosIntegralsAxSRV->Release();
+		photosIntegralsAxSRV = nullptr;
+
+		photosIntegralsAySRV->Release();
+		photosIntegralsAySRV = nullptr;
+
+		photosIntegralsAzSRV->Release();
+		photosIntegralsAzSRV = nullptr;
+
+		photosIntegralsBx->Release();
+		photosIntegralsBx = nullptr;
+
+		photosIntegralsBy->Release();
+		photosIntegralsBy = nullptr;
+
+		photosIntegralsBz->Release();
+		photosIntegralsBz = nullptr;
+
+		photosIntegralsBxUAV->Release();
+		photosIntegralsBxUAV = nullptr;
+
+		photosIntegralsByUAV->Release();
+		photosIntegralsByUAV = nullptr;
+
+		photosIntegralsBzUAV->Release();
+		photosIntegralsBzUAV = nullptr;
+
+		photosIntegralsBxSRV->Release();
+		photosIntegralsBxSRV = nullptr;
+
+		photosIntegralsBySRV->Release();
+		photosIntegralsBySRV = nullptr;
+
+		photosIntegralsBzSRV->Release();
+		photosIntegralsBzSRV = nullptr;
 
 		AA->Release();
 		AA = nullptr;
@@ -764,33 +999,45 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	texArrayDesc.Height = cellsAlongY;
 	texArrayDesc.MipLevels = 1;
 	texArrayDesc.ArraySize = count;
-	texArrayDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
 	texArrayDesc.SampleDesc.Count = 1;
 	texArrayDesc.SampleDesc.Quality = 0;
 	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
 	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
 	texArrayDesc.CPUAccessFlags = 0;
 	texArrayDesc.MiscFlags = 0;
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsA);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAx);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAy);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAz);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBx);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBy);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBz);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
 	uav_desc.Texture2DArray.MipSlice = 0;
 	uav_desc.Texture2DArray.FirstArraySlice = 0;
 	uav_desc.Texture2DArray.ArraySize = count;
-	device->CreateUnorderedAccessView(photosIntegralsA, &uav_desc, &photosIntegralsAuav);
-	device->CreateUnorderedAccessView(photosIntegralsB, &uav_desc, &photosIntegralsBuav);
+	device->CreateUnorderedAccessView(photosIntegralsAx, &uav_desc, &photosIntegralsAxUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAy, &uav_desc, &photosIntegralsAyUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAz, &uav_desc, &photosIntegralsAzUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBx, &uav_desc, &photosIntegralsBxUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBy, &uav_desc, &photosIntegralsByUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBz, &uav_desc, &photosIntegralsBzUAV);
 
-	srv_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	srv_desc.Format = DXGI_FORMAT_R32_UINT;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
 	srv_desc.Texture2DArray.MostDetailedMip = 0;
 	srv_desc.Texture2DArray.MipLevels = 1;
 	srv_desc.Texture2DArray.FirstArraySlice = 0;
 	srv_desc.Texture2DArray.ArraySize = count;
-	device->CreateShaderResourceView(photosIntegralsA, &srv_desc, &photosIntegralsAsrv);
-	device->CreateShaderResourceView(photosIntegralsB, &srv_desc, &photosIntegralsBsrv);
+	device->CreateShaderResourceView(photosIntegralsAx, &srv_desc, &photosIntegralsAxSRV);
+	device->CreateShaderResourceView(photosIntegralsAy, &srv_desc, &photosIntegralsAySRV);
+	device->CreateShaderResourceView(photosIntegralsAz, &srv_desc, &photosIntegralsAzSRV);
+	device->CreateShaderResourceView(photosIntegralsBx, &srv_desc, &photosIntegralsBxSRV);
+	device->CreateShaderResourceView(photosIntegralsBy, &srv_desc, &photosIntegralsBySRV);
+	device->CreateShaderResourceView(photosIntegralsBz, &srv_desc, &photosIntegralsBzSRV);
 
 	int diameterInCells = 2 * RADIUS_IN_CELLS + 1;
 
@@ -855,12 +1102,12 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	std::vector<uint32_t> vMapAtoB(texturesCount);
 	for (uint32_t i = 0; i < texturesCount; i++)
 	{
-		vMapAtoB[i] = i;
+		vMapAtoB[i] = texturesCount - 1 - i;
 	}
 	data.pSysMem = vMapAtoB.data();
 	device->CreateBuffer(&buffer_desc, &data, &mapAtoB);
 
-	srv_desc.Format = DXGI_FORMAT_R32_UINT;
+	srv_desc.Format = DXGI_FORMAT_UNKNOWN;
 	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
 	srv_desc.Buffer.FirstElement = 0;
 	srv_desc.Buffer.NumElements = count;
@@ -885,18 +1132,31 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 void ModelMaker::defineTheSamePointsOnSetOfPhotos() 
 {
-	gridIntegrals.clearPhotosIntegrals(photosIntegralsAuav, width, height, texturesCount);
+	float t0 = Timer::Instance()->elapsedTime();
+
+	gridIntegrals.clearPhotosIntegrals(
+		photosIntegralsAxUAV,
+		photosIntegralsAyUAV,
+		photosIntegralsAzUAV,
+		width, height, texturesCount);
 	gridIntegrals.calculatePhotosIntegrals(
-		setOfPhotosSRV, photosIntegralsAuav,
+		setOfPhotosSRV,
+		photosIntegralsAxUAV,
+		photosIntegralsAyUAV,
+		photosIntegralsAzUAV,
 		width, height, texturesCount,
 		0, 1,
 		0, 1,
 		0, 0
 	);
 
-	operationsOnGridIntegrals.clearA(AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
+	operationsOnGridIntegrals.clearA(
+		AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
 	operationsOnGridIntegrals.calculateA(
-		photosIntegralsAsrv, AAuav, AAfractionUAV, maxAuav,
+		photosIntegralsAxSRV,
+		photosIntegralsAySRV,
+		photosIntegralsAzSRV,
+		AAuav, AAfractionUAV, maxAuav,
 		width, height, texturesCount
 	);
 
@@ -904,6 +1164,12 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 
 	int maxOffset = 10;
 	int N = 10;
+
+	int countOfSteps = 2 * maxOffset + 1;
+	countOfSteps *= 2 * maxOffset + 1;
+	countOfSteps *= N * N * N * N;
+	int elapsedSteps = 0;
+	int percent = 0;
 
 	float scaleMin = 0.8f;
 	float scaleMax = 1.2f;
@@ -925,12 +1191,49 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 					{
 						for (int s1i = 0; s1i <= N; s1i++)
 						{
+							int p = (float)(elapsedSteps * 100) / countOfSteps;
+							if (p > percent)
+							{
+								percent = p;
+								char buffer[256];
+								sprintf(buffer, "percent=%d%\n", percent);
+								OutputDebugStringA(buffer);
+							}
+
 							float angle0 = angleMin + a0i * angleStep;
 							float scale0 = scaleMin + s0i * scaleStep;
 
 							float angle1 = angleMin + a1i * angleStep;
 							float scale1 = scaleMin + s1i * scaleStep;
 
+							gridIntegrals.clearPhotosIntegrals(
+								photosIntegralsBxUAV,
+								photosIntegralsByUAV,
+								photosIntegralsBzUAV,
+								width, height, texturesCount);
+							gridIntegrals.calculatePhotosIntegrals(
+								setOfPhotosSRV,
+								photosIntegralsBxUAV,
+								photosIntegralsByUAV,
+								photosIntegralsBzUAV,
+								width, height, texturesCount,
+								angle0, scale0,
+								angle1 + angle0, scale1,
+								offsetX, offsetY
+							);
+							operationsOnGridIntegrals.calculateAB(
+								photosIntegralsAxSRV,
+								photosIntegralsAySRV,
+								photosIntegralsAzSRV,
+								photosIntegralsBxSRV,
+								photosIntegralsBySRV,
+								photosIntegralsBzSRV,
+								mapAtoBsrv,
+								ABuav, ABfractionUAV,
+								BBuav, BBfractionUAV,
+								maxBuav,
+								width, height, texturesCount
+							);
 							leastSquaresOfJacobianDeterminant.calculateErrors(
 								AAsrv, ABsrv, BBsrv,
 								AAfractionSRV, ABfractionSRV, BBfractionSRV,
@@ -941,10 +1244,16 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 								angle1 + angle0, scale1,
 								offsetX, offsetY
 							);
+							elapsedSteps++;
 						}
 					}
 				}
 			}
 		}
 	}
+
+	float t1 = Timer::Instance()->elapsedTime();
+	float dt = t1 - t0;
+	char buffer[256];
+	sprintf(buffer, "seconds=%d\n", (int)dt);
 }

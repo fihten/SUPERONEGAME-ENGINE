@@ -11,8 +11,15 @@ Texture2DArray<uint> maxB;
 
 StructuredBuffer<uint> mapAtoB;
 
-int width;
-int height;
+int widthAA;
+int heightAA;
+
+int widthAB;
+int heightAB;
+
+int widthBB;
+int heightBB;
+
 int texturesCount;
 
 float angle0;
@@ -21,12 +28,10 @@ float scale0;
 float angle1;
 float scale1;
 
-int offsetX;
-int offsetY;
-
-int cellRadius;
-int unitX;
-int unitY;
+int radius;
+int2 cellDimension;
+int2 offsetRange;
+int2 offset0;
 
 RWTexture2DArray<float> error;
 RWTexture2DArray<uint4> AtoB;
@@ -55,35 +60,47 @@ void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width)
+	if (x >= widthAB)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= height)
+	if (y >= heightAB)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 
-	uint3 locationIn = uint3(x, y, indexOfPhoto);
+	uint3 locationInAB = uint3(x, y, indexOfPhoto);
 	
-	float AA_ = AA[locationIn].r;
-	float AAfraction_ = AAfraction[locationIn].r;
-	AA_ = AA_ + AAfraction_ / 1000000.0f;
-
-	float BB_ = BB[locationIn].r;
-	float BBfraction_ = BBfraction[locationIn].r;
-	BB_ = BB_ + BBfraction_ / 1000000.0f;
-
-	float AB_ = AB[locationIn].r;
-	float ABfraction_ = ABfraction[locationIn].r;
+	float AB_ = AB[locationInAB].r;
+	float ABfraction_ = ABfraction[locationInAB].r;
 	AB_ = AB_ + ABfraction_ / 1000000.0f;
 
-	float maxA_ = maxA[locationIn].r;
+	uint3 locationInAA = uint3(x, y, indexOfPhoto);
+	locationInAA.xy += offset0;
+	int2 n = locationInAA.xy % offsetRange;
+	n -= offset0;
+	locationInAA.xy /= offsetRange;
+	locationInAA.xy *= cellDimension;
+	locationInAA.xy += n; 
+
+	float AA_ = AA[locationInAA].r;
+	float AAfraction_ = AAfraction[locationInAA].r;
+	AA_ = AA_ + AAfraction_ / 1000000.0f;
+
+	uint3 locationInBB = uint3(x, y, indexOfPhoto);
+	locationInBB.xy += offset0;
+	locationInBB.xy /= offsetRange;
+
+	float BB_ = BB[locationInBB].r;
+	float BBfraction_ = BBfraction[locationInBB].r;
+	BB_ = BB_ + BBfraction_ / 1000000.0f;
+
+	float maxA_ = maxA[locationInAA].r;
 	maxA_ /= 255.0f;
 
-	float maxB_ = maxB[locationIn].r;
+	float maxB_ = maxB[locationInBB].r;
 	maxB_ /= 255.0f;
 
 	AA_ /= maxA_ * maxA_;
@@ -93,19 +110,13 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
 
-	int cellDiameterX = (2 * cellRadius + 1) * unitX;
-	int cellDiameterY = (2 * cellRadius + 1) * unitY;
-
-	int x_ = ((float)x + 0.5f) * cellDiameterX;
-	int y_ = ((float)y + 0.5f) * cellDiameterY;
-
-	int2 posInA = int2(x_, y_);
+	int2 posInA = locationInAA.xy + 0.5 * cellDimension;
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	int2 posInB = int2(x_ - offsetX, y_ - offsetY);
+	int2 posInB = posInA;
 	posInB = max(mul(posInB, m), int2(0, 0));
 
 	uint4 mapping;
@@ -114,7 +125,7 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	mapping.z = (posInB.x << 16) | (posInB.y & 0xffff);
 	mapping.w = mapAtoB[indexOfPhoto];
 
-	uint3 locationOut = locationIn;
+	uint3 locationOut = locationInAA;
 	error[locationOut] = err;
 	AtoB[locationOut] = mapping;
 }
