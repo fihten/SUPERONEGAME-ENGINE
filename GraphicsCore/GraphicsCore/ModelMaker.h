@@ -7,6 +7,12 @@
 #define CELL_DIMENSION_X 32 // for spheres this is 36
 #define CELL_DIMENSION_Y 32 // for spheres this is 36
 
+#define OFFSET_RANGE_X 128
+#define OFFSET_RANGE_Y 128
+
+#define OFFSET0_X 64
+#define OFFSET0_Y 64
+
 #define RADIUS_IN_CELLS 7 
 
 struct GridIntegralsA
@@ -62,7 +68,7 @@ public:
 	);
 };
 
-struct GridIntegrals
+struct GridIntegralsB
 {
 	ID3DX11Effect* hGridIntegralsFX = nullptr;
 	ID3DX11EffectTechnique* hClearGridIntegralsTech = nullptr;
@@ -83,9 +89,6 @@ struct GridIntegrals
 	ID3DX11EffectVariable* hAngle1 = nullptr;
 	ID3DX11EffectVariable* hScale1 = nullptr;
 
-	ID3DX11EffectVariable* hOffsetX = nullptr;
-	ID3DX11EffectVariable* hOffsetY = nullptr;
-
 	ID3DX11EffectVariable* hCellDimensionX = nullptr;
 	ID3DX11EffectVariable* hCellDimensionY = nullptr;
 public:
@@ -103,8 +106,7 @@ public:
 		ID3D11UnorderedAccessView* photosIntegralsZ,
 		int width, int height, int count,
 		float angle0, float scale0,
-		float angle1, float scale1,
-		int offsetX, int offsetY
+		float angle1, float scale1
 	);
 };
 
@@ -134,11 +136,21 @@ struct OperationsOnGridIntegrals
 
 	ID3DX11EffectShaderResourceVariable* hMapAtoB = nullptr;
 
-	ID3DX11EffectVariable* hWidth = nullptr;
-	ID3DX11EffectVariable* hHeight = nullptr;
+	ID3DX11EffectVariable* hWidthAA = nullptr;
+	ID3DX11EffectVariable* hWidthAB = nullptr;
+	ID3DX11EffectVariable* hWidthBB = nullptr;
+
+	ID3DX11EffectVariable* hHeightAA = nullptr;
+	ID3DX11EffectVariable* hHeightAB = nullptr;
+	ID3DX11EffectVariable* hHeightBB = nullptr;
+
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
-	ID3DX11EffectVariable* hCellRadius = nullptr;
+	ID3DX11EffectVariable* hCellDimension = nullptr;
+	ID3DX11EffectVariable* hOffsetRange = nullptr;
+	ID3DX11EffectVariable* hOffset0 = nullptr;
+
+	ID3DX11EffectVariable* hRadius = nullptr;
 public:
 	void init();
 	void clearA(
@@ -200,8 +212,14 @@ struct LeastSquaresOfJacobianDeterminant
 
 	ID3DX11EffectShaderResourceVariable* hMapAtoB = nullptr;
 
-	ID3DX11EffectVariable* hWidth = nullptr;
-	ID3DX11EffectVariable* hHeight = nullptr;
+	ID3DX11EffectVariable* hWidthAA = nullptr;
+	ID3DX11EffectVariable* hWidthAB = nullptr;
+	ID3DX11EffectVariable* hWidthBB = nullptr;
+
+	ID3DX11EffectVariable* hHeightAA = nullptr;
+	ID3DX11EffectVariable* hHeightAB = nullptr;
+	ID3DX11EffectVariable* hHeightBB = nullptr;
+
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
 	ID3DX11EffectVariable* hAngle0 = nullptr;
@@ -210,12 +228,10 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectVariable* hAngle1 = nullptr;
 	ID3DX11EffectVariable* hScale1 = nullptr;
 
-	ID3DX11EffectVariable* hOffsetX = nullptr;
-	ID3DX11EffectVariable* hOffsetY = nullptr;
-
 	ID3DX11EffectVariable* hCellRadius = nullptr;
-	ID3DX11EffectVariable* hUnitX = nullptr;
-	ID3DX11EffectVariable* hUnitY = nullptr;
+	ID3DX11EffectVariable* hCellDimension = nullptr;
+	ID3DX11EffectVariable* hOffsetRange = nullptr;
+	ID3DX11EffectVariable* hOffset0 = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* hError = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hAtoB = nullptr;
@@ -261,9 +277,21 @@ class ModelMaker
 
 	bool bSetOfPhotosIsLoaded = false;
 
+	ID3D11Texture2D* photosIntegralsAxh = nullptr;
+	ID3D11Texture2D* photosIntegralsAyh = nullptr;
+	ID3D11Texture2D* photosIntegralsAzh = nullptr;
+
 	ID3D11Texture2D* photosIntegralsAx = nullptr;
 	ID3D11Texture2D* photosIntegralsAy = nullptr;
 	ID3D11Texture2D* photosIntegralsAz = nullptr;
+
+	ID3D11UnorderedAccessView* photosIntegralsAxhUAV = nullptr;
+	ID3D11UnorderedAccessView* photosIntegralsAyhUAV = nullptr;
+	ID3D11UnorderedAccessView* photosIntegralsAzhUAV = nullptr;
+
+	ID3D11ShaderResourceView* photosIntegralsAxhSRV = nullptr;
+	ID3D11ShaderResourceView* photosIntegralsAyhSRV = nullptr;
+	ID3D11ShaderResourceView* photosIntegralsAzhSRV = nullptr;
 
 	ID3D11UnorderedAccessView* photosIntegralsAxUAV = nullptr;
 	ID3D11UnorderedAccessView* photosIntegralsAyUAV = nullptr;

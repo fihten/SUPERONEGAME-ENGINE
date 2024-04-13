@@ -183,7 +183,7 @@ void GridIntegralsA::calculatePhotosIntegrals(
 	context->CSSetUnorderedAccessViews(0, 6, nullUAVs, 0);
 }
 
-void GridIntegrals::init()
+void GridIntegralsB::init()
 {
 	char shadersFolder[200];
 	int sz = sizeof shadersFolder / sizeof * shadersFolder;
@@ -226,14 +226,11 @@ void GridIntegrals::init()
 	hAngle1 = hGridIntegralsFX->GetVariableByName("angle1");
 	hScale1 = hGridIntegralsFX->GetVariableByName("scale1");
 
-	hOffsetX = hGridIntegralsFX->GetVariableByName("offsetX");
-	hOffsetY = hGridIntegralsFX->GetVariableByName("offsetY");
-
 	hCellDimensionX = hGridIntegralsFX->GetVariableByName("cellDimensionX");
 	hCellDimensionY = hGridIntegralsFX->GetVariableByName("cellDimensionY");
 }
 
-void GridIntegrals::clearPhotosIntegrals(
+void GridIntegralsB::clearPhotosIntegrals(
 	ID3D11UnorderedAccessView* photosIntegralsX,
 	ID3D11UnorderedAccessView* photosIntegralsY,
 	ID3D11UnorderedAccessView* photosIntegralsZ,
@@ -275,15 +272,14 @@ void GridIntegrals::clearPhotosIntegrals(
 	context->CSSetUnorderedAccessViews(0, 3, uavsNull, nullptr);
 }
 
-void GridIntegrals::calculatePhotosIntegrals(
+void GridIntegralsB::calculatePhotosIntegrals(
 	ID3D11ShaderResourceView* photos,
 	ID3D11UnorderedAccessView* photosIntegralsX,
 	ID3D11UnorderedAccessView* photosIntegralsY,
 	ID3D11UnorderedAccessView* photosIntegralsZ,
 	int width, int height, int count,
 	float angle0, float scale0,
-	float angle1, float scale1,
-	int offsetX, int offsetY
+	float angle1, float scale1
 )
 {
 	auto context = GraphicsCore::instance()->context;
@@ -302,9 +298,6 @@ void GridIntegrals::calculatePhotosIntegrals(
 
 	hAngle1->SetRawValue(&angle1, 0, sizeof(angle1));
 	hScale1->SetRawValue(&scale1, 0, sizeof(scale1));
-
-	hOffsetX->SetRawValue(&offsetX, 0, sizeof(offsetX));
-	hOffsetY->SetRawValue(&offsetY, 0, sizeof(offsetY));
 
 	int cellDimensionX = CELL_DIMENSION_X;
 	hCellDimensionX->SetRawValue(&cellDimensionX, 0, sizeof(cellDimensionX));
@@ -373,11 +366,21 @@ void OperationsOnGridIntegrals::init()
 
 	hMapAtoB = hOperationsOnGridIntegralsFX->GetVariableByName("mapAtoB")->AsShaderResource();
 
-	hWidth = hOperationsOnGridIntegralsFX->GetVariableByName("width");
-	hHeight = hOperationsOnGridIntegralsFX->GetVariableByName("height");
+	hWidthAA = hOperationsOnGridIntegralsFX->GetVariableByName("widthAA");
+	hWidthAB = hOperationsOnGridIntegralsFX->GetVariableByName("widthAB");
+	hWidthBB = hOperationsOnGridIntegralsFX->GetVariableByName("widthBB");
+
+	hHeightAA = hOperationsOnGridIntegralsFX->GetVariableByName("heightAA");
+	hHeightAB = hOperationsOnGridIntegralsFX->GetVariableByName("heightAB");
+	hHeightBB = hOperationsOnGridIntegralsFX->GetVariableByName("heightBB");
+
 	hTexturesCount = hOperationsOnGridIntegralsFX->GetVariableByName("texturesCount");
 
-	hCellRadius = hOperationsOnGridIntegralsFX->GetVariableByName("cellRadius");
+	hCellDimension = hOperationsOnGridIntegralsFX->GetVariableByName("cellDimension");
+	hOffsetRange = hOperationsOnGridIntegralsFX->GetVariableByName("offsetRange");
+	hOffset0 = hOperationsOnGridIntegralsFX->GetVariableByName("offset0");
+
+	hRadius = hOperationsOnGridIntegralsFX->GetVariableByName("radius");
 }
 
 void OperationsOnGridIntegrals::clearA(
@@ -393,20 +396,22 @@ void OperationsOnGridIntegrals::clearA(
 	hAAfraction->SetUnorderedAccessView(AAfraction);
 	hMaxA->SetUnorderedAccessView(maxA);
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int diameter = 2 * RADIUS_IN_CELLS + 1;
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	int widthAA = width - CELL_DIMENSION_X + 1;
+	widthAA = std::ceil((float)(widthAA) / diameter);
+
+	int heightAA = height - CELL_DIMENSION_Y + 1;
+	heightAA = std::ceil((float)(heightAA) / diameter);
+
+	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
+	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
-
-	int cellRadius = RADIUS_IN_CELLS;
-	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
 
 	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(0)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAA / 16);
+	uint32_t groups_y = std::ceil((float)heightAA / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -437,20 +442,33 @@ void OperationsOnGridIntegrals::clearAB(
 
 	hMaxB->SetUnorderedAccessView(maxB);
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int diameter = 2 * RADIUS_IN_CELLS + 1;
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	int widthAB = width - CELL_DIMENSION_X + 1;
+	widthAB = std::ceil((float)(widthAB) / CELL_DIMENSION_X);
+	widthAB *= OFFSET_RANGE_X;
+	widthAB = std::ceil((float)(widthAB) / diameter);
+
+	int heightAB = height - CELL_DIMENSION_Y + 1;
+	heightAB = std::ceil((float)(heightAB) / CELL_DIMENSION_Y);
+	heightAB *= OFFSET_RANGE_Y;
+	heightAB = std::ceil((float)(heightAB) / diameter);
+
+	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
+	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
+
+	int widthBB = std::ceil((float)(width) / diameter);
+	int heightBB = std::ceil((float)(height) / diameter);
+
+	hWidthBB->SetRawValue(&widthBB, 0, sizeof(widthBB));
+	hHeightBB->SetRawValue(&heightBB, 0, sizeof(heightBB));
+
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
-
-	int cellRadius = RADIUS_IN_CELLS;
-	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
 
 	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(1)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAB / 16);
+	uint32_t groups_y = std::ceil((float)heightAB / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -482,20 +500,23 @@ void OperationsOnGridIntegrals::calculateA(
 	hAAfraction->SetUnorderedAccessView(AAfraction);
 	hMaxA->SetUnorderedAccessView(maxA);
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int widthAA = width - CELL_DIMENSION_X + 1;
+	int heightAA = height - CELL_DIMENSION_Y + 1;
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
+	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
 
 	int cellRadius = RADIUS_IN_CELLS;
-	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+	hRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+
+	Vec2d<int> cellDimension{ CELL_DIMENSION_X,CELL_DIMENSION_Y };
+	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
 
 	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(2)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAA / 16);
+	uint32_t groups_y = std::ceil((float)heightAA / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -543,20 +564,35 @@ void OperationsOnGridIntegrals::calculateAB(
 
 	hMaxB->SetUnorderedAccessView(maxB);
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int widthAB = width - CELL_DIMENSION_X + 1;
+	widthAB = std::ceil((float)(widthAB) / CELL_DIMENSION_X);
+	widthAB *= OFFSET_RANGE_X;
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	int heightAB = height - CELL_DIMENSION_Y + 1;
+	heightAB = std::ceil((float)(heightAB) / CELL_DIMENSION_Y);
+	heightAB *= OFFSET_RANGE_Y;
+
+	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
+	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
+
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
 
 	int cellRadius = RADIUS_IN_CELLS;
-	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+	hRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
+
+	Vec2d<int> offsetRange{ OFFSET_RANGE_X,OFFSET_RANGE_Y };
+	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
+
+	Vec2d<int> offset0{ OFFSET0_X,OFFSET0_Y };
+	hOffset0->SetRawValue(&offset0, 0, sizeof(offset0));
+
+	Vec2d<int> cellDimension{ CELL_DIMENSION_X,CELL_DIMENSION_Y };
+	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
 
 	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(3)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAB / 16);
+	uint32_t groups_y = std::ceil((float)heightAB / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -609,8 +645,14 @@ void LeastSquaresOfJacobianDeterminant::init()
 
 	hMapAtoB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("mapAtoB")->AsShaderResource();
 
-	hWidth = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("width");
-	hHeight = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("height");
+	hWidthAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAA");
+	hWidthAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAB");
+	hWidthBB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthBB");
+
+	hHeightAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightAA");
+	hHeightAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightAB");
+	hHeightBB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightBB");
+
 	hTexturesCount = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("texturesCount");
 
 	hAngle0 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("angle0");
@@ -619,12 +661,10 @@ void LeastSquaresOfJacobianDeterminant::init()
 	hAngle1 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("angle1");
 	hScale1 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("scale1");
 
-	hOffsetX = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offsetX");
-	hOffsetY = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offsetY");
-
 	hCellRadius = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("cellRadius");
-	hUnitX = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("unitX");
-	hUnitY = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("unitY");
+	hCellDimension = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("cellDimension");
+	hOffsetRange = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offsetRange");
+	hOffset0 = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("offset0");
 
 	hError = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("error")->AsUnorderedAccessView();
 	hAtoB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("AtoB")->AsUnorderedAccessView();
@@ -638,15 +678,17 @@ void LeastSquaresOfJacobianDeterminant::clear(
 {
 	auto context = GraphicsCore::instance()->context;
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int diameter = 2 * RADIUS_IN_CELLS + 1;
 
-	int cellDiameter = 2 * RADIUS_IN_CELLS + 1;
-	width = std::ceil((float)width / cellDiameter);
-	height = std::ceil((float)height / cellDiameter);
+	int widthAA = width - CELL_DIMENSION_X + 1;
+	widthAA = std::ceil((float)(widthAA) / diameter);
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	int heightAA = height - CELL_DIMENSION_Y + 1;
+	heightAA = std::ceil((float)(heightAA) / diameter);
+
+	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
+	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
+
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
 
 	hError->SetUnorderedAccessView(error);
@@ -654,8 +696,8 @@ void LeastSquaresOfJacobianDeterminant::clear(
 
 	hClearTech->GetPassByIndex(0)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAA / 16);
+	uint32_t groups_y = std::ceil((float)heightAA / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -703,16 +745,21 @@ void LeastSquaresOfJacobianDeterminant::calculateErrors(
 	hError->SetUnorderedAccessView(error);
 	hAtoB->SetUnorderedAccessView(AtoB);
 
-	width = std::ceil((float)width / CELL_DIMENSION_X);
-	height = std::ceil((float)height / CELL_DIMENSION_Y);
+	int radius = RADIUS_IN_CELLS;
+	int diameter = 2 * radius + 1;
+	
+	int widthAB = width - CELL_DIMENSION_X + 1;
+	widthAB = std::ceil((float)(widthAB) / CELL_DIMENSION_X);
+	widthAB *= OFFSET_RANGE_X;
+	widthAB = std::ceil((float)(widthAB) / diameter);
 
-	int cellRadius = RADIUS_IN_CELLS;
-	int cellDiameter = 2 * cellRadius + 1;
-	width = std::ceil((float)width / cellDiameter);
-	height = std::ceil((float)height / cellDiameter);
+	int heightAB = height - CELL_DIMENSION_Y + 1;
+	heightAB = std::ceil((float)(heightAB) / CELL_DIMENSION_Y);
+	heightAB *= OFFSET_RANGE_Y;
+	heightAB = std::ceil((float)(heightAB) / diameter);
 
-	hWidth->SetRawValue(&width, 0, sizeof(width));
-	hHeight->SetRawValue(&height, 0, sizeof(height));
+	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
+	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
 	hTexturesCount->SetRawValue(&count, 0, sizeof(count));
 
 	hAngle0->SetRawValue(&angle0, 0, sizeof(angle0));
@@ -721,21 +768,19 @@ void LeastSquaresOfJacobianDeterminant::calculateErrors(
 	hAngle1->SetRawValue(&angle0, 0, sizeof(angle1));
 	hScale1->SetRawValue(&scale0, 0, sizeof(scale1));
 
-	hOffsetX->SetRawValue(&offsetX, 0, sizeof(offsetX));
-	hOffsetY->SetRawValue(&offsetY, 0, sizeof(offsetY));
+	Vec2d<int> cellDimension{ CELL_DIMENSION_X,CELL_DIMENSION_Y };
+	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+	
+	Vec2d<int> offsetRange{ OFFSET_RANGE_X,OFFSET_RANGE_Y };
+	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
 
-	hCellRadius->SetRawValue(&cellRadius, 0, sizeof(cellRadius));
-
-	int unitX = CELL_DIMENSION_X;
-	hUnitX->SetRawValue(&unitX, 0, sizeof(unitX));
-
-	int unitY = CELL_DIMENSION_Y;
-	hUnitY->SetRawValue(&unitY, 0, sizeof(unitY));
+	Vec2d<int> offset0{ OFFSET0_X,OFFSET0_Y };
+	hOffset0->SetRawValue(&offset0, 0, sizeof(offset0));
 
 	hApplyLeastSquareMethodTech->GetPassByIndex(0)->Apply(0, context);
 
-	uint32_t groups_x = std::ceil((float)width / 16);
-	uint32_t groups_y = std::ceil((float)height / 16);
+	uint32_t groups_x = std::ceil((float)widthAB / 16);
+	uint32_t groups_y = std::ceil((float)heightAB / 16);
 	uint32_t groups_z = std::ceil((float)count / 4);
 	context->Dispatch(groups_x, groups_y, groups_z);
 
@@ -764,6 +809,15 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 		setOfPhotosSRV->Release();
 		setOfPhotosSRV = nullptr;
 
+		photosIntegralsAxh->Release();
+		photosIntegralsAxh = nullptr;
+
+		photosIntegralsAyh->Release();
+		photosIntegralsAyh = nullptr;
+
+		photosIntegralsAzh->Release();
+		photosIntegralsAzh = nullptr;
+
 		photosIntegralsAx->Release();
 		photosIntegralsAx = nullptr;
 
@@ -773,6 +827,15 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 		photosIntegralsAz->Release();
 		photosIntegralsAz = nullptr;
 
+		photosIntegralsAxhUAV->Release();
+		photosIntegralsAxhUAV = nullptr;
+
+		photosIntegralsAyhUAV->Release();
+		photosIntegralsAyhUAV = nullptr;
+
+		photosIntegralsAzhUAV->Release();
+		photosIntegralsAzhUAV = nullptr;
+
 		photosIntegralsAxUAV->Release();
 		photosIntegralsAxUAV = nullptr;
 
@@ -781,6 +844,15 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 
 		photosIntegralsAzUAV->Release();
 		photosIntegralsAzUAV = nullptr;
+
+		photosIntegralsAxhSRV->Release();
+		photosIntegralsAxhSRV = nullptr;
+
+		photosIntegralsAyhSRV->Release();
+		photosIntegralsAyhSRV = nullptr;
+
+		photosIntegralsAzhSRV->Release();
+		photosIntegralsAzhSRV = nullptr;
 
 		photosIntegralsAxSRV->Release();
 		photosIntegralsAxSRV = nullptr;

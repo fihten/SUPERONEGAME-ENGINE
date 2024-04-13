@@ -40,11 +40,11 @@ RWTexture2DArray<uint4> AtoB;
 void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width)
+	if (x >= widthAA)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= height)
+	if (y >= heightAA)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
