@@ -194,8 +194,9 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 		ModelMaker::instance()->loadPhotos(paths);
 
 		ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
+
+		ModelMaker::instance()->freeResources();
 	}
-	
 }
 
 void GraphicsCore::startFrame()

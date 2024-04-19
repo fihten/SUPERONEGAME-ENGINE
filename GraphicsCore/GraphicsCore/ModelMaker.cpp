@@ -189,7 +189,7 @@ void GridIntegralsB::init()
 	int sz = sizeof shadersFolder / sizeof * shadersFolder;
 	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
 
-	std::string sGridIntegrals = std::string(shadersFolder) + "\\GridIntegrals.fx";
+	std::string sGridIntegrals = std::string(shadersFolder) + "\\GridIntegralsB.fx";
 
 	DWORD shaderFlags = 0;
 //#if defined(DEBUG) || defined(_DEBUG)
@@ -723,8 +723,7 @@ void LeastSquaresOfJacobianDeterminant::calculateErrors(
 	ID3D11UnorderedAccessView* AtoB,
 	int width, int height, int count,
 	float angle0, float scale0,
-	float angle1, float scale1,
-	int offsetX, int offsetY
+	float angle1, float scale1
 )
 {
 	auto context = GraphicsCore::instance()->context;
@@ -792,14 +791,465 @@ void LeastSquaresOfJacobianDeterminant::calculateErrors(
 	context->CSSetUnorderedAccessViews(0, 2, uavsNull, nullptr);
 }
 
+void FindNearestDefinedPoint::init()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sFindNearestDefinedPoint = std::string(shadersFolder) + "\\findNearestDefinedPoint.fx";
+
+	DWORD shaderFlags = 0;
+	//#if defined(DEBUG) || defined(_DEBUG)
+	//	shaderFlags |= D3D10_SHADER_DEBUG;
+	//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+	//#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sFindNearestDefinedPoint.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	auto device = GraphicsCore::instance()->device;
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &hEffect);
+
+	hTechnique = hEffect->GetTechniqueByName("findNearestDefinedPoint");
+	hError = hEffect->GetVariableByName("error")->AsShaderResource();
+	hAtoB = hEffect->GetVariableByName("AtoB")->AsShaderResource();
+	hMinDistanceOut = hEffect->GetVariableByName("minDistanceOut")->AsUnorderedAccessView();
+	hMinDistanceIn = hEffect->GetVariableByName("minDistanceIn")->AsShaderResource();
+	hMappingOfPoint = hEffect->GetVariableByName("mappingOfPoint")->AsUnorderedAccessView();
+	hWidth = hEffect->GetVariableByName("width");
+	hHeight = hEffect->GetVariableByName("height");
+	hIndex = hEffect->GetVariableByName("index");
+	hPt = hEffect->GetVariableByName("pt");
+	hThreshold = hEffect->GetVariableByName("threshold");
+
+	D3D11_BUFFER_DESC bufferDesc;
+	bufferDesc.ByteWidth = sizeof(uint32_t);
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(uint32_t);
+	device->CreateBuffer(&bufferDesc, nullptr, &minDistance);
+}
+
+Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
+	ID3D11ShaderResourceView* error,
+	ID3D11ShaderResourceView* AtoB,
+	const Vec2d<int>& point
+)
+{
+	hError->SetResource(error);
+	hAtoB->SetResource(AtoB);
+}
+
 void ModelMaker::init()
 {
-	ptr->gridIntegrals.init();
+	ptr->gridIntegralsA.init();
+	ptr->gridIntegralsB.init();
 	ptr->operationsOnGridIntegrals.init();
 	ptr->leastSquaresOfJacobianDeterminant.init();
 }
 
 void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
+{
+	freeResources(true);
+
+	auto device = GraphicsCore::instance()->device;
+	auto context = GraphicsCore::instance()->context;
+
+	int count = paths.size();
+	std::vector<ID3D11Texture2D*> photos(count);
+	for (int i = 0; i < count; i++)
+	{
+		const std::string& path = paths[i];
+
+		D3DX11_IMAGE_LOAD_INFO loadInfo;
+		loadInfo.Width = D3DX11_FROM_FILE;
+		loadInfo.Height = D3DX11_FROM_FILE;
+		loadInfo.Depth = D3DX11_FROM_FILE;
+		loadInfo.FirstMipLevel = 0;
+		loadInfo.MipLevels = D3DX11_FROM_FILE;
+		loadInfo.Usage = D3D11_USAGE_STAGING;
+		loadInfo.BindFlags = 0;
+		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+		loadInfo.MiscFlags = 0;
+		loadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		loadInfo.Filter = D3DX11_FILTER_LINEAR;
+		loadInfo.MipFilter = D3DX11_FILTER_LINEAR;
+		loadInfo.pSrcInfo = 0;
+		D3DX11CreateTextureFromFileA(
+			device,
+			path.c_str(),
+			&loadInfo,
+			0,
+			(ID3D11Resource * *)& photos[i],
+			0
+		);
+	}
+
+	D3D11_TEXTURE2D_DESC texElementDesc;
+	photos[0]->GetDesc(&texElementDesc);
+	D3D11_TEXTURE2D_DESC texArrayDesc;
+	texArrayDesc.Width = texElementDesc.Width;
+	texArrayDesc.Height = texElementDesc.Height;
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = texElementDesc.Format;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, 0, &setOfPhotos);
+
+	for (int texElement = 0; texElement < count; ++texElement)
+	{
+		int mipLevel = 0;
+		
+		D3D11_MAPPED_SUBRESOURCE mappedTex2D;
+		context->Map(photos[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D);
+		context->UpdateSubresource(
+			setOfPhotos,
+			D3D11CalcSubresource(
+				mipLevel,
+				texElement,
+				texElementDesc.MipLevels
+			),
+			0,
+			mappedTex2D.pData,
+			mappedTex2D.RowPitch,
+			mappedTex2D.DepthPitch
+		);
+		context->Unmap(photos[texElement], mipLevel);
+	}
+
+	width = texElementDesc.Width;
+	height = texElementDesc.Height;
+	texturesCount = count;
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+	srv_desc.Format = texElementDesc.Format;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(setOfPhotos, &srv_desc, &setOfPhotosSRV);
+
+	texArrayDesc.Width = width - CELL_DIMENSION_X + 1;
+	texArrayDesc.Height = height;
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAxh);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAyh);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAzh);
+	
+	texArrayDesc.Height = height - CELL_DIMENSION_Y + 1;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAx);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAy);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAz);
+
+	int cellsAlongX = std::ceil((float)(width) / CELL_DIMENSION_X);
+	int cellsAlongY = std::ceil((float)(height) / CELL_DIMENSION_Y);
+	texArrayDesc.Width = cellsAlongX;
+	texArrayDesc.Height = cellsAlongY;
+
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBx);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBy);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBz);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = count;
+	device->CreateUnorderedAccessView(photosIntegralsAxh, &uav_desc, &photosIntegralsAxhUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAyh, &uav_desc, &photosIntegralsAyhUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAzh, &uav_desc, &photosIntegralsAzhUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAx, &uav_desc, &photosIntegralsAxUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAy, &uav_desc, &photosIntegralsAyUAV);
+	device->CreateUnorderedAccessView(photosIntegralsAz, &uav_desc, &photosIntegralsAzUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBx, &uav_desc, &photosIntegralsBxUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBy, &uav_desc, &photosIntegralsByUAV);
+	device->CreateUnorderedAccessView(photosIntegralsBz, &uav_desc, &photosIntegralsBzUAV);
+
+	srv_desc.Format = DXGI_FORMAT_R32_UINT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(photosIntegralsAxh, &srv_desc, &photosIntegralsAxhSRV);
+	device->CreateShaderResourceView(photosIntegralsAyh, &srv_desc, &photosIntegralsAyhSRV);
+	device->CreateShaderResourceView(photosIntegralsAzh, &srv_desc, &photosIntegralsAzhSRV);
+	device->CreateShaderResourceView(photosIntegralsAx, &srv_desc, &photosIntegralsAxSRV);
+	device->CreateShaderResourceView(photosIntegralsAy, &srv_desc, &photosIntegralsAySRV);
+	device->CreateShaderResourceView(photosIntegralsAz, &srv_desc, &photosIntegralsAzSRV);
+	device->CreateShaderResourceView(photosIntegralsBx, &srv_desc, &photosIntegralsBxSRV);
+	device->CreateShaderResourceView(photosIntegralsBy, &srv_desc, &photosIntegralsBySRV);
+	device->CreateShaderResourceView(photosIntegralsBz, &srv_desc, &photosIntegralsBzSRV);
+
+	int diameter = 2 * RADIUS_IN_CELLS + 1;
+
+	int widthAA = width - CELL_DIMENSION_X + 1;
+	widthAA = std::ceil((float)(widthAA) / diameter);
+
+	int heightAA = height - CELL_DIMENSION_Y + 1;
+	heightAA = std::ceil((float)(heightAA) / diameter);
+
+	int widthAB = width - CELL_DIMENSION_X + 1;
+	widthAB = std::ceil((float)(widthAB) / CELL_DIMENSION_X);
+	widthAB *= OFFSET_RANGE_X;
+	widthAB = std::ceil((float)(widthAB) / diameter);
+
+	int heightAB = height - CELL_DIMENSION_Y + 1;
+	heightAB = std::ceil((float)(heightAB) / CELL_DIMENSION_Y);
+	heightAB *= OFFSET_RANGE_Y;
+	heightAB = std::ceil((float)(heightAB) / diameter);
+
+	int widthBB = std::ceil((float)(width) / diameter);
+	int heightBB = std::ceil((float)(height) / diameter);
+
+	texArrayDesc.Width = widthAA;
+	texArrayDesc.Height = heightAA;
+	texArrayDesc.MipLevels = 1;
+	texArrayDesc.ArraySize = count;
+	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
+	texArrayDesc.SampleDesc.Count = 1;
+	texArrayDesc.SampleDesc.Quality = 0;
+	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
+	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = 0;
+	texArrayDesc.MiscFlags = 0;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AA);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AAfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &maxA);
+
+	texArrayDesc.Width = widthAB;
+	texArrayDesc.Height = heightAB;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &ABfraction);
+
+	texArrayDesc.Width = widthBB;
+	texArrayDesc.Height = heightBB;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &BB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &BBfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &maxB);
+
+	uav_desc.Format = DXGI_FORMAT_R32_UINT;
+	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
+	uav_desc.Texture2DArray.MipSlice = 0;
+	uav_desc.Texture2DArray.FirstArraySlice = 0;
+	uav_desc.Texture2DArray.ArraySize = count;
+	device->CreateUnorderedAccessView(AA, &uav_desc, &AAuav);
+	device->CreateUnorderedAccessView(AB, &uav_desc, &ABuav);
+	device->CreateUnorderedAccessView(BB, &uav_desc, &BBuav);
+	device->CreateUnorderedAccessView(AAfraction, &uav_desc, &AAfractionUAV);
+	device->CreateUnorderedAccessView(ABfraction, &uav_desc, &ABfractionUAV);
+	device->CreateUnorderedAccessView(BBfraction, &uav_desc, &BBfractionUAV);
+	device->CreateUnorderedAccessView(maxA, &uav_desc, &maxAuav);
+	device->CreateUnorderedAccessView(maxB, &uav_desc, &maxBuav);
+
+	srv_desc.Format = DXGI_FORMAT_R32_UINT;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
+	srv_desc.Texture2DArray.MostDetailedMip = 0;
+	srv_desc.Texture2DArray.MipLevels = 1;
+	srv_desc.Texture2DArray.FirstArraySlice = 0;
+	srv_desc.Texture2DArray.ArraySize = count;
+	device->CreateShaderResourceView(AA, &srv_desc, &AAsrv);
+	device->CreateShaderResourceView(AB, &srv_desc, &ABsrv);
+	device->CreateShaderResourceView(BB, &srv_desc, &BBsrv);
+	device->CreateShaderResourceView(AAfraction, &srv_desc, &AAfractionSRV);
+	device->CreateShaderResourceView(ABfraction, &srv_desc, &ABfractionSRV);
+	device->CreateShaderResourceView(BBfraction, &srv_desc, &BBfractionSRV);
+	device->CreateShaderResourceView(maxA, &srv_desc, &maxAsrv);
+	device->CreateShaderResourceView(maxB, &srv_desc, &maxBsrv);
+
+	D3D11_BUFFER_DESC buffer_desc;
+	buffer_desc.ByteWidth = count * sizeof(uint32_t);
+	buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+	buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+	D3D11_SUBRESOURCE_DATA data;
+	std::vector<uint32_t> vMapAtoB(texturesCount);
+	for (uint32_t i = 0; i < texturesCount; i++)
+	{
+		vMapAtoB[i] = texturesCount - 1 - i;
+	}
+	data.pSysMem = vMapAtoB.data();
+	device->CreateBuffer(&buffer_desc, &data, &mapAtoB);
+
+	srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srv_desc.Buffer.FirstElement = 0;
+	srv_desc.Buffer.NumElements = count;
+	device->CreateShaderResourceView(mapAtoB, &srv_desc, &mapAtoBsrv);
+
+	texArrayDesc.Width = widthAA;
+	texArrayDesc.Height = heightAA;
+	texArrayDesc.Format = DXGI_FORMAT_R32_FLOAT;
+	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &error);
+
+	texArrayDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateTexture2D(&texArrayDesc, nullptr, &AtoB);
+
+	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
+	device->CreateUnorderedAccessView(error, &uav_desc, &errorUAV);
+
+	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
+	device->CreateUnorderedAccessView(AtoB, &uav_desc, &AtoBuav);
+
+	bSetOfPhotosIsLoaded = true;
+}
+
+void ModelMaker::defineTheSamePointsOnSetOfPhotos() 
+{
+	float t0 = Timer::Instance()->elapsedTime();
+
+	gridIntegralsA.clearPhotosIntegrals(
+		photosIntegralsAxhUAV,
+		photosIntegralsAyhUAV,
+		photosIntegralsAzhUAV,
+		photosIntegralsAxUAV,
+		photosIntegralsAyUAV,
+		photosIntegralsAzUAV,
+		width, height, texturesCount);
+	gridIntegralsA.calculatePhotosIntegrals(
+		setOfPhotosSRV,
+		photosIntegralsAxhUAV,
+		photosIntegralsAyhUAV,
+		photosIntegralsAzhUAV,
+		photosIntegralsAxhSRV,
+		photosIntegralsAyhSRV,
+		photosIntegralsAzhSRV,
+		photosIntegralsAxUAV,
+		photosIntegralsAyUAV,
+		photosIntegralsAzUAV,
+		width, height, texturesCount
+	);
+
+	operationsOnGridIntegrals.clearA(
+		AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
+	operationsOnGridIntegrals.calculateA(
+		photosIntegralsAxSRV,
+		photosIntegralsAySRV,
+		photosIntegralsAzSRV,
+		AAuav, AAfractionUAV, maxAuav,
+		width, height, texturesCount
+	);
+
+	leastSquaresOfJacobianDeterminant.clear(errorUAV, AtoBuav, width, height, texturesCount);
+
+	int maxOffset = 10;
+	int N = 10;
+
+	int countOfSteps = (N + 1) * (N + 1) * (N + 1) * (N + 1);
+	int elapsedSteps = 0;
+	int percent = 0;
+
+	float scaleMin = 0.8f;
+	float scaleMax = 1.2f;
+	float scaleStep = (scaleMax - scaleMin) / N;
+
+	float angleMin = -M_PI / 12;
+	float angleMax = M_PI / 12;
+	float angleStep = (angleMax - angleMin) / N;
+	
+	for (int a0i = 0; a0i <= N; a0i++)
+	{
+		for (int s0i = 0; s0i <= N; s0i++)
+		{
+			for (int a1i = 0; a1i <= N; a1i++)
+			{
+				for (int s1i = 0; s1i <= N; s1i++)
+				{
+					int p = (float)(elapsedSteps * 100) / countOfSteps;
+					if (p > percent)
+					{
+						percent = p;
+						char buffer[256];
+						sprintf(buffer, "percent=%d%\n", percent);
+						OutputDebugStringA(buffer);
+					}
+
+					float angle0 = angleMin + a0i * angleStep;
+					float scale0 = scaleMin + s0i * scaleStep;
+
+					float angle1 = angleMin + a1i * angleStep;
+					float scale1 = scaleMin + s1i * scaleStep;
+
+					gridIntegralsB.clearPhotosIntegrals(
+						photosIntegralsBxUAV,
+						photosIntegralsByUAV,
+						photosIntegralsBzUAV,
+						width, height, texturesCount);
+					gridIntegralsB.calculatePhotosIntegrals(
+						setOfPhotosSRV,
+						photosIntegralsBxUAV,
+						photosIntegralsByUAV,
+						photosIntegralsBzUAV,
+						width, height, texturesCount,
+						angle0, scale0,
+						angle1 + angle0, scale1
+					);
+					operationsOnGridIntegrals.calculateAB(
+						photosIntegralsAxSRV,
+						photosIntegralsAySRV,
+						photosIntegralsAzSRV,
+						photosIntegralsBxSRV,
+						photosIntegralsBySRV,
+						photosIntegralsBzSRV,
+						mapAtoBsrv,
+						ABuav, ABfractionUAV,
+						BBuav, BBfractionUAV,
+						maxBuav,
+						width, height, texturesCount
+					);
+					leastSquaresOfJacobianDeterminant.calculateErrors(
+						AAsrv, ABsrv, BBsrv,
+						AAfractionSRV, ABfractionSRV, BBfractionSRV,
+						maxAsrv, maxBsrv, mapAtoBsrv,
+						errorUAV, AtoBuav,
+						width, height, texturesCount,
+						angle0, scale0,
+						angle1 + angle0, scale1
+					);
+					elapsedSteps++;
+				}
+			}
+		}
+	}
+
+	float t1 = Timer::Instance()->elapsedTime();
+	float dt = t1 - t0;
+	char buffer[256];
+	sprintf(buffer, "seconds=%d\n", (int)dt);
+	OutputDebugStringA(buffer);
+}
+
+void ModelMaker::freeResources(bool freeResult)
 {
 	if (bSetOfPhotosIsLoaded)
 	{
@@ -968,364 +1418,21 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 		mapAtoBsrv->Release();
 		mapAtoBsrv = nullptr;
 
-		error->Release();
-		error = nullptr;
-
-		errorUAV->Release();
-		errorUAV = nullptr;
-
-		AtoB->Release();
-		AtoB = nullptr;
-
-		AtoBuav->Release();
-		AtoBuav = nullptr;
-	}
-
-	auto device = GraphicsCore::instance()->device;
-	auto context = GraphicsCore::instance()->context;
-
-	int count = paths.size();
-	std::vector<ID3D11Texture2D*> photos(count);
-	for (int i = 0; i < count; i++)
-	{
-		const std::string& path = paths[i];
-
-		D3DX11_IMAGE_LOAD_INFO loadInfo;
-		loadInfo.Width = D3DX11_FROM_FILE;
-		loadInfo.Height = D3DX11_FROM_FILE;
-		loadInfo.Depth = D3DX11_FROM_FILE;
-		loadInfo.FirstMipLevel = 0;
-		loadInfo.MipLevels = D3DX11_FROM_FILE;
-		loadInfo.Usage = D3D11_USAGE_STAGING;
-		loadInfo.BindFlags = 0;
-		loadInfo.CpuAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
-		loadInfo.MiscFlags = 0;
-		loadInfo.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-		loadInfo.Filter = D3DX11_FILTER_LINEAR;
-		loadInfo.MipFilter = D3DX11_FILTER_LINEAR;
-		loadInfo.pSrcInfo = 0;
-		D3DX11CreateTextureFromFileA(
-			device,
-			path.c_str(),
-			&loadInfo,
-			0,
-			(ID3D11Resource * *)& photos[i],
-			0
-		);
-	}
-
-	D3D11_TEXTURE2D_DESC texElementDesc;
-	photos[0]->GetDesc(&texElementDesc);
-	D3D11_TEXTURE2D_DESC texArrayDesc;
-	texArrayDesc.Width = texElementDesc.Width;
-	texArrayDesc.Height = texElementDesc.Height;
-	texArrayDesc.MipLevels = 1;
-	texArrayDesc.ArraySize = count;
-	texArrayDesc.Format = texElementDesc.Format;
-	texArrayDesc.SampleDesc.Count = 1;
-	texArrayDesc.SampleDesc.Quality = 0;
-	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	texArrayDesc.CPUAccessFlags = 0;
-	texArrayDesc.MiscFlags = 0;
-	device->CreateTexture2D(&texArrayDesc, 0, &setOfPhotos);
-
-	for (int texElement = 0; texElement < count; ++texElement)
-	{
-		int mipLevel = 0;
-		
-		D3D11_MAPPED_SUBRESOURCE mappedTex2D;
-		context->Map(photos[texElement], mipLevel, D3D11_MAP_READ, 0, &mappedTex2D);
-		context->UpdateSubresource(
-			setOfPhotos,
-			D3D11CalcSubresource(
-				mipLevel,
-				texElement,
-				texElementDesc.MipLevels
-			),
-			0,
-			mappedTex2D.pData,
-			mappedTex2D.RowPitch,
-			mappedTex2D.DepthPitch
-		);
-		context->Unmap(photos[texElement], mipLevel);
-	}
-
-	width = texElementDesc.Width;
-	height = texElementDesc.Height;
-	texturesCount = count;
-
-	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
-	srv_desc.Format = texElementDesc.Format;
-	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	srv_desc.Texture2DArray.MostDetailedMip = 0;
-	srv_desc.Texture2DArray.MipLevels = 1;
-	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = count;
-	device->CreateShaderResourceView(setOfPhotos, &srv_desc, &setOfPhotosSRV);
-
-	int cellsAlongX = std::ceil((float)(width) / CELL_DIMENSION_X);
-	int cellsAlongY = std::ceil((float)(height) / CELL_DIMENSION_Y);
-
-	texArrayDesc.Width = cellsAlongX;
-	texArrayDesc.Height = cellsAlongY;
-	texArrayDesc.MipLevels = 1;
-	texArrayDesc.ArraySize = count;
-	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
-	texArrayDesc.SampleDesc.Count = 1;
-	texArrayDesc.SampleDesc.Quality = 0;
-	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	texArrayDesc.CPUAccessFlags = 0;
-	texArrayDesc.MiscFlags = 0;
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAx);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAy);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsAz);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBx);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBy);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &photosIntegralsBz);
-
-	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
-	uav_desc.Format = DXGI_FORMAT_R32_UINT;
-	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-	uav_desc.Texture2DArray.MipSlice = 0;
-	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = count;
-	device->CreateUnorderedAccessView(photosIntegralsAx, &uav_desc, &photosIntegralsAxUAV);
-	device->CreateUnorderedAccessView(photosIntegralsAy, &uav_desc, &photosIntegralsAyUAV);
-	device->CreateUnorderedAccessView(photosIntegralsAz, &uav_desc, &photosIntegralsAzUAV);
-	device->CreateUnorderedAccessView(photosIntegralsBx, &uav_desc, &photosIntegralsBxUAV);
-	device->CreateUnorderedAccessView(photosIntegralsBy, &uav_desc, &photosIntegralsByUAV);
-	device->CreateUnorderedAccessView(photosIntegralsBz, &uav_desc, &photosIntegralsBzUAV);
-
-	srv_desc.Format = DXGI_FORMAT_R32_UINT;
-	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	srv_desc.Texture2DArray.MostDetailedMip = 0;
-	srv_desc.Texture2DArray.MipLevels = 1;
-	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = count;
-	device->CreateShaderResourceView(photosIntegralsAx, &srv_desc, &photosIntegralsAxSRV);
-	device->CreateShaderResourceView(photosIntegralsAy, &srv_desc, &photosIntegralsAySRV);
-	device->CreateShaderResourceView(photosIntegralsAz, &srv_desc, &photosIntegralsAzSRV);
-	device->CreateShaderResourceView(photosIntegralsBx, &srv_desc, &photosIntegralsBxSRV);
-	device->CreateShaderResourceView(photosIntegralsBy, &srv_desc, &photosIntegralsBySRV);
-	device->CreateShaderResourceView(photosIntegralsBz, &srv_desc, &photosIntegralsBzSRV);
-
-	int diameterInCells = 2 * RADIUS_IN_CELLS + 1;
-
-	texArrayDesc.Width = std::ceil(cellsAlongX / diameterInCells);
-	texArrayDesc.Height = std::ceil(cellsAlongY / diameterInCells);
-	texArrayDesc.MipLevels = 1;
-	texArrayDesc.ArraySize = count;
-	texArrayDesc.Format = DXGI_FORMAT_R32_UINT;
-	texArrayDesc.SampleDesc.Count = 1;
-	texArrayDesc.SampleDesc.Quality = 0;
-	texArrayDesc.Usage = D3D11_USAGE_DEFAULT;
-	texArrayDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	texArrayDesc.CPUAccessFlags = 0;
-	texArrayDesc.MiscFlags = 0;
-	device->CreateTexture2D(&texArrayDesc, nullptr, &AA);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &AB);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &BB);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &AAfraction);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &ABfraction);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &BBfraction);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &maxA);
-	device->CreateTexture2D(&texArrayDesc, nullptr, &maxB);
-
-	uav_desc.Format = DXGI_FORMAT_R32_UINT;
-	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_TEXTURE2DARRAY;
-	uav_desc.Texture2DArray.MipSlice = 0;
-	uav_desc.Texture2DArray.FirstArraySlice = 0;
-	uav_desc.Texture2DArray.ArraySize = count;
-	device->CreateUnorderedAccessView(AA, &uav_desc, &AAuav);
-	device->CreateUnorderedAccessView(AB, &uav_desc, &ABuav);
-	device->CreateUnorderedAccessView(BB, &uav_desc, &BBuav);
-	device->CreateUnorderedAccessView(AAfraction, &uav_desc, &AAfractionUAV);
-	device->CreateUnorderedAccessView(ABfraction, &uav_desc, &ABfractionUAV);
-	device->CreateUnorderedAccessView(BBfraction, &uav_desc, &BBfractionUAV);
-	device->CreateUnorderedAccessView(maxA, &uav_desc, &maxAuav);
-	device->CreateUnorderedAccessView(maxB, &uav_desc, &maxBuav);
-
-	srv_desc.Format = DXGI_FORMAT_R32_UINT;
-	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2DARRAY;
-	srv_desc.Texture2DArray.MostDetailedMip = 0;
-	srv_desc.Texture2DArray.MipLevels = 1;
-	srv_desc.Texture2DArray.FirstArraySlice = 0;
-	srv_desc.Texture2DArray.ArraySize = count;
-	device->CreateShaderResourceView(AA, &srv_desc, &AAsrv);
-	device->CreateShaderResourceView(AB, &srv_desc, &ABsrv);
-	device->CreateShaderResourceView(BB, &srv_desc, &BBsrv);
-	device->CreateShaderResourceView(AAfraction, &srv_desc, &AAfractionSRV);
-	device->CreateShaderResourceView(ABfraction, &srv_desc, &ABfractionSRV);
-	device->CreateShaderResourceView(BBfraction, &srv_desc, &BBfractionSRV);
-	device->CreateShaderResourceView(maxA, &srv_desc, &maxAsrv);
-	device->CreateShaderResourceView(maxB, &srv_desc, &maxBsrv);
-
-	D3D11_BUFFER_DESC buffer_desc;
-	buffer_desc.ByteWidth = count * sizeof(uint32_t);
-	buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-	buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
-	buffer_desc.StructureByteStride = sizeof(uint32_t);
-
-	D3D11_SUBRESOURCE_DATA data;
-	std::vector<uint32_t> vMapAtoB(texturesCount);
-	for (uint32_t i = 0; i < texturesCount; i++)
-	{
-		vMapAtoB[i] = texturesCount - 1 - i;
-	}
-	data.pSysMem = vMapAtoB.data();
-	device->CreateBuffer(&buffer_desc, &data, &mapAtoB);
-
-	srv_desc.Format = DXGI_FORMAT_UNKNOWN;
-	srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
-	srv_desc.Buffer.FirstElement = 0;
-	srv_desc.Buffer.NumElements = count;
-	device->CreateShaderResourceView(mapAtoB, &srv_desc, &mapAtoBsrv);
-
-	texArrayDesc.Format = DXGI_FORMAT_R32_FLOAT;
-	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	device->CreateTexture2D(&texArrayDesc, nullptr, &error);
-
-	texArrayDesc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
-	texArrayDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
-	texArrayDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
-	device->CreateTexture2D(&texArrayDesc, nullptr, &AtoB);
-
-	uav_desc.Format = DXGI_FORMAT_R32_FLOAT;
-	device->CreateUnorderedAccessView(error, &uav_desc, &errorUAV);
-
-	uav_desc.Format = DXGI_FORMAT_R32G32B32A32_UINT;
-	device->CreateUnorderedAccessView(AtoB, &uav_desc, &AtoBuav);
-}
-
-void ModelMaker::defineTheSamePointsOnSetOfPhotos() 
-{
-	float t0 = Timer::Instance()->elapsedTime();
-
-	gridIntegrals.clearPhotosIntegrals(
-		photosIntegralsAxUAV,
-		photosIntegralsAyUAV,
-		photosIntegralsAzUAV,
-		width, height, texturesCount);
-	gridIntegrals.calculatePhotosIntegrals(
-		setOfPhotosSRV,
-		photosIntegralsAxUAV,
-		photosIntegralsAyUAV,
-		photosIntegralsAzUAV,
-		width, height, texturesCount,
-		0, 1,
-		0, 1,
-		0, 0
-	);
-
-	operationsOnGridIntegrals.clearA(
-		AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
-	operationsOnGridIntegrals.calculateA(
-		photosIntegralsAxSRV,
-		photosIntegralsAySRV,
-		photosIntegralsAzSRV,
-		AAuav, AAfractionUAV, maxAuav,
-		width, height, texturesCount
-	);
-
-	leastSquaresOfJacobianDeterminant.clear(errorUAV, AtoBuav, width, height, texturesCount);
-
-	int maxOffset = 10;
-	int N = 10;
-
-	int countOfSteps = 2 * maxOffset + 1;
-	countOfSteps *= 2 * maxOffset + 1;
-	countOfSteps *= N * N * N * N;
-	int elapsedSteps = 0;
-	int percent = 0;
-
-	float scaleMin = 0.8f;
-	float scaleMax = 1.2f;
-	float scaleStep = (scaleMax - scaleMin) / N;
-
-	float angleMin = -M_PI / 12;
-	float angleMax = M_PI / 12;
-	float angleStep = (angleMax - angleMin) / N;
-	
-	for (int offsetX = -maxOffset; offsetX <= maxOffset; offsetX++)
-	{
-		for (int offsetY = -maxOffset; offsetY <= maxOffset; offsetY++)
+		if (freeResult)
 		{
-			for (int a0i = 0; a0i <= N; a0i++)
-			{
-				for (int s0i = 0; s0i <= N; s0i++)
-				{
-					for (int a1i = 0; a1i <= N; a1i++)
-					{
-						for (int s1i = 0; s1i <= N; s1i++)
-						{
-							int p = (float)(elapsedSteps * 100) / countOfSteps;
-							if (p > percent)
-							{
-								percent = p;
-								char buffer[256];
-								sprintf(buffer, "percent=%d%\n", percent);
-								OutputDebugStringA(buffer);
-							}
+			error->Release();
+			error = nullptr;
 
-							float angle0 = angleMin + a0i * angleStep;
-							float scale0 = scaleMin + s0i * scaleStep;
+			errorUAV->Release();
+			errorUAV = nullptr;
 
-							float angle1 = angleMin + a1i * angleStep;
-							float scale1 = scaleMin + s1i * scaleStep;
+			AtoB->Release();
+			AtoB = nullptr;
 
-							gridIntegrals.clearPhotosIntegrals(
-								photosIntegralsBxUAV,
-								photosIntegralsByUAV,
-								photosIntegralsBzUAV,
-								width, height, texturesCount);
-							gridIntegrals.calculatePhotosIntegrals(
-								setOfPhotosSRV,
-								photosIntegralsBxUAV,
-								photosIntegralsByUAV,
-								photosIntegralsBzUAV,
-								width, height, texturesCount,
-								angle0, scale0,
-								angle1 + angle0, scale1,
-								offsetX, offsetY
-							);
-							operationsOnGridIntegrals.calculateAB(
-								photosIntegralsAxSRV,
-								photosIntegralsAySRV,
-								photosIntegralsAzSRV,
-								photosIntegralsBxSRV,
-								photosIntegralsBySRV,
-								photosIntegralsBzSRV,
-								mapAtoBsrv,
-								ABuav, ABfractionUAV,
-								BBuav, BBfractionUAV,
-								maxBuav,
-								width, height, texturesCount
-							);
-							leastSquaresOfJacobianDeterminant.calculateErrors(
-								AAsrv, ABsrv, BBsrv,
-								AAfractionSRV, ABfractionSRV, BBfractionSRV,
-								maxAsrv, maxBsrv, mapAtoBsrv,
-								errorUAV, AtoBuav,
-								width, height, texturesCount,
-								angle0, scale0,
-								angle1 + angle0, scale1,
-								offsetX, offsetY
-							);
-							elapsedSteps++;
-						}
-					}
-				}
-			}
+			AtoBuav->Release();
+			AtoBuav = nullptr;
 		}
-	}
 
-	float t1 = Timer::Instance()->elapsedTime();
-	float dt = t1 - t0;
-	char buffer[256];
-	sprintf(buffer, "seconds=%d\n", (int)dt);
+		bSetOfPhotosIsLoaded = false;
+	}
 }

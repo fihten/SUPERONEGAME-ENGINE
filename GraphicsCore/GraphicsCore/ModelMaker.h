@@ -1,4 +1,7 @@
 #pragma once
+
+#include "Vec2d.h"
+
 #include <d3dx11effect.h>
 #include <memory>
 #include <vector>
@@ -256,16 +259,47 @@ public:
 		ID3D11UnorderedAccessView* AtoB,
 		int width, int height, int count,
 		float angle0, float scale0,
-		float angle1, float scale1,
-		int offsetX, int offsetY
+		float angle1, float scale1
 	);
 };
+
+struct FindNearestDefinedPoint
+{
+	ID3DX11Effect* hEffect = nullptr;
+	ID3DX11EffectTechnique* hTechnique = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* hError = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAtoB = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* hMinDistanceOut = nullptr;
+	ID3DX11EffectShaderResourceVariable* hMinDistanceIn = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* hMappingOfPoint = nullptr;
+
+	ID3DX11EffectVariable* hWidth = nullptr;
+	ID3DX11EffectVariable* hHeight = nullptr;
+	ID3DX11EffectVariable* hIndex = nullptr;
+
+	ID3DX11EffectVariable* hPt = nullptr;
+	ID3DX11EffectVariable* hThreshold = nullptr;
+
+	ID3D11Buffer* minDistance = nullptr;
+	ID3D11Buffer* minDistanceCopy = nullptr;
+public:
+	void init();
+	Vec2d<int> findNearestPoint(
+		ID3D11ShaderResourceView* error,
+		ID3D11ShaderResourceView* AtoB,
+		const Vec2d<int>& point
+	);
+}
 
 class ModelMaker
 {
 	static std::unique_ptr<ModelMaker> ptr;
 
-	GridIntegrals gridIntegrals;
+	GridIntegralsA gridIntegralsA;
+	GridIntegralsB gridIntegralsB;
 	OperationsOnGridIntegrals operationsOnGridIntegrals;
 	LeastSquaresOfJacobianDeterminant leastSquaresOfJacobianDeterminant;
 
@@ -361,4 +395,6 @@ public:
 
 	void loadPhotos(const std::vector<std::string>& paths);
 	void defineTheSamePointsOnSetOfPhotos();
+
+	void freeResources(bool freeResult = false);
 };

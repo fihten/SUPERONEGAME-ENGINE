@@ -138,6 +138,9 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (indexOfPhoto >= texturesCount)
 		return;
 
+	int x = dispatchThreadID.x;
+	int y = dispatchThreadID.y;
+
 	int2 m = int2(x, y);
 	m += offset0;
 	int2 n = m % offsetRange;
