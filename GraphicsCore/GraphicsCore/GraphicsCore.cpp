@@ -11,6 +11,7 @@
 #include <D3DX11tex.h>
 #include <fstream>
 #include <Windows.h>
+#include <cassert>
 
 GraphicsCore* GraphicsCore::pGraphicsCore = nullptr;
 
@@ -185,7 +186,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
 	initFourierTransform();
-	{
+	/*{
 		ModelMaker::instance()->init();
 
 		std::vector<std::string> paths;
@@ -196,7 +197,9 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 		ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
 
 		ModelMaker::instance()->freeResources();
-	}
+	}*/
+
+	radius1 = 300;// ((2 * RADIUS_IN_CELLS + 1)* CELL_DIMENSION_X) / 2;
 }
 
 void GraphicsCore::startFrame()
@@ -2625,7 +2628,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	int xB = std::min<float>(std::max<float>(fxB, 0.0f), widthOfB - 1);
 	int yB = std::min<float>(std::max<float>(fyB, 0.0f), heightOfB - 1);
 
-	float integralsA[3 * INTEGRALS];
+	float integralsA[3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
 	double maxX = 0;
 	double xx = 0;
 	calculateIntegralsAtTexturePoint(
@@ -2646,7 +2649,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 	xx /= maxX * maxX;
 
-	float integralsB[3 * INTEGRALS];
+	float integralsB[3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
 
 	float a[4] = {
 		-maxAngle,
@@ -2779,7 +2782,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	fileOfX.imbue(std::locale(std::locale::classic(), new Comma));
 	fileOfY.imbue(std::locale(std::locale::classic(), new Comma));
 
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1); i++)
 	{
 		fileOfX << integralsA[i] << std::endl;
 		fileOfY << integralsB[i] << std::endl;
@@ -2848,7 +2851,7 @@ void GraphicsCore::findDistributionOfErrors(
 
 	float maxIntegralA = 0;
 	float maxIntegralB = 0;
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1); i++)
 	{
 		maxIntegralA = std::max<float>(maxIntegralA, integralsA[i]);
 		maxIntegralB = std::max<float>(maxIntegralB, integralsB[i]);
@@ -2856,7 +2859,7 @@ void GraphicsCore::findDistributionOfErrors(
 
 	float minError = FLT_MAX;
 	float maxError = 0;
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1); i++)
 	{
 		float A = integralsA[i] / maxIntegralA;
 		float B = integralsB[i] / maxIntegralB;
@@ -2869,7 +2872,7 @@ void GraphicsCore::findDistributionOfErrors(
 	std::memset(distribution, 0, N * sizeof(float));
 
 	float h = 1.0f / N;
-	for (int i = 0; i < 3 * INTEGRALS; i++)
+	for (int i = 0; i < 3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1); i++)
 	{
 		float A = integralsA[i] / maxIntegralA;
 		float B = integralsB[i] / maxIntegralB;
@@ -2968,16 +2971,9 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &mCalculateIntegralsAtTexturePointFX);
 
 	mCalculateIntegralsAtTexturePointTech = mCalculateIntegralsAtTexturePointFX->GetTechniqueByName("CalculateIntegralsAtTexturePoint");
-	mCalculateVarianceWithinAreaOfIntegrationTech = mCalculateIntegralsAtTexturePointFX->GetTechniqueByName("CalculateVarianceWithinAreaOfIntegration");
 
 	mTextureMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("tex")->AsShaderResource();
 	mIntegralsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Integrals")->AsUnorderedAccessView();
-	mVariancesMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("Variances")->AsUnorderedAccessView();
-
-	mRadius0MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius0");
-	mRadius1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius1");
-
-	mSectorsMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("sectors");
 
 	mLeftXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("leftX");
 	mRightXMDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("rightX");
@@ -2994,34 +2990,35 @@ void GraphicsCore::initManualDefinitionOfTheSamePoint()
 	mAngle1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("angle1");
 	mScale1MDSP = mCalculateIntegralsAtTexturePointFX->GetVariableByName("scale1");
 
+	mCellDimensionX = mCalculateIntegralsAtTexturePointFX->GetVariableByName("cellDimensionX");
+	mCellDimensionY = mCalculateIntegralsAtTexturePointFX->GetVariableByName("cellDimensionY");
+	mRadius = mCalculateIntegralsAtTexturePointFX->GetVariableByName("radius");
+
 	D3D11_BUFFER_DESC buffer_desc;
-	buffer_desc.ByteWidth = 4 * INTEGRALS * sizeof(uint32_t);
+	buffer_desc.ByteWidth = 4 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1) * sizeof(uint32_t);
 	buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 	buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
 	buffer_desc.CPUAccessFlags = 0;
 	buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	buffer_desc.StructureByteStride = sizeof(uint32_t);
 	
-	static uint32_t initArray[4 * INTEGRALS];
+	static uint32_t initArray[4 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
 	D3D11_SUBRESOURCE_DATA data;
 	data.pSysMem = initArray;
 	device->CreateBuffer(&buffer_desc, &data, &mIntegralsBufferMDSP);
-	device->CreateBuffer(&buffer_desc, &data, &mVariancesBufferMDSP);
 
 	buffer_desc.Usage = D3D11_USAGE_STAGING;
 	buffer_desc.BindFlags = 0;
 	buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
 	device->CreateBuffer(&buffer_desc, 0, &mIntegralsBufferCopyMDSP);
-	device->CreateBuffer(&buffer_desc, 0, &mVariancesBufferCopyMDSP);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_UNKNOWN;
 	uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uav_desc.Buffer.FirstElement = 0;
-	uav_desc.Buffer.NumElements = 4 * INTEGRALS;
+	uav_desc.Buffer.NumElements = 4 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1);
 	uav_desc.Buffer.Flags = 0;
 	device->CreateUnorderedAccessView(mIntegralsBufferMDSP, &uav_desc, &mIntegralsBufferMDSPuav);
-	device->CreateUnorderedAccessView(mVariancesBufferMDSP, &uav_desc, &mVariancesBufferMDSPuav);
 }
 
 template<typename INTEGRAL_MODIFIER>
@@ -3036,21 +3033,21 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 {
 	mTextureMDSP->SetResource(texSRV);
 
-	static uint32_t initData[4 * INTEGRALS];
+	static uint32_t initData[4 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
 	context->UpdateSubresource(mIntegralsBufferMDSP, 0, 0, initData, 0, 0);
 
 	mIntegralsMDSP->SetUnorderedAccessView(mIntegralsBufferMDSPuav);
 
-	mRadius0MDSP->SetRawValue(&radius0, 0, sizeof radius0);
-	mRadius1MDSP->SetRawValue(&radius1, 0, sizeof radius1);
-
-	mSectorsMDSP->SetRawValue(&sectors, 0, sizeof sectors);
-
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
-	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
-	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+	int radius = this->radius1;
+	int cellDimension = (2 * radius) / (2 * RADIUS_IN_CELLS + 1);
+	cellDimension = cellDimension % 2 == 0 ? cellDimension : cellDimension + 1;
+	radius = (cellDimension * (2 * RADIUS_IN_CELLS + 1)) / 2;
+
+	float xs[4] = { -radius,+radius,-radius,+radius };
+	float ys[4] = { -radius,-radius,+radius,+radius };
 
 	int x_left = INT_MAX;
 	int x_right = -INT_MAX;
@@ -3085,19 +3082,26 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 	mAngle1MDSP->SetRawValue(&angle1, 0, sizeof angle1);
 	mScale1MDSP->SetRawValue(&scale1, 0, sizeof scale1);
 
+	mCellDimensionX->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+	mCellDimensionY->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+
+	int radiusInCells = RADIUS_IN_CELLS;
+	mRadius->SetRawValue(&radiusInCells, 0, sizeof(radiusInCells));
+
 	mCalculateIntegralsAtTexturePointTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 16.0f);
-	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 16.0f);
-	uint32_t z_groups = std::ceil((float)(INTEGRALS) / 4.0f);
+	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 32.0f);
+	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 32.0f);
+	uint32_t z_groups = 1;
 	context->Dispatch(x_groups, y_groups, z_groups);
 
 	context->CopyResource(mIntegralsBufferCopyMDSP, mIntegralsBufferMDSP);
 	D3D11_MAPPED_SUBRESOURCE data;
-	context->Map(mIntegralsBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+	auto res = context->Map(mIntegralsBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+	assert(res == S_OK);
 
 	uint32_t* pIntegrals = (uint32_t*)data.pData;
-	for (int i = 0; i < INTEGRALS; ++i)
+	for (int i = 0; i < (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1); ++i)
 	{
 		modifier(i, &integrals[3 * i], &pIntegrals[4 * i]);
 	}
@@ -3118,24 +3122,21 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 {
 	mTextureMDSP->SetResource(texSRV);
 
-	static uint32_t initData[4 * INTEGRALS];
+	static uint32_t initData[4 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
 	context->UpdateSubresource(mIntegralsBufferMDSP, 0, 0, initData, 0, 0);
 
 	mIntegralsMDSP->SetUnorderedAccessView(mIntegralsBufferMDSPuav);
 
-	int radius0 = this->radius1 / sqrt(sectorElements);
-	int radius1 = std::sqrt(sectorElements) * radius0;
-
-	mRadius0MDSP->SetRawValue(&radius0, 0, sizeof radius0);
-	mRadius1MDSP->SetRawValue(&radius1, 0, sizeof radius1);
-
-	mSectorsMDSP->SetRawValue(&sectors, 0, sizeof sectors);
-
 	float m00 = scale0 * cos(angle0); float m01 = scale0 * sin(angle0);
 	float m10 = -scale1 * sin(angle1); float m11 = scale1 * cos(angle1);
 
-	float xs[4] = { -radius1,+radius1,-radius1,+radius1 };
-	float ys[4] = { -radius1,-radius1,+radius1,+radius1 };
+	int radius = this->radius1;
+	int cellDimension = (2 * radius) / (2 * RADIUS_IN_CELLS + 1);
+	cellDimension = cellDimension % 2 == 0 ? cellDimension : cellDimension + 1;
+	radius = (cellDimension * (2 * RADIUS_IN_CELLS + 1)) / 2;
+
+	float xs[4] = { -radius,+radius,-radius,+radius };
+	float ys[4] = { -radius,-radius,+radius,+radius };
 
 	int x_left = INT_MAX;
 	int x_right = -INT_MAX;
@@ -3170,11 +3171,17 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 	mAngle1MDSP->SetRawValue(&angle1, 0, sizeof angle1);
 	mScale1MDSP->SetRawValue(&scale1, 0, sizeof scale1);
 
+	mCellDimensionX->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+	mCellDimensionY->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+
+	int radiusInCells = RADIUS_IN_CELLS;
+	mRadius->SetRawValue(&radiusInCells, 0, sizeof(radiusInCells));
+
 	mCalculateIntegralsAtTexturePointTech->GetPassByName("P0")->Apply(0, context);
 
-	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 16.0f);
-	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 16.0f);
-	uint32_t z_groups = std::ceil((float)(INTEGRALS) / 4.0f);
+	uint32_t x_groups = std::ceil((float)(x_right - x_left + 1) / 32.0f);
+	uint32_t y_groups = std::ceil((float)(y_top - y_bottom + 1) / 32.0f);
+	uint32_t z_groups = 1;
 	context->Dispatch(x_groups, y_groups, z_groups);
 
 	context->CopyResource(mIntegralsBufferCopyMDSP, mIntegralsBufferMDSP);
@@ -3182,7 +3189,7 @@ void GraphicsCore::calculateIntegralsAtTexturePoint(
 	context->Map(mIntegralsBufferCopyMDSP, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
 
 	uint32_t* pIntegrals = (uint32_t*)data.pData;
-	int integralsCount = sectors * sectorElements;
+	int integralsCount = (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1);
 	for (int i = 0; i < integralsCount; ++i)
 	{
 		modifier(i, &integrals[3 * i], &pIntegrals[4 * i + 0]);

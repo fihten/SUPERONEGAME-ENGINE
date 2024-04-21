@@ -16,7 +16,7 @@
 #define OFFSET0_X 64
 #define OFFSET0_Y 64
 
-#define RADIUS_IN_CELLS 7 
+#define RADIUS_IN_CELLS 16 
 
 struct GridIntegralsA
 {
@@ -284,7 +284,13 @@ struct FindNearestDefinedPoint
 	ID3DX11EffectVariable* hThreshold = nullptr;
 
 	ID3D11Buffer* minDistance = nullptr;
-	ID3D11Buffer* minDistanceCopy = nullptr;
+	ID3D11UnorderedAccessView* minDistanceUAV = nullptr;
+	ID3D11ShaderResourceView* minDistanceSRV = nullptr;
+
+	ID3D11Buffer* mappingOfPoint = nullptr;
+	ID3D11Buffer* mappingOfPointCopy = nullptr;
+	ID3D11UnorderedAccessView* mappingOfPointUAV = nullptr;
+
 public:
 	void init();
 	Vec2d<int> findNearestPoint(
@@ -292,7 +298,7 @@ public:
 		ID3D11ShaderResourceView* AtoB,
 		const Vec2d<int>& point
 	);
-}
+};
 
 class ModelMaker
 {

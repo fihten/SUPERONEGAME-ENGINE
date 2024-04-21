@@ -298,7 +298,7 @@ private:
 	uint32_t heightOfB = 0;
 
 	int radius0 = 50;
-	int radius1 = std::sqrt(INTEGRALS_ALONG_RADIUS) * radius0;
+	int radius1;// = ((2 * RADIUS_IN_CELLS + 1) * CELL_DIMENSION_X) / 2;
 	int sectors = INTEGRALS_ALONG_SECTORS;
 
 public:
@@ -355,16 +355,9 @@ private:
 	ID3DX11Effect* mCalculateIntegralsAtTexturePointFX = nullptr;
 
 	ID3DX11EffectTechnique* mCalculateIntegralsAtTexturePointTech = nullptr;
-	ID3DX11EffectTechnique* mCalculateVarianceWithinAreaOfIntegrationTech = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* mTextureMDSP = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* mIntegralsMDSP = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* mVariancesMDSP = nullptr;
-
-	ID3DX11EffectVariable* mRadius0MDSP = nullptr;
-	ID3DX11EffectVariable* mRadius1MDSP = nullptr;
-
-	ID3DX11EffectVariable* mSectorsMDSP = nullptr;
 
 	ID3DX11EffectVariable* mLeftXMDSP = nullptr;
 	ID3DX11EffectVariable* mRightXMDSP = nullptr;
@@ -381,13 +374,13 @@ private:
 	ID3DX11EffectVariable* mAngle1MDSP = nullptr;
 	ID3DX11EffectVariable* mScale1MDSP = nullptr;
 
+	ID3DX11EffectVariable* mCellDimensionX = nullptr;
+	ID3DX11EffectVariable* mCellDimensionY = nullptr;
+	ID3DX11EffectVariable* mRadius = nullptr;
+
 	ID3D11Buffer* mIntegralsBufferMDSP = nullptr;
 	ID3D11Buffer* mIntegralsBufferCopyMDSP = nullptr;
 	ID3D11UnorderedAccessView* mIntegralsBufferMDSPuav = nullptr;
-
-	ID3D11Buffer* mVariancesBufferMDSP = nullptr;
-	ID3D11Buffer* mVariancesBufferCopyMDSP = nullptr;
-	ID3D11UnorderedAccessView* mVariancesBufferMDSPuav = nullptr;
 
 	template<typename INTEGRAL_MODIFIER>
 	void calculateIntegralsAtTexturePoint(

@@ -1,6 +1,7 @@
 #include "ModelMaker.h"
 #include "GraphicsCore.h"
 #include "Timer.h"
+#include "Vec4d.h" 
 #include <D3DX11.h>
 
 std::unique_ptr<ModelMaker> ModelMaker::ptr;
@@ -832,10 +833,40 @@ void FindNearestDefinedPoint::init()
 	bufferDesc.ByteWidth = sizeof(uint32_t);
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE | D3D11_CPU_ACCESS_READ;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	bufferDesc.StructureByteStride = sizeof(uint32_t);
 	device->CreateBuffer(&bufferDesc, nullptr, &minDistance);
+
+	D3D11_UNORDERED_ACCESS_VIEW_DESC uavDesc;
+	uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+	uavDesc.Buffer.FirstElement = 0;
+	uavDesc.Buffer.NumElements = 1;
+	device->CreateUnorderedAccessView(minDistance, &uavDesc, &minDistanceUAV);
+
+	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
+	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
+	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.NumElements = 1;
+	srvDesc.Buffer.ElementWidth = sizeof(uint32_t);
+	device->CreateShaderResourceView(minDistance, &srvDesc, &minDistanceSRV);
+
+	bufferDesc.ByteWidth = 4 * sizeof(uint32_t);
+	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	bufferDesc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+	bufferDesc.CPUAccessFlags = 0;
+	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+	bufferDesc.StructureByteStride = sizeof(uint32_t);
+	device->CreateBuffer(&bufferDesc, nullptr, &mappingOfPoint);
+
+	bufferDesc.Usage = D3D11_USAGE_STAGING;
+	bufferDesc.BindFlags = 0;
+	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+	device->CreateBuffer(&bufferDesc, nullptr, &mappingOfPointCopy);
+
+	uavDesc.Buffer.NumElements = 4;
+	device->CreateUnorderedAccessView(mappingOfPoint, &uavDesc, &mappingOfPointUAV);
 }
 
 Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
@@ -844,8 +875,75 @@ Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
 	const Vec2d<int>& point
 )
 {
+	auto context = GraphicsCore::instance()->context;
+
 	hError->SetResource(error);
 	hAtoB->SetResource(AtoB);
+
+	uint32_t initialMinDistance = 0xffffffff;
+	context->UpdateSubresource(minDistance, 0, nullptr, &initialMinDistance, 0, 0);
+
+	hMinDistanceOut->SetUnorderedAccessView(minDistanceUAV);
+
+	ID3D11Texture2D* errorTex = nullptr;
+	error->GetResource((ID3D11Resource * *)(&errorTex));
+
+	D3D11_TEXTURE2D_DESC texDesc;
+	errorTex->GetDesc(&texDesc);
+
+	hWidth->SetRawValue(&texDesc.Width, 0, sizeof(texDesc.Width));
+	hHeight->SetRawValue(&texDesc.Height, 0, sizeof(texDesc.Height));
+	
+	int index = 0;
+	hIndex->SetRawValue(&index, 0, sizeof(index));
+
+	hPt->SetRawValue(&point, 0, sizeof(point));
+
+	float threshold = 0.1f;
+	hThreshold->SetRawValue(&threshold, 0, sizeof(threshold));
+
+	hTechnique->GetPassByIndex(0)->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)(texDesc.Width) / 16);
+	uint32_t groups_y = std::ceil((float)(texDesc.Height) / 16);
+	uint32_t groups_z = 1;
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	ID3D11ShaderResourceView* nullSRVs[3] = { nullptr,nullptr,nullptr };
+	ID3D11UnorderedAccessView* nullUAVs[2] = { nullptr,nullptr };
+
+	context->CSSetShaderResources(0, 3, nullSRVs);
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, nullptr);
+
+	hError->SetResource(error);
+	hAtoB->SetResource(AtoB);
+	hMinDistanceIn->SetResource(minDistanceSRV);
+	hMappingOfPoint->SetUnorderedAccessView(mappingOfPointUAV);
+
+	hWidth->SetRawValue(&texDesc.Width, 0, sizeof(texDesc.Width));
+	hHeight->SetRawValue(&texDesc.Height, 0, sizeof(texDesc.Height));
+	hIndex->SetRawValue(&index, 0, sizeof(index));
+	hPt->SetRawValue(&point, 0, sizeof(point));
+	hThreshold->SetRawValue(&threshold, 0, sizeof(threshold));
+
+	hTechnique->GetPassByIndex(1)->Apply(0, context);
+	context->Dispatch(groups_x, groups_y, groups_z);
+
+	context->CSSetShaderResources(0, 3, nullSRVs);
+	context->CSSetUnorderedAccessViews(0, 2, nullUAVs, nullptr);
+
+	context->CopyResource(mappingOfPointCopy, mappingOfPoint);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(mappingOfPointCopy, 0, D3D11_MAP_READ, 0, &data);
+
+	Vec4d<uint32_t> mapping = *((Vec4d<uint32_t>*)data.pData);
+	Vec2d<int> res{ mapping.z() >> 16, mapping.z() & 0xffff };
+
+	context->Unmap(mappingOfPointCopy, 0);
+
+	return res;
 }
 
 void ModelMaker::init()
