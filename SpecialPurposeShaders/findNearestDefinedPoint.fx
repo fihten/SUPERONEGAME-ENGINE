@@ -1,5 +1,8 @@
-Texture2DArray<float> error;
-Texture2DArray<uint4> AtoB;
+Texture2DArray<uint> error;
+Texture2DArray<uint> AtoBx;
+Texture2DArray<uint> AtoBy;
+Texture2DArray<uint> AtoBz;
+Texture2DArray<uint> AtoBw;
 RWStructuredBuffer<uint> minDistanceOut;
 StructuredBuffer<uint> minDistanceIn;
 RWStructuredBuffer<uint> mappingOfPoint;
@@ -9,7 +12,7 @@ int height;
 int index;
 
 int2 pt;
-float threshold;
+uint threshold;
 
 [numthreads(16, 16, 1)]
 void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -23,11 +26,11 @@ void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 pos = uint3(x, y, index);
-	float err = error[pos].r;
+	uint err = error[pos].r;
 	if (err > threshold)
 		return;
 
-	uint4 mapping = AtoB[pos].xyzw;
+	uint2 mapping = uint2(AtoBx[pos].r, AtoBy[pos].r);
 
 	uint3 posInA;
 	posInA.x = mapping.x >> 16;
@@ -51,11 +54,11 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 pos = uint3(x, y, index);
-	float err = error[pos].r;
+	uint err = error[pos].r;
 	if (err > threshold)
 		return;
 
-	uint4 mapping = AtoB[pos].xyzw;
+	uint4 mapping = uint4(AtoBx[pos].r, AtoBy[pos].r, AtoBz[pos].r, AtoBw[pos].r);
 
 	uint3 posInA;
 	posInA.x = mapping.x >> 16;

@@ -137,14 +137,23 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxA = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxB = nullptr;
 
-	ID3DX11EffectShaderResourceVariable* hMapAtoB = nullptr;
+	ID3DX11EffectVariable* hWidthA = nullptr;
+	ID3DX11EffectVariable* hHeightA = nullptr;
+
+	ID3DX11EffectVariable* hWidthAreal = nullptr;
+	ID3DX11EffectVariable* hHeightAreal = nullptr;
+
+	ID3DX11EffectVariable* hWidthB = nullptr;
+	ID3DX11EffectVariable* hHeightB = nullptr;
 
 	ID3DX11EffectVariable* hWidthAA = nullptr;
 	ID3DX11EffectVariable* hWidthAB = nullptr;
+	ID3DX11EffectVariable* hWidthABreal = nullptr;
 	ID3DX11EffectVariable* hWidthBB = nullptr;
 
 	ID3DX11EffectVariable* hHeightAA = nullptr;
 	ID3DX11EffectVariable* hHeightAB = nullptr;
+	ID3DX11EffectVariable* hHeightABreal = nullptr;
 	ID3DX11EffectVariable* hHeightBB = nullptr;
 
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
@@ -154,45 +163,27 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectVariable* hOffset0 = nullptr;
 
 	ID3DX11EffectVariable* hRadius = nullptr;
+	ID3DX11EffectVariable* hIndexOfA = nullptr;
 public:
 	void init();
-	void clearA(
+	void unboundViews();
+	void clearAAandMaxA(
 		ID3D11UnorderedAccessView* AA,
 		ID3D11UnorderedAccessView* AAfraction,
 		ID3D11UnorderedAccessView* maxA,
-		int width, int height, int count
+		int widthAA, int heightAA, int texturesCount
+	);
+	void clearBBandMaxB(
+		ID3D11UnorderedAccessView* BB,
+		ID3D11UnorderedAccessView* BBfraction,
+		ID3D11UnorderedAccessView* maxB,
+		int widthBB, int heightBB, int texturesCount
 	);
 	void clearAB(
 		ID3D11UnorderedAccessView* AB,
 		ID3D11UnorderedAccessView* ABfraction,
-		ID3D11UnorderedAccessView* BB,
-		ID3D11UnorderedAccessView* BBfraction,
-		ID3D11UnorderedAccessView* maxB,
-		int width, int height, int count
-	);
-	void calculateA(
-		ID3D11ShaderResourceView* photosIntegralsAx,
-		ID3D11ShaderResourceView* photosIntegralsAy,
-		ID3D11ShaderResourceView* photosIntegralsAz,
-		ID3D11UnorderedAccessView* AA,
-		ID3D11UnorderedAccessView* AAfraction,
-		ID3D11UnorderedAccessView* maxA,
-		int width, int height, int count
-	);
-	void calculateAB(
-		ID3D11ShaderResourceView* photosIntegralsAx,
-		ID3D11ShaderResourceView* photosIntegralsAy,
-		ID3D11ShaderResourceView* photosIntegralsAz,
-		ID3D11ShaderResourceView* photosIntegralsBx,
-		ID3D11ShaderResourceView* photosIntegralsBy,
-		ID3D11ShaderResourceView* photosIntegralsBz,
-		ID3D11ShaderResourceView* mapAtoB,
-		ID3D11UnorderedAccessView* AB,
-		ID3D11UnorderedAccessView* ABfraction,
-		ID3D11UnorderedAccessView* BB,
-		ID3D11UnorderedAccessView* BBfraction,
-		ID3D11UnorderedAccessView* maxB,
-		int width, int height, int count
+		int widthAB, int heightAB, int texturesCount,
+		int widthABreal, int heightABreal
 	);
 };
 
@@ -308,6 +299,7 @@ class ModelMaker
 	GridIntegralsB gridIntegralsB;
 	OperationsOnGridIntegrals operationsOnGridIntegrals;
 	LeastSquaresOfJacobianDeterminant leastSquaresOfJacobianDeterminant;
+	FindNearestDefinedPoint findNearestDefinedPoint;
 
 	ID3D11Texture2D* setOfPhotos = nullptr;
 	ID3D11ShaderResourceView* setOfPhotosSRV = nullptr;
@@ -401,6 +393,7 @@ public:
 
 	void loadPhotos(const std::vector<std::string>& paths);
 	void defineTheSamePointsOnSetOfPhotos();
+	Vec2d<int> findTheSamePoint(const Vec2d<int>& pt);
 
 	void freeResources(bool freeResult = false);
 };

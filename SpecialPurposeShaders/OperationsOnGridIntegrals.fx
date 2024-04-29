@@ -1,3 +1,5 @@
+#include "MapToTexArray.hlsl"
+
 Texture2DArray<uint> photosIntegralsAx;
 Texture2DArray<uint> photosIntegralsAy;
 Texture2DArray<uint> photosIntegralsAz;
@@ -5,8 +7,6 @@ Texture2DArray<uint> photosIntegralsAz;
 Texture2DArray<uint> photosIntegralsBx;
 Texture2DArray<uint> photosIntegralsBy;
 Texture2DArray<uint> photosIntegralsBz;
-
-StructuredBuffer<uint> mapAtoB;
 
 RWTexture2DArray<uint> AA;
 RWTexture2DArray<uint> AB;
@@ -19,11 +19,23 @@ RWTexture2DArray<uint> BBfraction;
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
 
+int widthA;
+int heightA;
+
+int widthAreal;
+int heightAreal;
+
+int widthB;
+int heightB;
+
 int widthAA;
 int heightAA;
 
 int widthAB;
 int heightAB;
+
+int widthABreal;
+int heightABreal;
 
 int widthBB;
 int heightBB;
@@ -35,6 +47,7 @@ int2 offsetRange;
 int2 offset0;
 
 int radius;
+int indexOfA;
 
 [numthreads(16, 16, 4)]
 void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -58,7 +71,28 @@ void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 }
 
 [numthreads(16, 16, 4)]
-void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
+void cs_clear_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int x = dispatchThreadID.x;
+	if (x >= widthBB)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= heightBB)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 location = uint3(x, y, indexOfPhoto);
+	BB[location].r = 0;
+	BBfraction[location].r = 0;
+	maxB[location].r = 0;
+}
+
+[numthreads(16, 16, 4)]
+void cs_clear_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
 	if (x >= widthAB)
@@ -73,28 +107,24 @@ void cs_clear_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 location = uint3(x, y, indexOfPhoto);
+
+	uint2 dims0 = uint2(widthAB, heightAB);
+	uint2 dims1 = uint2(widthABreal, heightABreal);
+	location = mapToTexArray(location, dims0, dims1);
+
 	AB[location].r = 0;
 	ABfraction[location].r = 0;
-	
-	if (x >= widthBB)
-		return;
-	if (y >= heightBB)
-		return;
-
-	BB[location].r = 0;
-	BBfraction[location].r = 0;
-	maxB[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
 void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= widthAA)
+	if (x >= widthAreal)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= heightAA)
+	if (y >= heightAreal)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
@@ -132,21 +162,64 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 }
 
 [numthreads(16, 16, 4)]
-void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
+void cs_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
+	int x = dispatchThreadID.x;
+	if (x >= widthB)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= heightB)
+		return;
+
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 
+	uint3 locationIn = uint3(x, y, indexOfPhoto);
+	uint3 colorB = float3(
+		photosIntegralsBx[locationIn].r,
+		photosIntegralsBy[locationIn].r,
+		photosIntegralsBz[locationIn].r
+		);
+	
+	uint uiBB = dot(colorB, colorB);
+	float fBB = (float)(uiBB) / 65025.0f;
+
+	uiBB = floor(fBB);
+	uint uiBBfraction = 1000000 * (fBB - uiBB);
+	uint maxB_ = max(colorB.x, max(colorB.y, colorB.z));
+
+	int diameter = 2 * radius + 1;
+	uint3 locationOut = uint3(x / diameter, y / diameter, indexOfPhoto);
+
+	uint originalValue = 0;
+	InterlockedAdd(BB[locationOut].r, uiBB, originalValue);
+	InterlockedAdd(BBfraction[locationOut].r, uiBBfraction, originalValue);
+	InterlockedMax(maxB[locationOut].r, maxB_, originalValue);
+}
+
+[numthreads(16, 16, 4)]
+void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
 	int x = dispatchThreadID.x;
+	if (x >= widthA)
+		return;
+
 	int y = dispatchThreadID.y;
+	if (y >= heightA)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
 
 	int2 m = int2(x, y);
 	m += offset0;
 	int2 n = m % offsetRange;
 	n -= offset0;
 	uint3 locationInA;
-	locationInA.z = indexOfPhoto;
+	locationInA.z = indexOfA;
 	locationInA.xy = m / offsetRange;
 	locationInA.xy *= cellDimension;
 	locationInA.xy += n;
@@ -155,18 +228,12 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 	if (locationInA.y < 0)
 		return;
-	if (locationInA.x >= widthAB)
-		return;
-	if (locationInA.y >= heightAB)
-		return;
 
 	uint3 colorA = float3(
 		photosIntegralsAx[locationInA].r,
 		photosIntegralsAy[locationInA].r,
 		photosIntegralsAz[locationInA].r
 		);
-
-	indexOfPhoto = mapAtoB[indexOfPhoto];
 
 	uint3 locationInB;
 	locationInB.z = indexOfPhoto;
@@ -177,12 +244,6 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 		photosIntegralsBy[locationInB].r,
 		photosIntegralsBz[locationInB].r
 		);
-	
-	uint uiBB = dot(colorB, colorB);
-	float fBB = (float)(uiBB) / 65025.0f;
-
-	uiBB = floor(fBB);
-	uint uiBBfraction = 1000000 * (fBB - uiBB);
 
 	uint uiAB = dot(colorA, colorB);
 	float fAB = (float)(uiAB) / 65025.0f;
@@ -190,30 +251,20 @@ void cs_BB_AB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uiAB = floor(fAB);
 	uint uiABfraction = 1000000 * (fAB - uiAB);
 
-	uint maxB_ = max(colorB.x, max(colorB.y, colorB.z));
-
 	int diameter = 2 * radius + 1;
 	uint3 locationOutAB;
 	locationOutAB.z = indexOfPhoto;
 	locationOutAB.xy = m / (diameter * offsetRange);
 	locationOutAB.xy *= offsetRange;
 	locationOutAB.xy += n;
-	
+
+	uint2 dims0 = uint2(widthAB, heightAB);
+	uint2 dims1 = uint2(widthABreal, heightABreal);
+	locationOutAB = mapToTexArray(locationOutAB, dims0, dims1);
+
 	uint originalValue = 0;
 	InterlockedAdd(AB[locationOutAB].r, uiAB, originalValue);
 	InterlockedAdd(ABfraction[locationOutAB].r, uiABfraction, originalValue);
-	
-	if (n.x != 0)
-		return;
-	if (n.y != 0)
-		return;
-
-	uint3 locationOutBB = locationInB;
-	locationOutBB.xy /= diameter;
-
-	InterlockedAdd(BB[locationOutBB].r, uiBB, originalValue);
-	InterlockedAdd(BBfraction[locationOutBB].r, uiBBfraction, originalValue);
-	InterlockedMax(maxB[locationOutBB].r, maxB_, originalValue);
 }
 
 technique11 MakeOperationsOnGridIntegrals
@@ -224,11 +275,17 @@ technique11 MakeOperationsOnGridIntegrals
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, cs_clear_AA_maxA()));
 	}
-	pass clear_BB_AB_maxB
+	pass clear_BB_maxB
 	{
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, cs_clear_BB_AB_maxB()));
+		SetComputeShader(CompileShader(cs_5_0, cs_clear_BB_maxB()));
+	}
+	pass clear_AB
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear_AB()));
 	}
 	pass AA_maxA
 	{
@@ -236,10 +293,16 @@ technique11 MakeOperationsOnGridIntegrals
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, cs_AA_maxA()));
 	}
-	pass BB_AB_maxB
+	pass BB_maxB
 	{
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
-		SetComputeShader(CompileShader(cs_5_0, cs_BB_AB_maxB()));
+		SetComputeShader(CompileShader(cs_5_0, cs_BB_maxB()));
+	}
+	pass AB
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_AB()));
 	}
 };

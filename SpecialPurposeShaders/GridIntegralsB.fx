@@ -36,9 +36,10 @@ void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (indexOfPhoto >= texturesCount)
 		return;
 
-	photosIntegralsX[int3(x, y, indexOfPhoto)].r = 0;
-	photosIntegralsY[int3(x, y, indexOfPhoto)].r = 0;
-	photosIntegralsZ[int3(x, y, indexOfPhoto)].r = 0;
+	uint3 locationOut = uint3(x, y, indexOfPhoto);
+	photosIntegralsX[locationOut].r = 0;
+	photosIntegralsY[locationOut].r = 0;
+	photosIntegralsZ[locationOut].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -81,17 +82,19 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (cellIndexY < 0 || cellIndexY >= cellsAlongY)
 		return;
 
-	uint3 color = round(255 * srgbToRaw(photos[int3(x, y, indexOfPhoto)].rgb));
+	uint3 locationIn = uint3(x, y, indexOfPhoto);
+	uint3 color = round(255 * srgbToRaw(photos[locationIn].rgb));
 
 	uint originalValue;
+	uint3 locationOut = uint3(cellIndexX, cellIndexY, indexOfPhoto);
 	InterlockedAdd(
-		photosIntegralsX[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
+		photosIntegralsX[locationOut].r,
 		color.x, originalValue);
 	InterlockedAdd(
-		photosIntegralsY[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
+		photosIntegralsY[locationOut].r,
 		color.y, originalValue);
 	InterlockedAdd(
-		photosIntegralsZ[int3(cellIndexX, cellIndexY, indexOfPhoto)].r,
+		photosIntegralsZ[locationOut].r,
 		color.z, originalValue);
 }
 
