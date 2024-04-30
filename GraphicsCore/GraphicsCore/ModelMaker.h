@@ -185,6 +185,37 @@ public:
 		int widthAB, int heightAB, int texturesCount,
 		int widthABreal, int heightABreal
 	);
+	void calculateAAandMaxA(
+		ID3D11ShaderResourceView* photosIntegralsAx,
+		ID3D11ShaderResourceView* photosIntegralsAy,
+		ID3D11ShaderResourceView* photosIntegralsAz,
+		ID3D11UnorderedAccessView* AA,
+		ID3D11UnorderedAccessView* AAfraction,
+		ID3D11UnorderedAccessView* maxA,
+		int widthAreal, int heightAreal, int texturesCount
+	);
+	void calculateBBandMaxB(
+		ID3D11ShaderResourceView* photosIntegralsBx,
+		ID3D11ShaderResourceView* photosIntegralsBy,
+		ID3D11ShaderResourceView* photosIntegralsBz,
+		ID3D11UnorderedAccessView* BB,
+		ID3D11UnorderedAccessView* BBfraction,
+		ID3D11UnorderedAccessView* maxB,
+		int widthB, int heightB, int texturesCount
+	);
+	void calculateAB(
+		ID3D11ShaderResourceView* photosIntegralsAx,
+		ID3D11ShaderResourceView* photosIntegralsAy,
+		ID3D11ShaderResourceView* photosIntegralsAz,
+		ID3D11ShaderResourceView* photosIntegralsBx,
+		ID3D11ShaderResourceView* photosIntegralsBy,
+		ID3D11ShaderResourceView* photosIntegralsBz,
+		ID3D11UnorderedAccessView* AB,
+		ID3D11UnorderedAccessView* ABfraction,
+		int widthA, int heightA, int texturesCount,
+		int widthAB, int heightAB,
+		int widthABreal, int heightABreal, int indexOfA
+	);
 };
 
 struct LeastSquaresOfJacobianDeterminant

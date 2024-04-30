@@ -461,6 +461,126 @@ void OperationsOnGridIntegrals::clearBBandMaxB(
 	unboundViews();
 }
 
+void OperationsOnGridIntegrals::clearAB(
+	ID3D11UnorderedAccessView* AB,
+	ID3D11UnorderedAccessView* ABfraction,
+	int widthAB, int heightAB, int texturesCount,
+	int widthABreal, int heightABreal
+)
+{
+	hAB->SetUnorderedAccessView(AB);
+	hABfraction->SetUnorderedAccessView(ABfraction);
+
+	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
+	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
+	hTexturesCount->SetRawValue(&texturesCount, 0, sizeof(texturesCount));
+
+	hWidthABreal->SetRawValue(&widthABreal, 0, sizeof(widthABreal));
+	hHeightABreal->SetRawValue(&heightABreal, 0, sizeof(heightABreal));
+
+	auto context = GraphicsCore::instance()->context;
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(2)->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)widthAB / 16);
+	uint32_t groups_y = std::ceil((float)heightAB / 16);
+	uint32_t groups_z = std::ceil((float)texturesCount / 4);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+	unboundViews();
+}
+
+void OperationsOnGridIntegrals::calculateAAandMaxA(
+	ID3D11ShaderResourceView* photosIntegralsAx,
+	ID3D11ShaderResourceView* photosIntegralsAy,
+	ID3D11ShaderResourceView* photosIntegralsAz,
+	ID3D11UnorderedAccessView* AA,
+	ID3D11UnorderedAccessView* AAfraction,
+	ID3D11UnorderedAccessView* maxA,
+	int widthAreal, int heightAreal, int texturesCount
+)
+{
+	hPhotosIntegralsAx->SetResource(photosIntegralsAx);
+	hPhotosIntegralsAy->SetResource(photosIntegralsAy);
+	hPhotosIntegralsAz->SetResource(photosIntegralsAz);
+
+	hAA->SetUnorderedAccessView(AA);
+	hAAfraction->SetUnorderedAccessView(AAfraction);
+	hMaxA->SetUnorderedAccessView(maxA);
+
+	hWidthAreal->SetRawValue(&widthAreal, 0, sizeof(widthAreal));
+	hHeightAreal->SetRawValue(&heightAreal, 0, sizeof(heightAreal));
+	hTexturesCount->SetRawValue(&texturesCount, 0, sizeof(texturesCount));
+
+	int radius = RADIUS_IN_CELLS;
+	hRadius->SetRawValue(&radius, 0, sizeof(radius));
+
+	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
+	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+
+	auto context = GraphicsCore::instance()->context;
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(3)->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)widthAreal / 16);
+	uint32_t groups_y = std::ceil((float)heightAreal / 16);
+	uint32_t groups_z = std::ceil((float)texturesCount / 4);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+	unboundViews();
+}
+
+void OperationsOnGridIntegrals::calculateBBandMaxB(
+	ID3D11ShaderResourceView* photosIntegralsBx,
+	ID3D11ShaderResourceView* photosIntegralsBy,
+	ID3D11ShaderResourceView* photosIntegralsBz,
+	ID3D11UnorderedAccessView* BB,
+	ID3D11UnorderedAccessView* BBfraction,
+	ID3D11UnorderedAccessView* maxB,
+	int widthB, int heightB, int texturesCount
+)
+{
+	hPhotosIntegralsBx->SetResource(photosIntegralsBx);
+	hPhotosIntegralsBy->SetResource(photosIntegralsBy);
+	hPhotosIntegralsBz->SetResource(photosIntegralsBz);
+
+	hBB->SetUnorderedAccessView(BB);
+	hBBfraction->SetUnorderedAccessView(BBfraction);
+	hMaxB->SetUnorderedAccessView(maxB);
+
+	hWidthB->SetRawValue(&widthB, 0, sizeof(widthB));
+	hHeightB->SetRawValue(&heightB, 0, sizeof(heightB));
+	hTexturesCount->SetRawValue(&texturesCount, 0, sizeof(texturesCount));
+
+	int radius = RADIUS_IN_CELLS;
+	hRadius->SetRawValue(&radius, 0, sizeof(radius));
+
+	auto context = GraphicsCore::instance()->context;
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(4)->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)widthB / 16);
+	uint32_t groups_y = std::ceil((float)heightB / 16);
+	uint32_t groups_z = std::ceil((float)texturesCount / 4);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+	unboundViews();
+}
+
+void OperationsOnGridIntegrals::calculateAB(
+	ID3D11ShaderResourceView* photosIntegralsAx,
+	ID3D11ShaderResourceView* photosIntegralsAy,
+	ID3D11ShaderResourceView* photosIntegralsAz,
+	ID3D11ShaderResourceView* photosIntegralsBx,
+	ID3D11ShaderResourceView* photosIntegralsBy,
+	ID3D11ShaderResourceView* photosIntegralsBz,
+	ID3D11UnorderedAccessView* AB,
+	ID3D11UnorderedAccessView* ABfraction,
+	int widthA, int heightA, int texturesCount,
+	int widthAB, int heightAB,
+	int widthABreal, int heightABreal, int indexOfA
+)
+{
+
+}
+
 void LeastSquaresOfJacobianDeterminant::init()
 {
 	char shadersFolder[200];
