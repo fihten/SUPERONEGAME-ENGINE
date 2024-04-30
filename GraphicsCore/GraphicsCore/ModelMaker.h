@@ -235,14 +235,14 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectShaderResourceVariable* hMaxA = nullptr;
 	ID3DX11EffectShaderResourceVariable* hMaxB = nullptr;
 
-	ID3DX11EffectShaderResourceVariable* hMapAtoB = nullptr;
-
 	ID3DX11EffectVariable* hWidthAA = nullptr;
 	ID3DX11EffectVariable* hWidthAB = nullptr;
+	ID3DX11EffectVariable* hWidthABreal = nullptr;
 	ID3DX11EffectVariable* hWidthBB = nullptr;
 
 	ID3DX11EffectVariable* hHeightAA = nullptr;
 	ID3DX11EffectVariable* hHeightAB = nullptr;
+	ID3DX11EffectVariable* hHeightABreal = nullptr;
 	ID3DX11EffectVariable* hHeightBB = nullptr;
 
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
@@ -253,13 +253,19 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectVariable* hAngle1 = nullptr;
 	ID3DX11EffectVariable* hScale1 = nullptr;
 
-	ID3DX11EffectVariable* hCellRadius = nullptr;
+	ID3DX11EffectVariable* hRadius = nullptr;
 	ID3DX11EffectVariable* hCellDimension = nullptr;
 	ID3DX11EffectVariable* hOffsetRange = nullptr;
 	ID3DX11EffectVariable* hOffset0 = nullptr;
 
+	ID3DX11EffectVariable* hIndexOfA = nullptr;
+
 	ID3DX11EffectUnorderedAccessViewVariable* hError = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* hAtoB = nullptr;
+	ID3DX11EffectShaderResourceVariable* hErrorIn = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAtoBx = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAtoBy = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAtoBz = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAtoBw = nullptr;
 public:
 	void init();
 	void clear(

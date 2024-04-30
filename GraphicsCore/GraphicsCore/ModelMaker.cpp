@@ -578,7 +578,49 @@ void OperationsOnGridIntegrals::calculateAB(
 	int widthABreal, int heightABreal, int indexOfA
 )
 {
+	hPhotosIntegralsAx->SetResource(photosIntegralsAx);
+	hPhotosIntegralsAy->SetResource(photosIntegralsAy);
+	hPhotosIntegralsAz->SetResource(photosIntegralsAz);
 
+	hPhotosIntegralsBx->SetResource(photosIntegralsBx);
+	hPhotosIntegralsBy->SetResource(photosIntegralsBy);
+	hPhotosIntegralsBz->SetResource(photosIntegralsBz);
+
+	hAB->SetUnorderedAccessView(AB);
+	hABfraction->SetUnorderedAccessView(ABfraction);
+
+	hWidthA->SetRawValue(&widthA, 0, sizeof(widthA));
+	hHeightA->SetRawValue(&heightA, 0, sizeof(heightA));
+	hTexturesCount->SetRawValue(&texturesCount, 0, sizeof(texturesCount));
+
+	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
+	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
+
+	hWidthABreal->SetRawValue(&widthABreal, 0, sizeof(widthABreal));
+	hHeightABreal->SetRawValue(&heightABreal, 0, sizeof(heightABreal));
+	hIndexOfA->SetRawValue(&indexOfA, 0, sizeof(indexOfA));
+
+	int radius = RADIUS_IN_CELLS;
+	hRadius->SetRawValue(&radius, 0, sizeof(radius));
+
+	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
+	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
+
+	Vec2d<int> offsetRange(OFFSET_RANGE_X, OFFSET_RANGE_Y);
+	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
+
+	Vec2d<int> offset0(OFFSET0_X, OFFSET0_Y);
+	hOffset0->SetRawValue(&offset0, 0, sizeof(offset0));
+
+	auto context = GraphicsCore::instance()->context;
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(5)->Apply(0, context);
+
+	uint32_t groups_x = std::ceil((float)widthA / 16);
+	uint32_t groups_y = std::ceil((float)heightA / 16);
+	uint32_t groups_z = std::ceil((float)texturesCount / 4);
+
+	context->Dispatch(groups_x, groups_y, groups_z);
+	unboundViews();
 }
 
 void LeastSquaresOfJacobianDeterminant::init()
