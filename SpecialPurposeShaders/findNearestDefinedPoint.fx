@@ -14,7 +14,7 @@ int index;
 int2 pt;
 uint threshold;
 
-[numthreads(16, 16, 1)]
+[numthreads(32, 32, 1)]
 void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
@@ -42,7 +42,7 @@ void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
 	InterlockedMin(minDistanceOut[0], distance2, originalValue);
 }
 
-[numthreads(16, 16, 1)]
+[numthreads(32, 32, 1)]
 void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;

@@ -268,24 +268,31 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectUnorderedAccessViewVariable* hAtoBw = nullptr;
 public:
 	void init();
+	void unboundViews();
 	void clear(
 		ID3D11UnorderedAccessView* error,
-		ID3D11UnorderedAccessView* AtoB,
-		int width, int height, int count
+		ID3D11UnorderedAccessView* AtoBx,
+		ID3D11UnorderedAccessView* AtoBy,
+		ID3D11UnorderedAccessView* AtoBz,
+		ID3D11UnorderedAccessView* AtoBw,
+		int widthBB, int heightBB, int texturesCount
 	);
-	void calculateErrors(
+	void calculateMapping(
 		ID3D11ShaderResourceView* AA,
-		ID3D11ShaderResourceView* AB,
-		ID3D11ShaderResourceView* BB,
 		ID3D11ShaderResourceView* AAfraction,
+		ID3D11ShaderResourceView* AB,
 		ID3D11ShaderResourceView* ABfraction,
+		ID3D11ShaderResourceView* BB,
 		ID3D11ShaderResourceView* BBfraction,
-		ID3D11ShaderResourceView* maxA,
-		ID3D11ShaderResourceView* maxB,
-		ID3D11ShaderResourceView* mapAtoB,
+		ID3D11ShaderResourceView* errorIn,
 		ID3D11UnorderedAccessView* error,
-		ID3D11UnorderedAccessView* AtoB,
-		int width, int height, int count,
+		ID3D11UnorderedAccessView* AtoBx,
+		ID3D11UnorderedAccessView* AtoBy,
+		ID3D11UnorderedAccessView* AtoBz,
+		ID3D11UnorderedAccessView* AtoBw,
+		int widthAB, int heightAB, int texturesCount,
+		int indexOfA,
+		int widthABreal, int heightABreal,
 		float angle0, float scale0,
 		float angle1, float scale1
 	);
@@ -297,7 +304,10 @@ struct FindNearestDefinedPoint
 	ID3DX11EffectTechnique* hTechnique = nullptr;
 
 	ID3DX11EffectShaderResourceVariable* hError = nullptr;
-	ID3DX11EffectShaderResourceVariable* hAtoB = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAtoBx = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAtoBy = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAtoBz = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAtoBw = nullptr;
 
 	ID3DX11EffectUnorderedAccessViewVariable* hMinDistanceOut = nullptr;
 	ID3DX11EffectShaderResourceVariable* hMinDistanceIn = nullptr;
@@ -323,7 +333,10 @@ public:
 	void init();
 	Vec2d<int> findNearestPoint(
 		ID3D11ShaderResourceView* error,
-		ID3D11ShaderResourceView* AtoB,
+		ID3D11ShaderResourceView* AtoBx,
+		ID3D11ShaderResourceView* AtoBy,
+		ID3D11ShaderResourceView* AtoBz,
+		ID3D11ShaderResourceView* AtoBw,
 		const Vec2d<int>& point
 	);
 };
@@ -343,6 +356,28 @@ class ModelMaker
 	int width = 0;
 	int height = 0;
 	int texturesCount = 0;
+
+	int widthA = 0;
+	int heightA = 0;
+
+	int widthAreal = 0;
+	int heightAreal = 0;
+
+	int widthB = 0;
+	int heightB = 0;
+
+	int widthAA = 0;
+	int heightAA = 0;
+
+	int widthAB = 0;
+	int heightAB = 0;
+
+	int widthABreal = 0;
+	int heightABreal = 0;
+	int countOfABtextures = 0;
+
+	int widthBB = 0;
+	int heightBB = 0;
 
 	bool bSetOfPhotosIsLoaded = false;
 
@@ -415,14 +450,32 @@ class ModelMaker
 	ID3D11ShaderResourceView* maxAsrv = nullptr;
 	ID3D11ShaderResourceView* maxBsrv = nullptr;
 
-	ID3D11Buffer* mapAtoB = nullptr;
-	ID3D11ShaderResourceView* mapAtoBsrv = nullptr;
-
 	ID3D11Texture2D* error = nullptr;
 	ID3D11UnorderedAccessView* errorUAV = nullptr;
+	ID3D11ShaderResourceView* errorSRV = nullptr;
 
-	ID3D11Texture2D* AtoB = nullptr;
-	ID3D11UnorderedAccessView* AtoBuav = nullptr;
+	ID3D11Texture2D* AtoBx = nullptr;
+	ID3D11Texture2D* AtoBy = nullptr;
+	ID3D11Texture2D* AtoBz = nullptr;
+	ID3D11Texture2D* AtoBw = nullptr;
+
+	ID3D11UnorderedAccessView* AtoBxUAV = nullptr;
+	ID3D11UnorderedAccessView* AtoByUAV = nullptr;
+	ID3D11UnorderedAccessView* AtoBzUAV = nullptr;
+	ID3D11UnorderedAccessView* AtoBwUAV = nullptr;
+
+	ID3D11ShaderResourceView* AtoBxSRV = nullptr;
+	ID3D11ShaderResourceView* AtoBySRV = nullptr;
+	ID3D11ShaderResourceView* AtoBzSRV = nullptr;
+	ID3D11ShaderResourceView* AtoBwSRV = nullptr;
+
+	void initSetOfPhotos(const std::vector<std::string>& paths);
+	void initPhotosIntegralsA();
+	void initPhotosIntegralsB();
+	void initAAandMaxA();
+	void initAB();
+	void initBBandMaxB();
+	void initErrorsAndMapping();
 
 public:
 	static ModelMaker* instance();
