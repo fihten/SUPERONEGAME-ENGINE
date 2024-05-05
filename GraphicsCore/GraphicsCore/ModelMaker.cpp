@@ -3,6 +3,7 @@
 #include "Timer.h"
 #include "Vec4d.h" 
 #include <D3DX11.h>
+#include <algorithm>
 
 std::unique_ptr<ModelMaker> ModelMaker::ptr;
 
@@ -365,9 +366,6 @@ void OperationsOnGridIntegrals::init()
 	hMaxA = hOperationsOnGridIntegralsFX->GetVariableByName("maxA")->AsUnorderedAccessView();
 	hMaxB = hOperationsOnGridIntegralsFX->GetVariableByName("maxB")->AsUnorderedAccessView();
 
-	hWidthA = hOperationsOnGridIntegralsFX->GetVariableByName("widthA");
-	hHeightA = hOperationsOnGridIntegralsFX->GetVariableByName("heightA");
-
 	hWidthAreal = hOperationsOnGridIntegralsFX->GetVariableByName("widthAreal");
 	hHeightAreal = hOperationsOnGridIntegralsFX->GetVariableByName("heightAreal");
 
@@ -574,6 +572,7 @@ void OperationsOnGridIntegrals::calculateAB(
 	ID3D11UnorderedAccessView* AB,
 	ID3D11UnorderedAccessView* ABfraction,
 	int widthA, int heightA, int texturesCount,
+	int widthAreal, int heightAreal,
 	int widthAB, int heightAB,
 	int widthABreal, int heightABreal, int indexOfA
 )
@@ -589,8 +588,8 @@ void OperationsOnGridIntegrals::calculateAB(
 	hAB->SetUnorderedAccessView(AB);
 	hABfraction->SetUnorderedAccessView(ABfraction);
 
-	hWidthA->SetRawValue(&widthA, 0, sizeof(widthA));
-	hHeightA->SetRawValue(&heightA, 0, sizeof(heightA));
+	hWidthAreal->SetRawValue(&widthAreal, 0, sizeof(widthAreal));
+	hHeightAreal->SetRawValue(&heightAreal, 0, sizeof(heightAreal));
 	hTexturesCount->SetRawValue(&texturesCount, 0, sizeof(texturesCount));
 
 	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
@@ -758,6 +757,7 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	int widthAB, int heightAB, int texturesCount,
 	int indexOfA,
 	int widthABreal, int heightABreal,
+	int widthAA, int heightAA,
 	float angle0, float scale0,
 	float angle1, float scale1
 )
@@ -781,6 +781,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 
 	hWidthABreal->SetRawValue(&widthABreal, 0, sizeof(widthABreal));
 	hHeightABreal->SetRawValue(&heightABreal, 0, sizeof(heightABreal));
+
+	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
+	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 
 	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
@@ -826,16 +829,13 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hWidthABreal->SetRawValue(&widthABreal, 0, sizeof(widthABreal));
 	hHeightABreal->SetRawValue(&heightABreal, 0, sizeof(heightABreal));
 
+	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
+	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
+
 	int radius = RADIUS_IN_CELLS;
 	hRadius->SetRawValue(&radius, 0, sizeof(radius));
-
-	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
-
-	Vec2d<int> offsetRange(OFFSET_RANGE_X, OFFSET_RANGE_Y);
 	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
-
-	Vec2d<int> offset0(OFFSET0_X, OFFSET0_Y);
 	hOffset0->SetRawValue(&offset0, 0, sizeof(offset0));
 
 	hAngle0->SetRawValue(&angle0, 0, sizeof(angle0));
@@ -1032,6 +1032,7 @@ void ModelMaker::loadPhotos(const std::vector<std::string>& paths)
 	freeResources(true);
 
 	initSetOfPhotos(paths);
+	initDimensionsOfTextures();
 	initPhotosIntegralsA();
 	initPhotosIntegralsB();
 	initAAandMaxA();
@@ -1068,17 +1069,24 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 		width, height, texturesCount
 	);
 
-	operationsOnGridIntegrals.clearA(
-		AAuav, AAfractionUAV, maxAuav, width, height, texturesCount);
-	operationsOnGridIntegrals.calculateA(
+	operationsOnGridIntegrals.clearAAandMaxA(
+		AAuav, AAfractionUAV, maxAuav, widthAA, heightAA, texturesCount
+	);
+	operationsOnGridIntegrals.calculateAAandMaxA(
 		photosIntegralsAxSRV,
 		photosIntegralsAySRV,
 		photosIntegralsAzSRV,
-		AAuav, AAfractionUAV, maxAuav,
-		width, height, texturesCount
+		AAuav,
+		AAfractionUAV,
+		maxAuav,
+		widthAreal, heightAreal, texturesCount
 	);
 
-	leastSquaresOfJacobianDeterminant.clear(errorUAV, AtoBuav, width, height, texturesCount);
+	leastSquaresOfJacobianDeterminant.clear(
+		errorUAV,
+		AtoBxUAV, AtoByUAV, AtoBzUAV, AtoBwUAV,
+		widthBB, heightBB, texturesCount
+	);
 
 	int maxOffset = 10;
 	int N = 10;
@@ -1122,7 +1130,9 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						photosIntegralsBxUAV,
 						photosIntegralsByUAV,
 						photosIntegralsBzUAV,
-						width, height, texturesCount);
+						width, height, texturesCount
+					);
+
 					gridIntegralsB.calculatePhotosIntegrals(
 						setOfPhotosSRV,
 						photosIntegralsBxUAV,
@@ -1130,8 +1140,9 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						photosIntegralsBzUAV,
 						width, height, texturesCount,
 						angle0, scale0,
-						angle1 + angle0, scale1
+						angle1, scale1
 					);
+					
 					operationsOnGridIntegrals.calculateAB(
 						photosIntegralsAxSRV,
 						photosIntegralsAySRV,
@@ -1139,21 +1150,41 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						photosIntegralsBxSRV,
 						photosIntegralsBySRV,
 						photosIntegralsBzSRV,
-						mapAtoBsrv,
-						ABuav, ABfractionUAV,
-						BBuav, BBfractionUAV,
+						ABuav,
+						ABfractionUAV,
+						widthA, heightA, texturesCount,
+						widthAreal, heightAreal,
+						widthAB, heightAB,
+						widthABreal, heightABreal,
+						0
+					);
+
+					operationsOnGridIntegrals.calculateBBandMaxB(
+						photosIntegralsBxSRV,
+						photosIntegralsBySRV,
+						photosIntegralsBzSRV,
+						BBuav,
+						BBfractionUAV,
 						maxBuav,
-						width, height, texturesCount
+						widthB,
+						heightB,
+						texturesCount
 					);
-					leastSquaresOfJacobianDeterminant.calculateErrors(
-						AAsrv, ABsrv, BBsrv,
-						AAfractionSRV, ABfractionSRV, BBfractionSRV,
-						maxAsrv, maxBsrv, mapAtoBsrv,
-						errorUAV, AtoBuav,
-						width, height, texturesCount,
+
+					leastSquaresOfJacobianDeterminant.calculateMapping(
+						AAsrv, AAfractionSRV,
+						ABsrv, ABfractionSRV,
+						BBsrv, BBfractionSRV,
+						errorSRV, errorUAV,
+						AtoBxUAV, AtoByUAV, AtoBzUAV, AtoBwUAV,
+						widthAB, heightAB, texturesCount,
+						0,
+						widthABreal, heightABreal,
+						widthAA, heightAA,
 						angle0, scale0,
-						angle1 + angle0, scale1
+						angle1, scale1
 					);
+
 					elapsedSteps++;
 				}
 			}
@@ -1169,7 +1200,14 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 
 Vec2d<int> ModelMaker::findTheSamePoint(const Vec2d<int>& pt)
 {
-
+	return findNearestDefinedPoint.findNearestPoint(
+		errorSRV,
+		AtoBxSRV,
+		AtoBySRV,
+		AtoBzSRV,
+		AtoBwSRV,
+		pt
+	);
 }
 
 void ModelMaker::freeResources(bool freeResult)
@@ -1392,7 +1430,7 @@ void ModelMaker::initSetOfPhotos(const std::vector<std::string>& paths)
 	auto device = GraphicsCore::instance()->device;
 	auto context = GraphicsCore::instance()->context;
 
-	int texturesCount = paths.size();
+	texturesCount = paths.size();
 	std::vector<ID3D11Texture2D*> photos(texturesCount);
 	for (int i = 0; i < texturesCount; i++)
 	{
@@ -1476,17 +1514,6 @@ void ModelMaker::initPhotosIntegralsA()
 {
 	auto device = GraphicsCore::instance()->device;
 
-	widthAreal = width - CELL_DIMENSION_X + 1;
-	heightAreal = height - CELL_DIMENSION_Y + 1;
-
-	widthA = (OFFSET0_X + widthAreal) / CELL_DIMENSION_X;
-	widthA = widthA * OFFSET_RANGE_X + (OFFSET0_X + widthAreal) % CELL_DIMENSION_X;
-	widthA -= OFFSET0_X;
-
-	heightA = (OFFSET0_Y + heightAreal) / CELL_DIMENSION_Y;
-	heightA = heightA * OFFSET_RANGE_Y + (OFFSET0_Y + heightAreal) % CELL_DIMENSION_Y;
-	heightA -= OFFSET0_Y;
-
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = widthAreal;
 	texArrayDesc.Height = height;
@@ -1546,9 +1573,6 @@ void ModelMaker::initPhotosIntegralsB()
 {
 	auto device = GraphicsCore::instance()->device;
 
-	widthB = std::ceil((float)width / CELL_DIMENSION_X);
-	heightB = std::ceil((float)height / CELL_DIMENSION_Y);
-
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = widthB;
 	texArrayDesc.Height = heightB;
@@ -1593,15 +1617,6 @@ void ModelMaker::initPhotosIntegralsB()
 void ModelMaker::initAAandMaxA()
 {
 	auto device = GraphicsCore::instance()->device;
-
-	int radius = RADIUS_IN_CELLS;
-	int diameter = 2 * radius + 1;
-
-	widthAA = widthAreal / (diameter * CELL_DIMENSION_X);
-	widthAA = widthAA * CELL_DIMENSION_X + widthAreal % CELL_DIMENSION_X;
-
-	heightAA = heightA / (diameter * CELL_DIMENSION_Y);
-	heightAA = heightAA * CELL_DIMENSION_Y + heightA % CELL_DIMENSION_Y;
 
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = widthAA;
@@ -1648,23 +1663,6 @@ void ModelMaker::initAB()
 {
 	auto device = GraphicsCore::instance()->device;
 
-	int radius = RADIUS_IN_CELLS;
-	int diameter = 2 * radius + 1;
-
-	widthAB = (OFFSET0_X + widthA) / (diameter * OFFSET_RANGE_X);
-	widthAB = widthAB * OFFSET_RANGE_X + (OFFSET0_X + widthA) % OFFSET_RANGE_X;
-	widthAB -= OFFSET0_X;
-
-	heightAB = (OFFSET0_Y + heightA) / (diameter * OFFSET_RANGE_Y);
-	heightAB = heightAB * OFFSET_RANGE_Y + (OFFSET0_Y + heightA) % OFFSET_RANGE_Y;
-	heightAB -= OFFSET0_Y;
-
-	widthABreal = 2048;
-	heightABreal = 2048;
-
-	int pixelsInAB = widthAB * heightAB * texturesCount;
-	countOfABtextures = std::ceil((float)pixelsInAB / (widthABreal * heightABreal));
-
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = widthABreal;
 	texArrayDesc.Height = heightABreal;
@@ -1706,15 +1704,6 @@ void ModelMaker::initAB()
 void ModelMaker::initBBandMaxB()
 {
 	auto device = GraphicsCore::instance()->device;
-
-	int radius = RADIUS_IN_CELLS;
-	int diameter = 2 * radius + 1;
-
-	widthBB = widthB / diameter;
-	widthBB += 1;
-
-	heightBB = heightB / diameter;
-	heightBB += 1;
 
 	D3D11_TEXTURE2D_DESC texArrayDesc;
 	texArrayDesc.Width = widthBB;
@@ -1806,4 +1795,80 @@ void ModelMaker::initErrorsAndMapping()
 	device->CreateShaderResourceView(AtoBy, &srv_desc, &AtoBySRV);
 	device->CreateShaderResourceView(AtoBz, &srv_desc, &AtoBzSRV);
 	device->CreateShaderResourceView(AtoBw, &srv_desc, &AtoBwSRV);
+}
+
+void ModelMaker::initDimensionsOfTextures()
+{
+	widthB = std::ceil((float)width / CELL_DIMENSION_X);
+	heightB = std::ceil((float)height / CELL_DIMENSION_Y);
+
+	widthAreal = width - CELL_DIMENSION_X + 1;
+	heightAreal = height - CELL_DIMENSION_Y + 1;
+
+	widthA = (OFFSET0_X + widthAreal) / CELL_DIMENSION_X;
+	widthA = widthA * OFFSET_RANGE_X + (OFFSET0_X + widthAreal) % CELL_DIMENSION_X;
+	widthA -= OFFSET0_X;
+	widthA = std::min<int>(widthA, widthB * OFFSET_RANGE_X - OFFSET0_X);
+	//(widthA - 1 + OFFSET0_X) / OFFSET_RANGE_X <= (widthB - 1);
+	//(widthA - 1 + OFFSET0_X) <= (widthB - 1) * OFFSET_RANGE_X + OFFSET_RANGE_X - 1;
+	//(widthA - 1 + OFFSET0_X) <= widthB * OFFSET_RANGE_X - 1;
+	//widthA <= widthB * OFFSET_RANGE_X - 1 - OFFSET0_X + 1;
+	//widthA <= widthB * OFFSET_RANGE_X - OFFSET0_X;
+
+	heightA = (OFFSET0_Y + heightAreal) / CELL_DIMENSION_Y;
+	heightA = heightA * OFFSET_RANGE_Y + (OFFSET0_Y + heightAreal) % CELL_DIMENSION_Y;
+	heightA -= OFFSET0_Y;
+	heightA = std::min<int>(heightA, heightB * OFFSET_RANGE_Y - OFFSET0_Y);
+
+	int radius = RADIUS_IN_CELLS;
+	int diameter = 2 * radius + 1;
+
+	widthAA = widthAreal / (diameter * CELL_DIMENSION_X);
+	widthAA = widthAA * CELL_DIMENSION_X + widthAreal % CELL_DIMENSION_X;
+
+	heightAA = heightAreal / (diameter * CELL_DIMENSION_Y);
+	heightAA = heightAA * CELL_DIMENSION_Y + heightAreal % CELL_DIMENSION_Y;
+
+	widthAB = (OFFSET0_X + widthA) / (diameter * OFFSET_RANGE_X);
+	widthAB = widthAB * OFFSET_RANGE_X + (OFFSET0_X + widthA) % OFFSET_RANGE_X;
+	widthAB -= OFFSET0_X;
+	//(widthAB - 1 + OFFSET0_X) / OFFSET_RANGE_X <= widthBB - 1;
+	//(widthAB - 1 + OFFSET0_X) <= (widthBB - 1) * OFFSET_RANGE_X + OFFSET_RANGE_X - 1;
+	//widthAB - 1 + OFFSET0_X <= widthBB * OFFSET_RANGE_X - 1;
+	//widthAB <= widthBB * OFFSET_RANGE_X - OFFSET0_X;
+
+	//widthAreal = width - CELL_DIMENSION_X + 1;
+
+	//widthA = (OFFSET0_X + widthAreal) / CELL_DIMENSION_X;
+	//widthA = widthA * OFFSET_RANGE_X + (OFFSET0_X + widthAreal) % CELL_DIMENSION_X;
+	//widthA -= OFFSET0_X;
+	//widthA = std::min<int>(widthA, widthB * OFFSET_RANGE_X - OFFSET0_X);
+
+	//widthAB = (OFFSET0_X + widthA) / (diameter * OFFSET_RANGE_X);
+	//widthAB = widthAB * OFFSET_RANGE_X + (OFFSET0_X + widthA) % OFFSET_RANGE_X;
+	//widthAB -= OFFSET0_X;
+	//widthAB = std::min<int>(widthAB, widthBB * OFFSET_RANGE_X - OFFSET0_X);
+
+	//widthBB = widthB / diameter;
+	//widthBB += 1;
+
+	//widthB = std::ceil((float)width / CELL_DIMENSION_X);
+
+	//widthAB = (widthB * OFFSET_RANGE_X) / (diameter * OFFSET_RANGE_X) = widthB / diameter;
+	//widthAB = (widthB / diameter) * OFFSET_RANGE_X + (widthB * OFFSET_RANGE_X) % OFFSET_RANGE_X;
+	//widthAB = (widthB / diameter) * OFFSET_RANGE_X - OFFSET0_X;
+	//widthAB = (widthBB - 1) * OFFSET_RANGE_X - OFFSET0_X;
+
+	heightAB = (OFFSET0_Y + heightA) / (diameter * OFFSET_RANGE_Y);
+	heightAB = heightAB * OFFSET_RANGE_Y + (OFFSET0_Y + heightA) % OFFSET_RANGE_Y;
+	heightAB -= OFFSET0_Y;
+
+	widthABreal = 2048;
+	heightABreal = 2048;
+
+	int pixelsInAB = widthAB * heightAB * texturesCount;
+	countOfABtextures = std::ceil((float)pixelsInAB / (widthABreal * heightABreal));
+
+	widthBB = std::ceil((float)widthB / diameter);
+	heightBB = std::ceil((float)heightB / diameter);
 }

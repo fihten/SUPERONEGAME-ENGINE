@@ -71,18 +71,30 @@ void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int x = dispatchThreadID.x;
-	if (x >= widthAB)
-		return;
-
-	int y = dispatchThreadID.y;
-	if (y >= heightAB)
-		return;
-
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 	if (indexOfPhoto == indexOfA)
+		return;
+
+	int x = dispatchThreadID.x;
+	int y = dispatchThreadID.y;
+
+	uint3 locationInAA = uint3(x, y, indexOfA);
+	locationInAA.xy += offset0;
+	int2 n = locationInAA.xy % offsetRange;
+	n -= offset0;
+	locationInAA.xy /= offsetRange;
+	locationInAA.xy *= cellDimension;
+	locationInAA.xy += n;
+
+	if (locationInAA.x < 0)
+		return;
+	if (locationInAA.x >= widthAA)
+		return;
+	if (locationInAA.y < 0)
+		return;
+	if (locationInAA.y >= heightAA)
 		return;
 
 	uint3 locationInAB = uint3(x, y, indexOfPhoto);
@@ -94,19 +106,6 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	float AB_ = AB[locationInAB].r;
 	float ABfraction_ = ABfraction[locationInAB].r;
 	AB_ = AB_ + ABfraction_ / 1000000.0f;
-
-	uint3 locationInAA = uint3(x, y, indexOfA);
-	locationInAA.xy += offset0;
-	int2 n = locationInAA.xy % offsetRange;
-	n -= offset0;
-	locationInAA.xy /= offsetRange;
-	locationInAA.xy *= cellDimension;
-	locationInAA.xy += n; 
-
-	if (locationInAA.x < 0)
-		return;
-	if (locationInAA.y < 0)
-		return;
 
 	float AA_ = AA[locationInAA].r;
 	float AAfraction_ = AAfraction[locationInAA].r;
@@ -142,29 +141,14 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int x = dispatchThreadID.x;
-	if (x >= widthAB)
-		return;
-
-	int y = dispatchThreadID.y;
-	if (y >= heightAB)
-		return;
-
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 	if (indexOfPhoto == indexOfA)
 		return;
 
-	uint3 locationInAB = uint3(x, y, indexOfPhoto);
-
-	uint2 dims0 = uint2(widthAB, heightAB);
-	uint2 dims1 = uint2(widthABreal, heightABreal);
-	locationInAB = mapToTexArray(locationInAB, dims0, dims1);
-
-	float AB_ = AB[locationInAB].r;
-	float ABfraction_ = ABfraction[locationInAB].r;
-	AB_ = AB_ + ABfraction_ / 1000000.0f;
+	int x = dispatchThreadID.x;
+	int y = dispatchThreadID.y;
 
 	uint3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
@@ -176,8 +160,22 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (locationInAA.x < 0)
 		return;
+	if (locationInAA.x >= widthAA)
+		return;
 	if (locationInAA.y < 0)
 		return;
+	if (locationInAA.y >= heightAA)
+		return;
+
+	uint3 locationInAB = uint3(x, y, indexOfPhoto);
+
+	uint2 dims0 = uint2(widthAB, heightAB);
+	uint2 dims1 = uint2(widthABreal, heightABreal);
+	locationInAB = mapToTexArray(locationInAB, dims0, dims1);
+
+	float AB_ = AB[locationInAB].r;
+	float ABfraction_ = ABfraction[locationInAB].r;
+	AB_ = AB_ + ABfraction_ / 1000000.0f;
 
 	float AA_ = AA[locationInAA].r;
 	float AAfraction_ = AAfraction[locationInAA].r;

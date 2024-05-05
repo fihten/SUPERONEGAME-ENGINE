@@ -32,8 +32,11 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			uA = (mousePosX + 0.5f) / width;
 			vA = (mousePosY + 0.5f) / height;
 
-			ModelMaker::instance();
+			Vec2d<int> ptA(uA * width - 0.5f, vA * 2 * height - 0.5f);
+			auto ptB = ModelMaker::instance()->findTheSamePoint(ptA);
 
+			uB = (ptB.x() + 0.5f) / width;
+			vB = (ptB.y() + 0.5f) / (2 * height);
 		}
 
 		flt2 uvA(uA, vA);
@@ -43,58 +46,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 		flt2 uvB(uB, vB);
 		ParamKey mappedPos_key{ StringManager::toStringId("mappedPos"), -1, string_id(-1) };
 		testMesh.setParam(mappedPos_key, uvB);
-
-		// set params of area of integration within texture A
-		int radiusOfIntegrationArea = GraphicsCore::instance()->getRadiusOfBiggestAreaOfIntegration();
-		ParamKey radiusOfArrow_key{ StringManager::toStringId("radiusOfArrow"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
-
-		ParamKey angle0_key{ StringManager::toStringId("angle0"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(angle0_key, 0.0f);
-
-		ParamKey scale0_key{ StringManager::toStringId("scale0"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(scale0_key, 1.0f);
-
-		ParamKey angle1_key{ StringManager::toStringId("angle1"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(angle1_key, 0.0f);
-
-		ParamKey scale1_key{ StringManager::toStringId("scale1"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(scale1_key, 1.0f);
-
-		int wA = GraphicsCore::instance()->getWidthOfTextureA();
-		ParamKey width_key{ StringManager::toStringId("width"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(width_key, wA);
-
-		int hA = GraphicsCore::instance()->getHeightOfTextureA();
-		ParamKey height_key{ StringManager::toStringId("height"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(height_key, hA);
-
-		ParamKey ndcOffsetY_key{ StringManager::toStringId("ndcOffsetY"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(ndcOffsetY_key, 0.0f);
-
-		Vec2d<int> centerOfArrowInA(uA * wA - 0.5f, vA * hA - 0.5f);
-		ParamKey centerOfArrow_key{ StringManager::toStringId("centerOfArrow"), -1, string_id(-1) };
-		areaOfIntegrationInA.setParam(centerOfArrow_key, centerOfArrowInA);
-
-		// set params of area of integration within texture B
-		areaOfIntegrationInB.setParam(radiusOfArrow_key, radiusOfIntegrationArea);
-
-		areaOfIntegrationInB.setParam(angle0_key, 0.0f);
-		areaOfIntegrationInB.setParam(scale0_key, 1.0f);
-
-		areaOfIntegrationInB.setParam(angle1_key, 0.0f);
-		areaOfIntegrationInB.setParam(scale1_key, 1.0f);
-
-		int wB = GraphicsCore::instance()->getWidthOfTextureB();
-		areaOfIntegrationInB.setParam(width_key, wB);
-
-		int hB = GraphicsCore::instance()->getHeightOfTextureB();
-		areaOfIntegrationInB.setParam(height_key, hB);
-
-		areaOfIntegrationInB.setParam(ndcOffsetY_key, -1.0f);
-
-		Vec2d<int> centerOfArrowInB(uB * wB - 0.5f, vB * hB - 0.5f);
-		areaOfIntegrationInB.setParam(centerOfArrow_key, centerOfArrowInB);
 	}
 	break;
 	}

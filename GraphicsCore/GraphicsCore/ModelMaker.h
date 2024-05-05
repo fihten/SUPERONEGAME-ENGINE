@@ -1,3 +1,13 @@
+/*
+
+Code of ModelMaker was stolen from company 
+that produces flight simulator.
+
+	P.S.: This is joke
+		P.S.: No
+
+*/
+
 #pragma once
 
 #include "Vec2d.h"
@@ -7,8 +17,8 @@
 #include <vector>
 #include <string>
 
-#define CELL_DIMENSION_X 32 // for spheres this is 36
-#define CELL_DIMENSION_Y 32 // for spheres this is 36
+#define CELL_DIMENSION_X 16 // for spheres this is 36
+#define CELL_DIMENSION_Y 16 // for spheres this is 36
 
 #define OFFSET_RANGE_X 128
 #define OFFSET_RANGE_Y 128
@@ -137,9 +147,6 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxA = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxB = nullptr;
 
-	ID3DX11EffectVariable* hWidthA = nullptr;
-	ID3DX11EffectVariable* hHeightA = nullptr;
-
 	ID3DX11EffectVariable* hWidthAreal = nullptr;
 	ID3DX11EffectVariable* hHeightAreal = nullptr;
 
@@ -213,6 +220,7 @@ public:
 		ID3D11UnorderedAccessView* AB,
 		ID3D11UnorderedAccessView* ABfraction,
 		int widthA, int heightA, int texturesCount,
+		int widthAreal, int heightAreal,
 		int widthAB, int heightAB,
 		int widthABreal, int heightABreal, int indexOfA
 	);
@@ -293,6 +301,7 @@ public:
 		int widthAB, int heightAB, int texturesCount,
 		int indexOfA,
 		int widthABreal, int heightABreal,
+		int widthAA, int heightAA,
 		float angle0, float scale0,
 		float angle1, float scale1
 	);
@@ -476,6 +485,8 @@ class ModelMaker
 	void initAB();
 	void initBBandMaxB();
 	void initErrorsAndMapping();
+
+	void initDimensionsOfTextures();
 
 public:
 	static ModelMaker* instance();

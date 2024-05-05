@@ -19,9 +19,6 @@ RWTexture2DArray<uint> BBfraction;
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
 
-int widthA;
-int heightA;
-
 int widthAreal;
 int heightAreal;
 
@@ -202,17 +199,12 @@ void cs_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(16, 16, 4)]
 void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int x = dispatchThreadID.x;
-	if (x >= widthA)
-		return;
-
-	int y = dispatchThreadID.y;
-	if (y >= heightA)
-		return;
-
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
+
+	int x = dispatchThreadID.x;
+	int y = dispatchThreadID.y;
 
 	int2 m = int2(x, y);
 	m += offset0;
@@ -226,7 +218,11 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (locationInA.x < 0)
 		return;
+	if (locationInA.x >= widthAreal)
+		return;
 	if (locationInA.y < 0)
+		return;
+	if (locationInA.y >= heightAreal)
 		return;
 
 	uint3 colorA = float3(

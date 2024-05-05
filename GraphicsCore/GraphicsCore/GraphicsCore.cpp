@@ -186,7 +186,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
 	initFourierTransform();
-	/*{
+	{
 		ModelMaker::instance()->init();
 
 		std::vector<std::string> paths;
@@ -197,7 +197,7 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 		ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
 
 		ModelMaker::instance()->freeResources();
-	}*/
+	}
 
 	radius1 = 300;// ((2 * RADIUS_IN_CELLS + 1)* CELL_DIMENSION_X) / 2;
 }
