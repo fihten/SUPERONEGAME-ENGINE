@@ -186,20 +186,20 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 	initManualDefinitionOfTheSamePoint();
 	initCalculationOfTextureStatistic();
 	initFourierTransform();
-	{
-		ModelMaker::instance()->init();
+	///*{
+	//	ModelMaker::instance()->init();
 
-		std::vector<std::string> paths;
-		paths.emplace_back("C:\\3dEngine\\Textures\\imageA.jpg");
-		paths.emplace_back("C:\\3dEngine\\Textures\\imageB.jpg");
-		ModelMaker::instance()->loadPhotos(paths);
+	//	std::vector<std::string> paths;
+	//	paths.emplace_back("C:\\3dEngine\\Textures\\imageA.jpg");
+	//	paths.emplace_back("C:\\3dEngine\\Textures\\imageB.jpg");
+	//	ModelMaker::instance()->loadPhotos(paths);
 
-		ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
+	//	ModelMaker::instance()->defineTheSamePointsOnSetOfPhotos();
 
-		ModelMaker::instance()->freeResources();
-	}
+	//	ModelMaker::instance()->freeResources();
+	//}*/
 
-	radius1 = 300;// ((2 * RADIUS_IN_CELLS + 1)* CELL_DIMENSION_X) / 2;
+	radius1 = ((2 * RADIUS_IN_CELLS + 1)* CELL_DIMENSION_X) / 2;
 }
 
 void GraphicsCore::startFrame()
@@ -2650,6 +2650,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	xx /= maxX * maxX;
 
 	float integralsB[3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1)];
+	int pointsCount = 3 * (2 * RADIUS_IN_CELLS + 1) * (2 * RADIUS_IN_CELLS + 1);
 
 	float a[4] = {
 		-maxAngle,
@@ -2665,7 +2666,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		maxScale
 	};
 
-	int numberOfSteps[4] = { 10,10,10,10 };
+	int numberOfSteps[4] = { 5,5,5,5 };
 	float step[4];
 	for (int i = 0; i < 4; ++i)
 		step[i] = (b[i] - a[i]) / numberOfSteps[i];
@@ -2676,6 +2677,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 	float threshold = 1e-5;
 	
 	double err = DBL_MAX;
+	int epoch = 0;
 
 	while (maxStep > threshold)
 	{
@@ -2721,6 +2723,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 
 			double k = xy / xx;
 			double derr = k * k * xx + yy - 2 * k * xy;
+			derr /= pointsCount;
 			if (derr < err)
 			{
 				err = derr;
@@ -2728,6 +2731,9 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 				scale0 = s0;
 				angle1 = a1;
 				scale1 = s1;
+				char buffer[256];
+				std::sprintf(buffer, "\nepoch: %d, error: %f\n", epoch, err);
+				OutputDebugStringA(buffer);
 			}
 
 			index[0]++;
@@ -2757,6 +2763,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 			step[i] = (b[i] - a[i]) / numberOfSteps[i];
 			maxStep = std::max<float>(maxStep, step[i]);
 		}
+		epoch++;
 	}
 
 	angle1 += angle0;

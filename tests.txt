@@ -1,0 +1,49 @@
+#define CELL_DIMENSION_X 16 // for spheres this is 36
+#define CELL_DIMENSION_Y 16 // for spheres this is 36
+
+#define OFFSET_RANGE_X 128
+#define OFFSET_RANGE_Y 128
+
+#define OFFSET0_X 64
+#define OFFSET0_Y 64
+
+#define RADIUS_IN_CELLS 16 
+
+integrals calculation starts
+The thread 0x4aa8 has exited with code 0 (0x0).
+The thread 0x15b4 has exited with code 0 (0x0).
+The thread 0x1bf8 has exited with code 0 (0x0).
+
+minError = 0.007931, a0 = 14.034430, s0 = 1.048781, a1 = 11.659005, s1 = 0.948000
+integrals calculation finishes
+The thread 0x2684 has exited with code 0 (0x0).
+The thread 0x3330 has exited with code 0 (0x0).
+integrals calculation starts
+
+minError = 0.014470, a0 = 0.065280, s0 = 1.276231, a1 = 30.918910, s1 = 1.468147
+integrals calculation finishes
+integrals calculation starts
+
+minError = 0.005417, a0 = 9.541632, s0 = 0.974208, a1 = 15.201791, s1 = 1.014688
+integrals calculation finishes
+integrals calculation starts
+
+minError = 0.011477, a0 = 6.425087, s0 = 1.074451, a1 = 0.188927, s1 = 1.132045
+integrals calculation finishes
+The thread 0x3d08 has exited with code 0 (0x0).
+integrals calculation starts
+
+minError = 0.004546, a0 = 16.821503, s0 = 1.017344, a1 = 15.947518, s1 = 0.982541
+integrals calculation finishes
+integrals calculation starts
+
+minError = 0.006538, a0 = -0.014592, s0 = 1.386899, a1 = 53.375996, s1 = 1.492480
+integrals calculation finishes
+The thread 0xe28 has exited with code 0 (0x0).
+The thread 0x1b8c has exited with code 0 (0x0).
+integrals calculation starts
+
+minError = 0.002542, a0 = 16.700159, s0 = 1.038144, a1 = 15.430655, s1 = 1.008870
+integrals calculation finishes
+The thread 0x4604 has exited with code 0 (0x0).
+The thread 0x2a24 has exited with code 0 (0x0).

@@ -131,6 +131,9 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
+	int diameter = 2 * radius + 1;
+	int pointsCount = 3 * diameter * diameter;
+	err /= pointsCount;
 
 	uint3 locationOut = locationInBB;
 
@@ -201,13 +204,15 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
+	int diameter = 2 * radius + 1;
+	int pointsCount = 3 * diameter * diameter;
+	err /= pointsCount;
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
 		return;
 
 	int2 posInA = locationInAA.xy;
 	n = posInA % cellDimension;
 	posInA = posInA / cellDimension;
-	int diameter = 2 * radius + 1;
 	posInA = posInA * cellDimension * diameter + n + 0.5f * diameter * cellDimension;
 
 	float2x2 m;
@@ -225,10 +230,10 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint3 locationOut = locationInBB;
 	uint originalValue = 0;
-	InterlockedExchange(AtoBx[locationOut], mapping.x, originalValue);
-	InterlockedExchange(AtoBy[locationOut], mapping.y, originalValue);
-	InterlockedExchange(AtoBz[locationOut], mapping.z, originalValue);
-	InterlockedExchange(AtoBw[locationOut], mapping.w, originalValue);
+	InterlockedExchange(AtoBx[locationOut].r, mapping.x, originalValue);
+	InterlockedExchange(AtoBy[locationOut].r, mapping.y, originalValue);
+	InterlockedExchange(AtoBz[locationOut].r, mapping.z, originalValue);
+	InterlockedExchange(AtoBw[locationOut].r, mapping.w, originalValue);
 }
 
 technique11 Clear

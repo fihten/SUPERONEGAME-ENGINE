@@ -33,10 +33,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 			vA = (mousePosY + 0.5f) / height;
 
 			Vec2d<int> ptA(uA * width - 0.5f, vA * 2 * height - 0.5f);
-			auto ptB = ModelMaker::instance()->findTheSamePoint(ptA);
+			auto ptAB = ModelMaker::instance()->findTheSamePoint(ptA);
 
-			uB = (ptB.x() + 0.5f) / width;
-			vB = (ptB.y() + 0.5f) / (2 * height);
+			uA = ((float)ptAB.x() + 0.5f) / width;
+			vA = ((float)ptAB.y() + 0.5f) / (2 * height);
+
+			uB = ((float)ptAB.z() + 0.5f) / width;
+			vB = ((float)ptAB.w() + 0.5f) / (2 * height);
 		}
 
 		flt2 uvA(uA, vA);

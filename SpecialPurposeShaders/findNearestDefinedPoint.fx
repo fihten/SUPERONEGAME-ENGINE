@@ -39,7 +39,7 @@ void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint distance2 = dot(pt - posInA.xy, pt - posInA.xy);
 	uint originalValue = 0;
-	InterlockedMin(minDistanceOut[0], distance2, originalValue);
+	InterlockedMin(minDistanceOut[0].r, distance2, originalValue);
 }
 
 [numthreads(32, 32, 1)]
@@ -66,14 +66,14 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	posInA.z = mapping.y;
 
 	uint distance2 = dot(pt - posInA.xy, pt - posInA.xy);
-	if (distance2 != minDistanceIn[0])
+	if (distance2 != minDistanceIn[0].r)
 		return;
 
 	uint originalValue = 0;
-	InterlockedExchange(mappingOfPoint[0], mapping.x, originalValue);
-	InterlockedExchange(mappingOfPoint[1], mapping.y, originalValue);
-	InterlockedExchange(mappingOfPoint[2], mapping.z, originalValue);
-	InterlockedExchange(mappingOfPoint[3], mapping.w, originalValue);
+	InterlockedExchange(mappingOfPoint[0].r, mapping.x, originalValue);
+	InterlockedExchange(mappingOfPoint[1].r, mapping.y, originalValue);
+	InterlockedExchange(mappingOfPoint[2].r, mapping.z, originalValue);
+	InterlockedExchange(mappingOfPoint[3].r, mapping.w, originalValue);
 }
 
 technique11 findNearestDefinedPoint

@@ -11,6 +11,7 @@ that produces flight simulator.
 #pragma once
 
 #include "Vec2d.h"
+#include "Vec4d.h"
 
 #include <d3dx11effect.h>
 #include <memory>
@@ -26,7 +27,7 @@ that produces flight simulator.
 #define OFFSET0_X 64
 #define OFFSET0_Y 64
 
-#define RADIUS_IN_CELLS 16 
+#define RADIUS_IN_CELLS 8 
 
 struct GridIntegralsA
 {
@@ -340,7 +341,7 @@ struct FindNearestDefinedPoint
 
 public:
 	void init();
-	Vec2d<int> findNearestPoint(
+	Vec4d<int> findNearestPoint(
 		ID3D11ShaderResourceView* error,
 		ID3D11ShaderResourceView* AtoBx,
 		ID3D11ShaderResourceView* AtoBy,
@@ -494,7 +495,7 @@ public:
 
 	void loadPhotos(const std::vector<std::string>& paths);
 	void defineTheSamePointsOnSetOfPhotos();
-	Vec2d<int> findTheSamePoint(const Vec2d<int>& pt);
+	Vec4d<int> findTheSamePoint(const Vec2d<int>& pt);
 
 	void freeResources(bool freeResult = false);
 };

@@ -785,6 +785,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
 	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 
+	int radius = RADIUS_IN_CELLS;
+	hRadius->SetRawValue(&radius, 0, sizeof(radius));
+
 	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
 
@@ -832,7 +835,6 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
 	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 
-	int radius = RADIUS_IN_CELLS;
 	hRadius->SetRawValue(&radius, 0, sizeof(radius));
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
 	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
@@ -929,7 +931,7 @@ void FindNearestDefinedPoint::init()
 	device->CreateUnorderedAccessView(mappingOfPoint, &uavDesc, &mappingOfPointUAV);
 }
 
-Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
+Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 	ID3D11ShaderResourceView* error,
 	ID3D11ShaderResourceView* AtoBx,
 	ID3D11ShaderResourceView* AtoBy,
@@ -965,7 +967,7 @@ Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
 
 	hPt->SetRawValue(&point, 0, sizeof(point));
 
-	uint32_t threshold = 100000;
+	uint32_t threshold = 4000;
 	hThreshold->SetRawValue(&threshold, 0, sizeof(threshold));
 
 	hTechnique->GetPassByIndex(0)->Apply(0, context);
@@ -1011,7 +1013,8 @@ Vec2d<int> FindNearestDefinedPoint::findNearestPoint(
 	context->Map(mappingOfPointCopy, 0, D3D11_MAP_READ, 0, &data);
 
 	Vec4d<uint32_t> mapping = *((Vec4d<uint32_t>*)data.pData);
-	Vec2d<int> res{ mapping.z() >> 16, mapping.z() & 0xffff };
+	Vec4d<int> res{ mapping.x() >> 16, mapping.x() & 0xffff,
+		mapping.z() >> 16, mapping.z() & 0xffff };
 
 	context->Unmap(mappingOfPointCopy, 0);
 
@@ -1088,8 +1091,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 		widthBB, heightBB, texturesCount
 	);
 
-	int maxOffset = 10;
-	int N = 10;
+	int N = 1;
 
 	int countOfSteps = (N + 1) * (N + 1) * (N + 1) * (N + 1);
 	int elapsedSteps = 0;
@@ -1198,7 +1200,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 	OutputDebugStringA(buffer);
 }
 
-Vec2d<int> ModelMaker::findTheSamePoint(const Vec2d<int>& pt)
+Vec4d<int> ModelMaker::findTheSamePoint(const Vec2d<int>& pt)
 {
 	return findNearestDefinedPoint.findNearestPoint(
 		errorSRV,
