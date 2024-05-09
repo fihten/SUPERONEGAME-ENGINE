@@ -497,5 +497,8 @@ public:
 	void defineTheSamePointsOnSetOfPhotos();
 	Vec4d<int> findTheSamePoint(const Vec2d<int>& pt);
 
+	int getWidth();
+	int getHeight();
+
 	void freeResources(bool freeResult = false);
 };

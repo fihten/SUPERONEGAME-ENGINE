@@ -1875,3 +1875,13 @@ void ModelMaker::initDimensionsOfTextures()
 	widthBB = std::ceil((float)widthB / diameter);
 	heightBB = std::ceil((float)heightB / diameter);
 }
+
+int ModelMaker::getWidth()
+{
+	return width;
+}
+
+int ModelMaker::getHeight()
+{
+	return height;
+}
