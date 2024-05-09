@@ -895,7 +895,7 @@ void FindNearestDefinedPoint::init()
 	bufferDesc.ByteWidth = sizeof(uint32_t);
 	bufferDesc.Usage = D3D11_USAGE_DEFAULT;
 	bufferDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
-	bufferDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	bufferDesc.CPUAccessFlags = 0;
 	bufferDesc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
 	bufferDesc.StructureByteStride = sizeof(uint32_t);
 	device->CreateBuffer(&bufferDesc, nullptr, &minDistance);
@@ -905,13 +905,14 @@ void FindNearestDefinedPoint::init()
 	uavDesc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
 	uavDesc.Buffer.FirstElement = 0;
 	uavDesc.Buffer.NumElements = 1;
+	uavDesc.Buffer.Flags = 0;
 	device->CreateUnorderedAccessView(minDistance, &uavDesc, &minDistanceUAV);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srvDesc;
 	srvDesc.Format = DXGI_FORMAT_UNKNOWN;
 	srvDesc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+	srvDesc.Buffer.FirstElement = 0;
 	srvDesc.Buffer.NumElements = 1;
-	srvDesc.Buffer.ElementWidth = sizeof(uint32_t);
 	device->CreateShaderResourceView(minDistance, &srvDesc, &minDistanceSRV);
 
 	bufferDesc.ByteWidth = 4 * sizeof(uint32_t);
