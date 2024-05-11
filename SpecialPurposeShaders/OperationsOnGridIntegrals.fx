@@ -19,6 +19,10 @@ RWTexture2DArray<uint> BBfraction;
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
 
+RWTexture2DArray<uint> pointsCountAA;
+RWTexture2DArray<uint> pointsCountAB;
+RWTexture2DArray<uint> pointsCountBB;
+
 int widthAreal;
 int heightAreal;
 
@@ -65,6 +69,7 @@ void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 	AA[location].r = 0;
 	AAfraction[location].r = 0;
 	maxA[location].r = 0;
+	pointsCountAA[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -86,6 +91,7 @@ void cs_clear_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	BB[location].r = 0;
 	BBfraction[location].r = 0;
 	maxB[location].r = 0;
+	pointsCountBB[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -111,6 +117,7 @@ void cs_clear_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	AB[location].r = 0;
 	ABfraction[location].r = 0;
+	pointsCountAB[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -156,6 +163,7 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 	InterlockedAdd(AA[locationOut].r, uiAA, originalValue);
 	InterlockedAdd(AAfraction[locationOut].r, uiAAfraction, originalValue);
 	InterlockedMax(maxA[locationOut].r, maxA_, originalValue);
+	InterlockedAdd(pointsCountAA[locationOut].r, 3, originalValue);
 }
 
 [numthreads(16, 16, 4)]
@@ -194,6 +202,7 @@ void cs_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	InterlockedAdd(BB[locationOut].r, uiBB, originalValue);
 	InterlockedAdd(BBfraction[locationOut].r, uiBBfraction, originalValue);
 	InterlockedMax(maxB[locationOut].r, maxB_, originalValue);
+	InterlockedAdd(pointsCountBB[locationOut].r, 3, originalValue);
 }
 
 [numthreads(16, 16, 4)]
@@ -254,6 +263,11 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	locationOutAB.xy *= offsetRange;
 	locationOutAB.xy += n;
 
+	if (locationOutAB.x < 0)
+		return;
+	if (locationOutAB.y < 0)
+		return;
+
 	uint2 dims0 = uint2(widthAB, heightAB);
 	uint2 dims1 = uint2(widthABreal, heightABreal);
 	locationOutAB = mapToTexArray(locationOutAB, dims0, dims1);
@@ -261,6 +275,7 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint originalValue = 0;
 	InterlockedAdd(AB[locationOutAB].r, uiAB, originalValue);
 	InterlockedAdd(ABfraction[locationOutAB].r, uiABfraction, originalValue);
+	InterlockedAdd(pointsCountAB[locationOutAB].r, 3, originalValue);
 }
 
 technique11 MakeOperationsOnGridIntegrals

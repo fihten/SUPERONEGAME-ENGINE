@@ -58,14 +58,14 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 		if (mousePosY < height)
 		{
-			uA = (mousePosX + 0.5f) / width;
-			vA = (mousePosY + 0.5f) / height;
+			uA = 0.5f;// (mousePosX + 0.5f) / width;
+			vA = 0.5f;// (mousePosY + 0.5f) / height;
 		}
 		else
 		{
 			mousePosY -= height;
-			uB = (mousePosX + 0.5f) / width;
-			vB = (mousePosY + 0.5f) / height;
+			uB = 0.5f;// (mousePosX + 0.5f) / width;
+			vB = 0.5f;// (mousePosY + 0.5f) / height;
 		}
 
 		flt2 uvA(uA, vA);

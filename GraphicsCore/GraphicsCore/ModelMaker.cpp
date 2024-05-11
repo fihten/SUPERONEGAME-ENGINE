@@ -366,6 +366,10 @@ void OperationsOnGridIntegrals::init()
 	hMaxA = hOperationsOnGridIntegralsFX->GetVariableByName("maxA")->AsUnorderedAccessView();
 	hMaxB = hOperationsOnGridIntegralsFX->GetVariableByName("maxB")->AsUnorderedAccessView();
 
+	hPointsCountAA = hOperationsOnGridIntegralsFX->GetVariableByName("pointsCountAA")->AsUnorderedAccessView();
+	hPointsCountAB = hOperationsOnGridIntegralsFX->GetVariableByName("pointsCountAB")->AsUnorderedAccessView();
+	hPointsCountBB = hOperationsOnGridIntegralsFX->GetVariableByName("pointsCountBB")->AsUnorderedAccessView();
+
 	hWidthAreal = hOperationsOnGridIntegralsFX->GetVariableByName("widthAreal");
 	hHeightAreal = hOperationsOnGridIntegralsFX->GetVariableByName("heightAreal");
 
@@ -400,23 +404,26 @@ void OperationsOnGridIntegrals::unboundViews()
 		nullptr,nullptr,nullptr,nullptr,nullptr,nullptr };
 	context->CSSetShaderResources(0, 6, nullSRVs);
 
-	ID3D11UnorderedAccessView* nullUAVs[8] = {
+	ID3D11UnorderedAccessView* nullUAVs[11] = {
 		nullptr, nullptr, nullptr, nullptr,
-		nullptr, nullptr, nullptr, nullptr
+		nullptr, nullptr, nullptr, nullptr,
+		nullptr, nullptr, nullptr
 	};
-	context->CSSetUnorderedAccessViews(0, 8, nullUAVs, nullptr);
+	context->CSSetUnorderedAccessViews(0, 11, nullUAVs, nullptr);
 }
 
 void OperationsOnGridIntegrals::clearAAandMaxA(
 	ID3D11UnorderedAccessView* AA,
 	ID3D11UnorderedAccessView* AAfraction,
 	ID3D11UnorderedAccessView* maxA,
+	ID3D11UnorderedAccessView* pointsCountAA,
 	int widthAA, int heightAA, int texturesCount
 )
 {
 	hAA->SetUnorderedAccessView(AA);
 	hAAfraction->SetUnorderedAccessView(AAfraction);
 	hMaxA->SetUnorderedAccessView(maxA);
+	hPointsCountAA->SetUnorderedAccessView(pointsCountAA);
 
 	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
 	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
@@ -437,12 +444,14 @@ void OperationsOnGridIntegrals::clearBBandMaxB(
 	ID3D11UnorderedAccessView* BB,
 	ID3D11UnorderedAccessView* BBfraction,
 	ID3D11UnorderedAccessView* maxB,
+	ID3D11UnorderedAccessView* pointsCountBB,
 	int widthBB, int heightBB, int texturesCount
 )
 {
 	hBB->SetUnorderedAccessView(BB);
 	hBBfraction->SetUnorderedAccessView(BBfraction);
 	hMaxB->SetUnorderedAccessView(maxB);
+	hPointsCountBB->SetUnorderedAccessView(pointsCountBB);
 
 	hWidthBB->SetRawValue(&widthBB, 0, sizeof(widthBB));
 	hHeightBB->SetRawValue(&heightBB, 0, sizeof(heightBB));
@@ -462,12 +471,14 @@ void OperationsOnGridIntegrals::clearBBandMaxB(
 void OperationsOnGridIntegrals::clearAB(
 	ID3D11UnorderedAccessView* AB,
 	ID3D11UnorderedAccessView* ABfraction,
+	ID3D11UnorderedAccessView* pointsCountAB,
 	int widthAB, int heightAB, int texturesCount,
 	int widthABreal, int heightABreal
 )
 {
 	hAB->SetUnorderedAccessView(AB);
 	hABfraction->SetUnorderedAccessView(ABfraction);
+	hPointsCountAB->SetUnorderedAccessView(pointsCountAB);
 
 	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
 	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
@@ -494,6 +505,7 @@ void OperationsOnGridIntegrals::calculateAAandMaxA(
 	ID3D11UnorderedAccessView* AA,
 	ID3D11UnorderedAccessView* AAfraction,
 	ID3D11UnorderedAccessView* maxA,
+	ID3D11UnorderedAccessView* pointsCountAA,
 	int widthAreal, int heightAreal, int texturesCount
 )
 {
@@ -504,6 +516,7 @@ void OperationsOnGridIntegrals::calculateAAandMaxA(
 	hAA->SetUnorderedAccessView(AA);
 	hAAfraction->SetUnorderedAccessView(AAfraction);
 	hMaxA->SetUnorderedAccessView(maxA);
+	hPointsCountAA->SetUnorderedAccessView(pointsCountAA);
 
 	hWidthAreal->SetRawValue(&widthAreal, 0, sizeof(widthAreal));
 	hHeightAreal->SetRawValue(&heightAreal, 0, sizeof(heightAreal));
@@ -533,6 +546,7 @@ void OperationsOnGridIntegrals::calculateBBandMaxB(
 	ID3D11UnorderedAccessView* BB,
 	ID3D11UnorderedAccessView* BBfraction,
 	ID3D11UnorderedAccessView* maxB,
+	ID3D11UnorderedAccessView* pointsCountBB,
 	int widthB, int heightB, int texturesCount
 )
 {
@@ -543,6 +557,7 @@ void OperationsOnGridIntegrals::calculateBBandMaxB(
 	hBB->SetUnorderedAccessView(BB);
 	hBBfraction->SetUnorderedAccessView(BBfraction);
 	hMaxB->SetUnorderedAccessView(maxB);
+	hPointsCountBB->SetUnorderedAccessView(pointsCountBB);
 
 	hWidthB->SetRawValue(&widthB, 0, sizeof(widthB));
 	hHeightB->SetRawValue(&heightB, 0, sizeof(heightB));
@@ -571,6 +586,7 @@ void OperationsOnGridIntegrals::calculateAB(
 	ID3D11ShaderResourceView* photosIntegralsBz,
 	ID3D11UnorderedAccessView* AB,
 	ID3D11UnorderedAccessView* ABfraction,
+	ID3D11UnorderedAccessView* pointsCountAB,
 	int widthA, int heightA, int texturesCount,
 	int widthAreal, int heightAreal,
 	int widthAB, int heightAB,
@@ -587,6 +603,7 @@ void OperationsOnGridIntegrals::calculateAB(
 
 	hAB->SetUnorderedAccessView(AB);
 	hABfraction->SetUnorderedAccessView(ABfraction);
+	hPointsCountAB->SetUnorderedAccessView(pointsCountAB);
 
 	hWidthAreal->SetRawValue(&widthAreal, 0, sizeof(widthAreal));
 	hHeightAreal->SetRawValue(&heightAreal, 0, sizeof(heightAreal));
@@ -661,6 +678,10 @@ void LeastSquaresOfJacobianDeterminant::init()
 	hMaxA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxA")->AsShaderResource();
 	hMaxB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxB")->AsShaderResource();
 
+	hPointsCountAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("pointsCountAA")->AsShaderResource();
+	hPointsCountAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("pointsCountAB")->AsShaderResource();
+	hPointsCountBB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("pointsCountBB")->AsShaderResource();
+
 	hWidthAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAA");
 	hWidthAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAB");
 	hWidthABreal = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthABreal");
@@ -698,7 +719,8 @@ void LeastSquaresOfJacobianDeterminant::unboundViews()
 {
 	auto context = GraphicsCore::instance()->context;
 
-	ID3D11ShaderResourceView* nullSRVs[9] = {
+	ID3D11ShaderResourceView* nullSRVs[12] = {
+		nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr,
 		nullptr, nullptr, nullptr
@@ -748,6 +770,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	ID3D11ShaderResourceView* ABfraction,
 	ID3D11ShaderResourceView* BB,
 	ID3D11ShaderResourceView* BBfraction,
+	ID3D11ShaderResourceView* pointsCountAA,
+	ID3D11ShaderResourceView* pointsCountBB,
+	ID3D11ShaderResourceView* pointsCountAB,
 	ID3D11ShaderResourceView* errorIn,
 	ID3D11UnorderedAccessView* error,
 	ID3D11UnorderedAccessView* AtoBx,
@@ -771,6 +796,10 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hBB->SetResource(BB);
 	hBBfraction->SetResource(BBfraction);
 
+	hPointsCountAA->SetResource(pointsCountAA);
+	hPointsCountAB->SetResource(pointsCountAB);
+	hPointsCountBB->SetResource(pointsCountBB);
+
 	hError->SetUnorderedAccessView(error);
 
 	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
@@ -784,9 +813,6 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 
 	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
 	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
-
-	int radius = RADIUS_IN_CELLS;
-	hRadius->SetRawValue(&radius, 0, sizeof(radius));
 
 	Vec2d<int> cellDimension(CELL_DIMENSION_X, CELL_DIMENSION_Y);
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
@@ -816,6 +842,10 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hBB->SetResource(BB);
 	hBBfraction->SetResource(BBfraction);
 
+	hPointsCountAA->SetResource(pointsCountAA);
+	hPointsCountAB->SetResource(pointsCountAB);
+	hPointsCountBB->SetResource(pointsCountBB);
+
 	hErrorIn->SetResource(errorIn);
 
 	hAtoBx->SetUnorderedAccessView(AtoBx);
@@ -835,6 +865,7 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hWidthAA->SetRawValue(&widthAA, 0, sizeof(widthAA));
 	hHeightAA->SetRawValue(&heightAA, 0, sizeof(heightAA));
 
+	int radius = RADIUS_IN_CELLS;
 	hRadius->SetRawValue(&radius, 0, sizeof(radius));
 	hCellDimension->SetRawValue(&cellDimension, 0, sizeof(cellDimension));
 	hOffsetRange->SetRawValue(&offsetRange, 0, sizeof(offsetRange));
@@ -968,7 +999,7 @@ Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 
 	hPt->SetRawValue(&point, 0, sizeof(point));
 
-	uint32_t threshold = 4000;
+	uint32_t threshold = 1;
 	hThreshold->SetRawValue(&threshold, 0, sizeof(threshold));
 
 	hTechnique->GetPassByIndex(0)->Apply(0, context);
@@ -1074,7 +1105,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 	);
 
 	operationsOnGridIntegrals.clearAAandMaxA(
-		AAuav, AAfractionUAV, maxAuav, widthAA, heightAA, texturesCount
+		AAuav, AAfractionUAV, maxAuav, pointsCountAAuav, widthAA, heightAA, texturesCount
 	);
 	operationsOnGridIntegrals.calculateAAandMaxA(
 		photosIntegralsAxSRV,
@@ -1083,6 +1114,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 		AAuav,
 		AAfractionUAV,
 		maxAuav,
+		pointsCountAAuav,
 		widthAreal, heightAreal, texturesCount
 	);
 
@@ -1092,20 +1124,29 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 		widthBB, heightBB, texturesCount
 	);
 
-	int N = 1;
+	int N = 10;
+	N = 1;
 
 	int countOfSteps = (N + 1) * (N + 1) * (N + 1) * (N + 1);
 	int elapsedSteps = 0;
 	int percent = 0;
 
-	float scaleMin = 0.8f;
-	float scaleMax = 1.2f;
+	float scaleMin = 0.3f;
+	float scaleMax = 2.2f;
 	float scaleStep = (scaleMax - scaleMin) / N;
 
 	float angleMin = -M_PI / 12;
 	float angleMax = M_PI / 12;
 	float angleStep = (angleMax - angleMin) / N;
 	
+	scaleMin = 1.0f;
+	scaleMax = 1.0f;
+	scaleStep = (scaleMax - scaleMin) / N;
+
+	angleMin = 0;
+	angleMax = 0;
+	angleStep = (angleMax - angleMin) / N;
+
 	for (int a0i = 0; a0i <= N; a0i++)
 	{
 		for (int s0i = 0; s0i <= N; s0i++)
@@ -1155,6 +1196,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						photosIntegralsBzSRV,
 						ABuav,
 						ABfractionUAV,
+						pointsCountABuav,
 						widthA, heightA, texturesCount,
 						widthAreal, heightAreal,
 						widthAB, heightAB,
@@ -1169,6 +1211,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						BBuav,
 						BBfractionUAV,
 						maxBuav,
+						pointsCountBBuav,
 						widthB,
 						heightB,
 						texturesCount
@@ -1178,6 +1221,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						AAsrv, AAfractionSRV,
 						ABsrv, ABfractionSRV,
 						BBsrv, BBfractionSRV,
+						pointsCountAAsrv, pointsCountBBsrv, pointsCountABsrv,
 						errorSRV, errorUAV,
 						AtoBxUAV, AtoByUAV, AtoBzUAV, AtoBwUAV,
 						widthAB, heightAB, texturesCount,
@@ -1375,6 +1419,33 @@ void ModelMaker::freeResources(bool freeResult)
 
 		maxBuav->Release();
 		maxBuav = nullptr;
+
+		pointsCountAA->Release();
+		pointsCountAA = nullptr;
+
+		pointsCountAB->Release();
+		pointsCountAB = nullptr;
+
+		pointsCountBB->Release();
+		pointsCountBB = nullptr;
+
+		pointsCountAAuav->Release();
+		pointsCountAAuav = nullptr;
+
+		pointsCountABuav->Release();
+		pointsCountABuav = nullptr;
+
+		pointsCountBBuav->Release();
+		pointsCountBBuav = nullptr;
+
+		pointsCountAAsrv->Release();
+		pointsCountAAsrv = nullptr;
+
+		pointsCountABsrv->Release();
+		pointsCountABsrv = nullptr;
+
+		pointsCountBBsrv->Release();
+		pointsCountBBsrv = nullptr;
 
 		if (freeResult)
 		{
@@ -1637,6 +1708,7 @@ void ModelMaker::initAAandMaxA()
 	device->CreateTexture2D(&texArrayDesc, nullptr, &AA);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &AAfraction);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &maxA);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &pointsCountAA);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1648,6 +1720,7 @@ void ModelMaker::initAAandMaxA()
 	device->CreateUnorderedAccessView(AA, &uav_desc, &AAuav);
 	device->CreateUnorderedAccessView(AAfraction, &uav_desc, &AAfractionUAV);
 	device->CreateUnorderedAccessView(maxA, &uav_desc, &maxAuav);
+	device->CreateUnorderedAccessView(pointsCountAA, &uav_desc, &pointsCountAAuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
 	srv_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1660,6 +1733,7 @@ void ModelMaker::initAAandMaxA()
 	device->CreateShaderResourceView(AA, &srv_desc, &AAsrv);
 	device->CreateShaderResourceView(AAfraction, &srv_desc, &AAfractionSRV);
 	device->CreateShaderResourceView(maxA, &srv_desc, &maxAsrv);
+	device->CreateShaderResourceView(pointsCountAA, &srv_desc, &pointsCountAAsrv);
 }
 
 void ModelMaker::initAB()
@@ -1681,6 +1755,7 @@ void ModelMaker::initAB()
 
 	device->CreateTexture2D(&texArrayDesc, nullptr, &AB);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &ABfraction);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &pointsCountAB);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1691,6 +1766,7 @@ void ModelMaker::initAB()
 
 	device->CreateUnorderedAccessView(AB, &uav_desc, &ABuav);
 	device->CreateUnorderedAccessView(ABfraction, &uav_desc, &ABfractionUAV);
+	device->CreateUnorderedAccessView(pointsCountAB, &uav_desc, &pointsCountABuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
 	srv_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1702,6 +1778,7 @@ void ModelMaker::initAB()
 
 	device->CreateShaderResourceView(AB, &srv_desc, &ABsrv);
 	device->CreateShaderResourceView(ABfraction, &srv_desc, &ABfractionSRV);
+	device->CreateShaderResourceView(pointsCountAB, &srv_desc, &pointsCountABsrv);
 }
 
 void ModelMaker::initBBandMaxB()
@@ -1724,6 +1801,7 @@ void ModelMaker::initBBandMaxB()
 	device->CreateTexture2D(&texArrayDesc, nullptr, &BB);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &BBfraction);
 	device->CreateTexture2D(&texArrayDesc, nullptr, &maxB);
+	device->CreateTexture2D(&texArrayDesc, nullptr, &pointsCountBB);
 
 	D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
 	uav_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1735,6 +1813,7 @@ void ModelMaker::initBBandMaxB()
 	device->CreateUnorderedAccessView(BB, &uav_desc, &BBuav);
 	device->CreateUnorderedAccessView(BBfraction, &uav_desc, &BBfractionUAV);
 	device->CreateUnorderedAccessView(maxB, &uav_desc, &maxBuav);
+	device->CreateUnorderedAccessView(pointsCountBB, &uav_desc, &pointsCountBBuav);
 
 	D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
 	srv_desc.Format = DXGI_FORMAT_R32_UINT;
@@ -1747,6 +1826,7 @@ void ModelMaker::initBBandMaxB()
 	device->CreateShaderResourceView(BB, &srv_desc, &BBsrv);
 	device->CreateShaderResourceView(BBfraction, &srv_desc, &BBfractionSRV);
 	device->CreateShaderResourceView(maxB, &srv_desc, &maxBsrv);
+	device->CreateShaderResourceView(pointsCountBB, &srv_desc, &pointsCountBBsrv);
 }
 
 void ModelMaker::initErrorsAndMapping()

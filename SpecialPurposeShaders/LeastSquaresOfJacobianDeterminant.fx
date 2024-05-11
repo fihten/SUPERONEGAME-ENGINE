@@ -11,6 +11,10 @@ Texture2DArray<uint> BBfraction;
 Texture2DArray<uint> maxA;
 Texture2DArray<uint> maxB;
 
+Texture2DArray<uint> pointsCountAA;
+Texture2DArray<uint> pointsCountAB;
+Texture2DArray<uint> pointsCountBB;
+
 int widthAA;
 int heightAA;
 
@@ -131,8 +135,9 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int diameter = 2 * radius + 1;
-	int pointsCount = 3 * diameter * diameter;
+	int pointsCount = min(
+		pointsCountAA[locationInAA].r,
+		min(pointsCountAB[locationInAB].r, pointsCountBB[locationInBB].r));
 	err /= pointsCount;
 
 	uint3 locationOut = locationInBB;
@@ -204,8 +209,9 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int diameter = 2 * radius + 1;
-	int pointsCount = 3 * diameter * diameter;
+	int pointsCount = min(
+		pointsCountAA[locationInAA].r,
+		min(pointsCountAB[locationInAB].r, pointsCountBB[locationInBB].r));
 	err /= pointsCount;
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
 		return;
@@ -213,19 +219,21 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int2 posInA = locationInAA.xy;
 	n = posInA % cellDimension;
 	posInA = posInA / cellDimension;
+	int diameter = 2 * radius + 1;
 	posInA = posInA * cellDimension * diameter + n + 0.5f * diameter * cellDimension;
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	int2 posInB = (locationInBB.xy + 0.5f) * radius * cellDimension;
+	float2 posInB = (float2(locationInBB.xy) + 0.5f) * diameter * cellDimension;
 	posInB = max(mul(posInB, m), int2(0, 0));
+	uint2 uiPosInB = posInB;
 
 	uint4 mapping;
 	mapping.x = (posInA.x << 16) | (posInA.y & 0xffff);
 	mapping.y = indexOfA;
-	mapping.z = (posInB.x << 16) | (posInB.y & 0xffff);
+	mapping.z = (uiPosInB.x << 16) | (uiPosInB.y & 0xffff);
 	mapping.w = indexOfPhoto;
 
 	uint3 locationOut = locationInBB;
