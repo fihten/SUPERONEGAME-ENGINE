@@ -11,10 +11,6 @@ Texture2DArray<uint> BBfraction;
 Texture2DArray<uint> maxA;
 Texture2DArray<uint> maxB;
 
-Texture2DArray<uint> pointsCountAA;
-Texture2DArray<uint> pointsCountAB;
-Texture2DArray<uint> pointsCountBB;
-
 int widthAA;
 int heightAA;
 
@@ -87,16 +83,11 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
-	n -= offset0;
 	locationInAA.xy /= offsetRange;
 	locationInAA.xy *= cellDimension;
-	locationInAA.xy += n;
+	locationInAA.xy += n - offset0;
 
-	if (locationInAA.x < 0)
-		return;
 	if (locationInAA.x >= widthAA)
-		return;
-	if (locationInAA.y < 0)
 		return;
 	if (locationInAA.y >= heightAA)
 		return;
@@ -135,9 +126,8 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int pointsCount = min(
-		pointsCountAA[locationInAA].r,
-		min(pointsCountAB[locationInAB].r, pointsCountBB[locationInBB].r));
+	int diameter = 2 * radius + 1;
+	int pointsCount = 3 * diameter * diameter;
 	err /= pointsCount;
 
 	uint3 locationOut = locationInBB;
@@ -161,16 +151,11 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
-	n -= offset0;
 	locationInAA.xy /= offsetRange;
 	locationInAA.xy *= cellDimension;
-	locationInAA.xy += n;
+	locationInAA.xy += n - offset0;
 
-	if (locationInAA.x < 0)
-		return;
 	if (locationInAA.x >= widthAA)
-		return;
-	if (locationInAA.y < 0)
 		return;
 	if (locationInAA.y >= heightAA)
 		return;
@@ -209,9 +194,8 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int pointsCount = min(
-		pointsCountAA[locationInAA].r,
-		min(pointsCountAB[locationInAB].r, pointsCountBB[locationInBB].r));
+	int diameter = 2 * radius + 1;
+	int pointsCount = 3 * diameter * diameter;
 	err /= pointsCount;
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
 		return;
@@ -219,21 +203,19 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int2 posInA = locationInAA.xy;
 	n = posInA % cellDimension;
 	posInA = posInA / cellDimension;
-	int diameter = 2 * radius + 1;
 	posInA = posInA * cellDimension * diameter + n + 0.5f * diameter * cellDimension;
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	float2 posInB = (float2(locationInBB.xy) + 0.5f) * diameter * cellDimension;
+	int2 posInB = locationInBB.xy * diameter * cellDimension + 0.5f * diameter * cellDimension;
 	posInB = max(mul(posInB, m), int2(0, 0));
-	uint2 uiPosInB = posInB;
 
 	uint4 mapping;
 	mapping.x = (posInA.x << 16) | (posInA.y & 0xffff);
 	mapping.y = indexOfA;
-	mapping.z = (uiPosInB.x << 16) | (uiPosInB.y & 0xffff);
+	mapping.z = (posInB.x << 16) | (posInB.y & 0xffff);
 	mapping.w = indexOfPhoto;
 
 	uint3 locationOut = locationInBB;

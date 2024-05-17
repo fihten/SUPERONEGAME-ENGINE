@@ -8,6 +8,14 @@ Texture2DArray<uint> photosIntegralsBx;
 Texture2DArray<uint> photosIntegralsBy;
 Texture2DArray<uint> photosIntegralsBz;
 
+RWTexture2DArray<uint> AAho;
+RWTexture2DArray<uint> AAfractionHo;
+RWTexture2DArray<uint> maxAho;
+
+Texture2DArray<uint> AAhi;
+Texture2DArray<uint> AAfractionHi;
+Texture2DArray<uint> maxAhi;
+
 RWTexture2DArray<uint> AA;
 RWTexture2DArray<uint> AB;
 RWTexture2DArray<uint> BB;
@@ -18,10 +26,6 @@ RWTexture2DArray<uint> BBfraction;
 
 RWTexture2DArray<uint> maxA;
 RWTexture2DArray<uint> maxB;
-
-RWTexture2DArray<uint> pointsCountAA;
-RWTexture2DArray<uint> pointsCountAB;
-RWTexture2DArray<uint> pointsCountBB;
 
 int widthAreal;
 int heightAreal;
@@ -51,6 +55,27 @@ int radius;
 int indexOfA;
 
 [numthreads(16, 16, 4)]
+void cs_clear_AA_maxA_h(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int x = dispatchThreadID.x;
+	if (x >= widthAA)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= heightAreal)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 location = uint3(x, y, indexOfPhoto);
+	AAho[location].r = 0;
+	AAfractionHo[location].r = 0;
+	maxAho[location].r = 0;
+}
+
+[numthreads(16, 16, 4)]
 void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
@@ -69,7 +94,6 @@ void cs_clear_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 	AA[location].r = 0;
 	AAfraction[location].r = 0;
 	maxA[location].r = 0;
-	pointsCountAA[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -91,7 +115,6 @@ void cs_clear_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	BB[location].r = 0;
 	BBfraction[location].r = 0;
 	maxB[location].r = 0;
-	pointsCountBB[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
@@ -117,11 +140,10 @@ void cs_clear_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	AB[location].r = 0;
 	ABfraction[location].r = 0;
-	pointsCountAB[location].r = 0;
 }
 
 [numthreads(16, 16, 4)]
-void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
+void cs_AA_maxA_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
 	if (x >= widthAreal)
@@ -151,19 +173,57 @@ void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint maxA_ = max(colorA.x, max(colorA.y, colorA.z));
 
 	int diameter = 2 * radius + 1;
-	int2 m = int2(x, y);
-	int2 n = m % cellDimension;
-	m = m / (diameter * cellDimension);
+	int n = x % cellDimension.x;
+	x = x / cellDimension.x;
+	int minX = max(0, x - diameter + 1);
+	int w = widthAA / cellDimension.x;
+	int maxX = min(w, x);
+	for (x = minX; x <= maxX; x++)
+	{
+		int3 locationOut = int3(x * cellDimension.x + n, y, indexOfPhoto);
 
-	uint3 locationOut;
-	locationOut.xy = m * cellDimension + n;
-	locationOut.z = indexOfPhoto;
+		uint originalValue = 0;
+		InterlockedAdd(AAho[locationOut].r, uiAA, originalValue);
+		InterlockedAdd(AAfractionHo[locationOut].r, uiAAfraction, originalValue);
+		InterlockedMax(maxAho[locationOut].r, maxA_, originalValue);
+	}
+}
 
-	uint originalValue = 0;
-	InterlockedAdd(AA[locationOut].r, uiAA, originalValue);
-	InterlockedAdd(AAfraction[locationOut].r, uiAAfraction, originalValue);
-	InterlockedMax(maxA[locationOut].r, maxA_, originalValue);
-	InterlockedAdd(pointsCountAA[locationOut].r, 3, originalValue);
+[numthreads(16, 16, 4)]
+void cs_AA_maxA(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int x = dispatchThreadID.x;
+	if (x >= widthAA)
+		return;
+
+	int y = dispatchThreadID.y;
+	if (y >= heightAreal)
+		return;
+
+	int indexOfPhoto = dispatchThreadID.z;
+	if (indexOfPhoto >= texturesCount)
+		return;
+
+	uint3 locationIn = uint3(x, y, indexOfPhoto);
+	uint colorAA = AAhi[locationIn].r;
+	uint colorAAfraction = AAfractionHi[locationIn].r;
+	uint colorMaxA = maxAhi[locationIn].r;
+
+	int diameter = 2 * radius + 1;
+	int n = y % cellDimension.y;
+	y = y / cellDimension.y;
+	int minY = max(0, y - diameter + 1);
+	int h = heightAA / cellDimension.y;
+	int maxY = min(h, y);
+	for (y = minY; y <= maxY; y++)
+	{
+		int3 locationOut = int3(x, y * cellDimension.y + n, indexOfPhoto);
+
+		uint originalValue = 0;
+		InterlockedAdd(AA[locationOut].r, colorAA, originalValue);
+		InterlockedAdd(AAfraction[locationOut].r, colorAAfraction, originalValue);
+		InterlockedMax(maxA[locationOut].r, colorMaxA, originalValue);
+	}
 }
 
 [numthreads(16, 16, 4)]
@@ -202,7 +262,6 @@ void cs_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	InterlockedAdd(BB[locationOut].r, uiBB, originalValue);
 	InterlockedAdd(BBfraction[locationOut].r, uiBBfraction, originalValue);
 	InterlockedMax(maxB[locationOut].r, maxB_, originalValue);
-	InterlockedAdd(pointsCountBB[locationOut].r, 3, originalValue);
 }
 
 [numthreads(16, 16, 4)]
@@ -218,18 +277,13 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int2 m = int2(x, y);
 	m += offset0;
 	int2 n = m % offsetRange;
-	n -= offset0;
 	uint3 locationInA;
 	locationInA.z = indexOfA;
 	locationInA.xy = m / offsetRange;
 	locationInA.xy *= cellDimension;
-	locationInA.xy += n;
+	locationInA.xy += n - offset0;
 
-	if (locationInA.x < 0)
-		return;
 	if (locationInA.x >= widthAreal)
-		return;
-	if (locationInA.y < 0)
 		return;
 	if (locationInA.y >= heightAreal)
 		return;
@@ -257,11 +311,11 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint uiABfraction = 1000000 * (fAB - uiAB);
 
 	int diameter = 2 * radius + 1;
-	uint3 locationOutAB;
+	int3 locationOutAB;
 	locationOutAB.z = indexOfPhoto;
 	locationOutAB.xy = m / (diameter * offsetRange);
 	locationOutAB.xy *= offsetRange;
-	locationOutAB.xy += n;
+	locationOutAB.xy += n - offset0;
 
 	if (locationOutAB.x < 0)
 		return;
@@ -275,11 +329,16 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint originalValue = 0;
 	InterlockedAdd(AB[locationOutAB].r, uiAB, originalValue);
 	InterlockedAdd(ABfraction[locationOutAB].r, uiABfraction, originalValue);
-	InterlockedAdd(pointsCountAB[locationOutAB].r, 3, originalValue);
 }
 
 technique11 MakeOperationsOnGridIntegrals
 {
+	pass clear_AA_maxA_h
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_clear_AA_maxA_h()));
+	}
 	pass clear_AA_maxA
 	{
 		SetVertexShader(NULL);
@@ -297,6 +356,12 @@ technique11 MakeOperationsOnGridIntegrals
 		SetVertexShader(NULL);
 		SetPixelShader(NULL);
 		SetComputeShader(CompileShader(cs_5_0, cs_clear_AB()));
+	}
+	pass AA_maxA_h
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_AA_maxA_h()));
 	}
 	pass AA_maxA
 	{

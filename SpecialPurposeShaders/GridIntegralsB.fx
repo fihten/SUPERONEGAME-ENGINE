@@ -9,6 +9,9 @@ int width;
 int height;
 int texturesCount;
 
+int widthB;
+int heightB;
+
 float angle0;
 float scale0;
 
@@ -21,15 +24,12 @@ int cellDimensionY;
 [numthreads(16, 16, 4)]
 void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	int cellsAlongX = ceil((float)width / cellDimensionX);
-	int cellsAlongY = ceil((float)height / cellDimensionY);
-
 	int x = dispatchThreadID.x;
-	if (x >= cellsAlongX)
+	if (x >= widthB)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= cellsAlongY)
+	if (y >= heightB)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
@@ -74,12 +74,9 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int cellIndexX = floor(r_.x / cellDimensionX);
 	int cellIndexY = floor(r_.y / cellDimensionY);
 
-	int cellsAlongX = ceil((float)width / cellDimensionX);
-	int cellsAlongY = ceil((float)height / cellDimensionY);
-
-	if (cellIndexX < 0 || cellIndexX >= cellsAlongX)
+	if (cellIndexX < 0 || cellIndexX >= widthB)
 		return;
-	if (cellIndexY < 0 || cellIndexY >= cellsAlongY)
+	if (cellIndexY < 0 || cellIndexY >= heightB)
 		return;
 
 	uint3 locationIn = uint3(x, y, indexOfPhoto);

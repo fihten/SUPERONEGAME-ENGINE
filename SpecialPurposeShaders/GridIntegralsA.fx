@@ -18,6 +18,9 @@ int width;
 int height;
 int texturesCount;
 
+int widthA;
+int heightA;
+
 int cellDimensionX;
 int cellDimensionY;
 
@@ -25,7 +28,7 @@ int cellDimensionY;
 void cs_clear_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width - cellDimensionX + 1)
+	if (x >= widthA)
 		return;
 
 	int y = dispatchThreadID.y;
@@ -36,7 +39,7 @@ void cs_clear_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (indexOfPhoto >= texturesCount)
 		return;
 
-	uint3 locationOut = uint3(x, y, texturesCount);
+	uint3 locationOut = uint3(x, y, indexOfPhoto);
 	photosIntegralsXho[locationOut].r = 0;
 	photosIntegralsYho[locationOut].r = 0;
 	photosIntegralsZho[locationOut].r = 0;
@@ -46,18 +49,18 @@ void cs_clear_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 void cs_clear(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width - cellDimensionX + 1)
+	if (x >= widthA)
 		return;
 
 	int y = dispatchThreadID.y;
-	if (y >= height - cellDimensionY + 1)
+	if (y >= heightA)
 		return;
 
 	int indexOfPhoto = dispatchThreadID.z;
 	if (indexOfPhoto >= texturesCount)
 		return;
 
-	uint3 locationOut = uint3(x, y, texturesCount);
+	uint3 locationOut = uint3(x, y, indexOfPhoto);
 	photosIntegralsX[locationOut].r = 0;
 	photosIntegralsY[locationOut].r = 0;
 	photosIntegralsZ[locationOut].r = 0;
@@ -82,7 +85,7 @@ void cs_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint3 color = round(255 * srgbToRaw(photos[locationIn].rgb));
 
 	int minX = max(0, x - cellDimensionX + 1);
-	int maxX = min(width - cellDimensionX, x);
+	int maxX = min(widthA - 1, x);
 	for (x = minX; x <= maxX; x++)
 	{
 		uint3 locationOut = uint3(x, y, indexOfPhoto);
@@ -104,7 +107,7 @@ void cs_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int x = dispatchThreadID.x;
-	if (x >= width - cellDimensionX + 1)
+	if (x >= widthA)
 		return;
 
 	int y = dispatchThreadID.y;
@@ -121,7 +124,7 @@ void cs(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint colorZ = photosIntegralsZhi[locationIn].r;
 
 	int minY = max(0, y - cellDimensionY + 1);
-	int maxY = min(height - cellDimensionY, y);
+	int maxY = min(heightA - 1, y);
 	for (y = minY; y <= maxY; y++)
 	{
 		uint3 locationOut = uint3(x, y, indexOfPhoto);

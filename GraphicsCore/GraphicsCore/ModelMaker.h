@@ -53,8 +53,13 @@ struct GridIntegralsA
 	ID3DX11EffectVariable* hHeight = nullptr;
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
+	ID3DX11EffectVariable* hWidthA = nullptr;
+	ID3DX11EffectVariable* hHeightA = nullptr;
+
 	ID3DX11EffectVariable* hCellDimensionX = nullptr;
 	ID3DX11EffectVariable* hCellDimensionY = nullptr;
+
+	void unboundViews();
 
 public:
 	void init();
@@ -65,7 +70,8 @@ public:
 		ID3D11UnorderedAccessView* photosIntegralsX,
 		ID3D11UnorderedAccessView* photosIntegralsY,
 		ID3D11UnorderedAccessView* photosIntegralsZ,
-		int width, int height, int textureCount
+		int widthA, int heightA, int textureCount,
+		int height
 	);
 	void calculatePhotosIntegrals(
 		ID3D11ShaderResourceView* photos,
@@ -78,7 +84,8 @@ public:
 		ID3D11UnorderedAccessView* photosIntegralsX,
 		ID3D11UnorderedAccessView* photosIntegralsY,
 		ID3D11UnorderedAccessView* photosIntegralsZ,
-		int width, int height, int textureCount
+		int width, int height, int textureCount,
+		int widthA, int HeightA
 	);
 };
 
@@ -97,6 +104,9 @@ struct GridIntegralsB
 	ID3DX11EffectVariable* hHeight = nullptr;
 	ID3DX11EffectVariable* hTexturesCount = nullptr;
 
+	ID3DX11EffectVariable* hWidthB = nullptr;
+	ID3DX11EffectVariable* hHeightB = nullptr;
+
 	ID3DX11EffectVariable* hAngle0 = nullptr;
 	ID3DX11EffectVariable* hScale0 = nullptr;
 
@@ -105,13 +115,16 @@ struct GridIntegralsB
 
 	ID3DX11EffectVariable* hCellDimensionX = nullptr;
 	ID3DX11EffectVariable* hCellDimensionY = nullptr;
+
+	void unboundViews();
+
 public:
 	void init();
 	void clearPhotosIntegrals(
 		ID3D11UnorderedAccessView* photosIntegralsX,
 		ID3D11UnorderedAccessView* photosIntegralsY,
 		ID3D11UnorderedAccessView* photosIntegralsZ,
-		int width, int height, int count
+		int widthB, int heightB, int count
 	);
 	void calculatePhotosIntegrals(
 		ID3D11ShaderResourceView* photos,
@@ -119,6 +132,7 @@ public:
 		ID3D11UnorderedAccessView* photosIntegralsY,
 		ID3D11UnorderedAccessView* photosIntegralsZ,
 		int width, int height, int count,
+		int widthB, int heightB,
 		float angle0, float scale0,
 		float angle1, float scale1
 	);
@@ -148,9 +162,13 @@ struct OperationsOnGridIntegrals
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxA = nullptr;
 	ID3DX11EffectUnorderedAccessViewVariable* hMaxB = nullptr;
 
-	ID3DX11EffectUnorderedAccessViewVariable* hPointsCountAA = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* hPointsCountAB = nullptr;
-	ID3DX11EffectUnorderedAccessViewVariable* hPointsCountBB = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAAho = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hAAfractionHo = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* hMaxAho = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* hAAhi = nullptr;
+	ID3DX11EffectShaderResourceVariable* hAAfractionHi = nullptr;
+	ID3DX11EffectShaderResourceVariable* hMaxAhi = nullptr;
 
 	ID3DX11EffectVariable* hWidthAreal = nullptr;
 	ID3DX11EffectVariable* hHeightAreal = nullptr;
@@ -183,20 +201,21 @@ public:
 		ID3D11UnorderedAccessView* AA,
 		ID3D11UnorderedAccessView* AAfraction,
 		ID3D11UnorderedAccessView* maxA,
-		ID3D11UnorderedAccessView* pointsCountAA,
-		int widthAA, int heightAA, int texturesCount
+		ID3D11UnorderedAccessView* AAh,
+		ID3D11UnorderedAccessView* AAfractionH,
+		ID3D11UnorderedAccessView* maxAh,
+		int widthAA, int heightAA, int texturesCount,
+		int heightAreal
 	);
 	void clearBBandMaxB(
 		ID3D11UnorderedAccessView* BB,
 		ID3D11UnorderedAccessView* BBfraction,
 		ID3D11UnorderedAccessView* maxB,
-		ID3D11UnorderedAccessView* pointsCountBB,
 		int widthBB, int heightBB, int texturesCount
 	);
 	void clearAB(
 		ID3D11UnorderedAccessView* AB,
 		ID3D11UnorderedAccessView* ABfraction,
-		ID3D11UnorderedAccessView* pointsCountAB,
 		int widthAB, int heightAB, int texturesCount,
 		int widthABreal, int heightABreal
 	);
@@ -204,11 +223,17 @@ public:
 		ID3D11ShaderResourceView* photosIntegralsAx,
 		ID3D11ShaderResourceView* photosIntegralsAy,
 		ID3D11ShaderResourceView* photosIntegralsAz,
+		ID3D11ShaderResourceView* AAhi,
+		ID3D11ShaderResourceView* AAfractionHi,
+		ID3D11ShaderResourceView* maxAhi,
 		ID3D11UnorderedAccessView* AA,
 		ID3D11UnorderedAccessView* AAfraction,
 		ID3D11UnorderedAccessView* maxA,
-		ID3D11UnorderedAccessView* pointsCountAA,
-		int widthAreal, int heightAreal, int texturesCount
+		ID3D11UnorderedAccessView* AAho,
+		ID3D11UnorderedAccessView* AAfractionHo,
+		ID3D11UnorderedAccessView* maxAho,
+		int widthAreal, int heightAreal, int texturesCount,
+		int widthAA, int heightAA
 	);
 	void calculateBBandMaxB(
 		ID3D11ShaderResourceView* photosIntegralsBx,
@@ -217,7 +242,6 @@ public:
 		ID3D11UnorderedAccessView* BB,
 		ID3D11UnorderedAccessView* BBfraction,
 		ID3D11UnorderedAccessView* maxB,
-		ID3D11UnorderedAccessView* pointsCountBB,
 		int widthB, int heightB, int texturesCount
 	);
 	void calculateAB(
@@ -229,7 +253,6 @@ public:
 		ID3D11ShaderResourceView* photosIntegralsBz,
 		ID3D11UnorderedAccessView* AB,
 		ID3D11UnorderedAccessView* ABfraction,
-		ID3D11UnorderedAccessView* pointsCountAB,
 		int widthA, int heightA, int texturesCount,
 		int widthAreal, int heightAreal,
 		int widthAB, int heightAB,
@@ -253,10 +276,6 @@ struct LeastSquaresOfJacobianDeterminant
 
 	ID3DX11EffectShaderResourceVariable* hMaxA = nullptr;
 	ID3DX11EffectShaderResourceVariable* hMaxB = nullptr;
-
-	ID3DX11EffectShaderResourceVariable* hPointsCountAA = nullptr;
-	ID3DX11EffectShaderResourceVariable* hPointsCountBB = nullptr;
-	ID3DX11EffectShaderResourceVariable* hPointsCountAB = nullptr;
 
 	ID3DX11EffectVariable* hWidthAA = nullptr;
 	ID3DX11EffectVariable* hWidthAB = nullptr;
@@ -307,9 +326,6 @@ public:
 		ID3D11ShaderResourceView* ABfraction,
 		ID3D11ShaderResourceView* BB,
 		ID3D11ShaderResourceView* BBfraction,
-		ID3D11ShaderResourceView* pointsCountAA,
-		ID3D11ShaderResourceView* pointsCountBB,
-		ID3D11ShaderResourceView* pointsCountAB,
 		ID3D11ShaderResourceView* errorIn,
 		ID3D11UnorderedAccessView* error,
 		ID3D11UnorderedAccessView* AtoBx,
@@ -477,17 +493,17 @@ class ModelMaker
 	ID3D11ShaderResourceView* maxAsrv = nullptr;
 	ID3D11ShaderResourceView* maxBsrv = nullptr;
 
-	ID3D11Texture2D* pointsCountAA = nullptr;
-	ID3D11Texture2D* pointsCountAB = nullptr;
-	ID3D11Texture2D* pointsCountBB = nullptr;
+	ID3D11Texture2D* AAh = nullptr;
+	ID3D11Texture2D* AAfractionH = nullptr;
+	ID3D11Texture2D* maxAh = nullptr;
 
-	ID3D11UnorderedAccessView* pointsCountAAuav = nullptr;
-	ID3D11UnorderedAccessView* pointsCountABuav = nullptr;
-	ID3D11UnorderedAccessView* pointsCountBBuav = nullptr;
+	ID3D11UnorderedAccessView* AAhUAV = nullptr;
+	ID3D11UnorderedAccessView* AAfractionHuav = nullptr;
+	ID3D11UnorderedAccessView* maxAhUAV = nullptr;
 
-	ID3D11ShaderResourceView* pointsCountAAsrv = nullptr;
-	ID3D11ShaderResourceView* pointsCountABsrv = nullptr;
-	ID3D11ShaderResourceView* pointsCountBBsrv = nullptr;
+	ID3D11ShaderResourceView* AAhSRV = nullptr;
+	ID3D11ShaderResourceView* AAfractionHsrv = nullptr;
+	ID3D11ShaderResourceView* maxAhSRV = nullptr;
 
 	ID3D11Texture2D* error = nullptr;
 	ID3D11UnorderedAccessView* errorUAV = nullptr;
