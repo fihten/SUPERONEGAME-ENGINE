@@ -1,4 +1,5 @@
 #include "MapToTexArray.hlsl"
+#include "constants.hlsl"
 
 Texture2DArray<uint> AA;
 Texture2DArray<uint> AB;
@@ -100,11 +101,11 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float AB_ = AB[locationInAB].r;
 	float ABfraction_ = ABfraction[locationInAB].r;
-	AB_ = AB_ + ABfraction_ / 1000000.0f;
+	AB_ = AB_ + ABfraction_ / (acc * acc);
 
 	float AA_ = AA[locationInAA].r;
 	float AAfraction_ = AAfraction[locationInAA].r;
-	AA_ = AA_ + AAfraction_ / 1000000.0f;
+	AA_ = AA_ + AAfraction_ / (acc * acc);
 
 	uint3 locationInBB = uint3(x, y, indexOfPhoto);
 	locationInBB.xy += offset0;
@@ -112,7 +113,7 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float BB_ = BB[locationInBB].r;
 	float BBfraction_ = BBfraction[locationInBB].r;
-	BB_ = BB_ + BBfraction_ / 1000000.0f;
+	BB_ = BB_ + BBfraction_ / (acc * acc);
 
 	float maxA_ = maxA[locationInAA].r;
 	maxA_ /= 255.0f;
@@ -168,11 +169,11 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float AB_ = AB[locationInAB].r;
 	float ABfraction_ = ABfraction[locationInAB].r;
-	AB_ = AB_ + ABfraction_ / 1000000.0f;
+	AB_ = AB_ + ABfraction_ / (acc * acc);
 
 	float AA_ = AA[locationInAA].r;
 	float AAfraction_ = AAfraction[locationInAA].r;
-	AA_ = AA_ + AAfraction_ / 1000000.0f;
+	AA_ = AA_ + AAfraction_ / (acc * acc);
 
 	uint3 locationInBB = uint3(x, y, indexOfPhoto);
 	locationInBB.xy += offset0;
@@ -180,7 +181,7 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float BB_ = BB[locationInBB].r;
 	float BBfraction_ = BBfraction[locationInBB].r;
-	BB_ = BB_ + BBfraction_ / 1000000.0f;
+	BB_ = BB_ + BBfraction_ / (acc * acc);
 
 	float maxA_ = maxA[locationInAA].r;
 	maxA_ /= 255.0f;
@@ -200,22 +201,19 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
 		return;
 
-	int2 posInA = locationInAA.xy;
-	n = posInA % cellDimension;
-	posInA = posInA / cellDimension;
-	posInA = posInA * cellDimension * diameter + n + 0.5f * diameter * cellDimension;
+	int2 posInA = locationInBB.xy * cellDimension * diameter + n - offset0 + (radius * cellDimension);
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	int2 posInB = locationInBB.xy * diameter * cellDimension + 0.5f * diameter * cellDimension;
-	posInB = max(mul(posInB, m), int2(0, 0));
+	float2 posInB = locationInBB.xy * diameter * cellDimension + (radius * cellDimension);
+	posInB = max(mul(posInB, m), float2(0, 0));
 
 	uint4 mapping;
 	mapping.x = (posInA.x << 16) | (posInA.y & 0xffff);
 	mapping.y = indexOfA;
-	mapping.z = (posInB.x << 16) | (posInB.y & 0xffff);
+	mapping.z = ((uint)(posInB.x) << 16) | ((uint)(posInB.y) & 0xffff);
 	mapping.w = indexOfPhoto;
 
 	uint3 locationOut = locationInBB;

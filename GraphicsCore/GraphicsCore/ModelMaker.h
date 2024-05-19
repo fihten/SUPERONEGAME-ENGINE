@@ -326,6 +326,8 @@ public:
 		ID3D11ShaderResourceView* ABfraction,
 		ID3D11ShaderResourceView* BB,
 		ID3D11ShaderResourceView* BBfraction,
+		ID3D11ShaderResourceView* maxA,
+		ID3D11ShaderResourceView* maxB,
 		ID3D11ShaderResourceView* errorIn,
 		ID3D11UnorderedAccessView* error,
 		ID3D11UnorderedAccessView* AtoBx,

@@ -418,13 +418,6 @@ void OperationsOnGridIntegrals::unboundViews()
 		nullptr,nullptr,nullptr
 	};
 	context->CSSetShaderResources(0, 9, nullSRVs);
-
-	ID3D11UnorderedAccessView* nullUAVs[11] = {
-		nullptr, nullptr, nullptr, nullptr,
-		nullptr, nullptr, nullptr, nullptr,
-		nullptr, nullptr, nullptr
-	};
-	context->CSSetUnorderedAccessViews(0, 11, nullUAVs, nullptr);
 }
 
 void OperationsOnGridIntegrals::clearAAandMaxA(
@@ -454,6 +447,11 @@ void OperationsOnGridIntegrals::clearAAandMaxA(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+	
+	hAAho->SetUnorderedAccessView(nullptr);
+	hAAfractionHo->SetUnorderedAccessView(nullptr);
+	hMaxAho->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(0)->Apply(0, context);
 	unboundViews();
 
 	hAA->SetUnorderedAccessView(AA);
@@ -471,6 +469,11 @@ void OperationsOnGridIntegrals::clearAAandMaxA(
 	groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAA->SetUnorderedAccessView(nullptr);
+	hAAfraction->SetUnorderedAccessView(nullptr);
+	hMaxA->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(1)->Apply(0, context);
 	unboundViews();
 }
 
@@ -497,6 +500,11 @@ void OperationsOnGridIntegrals::clearBBandMaxB(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hBB->SetUnorderedAccessView(nullptr);
+	hBBfraction->SetUnorderedAccessView(nullptr);
+	hMaxB->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(2)->Apply(0, context);
 	unboundViews();
 }
 
@@ -525,6 +533,10 @@ void OperationsOnGridIntegrals::clearAB(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAB->SetUnorderedAccessView(nullptr);
+	hABfraction->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(3)->Apply(0, context);
 	unboundViews();
 }
 
@@ -573,6 +585,11 @@ void OperationsOnGridIntegrals::calculateAAandMaxA(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAAho->SetUnorderedAccessView(nullptr);
+	hAAfractionHo->SetUnorderedAccessView(nullptr);
+	hMaxAho->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(4)->Apply(0, context);
 	unboundViews();
 
 	hAAhi->SetResource(AAhi);
@@ -598,6 +615,11 @@ void OperationsOnGridIntegrals::calculateAAandMaxA(
 	groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAA->SetUnorderedAccessView(nullptr);
+	hAAfraction->SetUnorderedAccessView(nullptr);
+	hMaxA->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(5)->Apply(0, context);
 	unboundViews();
 }
 
@@ -634,6 +656,11 @@ void OperationsOnGridIntegrals::calculateBBandMaxB(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hBB->SetUnorderedAccessView(nullptr);
+	hBBfraction->SetUnorderedAccessView(nullptr);
+	hMaxB->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(6)->Apply(0, context);
 	unboundViews();
 }
 
@@ -694,6 +721,10 @@ void OperationsOnGridIntegrals::calculateAB(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAB->SetUnorderedAccessView(nullptr);
+	hABfraction->SetUnorderedAccessView(nullptr);
+	hMakeOperationsOnGridIntegralsTech->GetPassByIndex(7)->Apply(0, context);
 	unboundViews();
 }
 
@@ -779,11 +810,6 @@ void LeastSquaresOfJacobianDeterminant::unboundViews()
 		nullptr, nullptr, nullptr
 	};
 	context->CSSetShaderResources(0, 9, nullSRVs);
-
-	ID3D11UnorderedAccessView* nullUAVs[5] = {
-		nullptr, nullptr, nullptr, nullptr, nullptr
-	};
-	context->CSSetUnorderedAccessViews(0, 5, nullUAVs, nullptr);
 }
 
 void LeastSquaresOfJacobianDeterminant::clear(
@@ -813,6 +839,13 @@ void LeastSquaresOfJacobianDeterminant::clear(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hError->SetUnorderedAccessView(nullptr);
+	hAtoBx->SetUnorderedAccessView(nullptr);
+	hAtoBy->SetUnorderedAccessView(nullptr);
+	hAtoBz->SetUnorderedAccessView(nullptr);
+	hAtoBw->SetUnorderedAccessView(nullptr);
+	hClearTech->GetPassByIndex(0)->Apply(0, context);
 	unboundViews();
 }
 
@@ -823,6 +856,8 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	ID3D11ShaderResourceView* ABfraction,
 	ID3D11ShaderResourceView* BB,
 	ID3D11ShaderResourceView* BBfraction,
+	ID3D11ShaderResourceView* maxA,
+	ID3D11ShaderResourceView* maxB,
 	ID3D11ShaderResourceView* errorIn,
 	ID3D11UnorderedAccessView* error,
 	ID3D11UnorderedAccessView* AtoBx,
@@ -845,6 +880,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 
 	hBB->SetResource(BB);
 	hBBfraction->SetResource(BBfraction);
+
+	hMaxA->SetResource(maxA);
+	hMaxB->SetResource(maxB);
 
 	hError->SetUnorderedAccessView(error);
 
@@ -880,6 +918,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	uint32_t groups_z = std::ceil((float)texturesCount / 4);
 
 	context->Dispatch(groups_x, groups_y, groups_z);
+	
+	hError->SetUnorderedAccessView(nullptr);
+	hApplyLeastSquareMethodTech->GetPassByIndex(0)->Apply(0, context);
 	unboundViews();
 
 	hAA->SetResource(AA);
@@ -890,6 +931,9 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 
 	hBB->SetResource(BB);
 	hBBfraction->SetResource(BBfraction);
+
+	hMaxA->SetResource(maxA);
+	hMaxB->SetResource(maxB);
 
 	hErrorIn->SetResource(errorIn);
 
@@ -923,6 +967,12 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 
 	hApplyLeastSquareMethodTech->GetPassByIndex(1)->Apply(0, context);
 	context->Dispatch(groups_x, groups_y, groups_z);
+
+	hAtoBx->SetUnorderedAccessView(nullptr);
+	hAtoBy->SetUnorderedAccessView(nullptr);
+	hAtoBz->SetUnorderedAccessView(nullptr);
+	hAtoBw->SetUnorderedAccessView(nullptr);
+	hApplyLeastSquareMethodTech->GetPassByIndex(1)->Apply(0, context);
 	unboundViews();
 }
 
@@ -1069,6 +1119,9 @@ Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 	hAtoBz->SetResource(AtoBz);
 	hAtoBw->SetResource(AtoBw);
 	hMinDistanceIn->SetResource(minDistanceSRV);
+
+	Vec4d<uint32_t> mappingOfPointInit;
+	context->UpdateSubresource(mappingOfPoint, 0, nullptr, &mappingOfPointInit, 0, 0);
 	hMappingOfPoint->SetUnorderedAccessView(mappingOfPointUAV);
 
 	hWidth->SetRawValue(&texDesc.Width, 0, sizeof(texDesc.Width));
@@ -1269,6 +1322,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						AAsrv, AAfractionSRV,
 						ABsrv, ABfractionSRV,
 						BBsrv, BBfractionSRV,
+						maxAsrv, maxBsrv,
 						errorSRV, errorUAV,
 						AtoBxUAV, AtoByUAV, AtoBzUAV, AtoBwUAV,
 						widthAB, heightAB, texturesCount,

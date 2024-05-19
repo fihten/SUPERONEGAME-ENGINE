@@ -1,4 +1,5 @@
 #include "MapToTexArray.hlsl"
+#include "constants.hlsl"
 
 Texture2DArray<uint> photosIntegralsAx;
 Texture2DArray<uint> photosIntegralsAy;
@@ -53,6 +54,39 @@ int2 offset0;
 
 int radius;
 int indexOfA;
+
+void fractionDot(float a, float b, out int ab, out int abFraction)
+{
+	const int d = acc;
+	const int d2 = acc*acc;
+
+	int A = floor(a);
+	int A_ = floor((a - A) * d);
+
+	int B = floor(b);
+	int B_ = floor((b - B) * d);
+
+	ab = A * B + (A * B_) / d + (A_ * B) / d + (A_ * B_) / d2;
+	abFraction = ((A * B_) % d) * d + ((A_ * B) % d) * d + (A_ * B_) % d2;
+}
+
+void fractionDot(float3 a, float3 b, out int ab, out int abFraction)
+{
+	ab = 0;
+	abFraction = 0;
+	for (int i = 0; i < 3; i++)
+	{
+		int ab0 = 0;
+		int abFraction0 = 0;
+		fractionDot(a[i], b[i], ab0, abFraction0);
+
+		ab += ab0;
+		abFraction += abFraction0;
+	}
+	int d2 = acc * acc;
+	ab += abFraction / d2;
+	abFraction = abFraction % d2;
+}
 
 [numthreads(16, 16, 4)]
 void cs_clear_AA_maxA_h(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -158,19 +192,17 @@ void cs_AA_maxA_h(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 locationIn = uint3(x, y, indexOfPhoto);
-	uint3 colorA = float3(
+	float3 colorA = float3(
 		photosIntegralsAx[locationIn].r,
 		photosIntegralsAy[locationIn].r,
 		photosIntegralsAz[locationIn].r
 		);
-
-	uint uiAA = dot(colorA, colorA);
-	float fAA = (float)(uiAA) / 65025.0f;
-
-	uiAA = floor(fAA);
-	uint uiAAfraction = 1000000 * (fAA - uiAA);
-
 	uint maxA_ = max(colorA.x, max(colorA.y, colorA.z));
+
+	uint uiAA = 0;
+	uint uiAAfraction = 0;
+	colorA /= 255.0f;
+	fractionDot(colorA, colorA, uiAA, uiAAfraction);
 
 	int diameter = 2 * radius + 1;
 	int n = x % cellDimension.x;
@@ -242,18 +274,18 @@ void cs_BB_maxB(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	uint3 locationIn = uint3(x, y, indexOfPhoto);
-	uint3 colorB = float3(
+	float3 colorB = float3(
 		photosIntegralsBx[locationIn].r,
 		photosIntegralsBy[locationIn].r,
 		photosIntegralsBz[locationIn].r
 		);
-	
-	uint uiBB = dot(colorB, colorB);
-	float fBB = (float)(uiBB) / 65025.0f;
 
-	uiBB = floor(fBB);
-	uint uiBBfraction = 1000000 * (fBB - uiBB);
 	uint maxB_ = max(colorB.x, max(colorB.y, colorB.z));
+	
+	uint uiBB = 0;
+	uint uiBBfraction = 0;
+	colorB /= 255.0f;
+	fractionDot(colorB, colorB, uiBB, uiBBfraction);
 
 	int diameter = 2 * radius + 1;
 	uint3 locationOut = uint3(x / diameter, y / diameter, indexOfPhoto);
@@ -288,27 +320,27 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (locationInA.y >= heightAreal)
 		return;
 
-	uint3 colorA = float3(
+	float3 colorA = float3(
 		photosIntegralsAx[locationInA].r,
 		photosIntegralsAy[locationInA].r,
 		photosIntegralsAz[locationInA].r
 		);
+	colorA /= 255.0f;
 
 	uint3 locationInB;
 	locationInB.z = indexOfPhoto;
 	locationInB.xy = m / offsetRange;
 
-	uint3 colorB = float3(
+	float3 colorB = float3(
 		photosIntegralsBx[locationInB].r,
 		photosIntegralsBy[locationInB].r,
 		photosIntegralsBz[locationInB].r
 		);
+	colorB /= 255.0f;
 
-	uint uiAB = dot(colorA, colorB);
-	float fAB = (float)(uiAB) / 65025.0f;
-
-	uiAB = floor(fAB);
-	uint uiABfraction = 1000000 * (fAB - uiAB);
+	uint uiAB = 0;
+	uint uiABfraction = 0;
+	fractionDot(colorA, colorB, uiAB, uiABfraction);
 
 	int diameter = 2 * radius + 1;
 	int3 locationOutAB;

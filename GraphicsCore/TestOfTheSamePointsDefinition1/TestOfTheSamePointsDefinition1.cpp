@@ -43,6 +43,10 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 			uB = ((float)ptAB.z() + 0.5f) / w;
 			vB = ((float)ptAB.w() + 0.5f) / h;
+
+			char buffer[256];
+			std::sprintf(buffer, "\nuA - uB = %d; vA - vB = %d;\n", ptAB.x() - ptAB.z(), ptAB.y() - ptAB.w());
+			OutputDebugStringA(buffer);
 		}
 
 		flt2 uvA(uA, vA);
