@@ -1147,6 +1147,12 @@ Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 
 	context->Unmap(mappingOfPointCopy, 0);
 
+	char buffer[256];
+	std::sprintf(buffer, "\nerror = %llu\n", mapping.y());
+	OutputDebugStringA(buffer);
+	std::sprintf(buffer, "\nerror = %llu\n", mapping.w());
+	OutputDebugStringA(buffer);
+
 	return res;
 }
 
@@ -1249,13 +1255,13 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 	angleMax = 0;
 	angleStep = (angleMax - angleMin) / N;
 
-	for (int a0i = 0; a0i <= N; a0i++)
+	//for (int a0i = 0; a0i <= N; a0i++)
 	{
-		for (int s0i = 0; s0i <= N; s0i++)
+		////for (int s0i = 0; s0i <= N; s0i++)
 		{
-			for (int a1i = 0; a1i <= N; a1i++)
+			//for (int a1i = 0; a1i <= N; a1i++)
 			{
-				for (int s1i = 0; s1i <= N; s1i++)
+				//for (int s1i = 0; s1i <= N; s1i++)
 				{
 					int p = (float)(elapsedSteps * 100) / countOfSteps;
 					if (p > percent)
@@ -1266,11 +1272,11 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						OutputDebugStringA(buffer);
 					}
 
-					float angle0 = angleMin + a0i * angleStep;
-					float scale0 = scaleMin + s0i * scaleStep;
+					float angle0 = 0;// angleMin + a0i * angleStep;
+					float scale0 = 1;// scaleMin + s0i * scaleStep;
 
-					float angle1 = angleMin + a1i * angleStep;
-					float scale1 = scaleMin + s1i * scaleStep;
+					float angle1 = 0;// angleMin + a1i * angleStep;
+					float scale1 = 1;// scaleMin + s1i * scaleStep;
 
 					gridIntegralsB.clearPhotosIntegrals(
 						photosIntegralsBxUAV,
@@ -1290,6 +1296,19 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						angle1, scale1
 					);
 					
+					operationsOnGridIntegrals.clearAB(
+						ABuav,
+						ABfractionUAV,
+						widthAB, heightAB, texturesCount,
+						widthABreal, heightABreal
+					);
+					operationsOnGridIntegrals.clearBBandMaxB(
+						BBuav,
+						BBfractionUAV,
+						maxBuav,
+						widthBB, heightBB, texturesCount
+					);
+
 					operationsOnGridIntegrals.calculateAB(
 						photosIntegralsAxSRV,
 						photosIntegralsAySRV,
@@ -1960,80 +1979,49 @@ void ModelMaker::initErrorsAndMapping()
 
 void ModelMaker::initDimensionsOfTextures()
 {
-	widthB = std::ceil((float)width / CELL_DIMENSION_X);
-	heightB = std::ceil((float)height / CELL_DIMENSION_Y);
-
-	widthAreal = width - CELL_DIMENSION_X + 1;
-	heightAreal = height - CELL_DIMENSION_Y + 1;
-
-	widthA = (OFFSET0_X + widthAreal) / CELL_DIMENSION_X;
-	widthA = widthA * OFFSET_RANGE_X + (OFFSET0_X + widthAreal) % CELL_DIMENSION_X;
-	widthA -= OFFSET0_X;
-	widthA = std::min<int>(widthA, widthB * OFFSET_RANGE_X - OFFSET0_X);
-	//(widthA - 1 + OFFSET0_X) / OFFSET_RANGE_X <= (widthB - 1);
-	//(widthA - 1 + OFFSET0_X) <= (widthB - 1) * OFFSET_RANGE_X + OFFSET_RANGE_X - 1;
-	//(widthA - 1 + OFFSET0_X) <= widthB * OFFSET_RANGE_X - 1;
-	//widthA <= widthB * OFFSET_RANGE_X - 1 - OFFSET0_X + 1;
-	//widthA <= widthB * OFFSET_RANGE_X - OFFSET0_X;
-
-	heightA = (OFFSET0_Y + heightAreal) / CELL_DIMENSION_Y;
-	heightA = heightA * OFFSET_RANGE_Y + (OFFSET0_Y + heightAreal) % CELL_DIMENSION_Y;
-	heightA -= OFFSET0_Y;
-	heightA = std::min<int>(heightA, heightB * OFFSET_RANGE_Y - OFFSET0_Y);
-
 	int radius = RADIUS_IN_CELLS;
 	int diameter = 2 * radius + 1;
 
-	widthAA = widthAreal / CELL_DIMENSION_X;
-	widthAA = widthAA - diameter + 1;
-	widthAA = widthAA * CELL_DIMENSION_X + widthAreal % CELL_DIMENSION_X;
+	// Dimensions of BB
+	widthBB = width / (diameter * CELL_DIMENSION_X);
+	heightBB = height / (diameter * CELL_DIMENSION_Y);
 
-	heightAA = heightAreal / CELL_DIMENSION_Y;
-	heightAA = heightAA - diameter + 1;
-	heightAA = heightAA * CELL_DIMENSION_Y + heightAreal % CELL_DIMENSION_Y;
+	// Dimensions of B
+	widthB = widthBB * diameter;
+	heightB = heightBB * diameter;
 
-	widthAB = (OFFSET0_X + widthA) / (diameter * OFFSET_RANGE_X);
-	widthAB = widthAB * OFFSET_RANGE_X;
+	// Dimensions of real A
+	widthAreal = width - CELL_DIMENSION_X + 1;
+	heightAreal = height - CELL_DIMENSION_Y + 1; 
+
+	// Dimensions of A
+	widthA = (widthB - 1) * OFFSET_RANGE_X;
+	widthA += std::min<int>(OFFSET_RANGE_X, OFFSET0_X + widthAreal - (widthB - 1) * CELL_DIMENSION_X);
+	widthA -= OFFSET0_X;
+
+	heightA = (heightB - 1) * OFFSET_RANGE_Y;
+	heightA += std::min<int>(OFFSET_RANGE_Y, OFFSET0_Y + heightAreal - (heightB - 1) * CELL_DIMENSION_Y);
+	heightA -= OFFSET0_Y;
+
+	// Dimensions of AA
+	widthAA = widthAreal - (CELL_DIMENSION_X * diameter) + 1;
+	heightAA = heightAreal - (CELL_DIMENSION_Y * diameter) + 1;
+
+	// Dimensions of AB
+	widthAB = (widthBB - 1) * OFFSET_RANGE_X;
+	widthAB += std::min<int>(OFFSET_RANGE_X, OFFSET0_X + widthAA - (widthBB - 1) * CELL_DIMENSION_X);
 	widthAB -= OFFSET0_X;
-	//(widthAB - 1 + OFFSET0_X) / OFFSET_RANGE_X <= widthBB - 1;
-	//(widthAB - 1 + OFFSET0_X) <= (widthBB - 1) * OFFSET_RANGE_X + OFFSET_RANGE_X - 1;
-	//widthAB - 1 + OFFSET0_X <= widthBB * OFFSET_RANGE_X - 1;
-	//widthAB <= widthBB * OFFSET_RANGE_X - OFFSET0_X;
 
-	//widthAreal = width - CELL_DIMENSION_X + 1;
-
-	//widthA = (OFFSET0_X + widthAreal) / CELL_DIMENSION_X;
-	//widthA = widthA * OFFSET_RANGE_X + (OFFSET0_X + widthAreal) % CELL_DIMENSION_X;
-	//widthA -= OFFSET0_X;
-	//widthA = std::min<int>(widthA, widthB * OFFSET_RANGE_X - OFFSET0_X);
-
-	//widthAB = (OFFSET0_X + widthA) / (diameter * OFFSET_RANGE_X);
-	//widthAB = widthAB * OFFSET_RANGE_X + (OFFSET0_X + widthA) % OFFSET_RANGE_X;
-	//widthAB -= OFFSET0_X;
-	//widthAB = std::min<int>(widthAB, widthBB * OFFSET_RANGE_X - OFFSET0_X);
-
-	//widthBB = widthB / diameter;
-	//widthBB += 1;
-
-	//widthB = std::ceil((float)width / CELL_DIMENSION_X);
-
-	//widthAB = (widthB * OFFSET_RANGE_X) / (diameter * OFFSET_RANGE_X) = widthB / diameter;
-	//widthAB = (widthB / diameter) * OFFSET_RANGE_X + (widthB * OFFSET_RANGE_X) % OFFSET_RANGE_X;
-	//widthAB = (widthB / diameter) * OFFSET_RANGE_X - OFFSET0_X;
-	//widthAB = (widthBB - 1) * OFFSET_RANGE_X - OFFSET0_X;
-
-	heightAB = (OFFSET0_Y + heightA) / (diameter * OFFSET_RANGE_Y);
-	heightAB = heightAB * OFFSET_RANGE_Y;
+	heightAB = (heightBB - 1) * OFFSET_RANGE_Y;
+	heightAB += std::min<int>(OFFSET_RANGE_Y, OFFSET0_Y + heightAA - (heightBB - 1) * CELL_DIMENSION_Y);
 	heightAB -= OFFSET0_Y;
 
+	// count of AB textures
 	widthABreal = 2048;
 	heightABreal = 2048;
 
 	int pixelsInAB = widthAB * heightAB * texturesCount;
 	countOfABtextures = std::ceil((float)pixelsInAB / (widthABreal * heightABreal));
-
-	widthBB = widthB / diameter;
-	heightBB = heightB / diameter;
 }
 
 int ModelMaker::getWidth()

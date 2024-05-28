@@ -309,13 +309,17 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int2 m = int2(x, y);
 	m += offset0;
 	int2 n = m % offsetRange;
-	uint3 locationInA;
+	int3 locationInA;
 	locationInA.z = indexOfA;
 	locationInA.xy = m / offsetRange;
 	locationInA.xy *= cellDimension;
 	locationInA.xy += n - offset0;
 
+	if (locationInA.x < 0)
+		return;
 	if (locationInA.x >= widthAreal)
+		return;
+	if (locationInA.y < 0)
 		return;
 	if (locationInA.y >= heightAreal)
 		return;
@@ -351,7 +355,11 @@ void cs_AB(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (locationOutAB.x < 0)
 		return;
+	if (locationOutAB.x >= widthAB)
+		return;
 	if (locationOutAB.y < 0)
+		return;
+	if (locationOutAB.y >= heightAB)
 		return;
 
 	uint2 dims0 = uint2(widthAB, heightAB);

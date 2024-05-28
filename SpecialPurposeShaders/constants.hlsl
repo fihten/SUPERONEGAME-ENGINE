@@ -11,6 +11,6 @@
 
 #define PI 3.14159
 
-#define acc 100
+#define acc 1000
 
 #endif

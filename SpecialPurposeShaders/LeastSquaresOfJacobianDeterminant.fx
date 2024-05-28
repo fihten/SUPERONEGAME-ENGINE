@@ -81,14 +81,18 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int x = dispatchThreadID.x;
 	int y = dispatchThreadID.y;
 
-	uint3 locationInAA = uint3(x, y, indexOfA);
+	int3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
 	locationInAA.xy /= offsetRange;
 	locationInAA.xy *= cellDimension;
 	locationInAA.xy += n - offset0;
 
+	if (locationInAA.x < 0)
+		return;
 	if (locationInAA.x >= widthAA)
+		return;
+	if (locationInAA.y < 0)
 		return;
 	if (locationInAA.y >= heightAA)
 		return;
@@ -149,14 +153,18 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int x = dispatchThreadID.x;
 	int y = dispatchThreadID.y;
 
-	uint3 locationInAA = uint3(x, y, indexOfA);
+	int3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
 	locationInAA.xy /= offsetRange;
 	locationInAA.xy *= cellDimension;
 	locationInAA.xy += n - offset0;
 
+	if (locationInAA.x < 0)
+		return;
 	if (locationInAA.x >= widthAA)
+		return;
+	if (locationInAA.y < 0)
 		return;
 	if (locationInAA.y >= heightAA)
 		return;

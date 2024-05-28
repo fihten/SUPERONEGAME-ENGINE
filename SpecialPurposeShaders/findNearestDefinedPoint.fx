@@ -27,8 +27,8 @@ void cs_minDistance(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint3 pos = uint3(x, y, index);
 	uint err = error[pos].r;
-	if (err > threshold)
-		return;
+	//if (err > threshold)
+	//	return;
 
 	uint2 mapping = uint2(AtoBx[pos].r, AtoBy[pos].r);
 
@@ -55,8 +55,8 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	uint3 pos = uint3(x, y, index);
 	uint err = error[pos].r;
-	if (err > threshold)
-		return;
+	//if (err > threshold)
+	//	return;
 
 	uint4 mapping = uint4(AtoBx[pos].r, AtoBy[pos].r, AtoBz[pos].r, AtoBw[pos].r);
 
