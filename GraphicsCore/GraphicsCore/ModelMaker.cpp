@@ -2009,11 +2009,11 @@ void ModelMaker::initDimensionsOfTextures()
 
 	// Dimensions of AB
 	widthAB = (widthBB - 1) * OFFSET_RANGE_X;
-	widthAB += std::min<int>(OFFSET_RANGE_X, OFFSET0_X + widthAA - (widthBB - 1) * CELL_DIMENSION_X);
+	widthAB += std::min<int>(OFFSET_RANGE_X, OFFSET0_X + widthAA - (widthBB - 1) * CELL_DIMENSION_X * diameter);
 	widthAB -= OFFSET0_X;
 
 	heightAB = (heightBB - 1) * OFFSET_RANGE_Y;
-	heightAB += std::min<int>(OFFSET_RANGE_Y, OFFSET0_Y + heightAA - (heightBB - 1) * CELL_DIMENSION_Y);
+	heightAB += std::min<int>(OFFSET_RANGE_Y, OFFSET0_Y + heightAA - (heightBB - 1) * CELL_DIMENSION_Y * diameter);
 	heightAB -= OFFSET0_Y;
 
 	// count of AB textures
