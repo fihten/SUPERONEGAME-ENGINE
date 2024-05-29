@@ -24,8 +24,8 @@ that produces flight simulator.
 #define OFFSET_RANGE_X 128
 #define OFFSET_RANGE_Y 128
 
-#define OFFSET0_X 0
-#define OFFSET0_Y 0
+#define OFFSET0_X 64
+#define OFFSET0_Y 64
 
 #define RADIUS_IN_CELLS 8 
 

@@ -81,11 +81,13 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int x = dispatchThreadID.x;
 	int y = dispatchThreadID.y;
 
+	int diameter = 2 * radius + 1;
+
 	int3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
 	locationInAA.xy /= offsetRange;
-	locationInAA.xy *= cellDimension;
+	locationInAA.xy *= (diameter * cellDimension);
 	locationInAA.xy += n - offset0;
 
 	if (locationInAA.x < 0)
@@ -131,7 +133,6 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int diameter = 2 * radius + 1;
 	int pointsCount = 3 * diameter * diameter;
 	err /= pointsCount;
 
@@ -153,11 +154,13 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int x = dispatchThreadID.x;
 	int y = dispatchThreadID.y;
 
+	int diameter = 2 * radius + 1;
+
 	int3 locationInAA = uint3(x, y, indexOfA);
 	locationInAA.xy += offset0;
 	int2 n = locationInAA.xy % offsetRange;
 	locationInAA.xy /= offsetRange;
-	locationInAA.xy *= cellDimension;
+	locationInAA.xy *= (diameter * cellDimension);
 	locationInAA.xy += n - offset0;
 
 	if (locationInAA.x < 0)
@@ -203,7 +206,6 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	float J = AB_ / AA_;
 	float err = J * J * AA_ + BB_ - 2 * J * AB_;
-	int diameter = 2 * radius + 1;
 	int pointsCount = 3 * diameter * diameter;
 	err /= pointsCount;
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
