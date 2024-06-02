@@ -1,6 +1,31 @@
-You are a space marine from far planet. Accidentely you arive to earth. Your space ship damaged and you are forced to leave it with lifeboat. You arive to Colorado state. And your space ship fall into the nearest 
-city. Many helicopters fly towards the place of accident. Trains with military forces go there. You lost your weapon. You must achieve your space ship through blood fight. On your path you 
-will pass through science labs where violent experiments are commited on people. There will be many blood. You get some super guns - the latest achievements of science. You will meet super soldiers - the mix of human flash and electronic mechanisms. 
-They have got diffrent powers/ For example one type of soldiers can fly. Another one can create teleports. 
-There is soldier that can get his heart from breast and throw it to enemy, and this heart is burst destroying everyone wintin radius of 5 meters. After that this monster lies
-squeezed on the floor to develop new heart making loud threaten noises.
+Coordinates of i-th camera:
+Rc[i]
+Ac[i]
+Bc[i]
+
+Coordinates of i-th camera direction:
+Ad[i]
+Bd[i]
+Cd[i]
+
+I = {1, 0, 0}
+J = {0, 1, 0}
+K = {0, 0, 1}
+
+I' = I = {1, 0, 0}
+J' = {0, cos(Ad[i]), sin(Ad[i])}
+K' = {0, -sin(Ad[i]), cos(Ad[i])}
+
+    | cos(Bd[i]) sin(Bd[i])   0|
+M = |-sin(Bd[i]) cos(Bd[i])   0|
+    |          0          0   1|
+
+I" = { cos(Bd[i]), sin(Bd[i]), 0}
+J" = { -cos(Ad[i])*sin(Bd[i]), cos(Ad[i])*cos(Bd[i]), sin(Ad[i])}
+K" = { sin(Ad[i])*sin(Bd[i]), -sin(Ad[i])*cos(Bd[i]), cos(Ad[i])}
+
+Coordinates of j-th point:
+R[j]
+A[i]
+B[i]
+
