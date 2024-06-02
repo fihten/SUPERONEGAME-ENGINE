@@ -1093,7 +1093,7 @@ Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 
 	hPt->SetRawValue(&point, 0, sizeof(point));
 
-	uint32_t threshold = 1;
+	uint32_t threshold = 4000;
 	hThreshold->SetRawValue(&threshold, 0, sizeof(threshold));
 
 	hTechnique->GetPassByIndex(0)->Apply(0, context);
@@ -1232,36 +1232,27 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 		widthBB, heightBB, texturesCount
 	);
 
-	int N = 10;
-	N = 1;
+	int N = 4;
 
 	int countOfSteps = (N + 1) * (N + 1) * (N + 1) * (N + 1);
 	int elapsedSteps = 0;
 	int percent = 0;
 
-	float scaleMin = 0.3f;
-	float scaleMax = 2.2f;
+	float scaleMin = 0.9f;
+	float scaleMax = 1.1f;
 	float scaleStep = (scaleMax - scaleMin) / N;
 
 	float angleMin = -M_PI / 12;
 	float angleMax = M_PI / 12;
 	float angleStep = (angleMax - angleMin) / N;
-	
-	scaleMin = 1.0f;
-	scaleMax = 1.0f;
-	scaleStep = (scaleMax - scaleMin) / N;
 
-	angleMin = 0;
-	angleMax = 0;
-	angleStep = (angleMax - angleMin) / N;
-
-	//for (int a0i = 0; a0i <= N; a0i++)
+	for (int a0i = 0; a0i <= N; a0i++)
 	{
-		////for (int s0i = 0; s0i <= N; s0i++)
+		for (int s0i = 0; s0i <= N; s0i++)
 		{
-			//for (int a1i = 0; a1i <= N; a1i++)
+			for (int a1i = 0; a1i <= N; a1i++)
 			{
-				//for (int s1i = 0; s1i <= N; s1i++)
+				for (int s1i = 0; s1i <= N; s1i++)
 				{
 					int p = (float)(elapsedSteps * 100) / countOfSteps;
 					if (p > percent)
@@ -1272,11 +1263,11 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						OutputDebugStringA(buffer);
 					}
 
-					float angle0 = 0;// angleMin + a0i * angleStep;
-					float scale0 = 1;// scaleMin + s0i * scaleStep;
+					float angle0 = angleMin + a0i * angleStep;
+					float scale0 = scaleMin + s0i * scaleStep;
 
-					float angle1 = 0;// angleMin + a1i * angleStep;
-					float scale1 = 1;// scaleMin + s1i * scaleStep;
+					float angle1 = angleMin + a1i * angleStep;
+					float scale1 = scaleMin + s1i * scaleStep;
 
 					gridIntegralsB.clearPhotosIntegrals(
 						photosIntegralsBxUAV,

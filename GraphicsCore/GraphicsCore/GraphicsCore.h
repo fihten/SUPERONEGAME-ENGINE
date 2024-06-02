@@ -334,8 +334,8 @@ private:
 	ID3D11UnorderedAccessView* mErrorOfTheSamePointsDefinitionUAV = nullptr;
 
 	float maxAngle = 15.0f * M_PI / 180.0f;
-	float minScale = 0.3f;
-	float maxScale = 2.2f;
+	float minScale = 0.9f;
+	float maxScale = 1.1f;
 	int positions_number = 0;
 	int discrete_radius = 10;
 	

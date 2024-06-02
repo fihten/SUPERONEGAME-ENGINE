@@ -2666,7 +2666,7 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 		maxScale
 	};
 
-	int numberOfSteps[4] = { 10,10,10,10 };
+	int numberOfSteps[4] = { 4,4,4,4 };
 	float step[4];
 	for (int i = 0; i < 4; ++i)
 		step[i] = (b[i] - a[i]) / numberOfSteps[i];
@@ -2693,10 +2693,10 @@ void GraphicsCore::calculateIntegralsAtTwoPointsOfAandB(
 				index[i] %= numberOfSteps[i] + 1;
 			}
 
-			float a0 = 0;// a[0] + index[0] * step[0];
-			float s0 = 1;// a[1] + index[1] * step[1];
-			float a1 = 0;// a[2] + index[2] * step[2];
-			float s1 = 1;// a[3] + index[3] * step[3];
+			float a0 = a[0] + index[0] * step[0];
+			float s0 = a[1] + index[1] * step[1];
+			float a1 = a[2] + index[2] * step[2];
+			float s1 = a[3] + index[3] * step[3];
 
 			double maxY = 0;
 			double xy = 0;

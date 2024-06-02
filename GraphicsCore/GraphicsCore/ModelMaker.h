@@ -18,14 +18,14 @@ that produces flight simulator.
 #include <vector>
 #include <string>
 
-#define CELL_DIMENSION_X 16 // for spheres this is 36
-#define CELL_DIMENSION_Y 16 // for spheres this is 36
+#define CELL_DIMENSION_X 32 // for spheres this is 36
+#define CELL_DIMENSION_Y 32 // for spheres this is 36
 
-#define OFFSET_RANGE_X 128
-#define OFFSET_RANGE_Y 128
+#define OFFSET_RANGE_X 256
+#define OFFSET_RANGE_Y 256
 
-#define OFFSET0_X 64
-#define OFFSET0_Y 64
+#define OFFSET0_X 128
+#define OFFSET0_Y 128
 
 #define RADIUS_IN_CELLS 8 
 
