@@ -7,6 +7,7 @@
 !*.hlsl
 !*.cfg
 !*.jpg
+!*.png
 !*.pdf
 !*.dds
 !*.rc
