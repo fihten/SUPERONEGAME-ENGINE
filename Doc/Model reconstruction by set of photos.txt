@@ -33,6 +33,25 @@ I" = { cos(Bd[i]), sin(Bd[i]), 0}
 J" = { -cos(Ad[i])*sin(Bd[i]), cos(Ad[i])*cos(Bd[i]), sin(Ad[i])}
 K" = { sin(Ad[i])*sin(Bd[i]), -sin(Ad[i])*cos(Bd[i]), cos(Ad[i])}
 
+I''' = cos(Cd[i])*I"+sin(Cd[i])*J" = 
+
+{cos(Bd[i])*cos(Cd[i]), sin(Bd[i])*cos(Cd[i]), 0} +
+{-cos(Ad[i])*sin(Bd[i])*sin(Cd[i]), cos(Ad[i])*cos(Bd[i])*sin(Cd[i]), sin(Ad[i])*sin(Cd[i])} = 
+
+{cos(Bd[i])*cos(Cd[i])-cos(Ad[i])*sin(Bd[i])*sin(Cd[i]), sin(Bd[i])*cos(Cd[i])+cos(Ad[i])*cos(Bd[i])*sin(Cd[i]), sin(Ad[i])*sin(Cd[i])}
+
+J''' = -sin(Cd[i])*I"+cos(Cd[i])*J" = 
+
+-sin(Cd[i])*{ cos(Bd[i]), sin(Bd[i]), 0} +
+cos(Cd[i])*{ -cos(Ad[i])*sin(Bd[i]), cos(Ad[i])*cos(Bd[i]), sin(Ad[i])} = 
+
+{-cos(Bd[i])*sin(Cd[i]), -sin(Bd[i])*sin(Cd[i]), 0} +
+{-cos(Ad[i])*sin(Bd[i])*cos(Cd[i]), cos(Ad[i])*cos(Bd[i])*cos(Cd[i]), sin(Ad[i])*cos(Cd[i])} = 
+
+{-cos(Bd[i])*sin(Cd[i])-cos(Ad[i])*sin(Bd[i])*cos(Cd[i]), -sin(Bd[i])*sin(Cd[i])+cos(Ad[i])*cos(Bd[i])*cos(Cd[i]), sin(Ad[i])*cos(Cd[i])}
+
+K''' = K" = { sin(Ad[i])*sin(Bd[i]), -sin(Ad[i])*cos(Bd[i]), cos(Ad[i])}
+
 Coordinates of j-th point:
 R[j]
 A[i]
