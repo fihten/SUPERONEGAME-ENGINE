@@ -12,6 +12,10 @@ Rc[i]
 Ac[i]
 Bc[i]
 
+xc = Rc[i]*sin(Bc[i])*cos(Ac[i]);
+yc = Rc[i]*sin(Bc[i])*sin(Ac[i]);
+zc = Rc[i]*cos(Bc[i]);
+
 Coordinates of i-th camera direction:
 Ad[i]
 Bd[i]
@@ -52,9 +56,46 @@ cos(Cd[i])*{ -cos(Ad[i])*sin(Bd[i]), cos(Ad[i])*cos(Bd[i]), sin(Ad[i])} =
 
 K''' = K" = { sin(Ad[i])*sin(Bd[i]), -sin(Ad[i])*cos(Bd[i]), cos(Ad[i])}
 
+| cos(Bd[i])*cos(Cd[i])-cos(Ad[i])*sin(Bd[i])*sin(Cd[i])	sin(Bd[i])*cos(Cd[i])+cos(Ad[i])*cos(Bd[i])*sin(Cd[i])		sin(Ad[i])*sin(Cd[i]) |
+| -cos(Bd[i])*sin(Cd[i])-cos(Ad[i])*sin(Bd[i])*cos(Cd[i])	-sin(Bd[i])*sin(Cd[i])+cos(Ad[i])*cos(Bd[i])*cos(Cd[i])		sin(Ad[i])*cos(Cd[i]) |
+| sin(Ad[i])*sin(Bd[i])						-sin(Ad[i])*cos(Bd[i])						cos(Ad[i])	      |
+
+view[0][0] = cos(Bd[i])*cos(Cd[i])-cos(Ad[i])*sin(Bd[i])*sin(Cd[i]); view[0][1] = -cos(Bd[i])*sin(Cd[i])-cos(Ad[i])*sin(Bd[i])*cos(Cd[i]); view[0][2] = sin(Ad[i])*sin(Bd[i]); view[0][3] = 0;
+view[1][0] = sin(Bd[i])*cos(Cd[i])+cos(Ad[i])*cos(Bd[i])*sin(Cd[i]); view[1][1] = -sin(Bd[i])*sin(Cd[i])+cos(Ad[i])*cos(Bd[i])*cos(Cd[i]); view[1][2] = -sin(Ad[i])*cos(Bd[i]); view[1][3] = 0;
+view[2][0] = sin(Ad[i])*sin(Cd[i]); view[2][1] = sin(Ad[i])*cos(Cd[i]); view[2][2] = cos(Ad[i]); view[2][3] = 0;
+
+view[3][0] = -xc*I'''.x-yc*I'''.y-zc*I'''.z = 
+
+-Rc[i]*sin(Bc[i])*cos(Ac[i])*(cos(Bd[i])*cos(Cd[i])-cos(Ad[i])*sin(Bd[i])*sin(Cd[i])) -
+Rc[i]*sin(Bc[i])*sin(Ac[i])*(sin(Bd[i])*cos(Cd[i])+cos(Ad[i])*cos(Bd[i])*sin(Cd[i])) - 
+Rc[i]*cos(Bc[i])*sin(Ad[i])*sin(Cd[i]) = 
+
+-Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*cos(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*sin(Cd[i])-
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*cos(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*sin(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*sin(Cd[i])
+
+view[3][1] = -xc*J'''.x-yc*J'''.y-zc*J'''.z =
+
+-Rc[i]*sin(Bc[i])*cos(Ac[i])*(-cos(Bd[i])*sin(Cd[i])-cos(Ad[i])*sin(Bd[i])*cos(Cd[i]))-
+Rc[i]*sin(Bc[i])*sin(Ac[i])*(-sin(Bd[i])*sin(Cd[i])+cos(Ad[i])*cos(Bd[i])*cos(Cd[i]))-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*cos(Cd[i]) = 
+
+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*sin(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*cos(Cd[i])+
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*sin(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*cos(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*cos(Cd[i])
+
+view[3][2] = -xc*K'''.x-yc*K'''.y-zc*K'''.z =
+
+-Rc[i]*sin(Bc[i])*cos(Ac[i])*sin(Ad[i])*sin(Bd[i])+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Ad[i])*cos(Bd[i])-Rc[i]*cos(Bc[i])*cos(Ad[i])
+
+view[3][3] = 1
+
 Coordinates of j-th point:
 R[j]
 A[i]
 B[i]
 
+x = R[i]*sin(B[i])*cos(A[i]);
+y = R[i]*sin(B[i])*sin(A[i]);
+z = R[i]*cos(B[i]);
 
