@@ -99,3 +99,50 @@ x = R[i]*sin(B[i])*cos(A[i]);
 y = R[i]*sin(B[i])*sin(A[i]);
 z = R[i]*cos(B[i]);
 
+Rw = {x,y,z,1}
+
+Rv = Rw*view = {
+x*view[0][0]+y*view[1][0]+z*view[2][0]+view[3][0],
+x*view[0][1]+y*view[1][1]+z*view[2][1]+view[3][1],
+x*view[0][2]+y*view[1][2]+z*view[2][2]+view[3][2],
+1
+};
+
+Rv.x = 
+
+R[i]*sin(B[i])*cos(A[i])*(cos(Bd[i])*cos(Cd[i])-cos(Ad[i])*sin(Bd[i])*sin(Cd[i])) +
+R[i]*sin(B[i])*sin(A[i])*(sin(Bd[i])*cos(Cd[i])+cos(Ad[i])*cos(Bd[i])*sin(Cd[i])) +
+R[i]*cos(B[i])*sin(Ad[i])*sin(Cd[i]) - 
+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*cos(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*sin(Cd[i])-
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*cos(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*sin(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*sin(Cd[i]) = 
+
+R[i]*sin(B[i])*cos(A[i])*cos(Bd[i])*cos(Cd[i])-R[i]*sin(B[i])*cos(A[i])*cos(Ad[i])*sin(Bd[i])*sin(Cd[i])+
+R[i]*sin(B[i])*sin(A[i])*sin(Bd[i])*cos(Cd[i])+R[i]*sin(B[i])*sin(A[i])*cos(Ad[i])*cos(Bd[i])*sin(Cd[i])+
+R[i]*cos(B[i])*sin(Ad[i])*sin(Cd[i]) - 
+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*cos(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*sin(Cd[i])-
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*cos(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*sin(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*sin(Cd[i])
+
+Rv.y = 
+
+R[i]*sin(B[i])*cos(A[i])*(-cos(Bd[i])*sin(Cd[i])-cos(Ad[i])*sin(Bd[i])*cos(Cd[i]))+
+R[i]*sin(B[i])*sin(A[i])*(-sin(Bd[i])*sin(Cd[i])+cos(Ad[i])*cos(Bd[i])*cos(Cd[i]))+
+R[i]*cos(B[i])*sin(Ad[i])*cos(Cd[i])+
+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*sin(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*cos(Cd[i])+
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*sin(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*cos(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*cos(Cd[i]) = 
+
+-R[i]*sin(B[i])*cos(A[i])*cos(Bd[i])*sin(Cd[i])-R[i]*sin(B[i])*cos(A[i])*cos(Ad[i])*sin(Bd[i])*cos(Cd[i])-
+R[i]*sin(B[i])*sin(A[i])*sin(Bd[i])*sin(Cd[i])+R[i]*sin(B[i])*sin(A[i])*cos(Ad[i])*cos(Bd[i])*cos(Cd[i])+
+R[i]*cos(B[i])*sin(Ad[i])*cos(Cd[i])+
+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Bd[i])*sin(Cd[i])+Rc[i]*sin(Bc[i])*cos(Ac[i])*cos(Ad[i])*sin(Bd[i])*cos(Cd[i])+
+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Bd[i])*sin(Cd[i])-Rc[i]*sin(Bc[i])*sin(Ac[i])*cos(Ad[i])*cos(Bd[i])*cos(Cd[i])-
+Rc[i]*cos(Bc[i])*sin(Ad[i])*cos(Cd[i])
+
+Rv.z = 
+
+R[i]*sin(B[i])*cos(A[i])*sin(Ad[i])*sin(Bd[i])-
+R[i]*sin(B[i])*sin(A[i])*sin(Ad[i])*cos(Bd[i])+
+R[i]*cos(B[i])*cos(Ad[i])-
+Rc[i]*sin(Bc[i])*cos(Ac[i])*sin(Ad[i])*sin(Bd[i])+Rc[i]*sin(Bc[i])*sin(Ac[i])*sin(Ad[i])*cos(Bd[i])-Rc[i]*cos(Bc[i])*cos(Ad[i])

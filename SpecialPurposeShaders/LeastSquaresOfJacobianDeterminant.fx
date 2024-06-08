@@ -12,6 +12,9 @@ Texture2DArray<uint> BBfraction;
 Texture2DArray<uint> maxA;
 Texture2DArray<uint> maxB;
 
+int width;
+int height;
+
 int widthAA;
 int heightAA;
 
@@ -117,6 +120,28 @@ void cs_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 	locationInBB.xy += offset0;
 	locationInBB.xy /= offsetRange;
 
+	float2x2 m;
+	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
+	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
+
+	float2 posInB[4];
+	posInB[0] = locationInBB.xy * diameter * cellDimension;
+	posInB[1] = (locationInBB.xy + uint2(0, 1)) * diameter * cellDimension;
+	posInB[2] = (locationInBB.xy + uint2(1, 0)) * diameter * cellDimension;
+	posInB[3] = (locationInBB.xy + uint2(1, 1)) * diameter * cellDimension;
+	for (int i = 0; i < 4; i++)
+	{
+		float2 pos = mul(posInB[i], m);
+		if (pos.x < 0)
+			return;
+		if (pos.x >= width)
+			return;
+		if (pos.y < 0)
+			return;
+		if (pos.y >= height)
+			return;
+	}
+
 	float BB_ = BB[locationInBB].r;
 	float BBfraction_ = BBfraction[locationInBB].r;
 	BB_ = BB_ + BBfraction_ / (acc * acc);
@@ -211,14 +236,14 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (errorIn[locationInBB].r != (uint)(1000000 * err))
 		return;
 
-	int2 posInA = locationInBB.xy * cellDimension * diameter + n - offset0 + (radius * cellDimension);
+	int2 posInA = locationInBB.xy * cellDimension * diameter + n - offset0 + 0.5f * (diameter * cellDimension);
 
 	float2x2 m;
 	m[0][0] = scale0 * cos(angle0); m[0][1] = scale0 * sin(angle0);
 	m[1][0] = -scale1 * sin(angle1); m[1][1] = scale1 * cos(angle1);
 
-	float2 posInB = locationInBB.xy * diameter * cellDimension + (radius * cellDimension);
-	posInB = max(mul(posInB, m), float2(0, 0));
+	float2 posInB = locationInBB.xy * diameter * cellDimension + 0.5f * (diameter * cellDimension);
+	posInB = mul(posInB, m);
 
 	uint4 mapping;
 	mapping.x = (posInA.x << 16) | (posInA.y & 0xffff);
@@ -229,7 +254,7 @@ void cs_mapping(uint3 dispatchThreadID : SV_DispatchThreadID)
 	uint3 locationOut = locationInBB;
 	uint originalValue = 0;
 	InterlockedExchange(AtoBx[locationOut].r, mapping.x, originalValue);
-	InterlockedExchange(AtoBy[locationOut].r, mapping.y, originalValue);
+	InterlockedExchange(AtoBy[locationOut].r, errorIn[locationInBB].r, originalValue);
 	InterlockedExchange(AtoBz[locationOut].r, mapping.z, originalValue);
 	InterlockedExchange(AtoBw[locationOut].r, mapping.w, originalValue);
 }

@@ -277,6 +277,8 @@ struct LeastSquaresOfJacobianDeterminant
 	ID3DX11EffectShaderResourceVariable* hMaxA = nullptr;
 	ID3DX11EffectShaderResourceVariable* hMaxB = nullptr;
 
+	ID3DX11EffectVariable* hWidth = nullptr;
+	ID3DX11EffectVariable* hHeight = nullptr;
 	ID3DX11EffectVariable* hWidthAA = nullptr;
 	ID3DX11EffectVariable* hWidthAB = nullptr;
 	ID3DX11EffectVariable* hWidthABreal = nullptr;
@@ -334,6 +336,7 @@ public:
 		ID3D11UnorderedAccessView* AtoBy,
 		ID3D11UnorderedAccessView* AtoBz,
 		ID3D11UnorderedAccessView* AtoBw,
+		int width, int height,
 		int widthAB, int heightAB, int texturesCount,
 		int indexOfA,
 		int widthABreal, int heightABreal,

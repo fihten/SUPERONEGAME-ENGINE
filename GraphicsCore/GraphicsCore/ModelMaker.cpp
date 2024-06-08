@@ -767,11 +767,13 @@ void LeastSquaresOfJacobianDeterminant::init()
 	hMaxA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxA")->AsShaderResource();
 	hMaxB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("maxB")->AsShaderResource();
 
+	hWidth = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("width");
 	hWidthAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAA");
 	hWidthAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthAB");
 	hWidthABreal = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthABreal");
 	hWidthBB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("widthBB");
 
+	hHeight = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("height");
 	hHeightAA = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightAA");
 	hHeightAB = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightAB");
 	hHeightABreal = hLeastSquaresOfJacobianDeterminantFX->GetVariableByName("heightABreal");
@@ -864,6 +866,7 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	ID3D11UnorderedAccessView* AtoBy,
 	ID3D11UnorderedAccessView* AtoBz,
 	ID3D11UnorderedAccessView* AtoBw,
+	int width, int height,
 	int widthAB, int heightAB, int texturesCount,
 	int indexOfA,
 	int widthABreal, int heightABreal,
@@ -885,6 +888,15 @@ void LeastSquaresOfJacobianDeterminant::calculateMapping(
 	hMaxB->SetResource(maxB);
 
 	hError->SetUnorderedAccessView(error);
+
+	hWidth->SetRawValue(&width, 0, sizeof(width));
+	hHeight->SetRawValue(&height, 0, sizeof(height));
+
+	hAngle0->SetRawValue(&angle0, 0, sizeof(angle0));
+	hScale0->SetRawValue(&scale0, 0, sizeof(scale0));
+
+	hAngle1->SetRawValue(&angle1, 0, sizeof(angle1));
+	hScale1->SetRawValue(&scale1, 0, sizeof(scale1));
 
 	hWidthAB->SetRawValue(&widthAB, 0, sizeof(widthAB));
 	hHeightAB->SetRawValue(&heightAB, 0, sizeof(heightAB));
@@ -1335,6 +1347,7 @@ void ModelMaker::defineTheSamePointsOnSetOfPhotos()
 						maxAsrv, maxBsrv,
 						errorSRV, errorUAV,
 						AtoBxUAV, AtoByUAV, AtoBzUAV, AtoBwUAV,
+						width, height,
 						widthAB, heightAB, texturesCount,
 						0,
 						widthABreal, heightABreal,
