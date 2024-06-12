@@ -14,40 +14,107 @@ StructuredBuffer<float2> pointsOnPhotos;
 StructuredBuffer<uint2> mapToVertexAndCamera;
 
 RWStructuredBuffer<float3> I;
+StructuredBuffer<float3> Iin;
+
 RWStructuredBuffer<float3> J;
+StructuredBuffer<float3> Jin;
+
 RWStructuredBuffer<float3> K;
+StructuredBuffer<float3> Kin;
 
 RWStructuredBuffer<float3> xyzc;
+StructuredBuffer<float3> xyzc_in;
+
 RWStructuredBuffer<float3> xyz;
+StructuredBuffer<float3> xyz_in;
 
 RWStructuredBuffer<uint> error;
 
 RWStructuredBuffer<float3> dIdA;
+StructuredBuffer<float3> dIdAin;
+
 RWStructuredBuffer<float3> dIdB;
+StructuredBuffer<float3> dIdBin;
+
 RWStructuredBuffer<float3> dIdC;
+StructuredBuffer<float3> dIdCin;
 
 RWStructuredBuffer<float3> dJdA;
+StructuredBuffer<float3> dJdAin;
+
 RWStructuredBuffer<float3> dJdB;
+StructuredBuffer<float3> dJdBin;
+
 RWStructuredBuffer<float3> dJdC;
+StructuredBuffer<float3> dJdCin;
 
 RWStructuredBuffer<float3> dKdA;
+StructuredBuffer<float3> dKdAin;
+
 RWStructuredBuffer<float3> dKdB;
+StructuredBuffer<float3> dKdBin;
+
 RWStructuredBuffer<float3> dKdC;
+StructuredBuffer<float3> dKdCin;
 
 RWStructuredBuffer<float3> dXYZCdR;
+StructuredBuffer<float3> dXYZCdRin;
+
 RWStructuredBuffer<float3> dXYZCdA;
+StructuredBuffer<float3> dXYZCdAin;
+
 RWStructuredBuffer<float3> dXYZCdB;
+StructuredBuffer<float3> dXYZCdBin;
 
 RWStructuredBuffer<float3> dXYZdR;
-RWStructuredBuffer<float3> dXYZdA;
-RWStructuredBuffer<float3> dXYZdB;
+StructuredBuffer<float3> dXYZdRin;
 
-RWStructuredBuffer<uint> gradError_r;
-RWStructuredBuffer<uint> gradError_a;
+RWStructuredBuffer<float3> dXYZdA;
+StructuredBuffer<float3> dXYZdAin;
+
+RWStructuredBuffer<float3> dXYZdB;
+StructuredBuffer<float3> dXYZdBin;
+
+RWStructuredBuffer<int> gradError_r;
+StructuredBuffer<int> gradError_r_in;
+
+RWStructuredBuffer<int> gradError_a;
+StructuredBuffer<int> gradError_a_in;
 
 int amountOfCameras;
 int amountOfVertices;
 int amountOfPointsOnPhotos;
+
+float t_r;
+float t_a;
+
+void calculateGradient(
+	float3 rv,
+	float2 pt,
+	float3 r, float3 rc,
+	float3 i, float3 j, float3 k,
+	int index,
+	RWStructuredBuffer<int> grad
+)
+{
+	float2 e0 = rv.xy - rv.z * pt;
+
+	float3 rv_;
+	rv_.x = dot(r - rc, i);
+	rv_.y = dot(r - rc, j);
+	rv_.z = dot(r - rc, k);
+
+	float2 e1 = rv_.xy - rv_.z * pt;
+	float e = dot(e0, e1);
+
+	int d = 1000000;
+	int iE = floor(e);
+	int iEfraction = (e - iE) * d;
+
+	int originalValue = 0;
+	InterlockedAdd(grad[index + 0], iE, originalValue);
+	InterlockedAdd(grad[index + 1], iEfraction, originalValue);
+}
 
 [numthreads(64, 1, 1)]
 void cs_calculate_axis_I(uint3 dispatchThreadID : SV_DispatchThreadID)
@@ -55,6 +122,12 @@ void cs_calculate_axis_I(uint3 dispatchThreadID : SV_DispatchThreadID)
 	int i = dispatchThreadID.x;
 	if (i >= amountOfCameras)
 		return;
+
+	float a = Ad[i];
+	float b = Bd[i];
+	float c = Cd[i];
+
+
 
 	I[i].x = cos(Bd[i]) * cos(Cd[i]) - cos(Ad[i]) * sin(Bd[i]) * sin(Cd[i]);
 	I[i].y = sin(Bd[i]) * cos(Cd[i]) + cos(Ad[i]) * cos(Bd[i]) * sin(Cd[i]);
@@ -117,13 +190,13 @@ void cs_calculate_error(uint3 dispatchThreadID : SV_DispatchThreadID)
 		return;
 
 	int vertexId = mapToVertexAndCamera[i].x;
-	float3 xyz_ = xyz[vertexId];
+	float3 xyz_ = xyz_in[vertexId];
 	
 	int cameraId = mapToVertexAndCamera[i].y;
-	float3 xyzc_ = xyzc[cameraId];
-	float3 I_ = I[cameraId];
-	float3 J_ = J[cameraId];
-	float3 K_ = K[cameraId];
+	float3 xyzc_ = xyzc_in[cameraId];
+	float3 I_ = Iin[cameraId];
+	float3 J_ = Jin[cameraId];
+	float3 K_ = Kin[cameraId];
 
 	float3 xyzv;
 	xyzv.x = dot(xyz_ - xyzc_, I_);
@@ -280,26 +353,32 @@ void cs_calculate_grad_of_xyz_a(uint3 dispatchThreadID : SV_DispatchThreadID)
 	dXYZdB[i].z = -R[i] * sin(B[i]);
 }
 
-[numthreads(32, 32, 1)]
+uint RcId(uint cameraId)
+{
+	return cameraId * 2;
+}
+
+uint Rid(uint vertexId)
+{
+	return amountOfCameras * 2 + vertexId * 2;
+}
+
+[numthreads(64, 1, 1)]
 void cs_calculate_grad_of_error_r(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
 	int i = dispatchThreadID.x;
 	if (i >= amountOfPointsOnPhotos)
 		return;
-	
-	int j = dispatchThreadID.y;
-	if (j >= amountOfCameras + amountOfVertices)
-		return;
 
 	uint vertexId = mapToVertexAndCamera[i].x;
 	uint cameraId = mapToVertexAndCamera[i].y;
 	
-	float3 I_ = I[cameraId];
-	float3 J_ = J[cameraId];
-	float3 K_ = K[cameraId];
+	float3 I_ = Iin[cameraId];
+	float3 J_ = Jin[cameraId];
+	float3 K_ = Kin[cameraId];
 	
-	float3 xyz_ = xyz[vertexId].xyz;
-	float3 xyzc_ = xyzc[cameraId].xyz;
+	float3 xyz_ = xyz_in[vertexId].xyz;
+	float3 xyzc_ = xyzc_in[cameraId].xyz;
 
 	float2 pt = pointsOnPhotos[i];
 
@@ -308,36 +387,141 @@ void cs_calculate_grad_of_error_r(uint3 dispatchThreadID : SV_DispatchThreadID)
 	rv.y = dot(xyz_ - xyzc_, J_);
 	rv.z = dot(xyz_ - xyzc_, K_);
 
-	if (j < amountOfCameras)
-	{
-		if (j != cameraId)
-			return;
-
-		float3 dXYZCdR_ = dXYZCdR[cameraId].xyz;
-		
-		float3 rv_;
-		rv_.x = -dot(dXYZCdR_, I_);
-		rv_.y = -dot(dXYZCdR_, J_);
-		rv_.z = -dot(dXYZCdR_, K_);
-
-		float2 e0 = rv.xy - pt * rv.z;
-		float2 e1 = rv_.xy - pt * rv_.z;
-		float e = dot(e0, e1);
-
-		d = 1000000;
-		uint uiE = floor(e);
-		uint uiEfraction = (e - uiE) * d;
-
-		uint originalValue = 0;
-		InterlockedAdd(gradError_r[0], uiE, originalValue);
-		InterlockedAdd(gradError_r[1], uiEfraction, originalValue);
-	}
-	else
-	{
-		j -= amountOfCameras;
-		if (j != vertexId)
-			return;
-
-	}
-
+	calculateGradient(
+		rv,
+		pt,
+		0, dXYZCdRin[cameraId],
+		I_, J_, K_,
+		RcId(cameraId),
+		gradError_r
+	);
+	calculateGradient(
+		rv,
+		pt,
+		dXYZdRin[vertexId], 0,
+		I_, J_, K_,
+		Rid(vertexId),
+		gradError_r
+	);
 }
+
+uint AcId(uint cameraId)
+{
+	return cameraId * 10;
+}
+
+uint BcId(uint cameraId)
+{
+	return cameraId * 10 + 2;
+}
+
+uint AdId(uint cameraId)
+{
+	return cameraId * 10 + 4;
+}
+
+uint BdId(uint cameraId)
+{
+	return cameraId * 10 + 6;
+}
+
+uint CdId(uint cameraId)
+{
+	return cameraId * 10 + 8;
+}
+
+uint Aid(uint vertexId)
+{
+	return amountOfCameras * 10 + vertexId * 4;
+}
+
+uint Bid(uint vertexId)
+{
+	return amountOfCameras * 10 + vertexId * 4 + 2;
+}
+
+[numthreads(64, 1, 1)]
+void cs_calculate_grad_of_error_a(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int i = dispatchThreadID.x;
+	if (i >= amountOfPointsOnPhotos)
+		return;
+
+	uint vertexId = mapToVertexAndCamera[i].x;
+	uint cameraId = mapToVertexAndCamera[i].y;
+
+	float3 I_ = Iin[cameraId].xyz;
+	float3 J_ = Jin[cameraId].xyz;
+	float3 K_ = Kin[cameraId].xyz;
+
+	float3 xyz_ = xyz_in[vertexId].xyz;
+	float3 xyzc_ = xyzc_in[cameraId].xyz;
+
+	float3 rv;
+	rv.x = dot(xyz_ - xyzc_, I_);
+	rv.y = dot(xyz_ - xyzc_, J_);
+	rv.z = dot(xyz_ - xyzc_, K_);
+
+	float2 pt = pointsOnPhotos[i];
+	
+	// Cameras
+	calculateGradient(
+		rv,
+		pt,
+		0, dXYZCdAin[cameraId],
+		I_, J_, K_,
+		AcId(cameraId),
+		gradError_a
+	);
+	calculateGradient(
+		rv,
+		pt,
+		0, dXYZCdBin[cameraId],
+		I_, J_, K_,
+		BcId(cameraId),
+		gradError_a
+	);
+	calculateGradient(
+		rv,
+		pt,
+		xyz_, xyzc_,
+		dIdAin[cameraId], dJdAin[cameraId], dKdAin[cameraId],
+		AdId(cameraId),
+		gradError_a
+	);
+	calculateGradient(
+		rv,
+		pt,
+		xyz_, xyzc_,
+		dIdBin[cameraId], dJdBin[cameraId], dKdBin[cameraId],
+		BdId(cameraId),
+		gradError_a
+	);
+	calculateGradient(
+		rv,
+		pt,
+		xyz_, xyzc_,
+		dIdCin[cameraId], dJdCin[cameraId], dKdCin[cameraId],
+		CdId(cameraId),
+		gradError_a
+	);
+	
+	// Vertices
+	calculateGradient(
+		v,
+		pt,
+		dXYZdAin[vertexId], 0,
+		I_, J_, K_,
+		Aid(vertexId),
+		gradError_a
+	);
+	calculateGradient(
+		v,
+		pt,
+		dXYZdBin[vertexId], 0,
+		I_, J_, K_,
+		Bid(vertexId),
+		gradError_a
+	);
+}
+
