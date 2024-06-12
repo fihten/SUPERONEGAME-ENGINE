@@ -116,6 +116,62 @@ void calculateGradient(
 	InterlockedAdd(grad[index + 1], iEfraction, originalValue);
 }
 
+uint RcId(uint cameraId)
+{
+	return cameraId * 2;
+}
+
+uint Rid(uint vertexId)
+{
+	return amountOfCameras * 2 + vertexId * 2;
+}
+
+uint AcId(uint cameraId)
+{
+	return cameraId * 10;
+}
+
+uint BcId(uint cameraId)
+{
+	return cameraId * 10 + 2;
+}
+
+uint AdId(uint cameraId)
+{
+	return cameraId * 10 + 4;
+}
+
+uint BdId(uint cameraId)
+{
+	return cameraId * 10 + 6;
+}
+
+uint CdId(uint cameraId)
+{
+	return cameraId * 10 + 8;
+}
+
+uint Aid(uint vertexId)
+{
+	return amountOfCameras * 10 + vertexId * 4;
+}
+
+uint Bid(uint vertexId)
+{
+	return amountOfCameras * 10 + vertexId * 4 + 2;
+}
+
+float fetchGrad(uint index, StructuredBuffer<int> grad)
+{
+	int i = grad[index].x;
+	int ifraction = grad[index + 1].x;
+	
+	float d = 1000000.0f;
+	float f = (float)(i)+(float)(ifraction) / d;
+
+	return f;
+}
+
 [numthreads(64, 1, 1)]
 void cs_calculate_axis_I(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -123,15 +179,17 @@ void cs_calculate_axis_I(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	float a = Ad[i];
-	float b = Bd[i];
-	float c = Cd[i];
+	float gradA = fetchGrad(AdId(i), gradError_a);
+	float gradB = fetchGrad(BdId(i), gradError_a);
+	float gradC = fetchGrad(CdId(i), gradError_a);
 
+	float a = Ad[i] + t_a * gradA;
+	float b = Bd[i] + t_a * gradB;
+	float c = Cd[i] + t_a * gradC;
 
-
-	I[i].x = cos(Bd[i]) * cos(Cd[i]) - cos(Ad[i]) * sin(Bd[i]) * sin(Cd[i]);
-	I[i].y = sin(Bd[i]) * cos(Cd[i]) + cos(Ad[i]) * cos(Bd[i]) * sin(Cd[i]);
-	I[i].z = sin(Ad[i]) * sin(Cd[i]);
+	I[i].x = cos(b) * cos(c) - cos(a) * sin(b) * sin(c);
+	I[i].y = sin(b) * cos(c) + cos(a) * cos(b) * sin(c);
+	I[i].z = sin(a) * sin(c);
 }
 
 [numthreads(64, 1, 1)]
@@ -141,9 +199,17 @@ void cs_calculate_axis_J(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	J[i].x = -cos(Bd[i]) * sin(Cd[i]) - cos(Ad[i]) * sin(Bd[i]) * cos(Cd[i]);
-	J[i].y = -sin(Bd[i]) * sin(Cd[i]) + cos(Ad[i]) * cos(Bd[i]) * cos(Cd[i]);
-	J[i].z = sin(Ad[i]) * cos(Cd[i]);
+	float gradA = fetchGrad(AdId(i), gradError_a);
+	float gradB = fetchGrad(BdId(i), gradError_a);
+	float gradC = fetchGrad(CdId(i), gradError_a);
+
+	float a = Ad[i] + t_a * gradA;
+	float b = Bd[i] + t_a * gradB;
+	float c = Cd[i] + t_a * gradC;
+
+	J[i].x = -cos(b) * sin(c) - cos(a) * sin(b) * cos(c);
+	J[i].y = -sin(b) * sin(c) + cos(a) * cos(b) * cos(c);
+	J[i].z = sin(a) * cos(c);
 }
 
 [numthreads(64, 1, 1)]
@@ -153,9 +219,17 @@ void cs_calculate_axis_K(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	K[i].x = sin(Ad[i]) * sin(Bd[i]);
-	K[i].y = -sin(Ad[i]) * cos(Bd[i]);
-	K[i].z = cos(Ad[i]);
+	float gradA = fetchGrad(AdId(i), gradError_a);
+	float gradB = fetchGrad(BdId(i), gradError_a);
+	float gradC = fetchGrad(CdId(i), gradError_a);
+
+	float a = Ad[i] + t_a * gradA;
+	float b = Bd[i] + t_a * gradB;
+	float c = Cd[i] + t_a * gradC;
+
+	K[i].x = sin(a) * sin(b);
+	K[i].y = -sin(a) * cos(b);
+	K[i].z = cos(a);
 }
 
 [numthreads(64, 1, 1)]
@@ -353,16 +427,6 @@ void cs_calculate_grad_of_xyz_a(uint3 dispatchThreadID : SV_DispatchThreadID)
 	dXYZdB[i].z = -R[i] * sin(B[i]);
 }
 
-uint RcId(uint cameraId)
-{
-	return cameraId * 2;
-}
-
-uint Rid(uint vertexId)
-{
-	return amountOfCameras * 2 + vertexId * 2;
-}
-
 [numthreads(64, 1, 1)]
 void cs_calculate_grad_of_error_r(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
@@ -403,41 +467,6 @@ void cs_calculate_grad_of_error_r(uint3 dispatchThreadID : SV_DispatchThreadID)
 		Rid(vertexId),
 		gradError_r
 	);
-}
-
-uint AcId(uint cameraId)
-{
-	return cameraId * 10;
-}
-
-uint BcId(uint cameraId)
-{
-	return cameraId * 10 + 2;
-}
-
-uint AdId(uint cameraId)
-{
-	return cameraId * 10 + 4;
-}
-
-uint BdId(uint cameraId)
-{
-	return cameraId * 10 + 6;
-}
-
-uint CdId(uint cameraId)
-{
-	return cameraId * 10 + 8;
-}
-
-uint Aid(uint vertexId)
-{
-	return amountOfCameras * 10 + vertexId * 4;
-}
-
-uint Bid(uint vertexId)
-{
-	return amountOfCameras * 10 + vertexId * 4 + 2;
 }
 
 [numthreads(64, 1, 1)]
