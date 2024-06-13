@@ -81,6 +81,8 @@ StructuredBuffer<int> gradError_r_in;
 RWStructuredBuffer<int> gradError_a;
 StructuredBuffer<int> gradError_a_in;
 
+RWStructuredBuffer<uint> minGradComponent_a;
+
 int amountOfCameras;
 int amountOfVertices;
 int amountOfPointsOnPhotos;
@@ -179,9 +181,9 @@ void cs_calculate_axis_I(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	float gradA = fetchGrad(AdId(i), gradError_a);
-	float gradB = fetchGrad(BdId(i), gradError_a);
-	float gradC = fetchGrad(CdId(i), gradError_a);
+	float gradA = fetchGrad(AdId(i), gradError_a_in);
+	float gradB = fetchGrad(BdId(i), gradError_a_in);
+	float gradC = fetchGrad(CdId(i), gradError_a_in);
 
 	float a = Ad[i] + t_a * gradA;
 	float b = Bd[i] + t_a * gradB;
@@ -199,9 +201,9 @@ void cs_calculate_axis_J(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	float gradA = fetchGrad(AdId(i), gradError_a);
-	float gradB = fetchGrad(BdId(i), gradError_a);
-	float gradC = fetchGrad(CdId(i), gradError_a);
+	float gradA = fetchGrad(AdId(i), gradError_a_in);
+	float gradB = fetchGrad(BdId(i), gradError_a_in);
+	float gradC = fetchGrad(CdId(i), gradError_a_in);
 
 	float a = Ad[i] + t_a * gradA;
 	float b = Bd[i] + t_a * gradB;
@@ -219,9 +221,9 @@ void cs_calculate_axis_K(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	float gradA = fetchGrad(AdId(i), gradError_a);
-	float gradB = fetchGrad(BdId(i), gradError_a);
-	float gradC = fetchGrad(CdId(i), gradError_a);
+	float gradA = fetchGrad(AdId(i), gradError_a_in);
+	float gradB = fetchGrad(BdId(i), gradError_a_in);
+	float gradC = fetchGrad(CdId(i), gradError_a_in);
 
 	float a = Ad[i] + t_a * gradA;
 	float b = Bd[i] + t_a * gradB;
@@ -239,9 +241,17 @@ void cs_calculate_xyzc(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfCameras)
 		return;
 
-	xyzc[i].x = Rc[i] * sin(Bc[i]) * cos(Ac[i]);
-	xyzc[i].y = Rc[i] * sin(Bc[i]) * sin(Ac[i]);
-	xyzc[i].z = Rc[i] * cos(Bc[i]);
+	float gradR = fetchGrad(RcId(i), gradError_r_in);
+	float gradA = fetchGrad(AcId(i), gradError_a_in);
+	float gradB = fetchGrad(BcId(i), gradError_a_in);
+
+	float r = Rc[i] + t_r * gradR;
+	float a = Ac[i] + t_a * gradA;
+	float b = Bc[i] + t_a * gradB;
+
+	xyzc[i].x = r * sin(b) * cos(a);
+	xyzc[i].y = r * sin(b) * sin(a);
+	xyzc[i].z = r * cos(b);
 }
 
 [numthreads(64, 1, 1)]
@@ -251,9 +261,17 @@ void cs_calculate_xyz(uint3 dispatchThreadID : SV_DispatchThreadID)
 	if (i >= amountOfVertices)
 		return;
 
-	xyz[i].x = R[i] * sin(B[i]) * cos(A[i]);
-	xyz[i].y = R[i] * sin(B[i]) * sin(A[i]);
-	xyz[i].z = R[i] * cos(B[i]);
+	float gradR = fetchGrad(Rid(i), gradError_r_in);
+	float gradA = fetchGrad(Aid(i), gradError_a_in);
+	float gradB = fetchGrad(Bid(i), gradError_a_in);
+
+	float r = R[i] + t_r * gradR;
+	float a = A[i] + t_a * gradA;
+	float b = B[i] + t_a * gradB;
+
+	xyz[i].x = r * sin(b) * cos(a);
+	xyz[i].y = r * sin(b) * sin(a);
+	xyz[i].z = r * cos(b);
 }
 
 [numthreads(64, 1, 1)]
@@ -554,3 +572,41 @@ void cs_calculate_grad_of_error_a(uint3 dispatchThreadID : SV_DispatchThreadID)
 	);
 }
 
+[numthreads(64, 1, 1)]
+void cs_calculate_min_grad_component_a(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint i = dispatchThreadID.x;
+	if (i >= amountOfCameras + amountOfVertices)
+		return;
+
+	float minGrad = 0;
+	if (i < amountOfCameras)
+	{
+		float gradAc = abs(fetchGrad(AcId(i), gradError_a_in));
+		float gradBc = abs(fetchGrad(BcId(i), gradError_a_in));
+
+		float gradAd = abs(fetchGrad(AdId(i), gradError_a_in));
+		float gradBd = abs(fetchGrad(BdId(i), gradError_a_in));
+		float gradCd = abs(fetchGrad(CdId(i), gradError_a_in));
+
+		minGrad = min(gradAc, gradBc);
+		minGrad = min(minGrad, gradAd);
+		minGrad = min(minGrad, gradBd);
+		minGrad = min(minGrad, gradCd);
+	}
+	else
+	{
+		i -= amountOfCameras;
+
+		float gradA = abs(fetchGrad(Aid(i), gradError_a_in));
+		float gradB = abs(fetchGrad(Bid(i), gradError_a_in));
+
+		minGrad = min(gradA, gradB);
+	}
+
+	float d = 1000000.0f;
+	uint ui = minGrad * d;
+
+	uint originalValue = 0;
+	InterlockedMin(minGradComponent_a[0], ui, originalValue);
+}
