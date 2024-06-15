@@ -1,3 +1,5 @@
+#include "constants.hlsl"
+
 RWStructuredBuffer<float> Rc_out;
 RWStructuredBuffer<float> Ac_out;
 RWStructuredBuffer<float> Bc_out;
@@ -184,6 +186,91 @@ float fetchGrad(uint index, StructuredBuffer<int> grad)
 	float f = (float)(i)+(float)(ifraction) / d;
 
 	return f;
+}
+
+[numthreads(64, 1, 1)]
+void cs_init_vertices(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint i = dispatchThreadId.x;
+	if (i >= amountOfVertices)
+		return;
+
+	R_out[i] = 1.0f;
+	A_out[i] = 0.5f * PI;
+	B_out[i] = 0.5f * PI;
+}
+
+[numthreads(64, 1, 1)]
+void cs_init_cameras(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	uint i = dispatchThreadId.x;
+	if (i >= amountOfCameras)
+		return;
+
+	Rc_out[i] = 4.0f;
+	Ac_out[i] = 0.5f * PI;
+	Bc_out[i] = 0.5f * PI;
+
+	Ad_out[i] = 0.5f * PI;
+	Bd_out[i] = 0.0f;
+	Cd_out[i] = 0.0f;
+}
+
+[numthreads(64, 1, 1)]
+void cs_init_angle_gradients(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int i = dispatchThreadID.x;
+	if (i >= amountOfCameras + amountOfVertices)
+		return;
+
+	if (i < amountOfCameras)
+	{
+		gradError_a[AcId(i)] = 0;
+		gradError_a[AcId(i) + 1] = 0;
+
+		gradError_a[BcId(i)] = 0;
+		gradError_a[BcId(i) + 1] = 0;
+
+		gradError_a[Adid(i)] = 0;
+		gradError_a[AdId(i) + 1] = 0;
+
+		gradError_a[Bdid(i)] = 0;
+		gradError_a[BdId(i) + 1] = 0;
+
+		gradError_a[Cdid(i)] = 0;
+		gradError_a[CdId(i) + 1] = 0;
+	}
+	else
+	{
+		i -= amountOfCameras;
+
+		gradError_a[Aid(i)] = 0;
+		gradError_a[Aid(i) + 1] = 0;
+
+		gradError_a[Bid(i)] = 0;
+		gradError_a[Bid(i) + 1] = 0;
+	}
+}
+
+[numthreads(64, 1, 1)]
+void cs_init_radial_gradients(uint3 dispatchThreadID : SV_DispatchThreadID)
+{
+	int i = dispatchThreadID.x;
+	if (i >= amountOfCameras + amountOfVertices)
+		return;
+
+	if (i < amountOfCameras)
+	{
+		gradError_r[RcId(i)] = 0;
+		gradError_r[RcId(i) + 1] = 0;
+	}
+	else
+	{
+		i -= amountOfCameras;
+
+		gradError_r[Rid(i)] = 0;
+		gradError_r[Rid(i) + 1] = 0;
+	}
 }
 
 [numthreads(64, 1, 1)]
@@ -667,11 +754,150 @@ void cs_update_radiuses(uint3 dispatchThreadID : SV_DispatchThreadID)
 
 	if (i < amountOfCameras)
 	{
-		
+		float gradR = fetchGrad(RcId(i), gradError_r_in);
+		Rc_out[i] -= t_r * gradR;
 	}
 	else
 	{
 		i -= amountOfCameras;
 
+		float gradR = fetchGrad(Rid(i), gradError_r_in);
+		R_out[i] -= t_r * gradR;
 	}
 }
+
+technique11 TransformTo3dVertices
+{
+	pass P0
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_init_vertices()));
+	}
+	pass P1
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_init_cameras()));
+	}
+	pass P2
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_init_angle_gradients()));
+	}
+	pass P3
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_init_radial_gradients()));
+	}
+	pass P4
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_axis_I()));
+	}
+	pass P5
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_axis_J()));
+	}
+	pass P6
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_axis_K()));
+	}
+	pass P7
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_xyzc()));
+	}
+	pass P8
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_xyz()));
+	}
+	pass P9
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_error()));
+	}
+	pass P10
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_axis_I()));
+	}
+	pass P11
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_axis_J()));
+	}
+	pass P12
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_axis_K()));
+	}
+	pass P13
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_xyzc_r()));
+	}
+	pass P14
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_xyzc_a()));
+	}
+	pass P15
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_xyz_r()));
+	}
+	pass P16
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_xyz_a()));
+	}
+	pass P17
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_error_r()));
+	}
+	pass P18
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_grad_of_error_a()));
+	}
+	pass P19
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_calculate_min_grad_component_a()));
+	}
+	pass P20
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_update_angles()));
+	}
+	pass P21
+	{
+		SetVertexShader(NULL);
+		SetPixelShader(NULL);
+		SetComputeShader(CompileShader(cs_5_0, cs_update_radiuses()));
+	}
+};

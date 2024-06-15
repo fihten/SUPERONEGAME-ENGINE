@@ -43,15 +43,15 @@ void GraphicsCore::init(HINSTANCE instanceHandle, int show, WNDPROC WndProc, WND
 
 	// 1. Create the ID3D11Device and ID3D11DeviceContext interfaces using the D3D11CreateDevice function.
 
-	UINT flag = 0;
+	UINT flag = D3D11_CREATE_DEVICE_DISABLE_GPU_TIMEOUT;
 #if defined(_DEBUG)
-	flag = D3D11_CREATE_DEVICE_DEBUG;
+	flag |= D3D11_CREATE_DEVICE_DEBUG;
 #endif
 
-	D3D_FEATURE_LEVEL pFeatureLevels[] = { D3D_FEATURE_LEVEL_11_0 };
+	D3D_FEATURE_LEVEL pFeatureLevels[] = { D3D_FEATURE_LEVEL_11_1 };
 	D3D_FEATURE_LEVEL featureLevel;
 
-	D3D11CreateDevice(
+	auto hres = D3D11CreateDevice(
 		nullptr,
 		D3D_DRIVER_TYPE_HARDWARE,
 		0,

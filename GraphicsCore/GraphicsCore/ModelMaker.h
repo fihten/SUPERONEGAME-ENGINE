@@ -27,7 +27,7 @@ that produces flight simulator.
 #define OFFSET0_X 128
 #define OFFSET0_Y 128
 
-#define RADIUS_IN_CELLS 8 
+#define RADIUS_IN_CELLS 4 
 
 struct GridIntegralsA
 {
@@ -386,6 +386,178 @@ public:
 		ID3D11ShaderResourceView* AtoBz,
 		ID3D11ShaderResourceView* AtoBw,
 		const Vec2d<int>& point
+	);
+};
+
+struct TransformTo3dVertices
+{
+	ID3DX11Effect* hEffect = nullptr;
+	ID3DX11EffectTechnique* hTechnique = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* Rc_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* Ac_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* Bc_out = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* Ad_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* Bd_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* Cd_out = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* R_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* A_out = nullptr;
+	ID3DX11EffectUnorderedAccessViewVariable* B_out = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* Rc = nullptr;
+	ID3DX11EffectShaderResourceVariable* Ac = nullptr;
+	ID3DX11EffectShaderResourceVariable* Bc = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* Ad = nullptr;
+	ID3DX11EffectShaderResourceVariable* Bd = nullptr;
+	ID3DX11EffectShaderResourceVariable* Cd = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* R = nullptr;
+	ID3DX11EffectShaderResourceVariable* A = nullptr;
+	ID3DX11EffectShaderResourceVariable* B = nullptr;
+
+	ID3DX11EffectShaderResourceVariable* pointsOnPhotos = nullptr;
+	ID3DX11EffectShaderResourceVariable* mapToVertexAndCamera = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* I = nullptr;
+	ID3DX11EffectShaderResourceVariable* Iin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* J = nullptr;
+	ID3DX11EffectShaderResourceVariable* Jin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* K = nullptr;
+	ID3DX11EffectShaderResourceVariable* Kin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* xyzc = nullptr;
+	ID3DX11EffectShaderResourceVariable* xyzc_in = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* xyz = nullptr;
+	ID3DX11EffectShaderResourceVariable* xyz_in = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* error = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dIdA = nullptr;
+	ID3DX11EffectShaderResourceVariable* dIdAin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dIdB = nullptr;
+	ID3DX11EffectShaderResourceVariable* dIdBin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dIdC = nullptr;
+	ID3DX11EffectShaderResourceVariable* dIdCin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dJdA = nullptr;
+	ID3DX11EffectShaderResourceVariable* dJdAin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dJdB = nullptr;
+	ID3DX11EffectShaderResourceVariable* dJdBin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dJdC = nullptr;
+	ID3DX11EffectShaderResourceVariable* dJdCin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dKdA = nullptr;
+	ID3DX11EffectShaderResourceVariable* dKdAin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dKdB = nullptr;
+	ID3DX11EffectShaderResourceVariable* dKdBin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dKdC = nullptr;
+	ID3DX11EffectShaderResourceVariable* dKdCin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZCdR = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZCdRin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZCdA = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZCdAin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZCdB = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZCdBin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZdR = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZdRin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZdA = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZdAin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* dXYZdB = nullptr;
+	ID3DX11EffectShaderResourceVariable* dXYZdBin = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* gradError_r = nullptr;
+	ID3DX11EffectShaderResourceVariable* gradError_r_in = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* gradError_a = nullptr;
+	ID3DX11EffectShaderResourceVariable* gradError_a_in = nullptr;
+
+	ID3DX11EffectUnorderedAccessViewVariable* minGradComponent_a = nullptr;
+
+	ID3DX11EffectVariable* amountOfCameras = nullptr;
+	ID3DX11EffectVariable* amountOfVertices = nullptr;
+	ID3DX11EffectVariable* amountOfPointsOnPhotos = nullptr;
+
+	ID3DX11EffectVariable* t_r = nullptr;
+	ID3DX11EffectVariable* t_a = nullptr;
+
+public:
+	ID3D11Buffer* Rc_buf = nullptr;
+	ID3D11Buffer* Ac_buf = nullptr;
+	ID3D11Buffer* Bc_buf = nullptr;
+
+	ID3D11Buffer* Ad_buf = nullptr;
+	ID3D11Buffer* Bd_buf = nullptr;
+	ID3D11Buffer* Cd_buf = nullptr;
+
+	ID3D11Buffer* R_buf = nullptr;
+	ID3D11Buffer* A_buf = nullptr;
+	ID3D11Buffer* B_buf = nullptr;
+
+	ID3D11Buffer* pointsOnPhotos_buf = nullptr;
+	ID3D11Buffer* mapToVertexAndCamera_buf = nullptr;
+
+	ID3D11Buffer* I_buf = nullptr;
+	ID3D11Buffer* J_buf = nullptr;
+	ID3D11Buffer* K_buf = nullptr;
+
+	ID3D11Buffer* xyzc_buf = nullptr;
+	ID3D11Buffer* xyz_buf = nullptr;
+
+	ID3D11Buffer* error_buf = nullptr;
+
+	ID3D11Buffer* dIdA_buf = nullptr;
+	ID3D11Buffer* dIdB_buf = nullptr;
+	ID3D11Buffer* dIdC_buf = nullptr;
+
+	ID3D11Buffer* dJdA_buf = nullptr;
+	ID3D11Buffer* dJdB_buf = nullptr;
+	ID3D11Buffer* dJdC_buf = nullptr;
+
+	ID3D11Buffer* dKdA_buf = nullptr;
+	ID3D11Buffer* dKdB_buf = nullptr;
+	ID3D11Buffer* dKdC_buf = nullptr;
+
+	ID3D11Buffer* dXYZCdR_buf = nullptr;
+	ID3D11Buffer* dXYZCdA_buf = nullptr;
+	ID3D11Buffer* dXYZCdB_buf = nullptr;
+
+	ID3D11Buffer* dXYZdR_buf = nullptr;
+	ID3D11Buffer* dXYZdA_buf = nullptr;
+	ID3D11Buffer* dXYZdB_buf = nullptr;
+
+	ID3D11Buffer* gradError_r_buf = nullptr;
+	ID3D11Buffer* gradError_a_buf = nullptr;
+
+	ID3D11Buffer* minGradComponent_a_buf = nullptr;
+
+public:
+	int amountOfCameras_ = 0;
+	int amountOfVertices_ = 0;
+
+public:
+	void init();
+	void setPointsOnPhotos(
+		flt2* points,
+		Vec2d<uint32_t>* mapping,
+		int count
 	);
 };
 

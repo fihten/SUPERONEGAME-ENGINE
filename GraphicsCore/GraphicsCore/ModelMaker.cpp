@@ -1168,6 +1168,153 @@ Vec4d<int> FindNearestDefinedPoint::findNearestPoint(
 	return res;
 }
 
+void TransformTo3dVertices::init()
+{
+	char shadersFolder[200];
+	int sz = sizeof shadersFolder / sizeof * shadersFolder;
+	GetEnvironmentVariableA("SPECIAL_PURPOSE_SHADERS", shadersFolder, sz);
+
+	std::string sFindNearestDefinedPoint = std::string(shadersFolder) + "\\TransformationFromTheSamePointsTo3dVertices.hlsl";
+
+	DWORD shaderFlags = 0;
+	//#if defined(DEBUG) || defined(_DEBUG)
+	//	shaderFlags |= D3D10_SHADER_DEBUG;
+	//	shaderFlags |= D3D10_SHADER_SKIP_OPTIMIZATION;
+	//#endif
+
+	ID3D10Blob* compiledShader = 0;
+	ID3D10Blob* compilationMsgs = 0;
+	HRESULT res = D3DX11CompileFromFileA(sFindNearestDefinedPoint.c_str(), 0, 0, 0, "fx_5_0", shaderFlags, 0, 0, &compiledShader, &compilationMsgs, 0);
+	if (res != S_OK)
+	{
+		MessageBoxA(0, (char*)compilationMsgs->GetBufferPointer(), 0, MB_OK);
+		return;
+	}
+	auto device = GraphicsCore::instance()->device;
+	D3DX11CreateEffectFromMemory(compiledShader->GetBufferPointer(), compiledShader->GetBufferSize(), 0, device, &hEffect);
+
+	hTechnique = hEffect->GetTechniqueByName("TransformTo3dVertices");
+
+	Rc_out = hEffect->GetVariableByName("Rc_out")->AsUnorderedAccessView();
+	Ac_out = hEffect->GetVariableByName("Ac_out")->AsUnorderedAccessView();
+	Bc_out = hEffect->GetVariableByName("Bc_out")->AsUnorderedAccessView();
+
+	Ad_out = hEffect->GetVariableByName("Ad_out")->AsUnorderedAccessView();
+	Bd_out = hEffect->GetVariableByName("Bd_out")->AsUnorderedAccessView();
+	Cd_out = hEffect->GetVariableByName("Cd_out")->AsUnorderedAccessView();
+
+	R_out = hEffect->GetVariableByName("R_out")->AsUnorderedAccessView();
+	A_out = hEffect->GetVariableByName("A_out")->AsUnorderedAccessView();
+	B_out = hEffect->GetVariableByName("B_out")->AsUnorderedAccessView();
+
+	Rc = hEffect->GetVariableByName("Rc")->AsShaderResource();
+	Ac = hEffect->GetVariableByName("Ac")->AsShaderResource();
+	Bc = hEffect->GetVariableByName("Bc")->AsShaderResource();
+
+	Ad = hEffect->GetVariableByName("Ad")->AsShaderResource();
+	Bd = hEffect->GetVariableByName("Bd")->AsShaderResource();
+	Cd = hEffect->GetVariableByName("Cd")->AsShaderResource();
+
+	R = hEffect->GetVariableByName("R")->AsShaderResource();
+	A = hEffect->GetVariableByName("A")->AsShaderResource();
+	B = hEffect->GetVariableByName("B")->AsShaderResource();
+
+	pointsOnPhotos = hEffect->GetVariableByName("pointsOnPhotos")->AsShaderResource();
+	mapToVertexAndCamera = hEffect->GetVariableByName("mapToVertexAndCamera")->AsShaderResource();
+
+	I = hEffect->GetVariableByName("I")->AsUnorderedAccessView();
+	Iin = hEffect->GetVariableByName("Iin")->AsShaderResource();
+
+	J = hEffect->GetVariableByName("J")->AsUnorderedAccessView();
+	Jin = hEffect->GetVariableByName("Jin")->AsShaderResource();
+
+	K = hEffect->GetVariableByName("K")->AsUnorderedAccessView();
+	Kin = hEffect->GetVariableByName("Kin")->AsShaderResource();
+
+	xyzc = hEffect->GetVariableByName("xyzc")->AsUnorderedAccessView();
+	xyzc_in = hEffect->GetVariableByName("xyzc_in")->AsShaderResource();
+
+	xyz = hEffect->GetVariableByName("xyz")->AsUnorderedAccessView();
+	xyz_in = hEffect->GetVariableByName("xyz_in")->AsShaderResource();
+
+	error = hEffect->GetVariableByName("error")->AsUnorderedAccessView();
+
+	dIdA = hEffect->GetVariableByName("dIdA")->AsUnorderedAccessView();
+	dIdAin = hEffect->GetVariableByName("dIdAin")->AsShaderResource();
+
+	dIdB = hEffect->GetVariableByName("dIdB")->AsUnorderedAccessView();
+	dIdBin = hEffect->GetVariableByName("dIdBin")->AsShaderResource();
+
+	dIdC = hEffect->GetVariableByName("dIdC")->AsUnorderedAccessView();
+	dIdCin = hEffect->GetVariableByName("dIdCin")->AsShaderResource();
+
+	dJdA = hEffect->GetVariableByName("dJdA")->AsUnorderedAccessView();
+	dJdAin = hEffect->GetVariableByName("dJdAin")->AsShaderResource();
+
+	dJdB = hEffect->GetVariableByName("dJdB")->AsUnorderedAccessView();
+	dJdBin = hEffect->GetVariableByName("dJdBin")->AsShaderResource();
+
+	dJdC = hEffect->GetVariableByName("dJdC")->AsUnorderedAccessView();
+	dJdCin = hEffect->GetVariableByName("dJdCin")->AsShaderResource();
+
+	dKdA = hEffect->GetVariableByName("dKdA")->AsUnorderedAccessView();
+	dKdAin = hEffect->GetVariableByName("dKdAin")->AsShaderResource();
+
+	dKdB = hEffect->GetVariableByName("dKdB")->AsUnorderedAccessView();
+	dKdBin = hEffect->GetVariableByName("dKdBin")->AsShaderResource();
+
+	dKdC = hEffect->GetVariableByName("dKdC")->AsUnorderedAccessView();
+	dKdCin = hEffect->GetVariableByName("dKdCin")->AsShaderResource();
+
+	dXYZCdR = hEffect->GetVariableByName("dXYZCdR")->AsUnorderedAccessView();
+	dXYZCdRin = hEffect->GetVariableByName("dXYZCdRin")->AsShaderResource();
+
+	dXYZCdA = hEffect->GetVariableByName("dXYZCdA")->AsUnorderedAccessView();
+	dXYZCdAin = hEffect->GetVariableByName("dXYZCdAin")->AsShaderResource();
+
+	dXYZCdB = hEffect->GetVariableByName("dXYZCdB")->AsUnorderedAccessView();
+	dXYZCdBin = hEffect->GetVariableByName("dXYZCdBin")->AsShaderResource();
+
+	dXYZdR = hEffect->GetVariableByName("dXYZdR")->AsUnorderedAccessView();
+	dXYZdRin = hEffect->GetVariableByName("dXYZdRin")->AsShaderResource();
+
+	dXYZdA = hEffect->GetVariableByName("dXYZdA")->AsUnorderedAccessView();
+	dXYZdAin = hEffect->GetVariableByName("dXYZdAin")->AsShaderResource();
+
+	dXYZdB = hEffect->GetVariableByName("dXYZdB")->AsUnorderedAccessView();
+	dXYZdBin = hEffect->GetVariableByName("dXYZdBin")->AsShaderResource();
+
+	gradError_r = hEffect->GetVariableByName("gradError_r")->AsUnorderedAccessView();
+	gradError_r_in = hEffect->GetVariableByName("gradError_r_in")->AsShaderResource();
+
+	gradError_a = hEffect->GetVariableByName("gradError_a")->AsUnorderedAccessView();
+	gradError_a_in = hEffect->GetVariableByName("gradError_a_in")->AsShaderResource();
+
+	minGradComponent_a = hEffect->GetVariableByName("minGradComponent_a")->AsUnorderedAccessView();
+
+	amountOfCameras = hEffect->GetVariableByName("amountOfCameras");
+	amountOfVertices = hEffect->GetVariableByName("amountOfVertices");
+	amountOfPointsOnPhotos = hEffect->GetVariableByName("amountOfPointsOnPhotos");
+
+	t_r = hEffect->GetVariableByName("t_r");
+	t_a = hEffect->GetVariableByName("t_a");
+}
+
+void TransformTo3dVertices::setPointsOnPhotos(
+	flt2* points,
+	Vec2d<uint32_t>* mapping,
+	int count
+)
+{
+	amountOfCameras_ = 0;
+	amountOfVertices_ = 0;
+	for (int i = 0; i < count; i++)
+	{
+		amountOfVertices_ = std::max<int>(amountOfVertices_, mapping[i].x());
+		amountOfCameras_ = std::max<int>(amountOfCameras_, mapping[i].y());
+	}
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();

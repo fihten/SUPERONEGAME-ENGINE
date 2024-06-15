@@ -46,6 +46,7 @@ class GraphicsCore
 	friend struct OperationsOnGridIntegrals;
 	friend struct LeastSquaresOfJacobianDeterminant;
 	friend struct FindNearestDefinedPoint;
+	friend struct TransformTo3dVertices;
 
 	ID3D11Device* device = 0;
 	ID3D11DeviceContext* context = 0;
