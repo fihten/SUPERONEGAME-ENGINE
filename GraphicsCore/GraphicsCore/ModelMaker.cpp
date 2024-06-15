@@ -1306,12 +1306,45 @@ void TransformTo3dVertices::setPointsOnPhotos(
 	int count
 )
 {
+	auto device = GraphicsCore::instance()->device;
+
 	amountOfCameras_ = 0;
 	amountOfVertices_ = 0;
 	for (int i = 0; i < count; i++)
 	{
 		amountOfVertices_ = std::max<int>(amountOfVertices_, mapping[i].x());
 		amountOfCameras_ = std::max<int>(amountOfCameras_, mapping[i].y());
+	}
+
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = amountOfCameras_ * sizeof(float);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(float);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &Rc_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &Ac_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &Bc_buf);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &Ad_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &Bd_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &Cd_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = amountOfVertices_ * sizeof(float);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(float);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &R_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &A_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &B_buf);
 	}
 }
 
