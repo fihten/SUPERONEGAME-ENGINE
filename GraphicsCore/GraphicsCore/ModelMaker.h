@@ -522,6 +522,7 @@ public:
 	ID3D11Buffer* xyz_buf = nullptr;
 
 	ID3D11Buffer* error_buf = nullptr;
+	ID3D11Buffer* error_copy_buf = nullptr;
 
 	ID3D11Buffer* dIdA_buf = nullptr;
 	ID3D11Buffer* dIdB_buf = nullptr;

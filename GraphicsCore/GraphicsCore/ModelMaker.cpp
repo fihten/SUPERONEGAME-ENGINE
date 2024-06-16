@@ -1346,6 +1346,120 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateBuffer(&buffer_desc, nullptr, &A_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &B_buf);
 	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = count * sizeof(flt2);
+		buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(flt2);
+
+		D3D11_SUBRESOURCE_DATA data;
+		data.pSysMem = points;
+		device->CreateBuffer(&buffer_desc, &data, &pointsOnPhotos_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = count * sizeof(Vec2d<uint32_t>);
+		buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(Vec2d<uint32_t>);
+
+		D3D11_SUBRESOURCE_DATA data;
+		data.pSysMem = mapping;
+		device->CreateBuffer(&buffer_desc, &data, &mapToVertexAndCamera_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = amountOfCameras_ * sizeof(flt3);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(flt3);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &I_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &J_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &K_buf);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &dIdA_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dJdA_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dKdA_buf);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &dIdB_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dJdB_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dKdB_buf);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &dIdC_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dJdC_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dKdC_buf);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &xyzc_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdR_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdA_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdB_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = amountOfVertices_ * sizeof(flt3);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(flt3);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &xyz_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdR_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdA_buf);
+		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdB_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = 2 * sizeof(uint32_t);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &error_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = 2 * sizeof(uint32_t);
+		buffer_desc.Usage = D3D11_USAGE_STAGING;
+		buffer_desc.BindFlags = 0;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &error_copy_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = (amountOfVertices_ + amountOfCameras_) * sizeof(uint32_t) * 2;
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &gradError_r_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = (amountOfVertices_ * 4 + amountOfCameras_ * 10) * sizeof(uint32_t);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_SHADER_RESOURCE | D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &gradError_a_buf);
+	}
 }
 
 void ModelMaker::init()
