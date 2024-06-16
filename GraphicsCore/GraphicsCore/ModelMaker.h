@@ -592,6 +592,9 @@ public:
 	ID3D11ShaderResourceView* dXYZdA_srv = nullptr;
 	ID3D11ShaderResourceView* dXYZdB_srv = nullptr;
 
+	ID3D11ShaderResourceView* gradError_r_srv = nullptr;
+	ID3D11ShaderResourceView* gradError_a_srv = nullptr;
+
 public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;

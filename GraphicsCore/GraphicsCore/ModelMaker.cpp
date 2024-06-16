@@ -1524,6 +1524,14 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		buffer_desc.StructureByteStride = sizeof(uint32_t);
 
 		device->CreateBuffer(&buffer_desc, nullptr, &gradError_r_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = 2 * (amountOfVertices_ + amountOfCameras_);
+
+		device->CreateShaderResourceView(gradError_r_buf, &srv_desc, &gradError_r_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1535,6 +1543,14 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		buffer_desc.StructureByteStride = sizeof(uint32_t);
 
 		device->CreateBuffer(&buffer_desc, nullptr, &gradError_a_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = amountOfVertices_ * 4 + amountOfCameras_ * 10;
+
+		device->CreateShaderResourceView(gradError_a_buf, &srv_desc, &gradError_a_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
