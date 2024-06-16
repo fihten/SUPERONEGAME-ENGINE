@@ -566,6 +566,32 @@ public:
 	ID3D11ShaderResourceView* pointsOnPhotos_srv = nullptr;
 	ID3D11ShaderResourceView* mapToVertexAndCamera_srv = nullptr;
 
+	ID3D11ShaderResourceView* I_srv = nullptr;
+	ID3D11ShaderResourceView* J_srv = nullptr;
+	ID3D11ShaderResourceView* K_srv = nullptr;
+
+	ID3D11ShaderResourceView* dIdA_srv = nullptr;
+	ID3D11ShaderResourceView* dIdB_srv = nullptr;
+	ID3D11ShaderResourceView* dIdC_srv = nullptr;
+
+	ID3D11ShaderResourceView* dJdA_srv = nullptr;
+	ID3D11ShaderResourceView* dJdB_srv = nullptr;
+	ID3D11ShaderResourceView* dJdC_srv = nullptr;
+
+	ID3D11ShaderResourceView* dKdA_srv = nullptr;
+	ID3D11ShaderResourceView* dKdB_srv = nullptr;
+	ID3D11ShaderResourceView* dKdC_srv = nullptr;
+
+	ID3D11ShaderResourceView* xyzc_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZCdR_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZCdA_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZCdB_srv = nullptr;
+
+	ID3D11ShaderResourceView* xyz_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZdR_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZdA_srv = nullptr;
+	ID3D11ShaderResourceView* dXYZdB_srv = nullptr;
+
 public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;

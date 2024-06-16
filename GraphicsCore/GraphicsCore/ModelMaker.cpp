@@ -1439,6 +1439,33 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdR_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdA_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZCdB_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = amountOfCameras_;
+
+		device->CreateShaderResourceView(I_buf, &srv_desc, &I_srv);
+		device->CreateShaderResourceView(J_buf, &srv_desc, &J_srv);
+		device->CreateShaderResourceView(K_buf, &srv_desc, &K_srv);
+
+		device->CreateShaderResourceView(dIdA_buf, &srv_desc, &dIdA_srv);
+		device->CreateShaderResourceView(dJdA_buf, &srv_desc, &dJdA_srv);
+		device->CreateShaderResourceView(dKdA_buf, &srv_desc, &dKdA_srv);
+
+		device->CreateShaderResourceView(dIdB_buf, &srv_desc, &dIdB_srv);
+		device->CreateShaderResourceView(dJdB_buf, &srv_desc, &dJdB_srv);
+		device->CreateShaderResourceView(dKdB_buf, &srv_desc, &dKdB_srv);
+
+		device->CreateShaderResourceView(dIdC_buf, &srv_desc, &dIdC_srv);
+		device->CreateShaderResourceView(dJdC_buf, &srv_desc, &dJdC_srv);
+		device->CreateShaderResourceView(dKdC_buf, &srv_desc, &dKdC_srv);
+
+		device->CreateShaderResourceView(xyzc_buf, &srv_desc, &xyzc_srv);
+		device->CreateShaderResourceView(dXYZCdR_buf, &srv_desc, &dXYZCdR_srv);
+		device->CreateShaderResourceView(dXYZCdA_buf, &srv_desc, &dXYZCdA_srv);
+		device->CreateShaderResourceView(dXYZCdB_buf, &srv_desc, &dXYZCdB_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1453,6 +1480,17 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdR_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdA_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &dXYZdB_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = amountOfVertices_;
+
+		device->CreateShaderResourceView(xyz_buf, &srv_desc, &xyz_srv);
+		device->CreateShaderResourceView(dXYZdR_buf, &srv_desc, &dXYZdR_srv);
+		device->CreateShaderResourceView(dXYZdA_buf, &srv_desc, &dXYZdA_srv);
+		device->CreateShaderResourceView(dXYZdB_buf, &srv_desc, &dXYZdB_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
