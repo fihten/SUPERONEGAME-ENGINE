@@ -1332,6 +1332,20 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateBuffer(&buffer_desc, nullptr, &Ad_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &Bd_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &Cd_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = amountOfCameras_;
+
+		device->CreateShaderResourceView(Rc_buf, &srv_desc, &Rc_srv);
+		device->CreateShaderResourceView(Ac_buf, &srv_desc, &Ac_srv);
+		device->CreateShaderResourceView(Bc_buf, &srv_desc, &Bc_srv);
+
+		device->CreateShaderResourceView(Ad_buf, &srv_desc, &Ad_srv);
+		device->CreateShaderResourceView(Bd_buf, &srv_desc, &Bd_srv);
+		device->CreateShaderResourceView(Cd_buf, &srv_desc, &Cd_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1345,6 +1359,16 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateBuffer(&buffer_desc, nullptr, &R_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &A_buf);
 		device->CreateBuffer(&buffer_desc, nullptr, &B_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = amountOfVertices_;
+
+		device->CreateShaderResourceView(R_buf, &srv_desc, &R_srv);
+		device->CreateShaderResourceView(A_buf, &srv_desc, &A_srv);
+		device->CreateShaderResourceView(B_buf, &srv_desc, &B_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1358,6 +1382,13 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		D3D11_SUBRESOURCE_DATA data;
 		data.pSysMem = points;
 		device->CreateBuffer(&buffer_desc, &data, &pointsOnPhotos_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = count;
+		device->CreateShaderResourceView(pointsOnPhotos_buf, &srv_desc, &pointsOnPhotos_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1371,6 +1402,13 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		D3D11_SUBRESOURCE_DATA data;
 		data.pSysMem = mapping;
 		device->CreateBuffer(&buffer_desc, &data, &mapToVertexAndCamera_buf);
+
+		D3D11_SHADER_RESOURCE_VIEW_DESC srv_desc;
+		srv_desc.Format = DXGI_FORMAT_UNKNOWN;
+		srv_desc.ViewDimension = D3D11_SRV_DIMENSION_BUFFER;
+		srv_desc.Buffer.FirstElement = 0;
+		srv_desc.Buffer.NumElements = count;
+		device->CreateShaderResourceView(mapToVertexAndCamera_buf, &srv_desc, &mapToVertexAndCamera_srv);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1459,6 +1497,28 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		buffer_desc.StructureByteStride = sizeof(uint32_t);
 
 		device->CreateBuffer(&buffer_desc, nullptr, &gradError_a_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = sizeof(uint32_t);
+		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+		buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
+		buffer_desc.CPUAccessFlags = 0;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &minGradComponent_a_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = sizeof(uint32_t);
+		buffer_desc.Usage = D3D11_USAGE_STAGING;
+		buffer_desc.BindFlags = 0;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(uint32_t);
+
+		device->CreateBuffer(&buffer_desc, nullptr, &minGradComponent_a_copy_buf);
 	}
 }
 

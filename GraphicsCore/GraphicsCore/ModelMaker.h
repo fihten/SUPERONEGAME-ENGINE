@@ -548,6 +548,23 @@ public:
 	ID3D11Buffer* gradError_a_buf = nullptr;
 
 	ID3D11Buffer* minGradComponent_a_buf = nullptr;
+	ID3D11Buffer* minGradComponent_a_copy_buf = nullptr;
+
+public:
+	ID3D11ShaderResourceView* Rc_srv = nullptr;
+	ID3D11ShaderResourceView* Ac_srv = nullptr;
+	ID3D11ShaderResourceView* Bc_srv = nullptr;
+
+	ID3D11ShaderResourceView* Ad_srv = nullptr;
+	ID3D11ShaderResourceView* Bd_srv = nullptr;
+	ID3D11ShaderResourceView* Cd_srv = nullptr;
+
+	ID3D11ShaderResourceView* R_srv = nullptr;
+	ID3D11ShaderResourceView* A_srv = nullptr;
+	ID3D11ShaderResourceView* B_srv = nullptr;
+
+	ID3D11ShaderResourceView* pointsOnPhotos_srv = nullptr;
+	ID3D11ShaderResourceView* mapToVertexAndCamera_srv = nullptr;
 
 public:
 	int amountOfCameras_ = 0;
