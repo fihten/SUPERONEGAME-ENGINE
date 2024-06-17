@@ -596,6 +596,19 @@ public:
 	ID3D11ShaderResourceView* gradError_a_srv = nullptr;
 
 public:
+	ID3D11UnorderedAccessView* Rc_uav = nullptr;
+	ID3D11UnorderedAccessView* Ac_uav = nullptr;
+	ID3D11UnorderedAccessView* Bc_uav = nullptr;
+
+	ID3D11UnorderedAccessView* Ad_uav = nullptr;
+	ID3D11UnorderedAccessView* Bd_uav = nullptr;
+	ID3D11UnorderedAccessView* Cd_uav = nullptr;
+
+	ID3D11UnorderedAccessView* R_uav = nullptr;
+	ID3D11UnorderedAccessView* A_uav = nullptr;
+	ID3D11UnorderedAccessView* B_uav = nullptr;
+
+public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;
 
