@@ -1492,6 +1492,32 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateShaderResourceView(dXYZCdR_buf, &srv_desc, &dXYZCdR_srv);
 		device->CreateShaderResourceView(dXYZCdA_buf, &srv_desc, &dXYZCdA_srv);
 		device->CreateShaderResourceView(dXYZCdB_buf, &srv_desc, &dXYZCdB_srv);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = amountOfCameras_;
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(I_buf, &uav_desc, &I_uav);
+		device->CreateUnorderedAccessView(J_buf, &uav_desc, &J_uav);
+		device->CreateUnorderedAccessView(K_buf, &uav_desc, &K_uav);
+
+		device->CreateUnorderedAccessView(dIdA_buf, &uav_desc, &dIdA_uav);
+		device->CreateUnorderedAccessView(dJdA_buf, &uav_desc, &dJdA_uav);
+		device->CreateUnorderedAccessView(dKdA_buf, &uav_desc, &dKdA_uav);
+
+		device->CreateUnorderedAccessView(dIdB_buf, &uav_desc, &dIdB_uav);
+		device->CreateUnorderedAccessView(dJdB_buf, &uav_desc, &dJdB_uav);
+		device->CreateUnorderedAccessView(dKdB_buf, &uav_desc, &dKdB_uav);
+
+		device->CreateUnorderedAccessView(dIdC_buf, &uav_desc, &dIdC_uav);
+		device->CreateUnorderedAccessView(dJdC_buf, &uav_desc, &dJdC_uav);
+		device->CreateUnorderedAccessView(dKdC_buf, &uav_desc, &dKdC_uav);
+
+		device->CreateUnorderedAccessView(xyzc_buf, &uav_desc, &xyzc_uav);
+		device->CreateUnorderedAccessView(dXYZCdR_buf, &uav_desc, &dXYZCdR_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;

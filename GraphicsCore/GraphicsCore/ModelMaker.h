@@ -608,6 +608,27 @@ public:
 	ID3D11UnorderedAccessView* A_uav = nullptr;
 	ID3D11UnorderedAccessView* B_uav = nullptr;
 
+	ID3D11UnorderedAccessView* I_uav = nullptr;
+	ID3D11UnorderedAccessView* J_uav = nullptr;
+	ID3D11UnorderedAccessView* K_uav = nullptr;
+
+	ID3D11UnorderedAccessView* dIdA_uav = nullptr;
+	ID3D11UnorderedAccessView* dIdB_uav = nullptr;
+	ID3D11UnorderedAccessView* dIdC_uav = nullptr;
+
+	ID3D11UnorderedAccessView* dJdA_uav = nullptr;
+	ID3D11UnorderedAccessView* dJdB_uav = nullptr;
+	ID3D11UnorderedAccessView* dJdC_uav = nullptr;
+
+	ID3D11UnorderedAccessView* dKdA_uav = nullptr;
+	ID3D11UnorderedAccessView* dKdB_uav = nullptr;
+	ID3D11UnorderedAccessView* dKdC_uav = nullptr;
+
+	ID3D11UnorderedAccessView* xyzc_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZCdR_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZCdA_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZCdB_uav = nullptr;
+
 public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;
