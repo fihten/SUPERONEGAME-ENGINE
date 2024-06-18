@@ -1518,6 +1518,8 @@ void TransformTo3dVertices::setPointsOnPhotos(
 
 		device->CreateUnorderedAccessView(xyzc_buf, &uav_desc, &xyzc_uav);
 		device->CreateUnorderedAccessView(dXYZCdR_buf, &uav_desc, &dXYZCdR_uav);
+		device->CreateUnorderedAccessView(dXYZCdA_buf, &uav_desc, &dXYZCdA_uav);
+		device->CreateUnorderedAccessView(dXYZCdB_buf, &uav_desc, &dXYZCdB_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1543,6 +1545,18 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		device->CreateShaderResourceView(dXYZdR_buf, &srv_desc, &dXYZdR_srv);
 		device->CreateShaderResourceView(dXYZdA_buf, &srv_desc, &dXYZdA_srv);
 		device->CreateShaderResourceView(dXYZdB_buf, &srv_desc, &dXYZdB_srv);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = amountOfVertices_;
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(xyz_buf, &uav_desc, &xyz_uav);
+		device->CreateUnorderedAccessView(dXYZdR_buf, &uav_desc, &dXYZdR_uav);
+		device->CreateUnorderedAccessView(dXYZdA_buf, &uav_desc, &dXYZdA_uav);
+		device->CreateUnorderedAccessView(dXYZdB_buf, &uav_desc, &dXYZdB_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1554,6 +1568,15 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		buffer_desc.StructureByteStride = sizeof(uint32_t);
 
 		device->CreateBuffer(&buffer_desc, nullptr, &error_buf);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = 2;
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(error_buf, &uav_desc, &error_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1584,6 +1607,15 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		srv_desc.Buffer.NumElements = 2 * (amountOfVertices_ + amountOfCameras_);
 
 		device->CreateShaderResourceView(gradError_r_buf, &srv_desc, &gradError_r_srv);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = 2 * (amountOfVertices_ + amountOfCameras_);
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(gradError_r_buf, &uav_desc, &gradError_r_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1603,6 +1635,15 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		srv_desc.Buffer.NumElements = amountOfVertices_ * 4 + amountOfCameras_ * 10;
 
 		device->CreateShaderResourceView(gradError_a_buf, &srv_desc, &gradError_a_srv);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = amountOfVertices_ * 4 + amountOfCameras_ * 10;
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(gradError_a_buf, &uav_desc, &gradError_a_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1614,6 +1655,15 @@ void TransformTo3dVertices::setPointsOnPhotos(
 		buffer_desc.StructureByteStride = sizeof(uint32_t);
 
 		device->CreateBuffer(&buffer_desc, nullptr, &minGradComponent_a_buf);
+
+		D3D11_UNORDERED_ACCESS_VIEW_DESC uav_desc;
+		uav_desc.Format = DXGI_FORMAT_UNKNOWN;
+		uav_desc.ViewDimension = D3D11_UAV_DIMENSION_BUFFER;
+		uav_desc.Buffer.FirstElement = 0;
+		uav_desc.Buffer.NumElements = 1;
+		uav_desc.Buffer.Flags = 0;
+
+		device->CreateUnorderedAccessView(minGradComponent_a_buf, &uav_desc, &minGradComponent_a_uav);
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
@@ -1626,6 +1676,37 @@ void TransformTo3dVertices::setPointsOnPhotos(
 
 		device->CreateBuffer(&buffer_desc, nullptr, &minGradComponent_a_copy_buf);
 	}
+}
+
+void TransformTo3dVertices::initVertices()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+	R_out->SetUnorderedAccessView(R_uav);
+	A_out->SetUnorderedAccessView(A_uav);
+	B_out->SetUnorderedAccessView(B_uav);
+
+	hTechnique->GetPassByIndex(0)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	R_out->SetUnorderedAccessView(nullptr);
+	A_out->SetUnorderedAccessView(nullptr);
+	B_out->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(0)->Apply(0, context);
+}
+
+void TransformTo3dVertices::initCameras()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
 }
 
 void ModelMaker::init()

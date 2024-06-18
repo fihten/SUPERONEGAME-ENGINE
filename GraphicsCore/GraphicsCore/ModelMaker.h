@@ -629,6 +629,18 @@ public:
 	ID3D11UnorderedAccessView* dXYZCdA_uav = nullptr;
 	ID3D11UnorderedAccessView* dXYZCdB_uav = nullptr;
 
+	ID3D11UnorderedAccessView* xyz_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZdR_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZdA_uav = nullptr;
+	ID3D11UnorderedAccessView* dXYZdB_uav = nullptr;
+
+	ID3D11UnorderedAccessView* error_uav = nullptr;
+
+	ID3D11UnorderedAccessView* gradError_r_uav = nullptr;
+	ID3D11UnorderedAccessView* gradError_a_uav = nullptr;
+
+	ID3D11UnorderedAccessView* minGradComponent_a_uav = nullptr;
+
 public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;
@@ -640,6 +652,9 @@ public:
 		Vec2d<uint32_t>* mapping,
 		int count
 	);
+
+	void initVertices();
+	void initCameras();
 };
 
 class ModelMaker
