@@ -656,6 +656,11 @@ public:
 	void initVertices();
 	void initCameras();
 	void initAngleGradients();
+	void initRadialGradients();
+
+	void calculateAxisI(float t);
+	void calculateAxisJ(float t);
+	void calculateAxisK(float t);
 };
 
 class ModelMaker
