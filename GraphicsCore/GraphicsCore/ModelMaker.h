@@ -655,6 +655,7 @@ public:
 
 	void initVertices();
 	void initCameras();
+	void initAngleGradients();
 };
 
 class ModelMaker

@@ -1707,6 +1707,54 @@ void TransformTo3dVertices::initCameras()
 	auto context = GraphicsCore::instance()->context;
 
 	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	
+	Rc_out->SetUnorderedAccessView(Rc_uav);
+	Ac_out->SetUnorderedAccessView(Ac_uav);
+	Bc_out->SetUnorderedAccessView(Bc_uav);
+	
+	Ad_out->SetUnorderedAccessView(Ad_uav);
+	Bd_out->SetUnorderedAccessView(Bd_uav);
+	Cd_out->SetUnorderedAccessView(Cd_uav);
+
+	hTechnique->GetPassByIndex(1)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Rc_out->SetUnorderedAccessView(nullptr);
+	Ac_out->SetUnorderedAccessView(nullptr);
+	Bc_out->SetUnorderedAccessView(nullptr);
+
+	Ad_out->SetUnorderedAccessView(nullptr);
+	Bd_out->SetUnorderedAccessView(nullptr);
+	Cd_out->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(1)->Apply(0, context);
+}
+
+void TransformTo3dVertices::initAngleGradients()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+
+	gradError_a->SetUnorderedAccessView(gradError_a_uav);
+
+	hTechnique->GetPassByIndex(2)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_ + amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_a->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(2)->Apply(0, context);
 }
 
 void ModelMaker::init()
