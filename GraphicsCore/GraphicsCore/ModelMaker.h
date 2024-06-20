@@ -644,6 +644,7 @@ public:
 public:
 	int amountOfCameras_ = 0;
 	int amountOfVertices_ = 0;
+	int amountOfPointsOnPhotos_ = 0;
 
 public:
 	void init();
@@ -664,6 +665,8 @@ public:
 
 	void calculateXYZC(float ta, float tr);
 	void calculateXYZ(float ta, float tr);
+
+	void calculateError();
 };
 
 class ModelMaker

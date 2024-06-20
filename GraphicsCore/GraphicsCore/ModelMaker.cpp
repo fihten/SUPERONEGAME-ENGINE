@@ -1310,6 +1310,7 @@ void TransformTo3dVertices::setPointsOnPhotos(
 
 	amountOfCameras_ = 0;
 	amountOfVertices_ = 0;
+	amountOfPointsOnPhotos_ = count;
 	for (int i = 0; i < count; i++)
 	{
 		amountOfVertices_ = std::max<int>(amountOfVertices_, mapping[i].x());
@@ -1947,6 +1948,41 @@ void TransformTo3dVertices::calculateXYZ(float ta, float tr)
 	xyz->SetUnorderedAccessView(nullptr);
 
 	hTechnique->GetPassByIndex(8)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateError()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfPointsOnPhotos->SetRawValue(&amountOfPointsOnPhotos_, 0, sizeof(amountOfPointsOnPhotos_));
+
+	mapToVertexAndCamera->SetResource(mapToVertexAndCamera_srv);
+	xyz_in->SetResource(xyz_srv);
+	xyzc_in->SetResource(xyzc_srv);
+	Iin->SetResource(I_srv);
+	Jin->SetResource(J_srv);
+	Kin->SetResource(K_srv);
+	pointsOnPhotos->SetResource(pointsOnPhotos_srv);
+	error->SetUnorderedAccessView(error_uav);
+
+	hTechnique->GetPassByIndex(9)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfPointsOnPhotos_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	mapToVertexAndCamera->SetResource(nullptr);
+	xyz_in->SetResource(nullptr);
+	xyzc_in->SetResource(nullptr);
+	Iin->SetResource(nullptr);
+	Jin->SetResource(nullptr);
+	Kin->SetResource(nullptr);
+	pointsOnPhotos->SetResource(nullptr);
+	error->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(9)->Apply(0, context);
 }
 
 void ModelMaker::init()
