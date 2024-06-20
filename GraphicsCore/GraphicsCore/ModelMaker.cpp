@@ -1875,6 +1875,80 @@ void TransformTo3dVertices::calculateAxisK(float t)
 	hTechnique->GetPassByIndex(6)->Apply(0, context);
 }
 
+void TransformTo3dVertices::calculateXYZC(float ta, float tr)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	t_a->SetRawValue(&ta, 0, sizeof(ta));
+	t_r->SetRawValue(&tr, 0, sizeof(tr));
+
+	gradError_r_in->SetResource(gradError_r_srv);
+	gradError_a_in->SetResource(gradError_a_srv);
+
+	Rc->SetResource(Rc_srv);
+	Ac->SetResource(Ac_srv);
+	Bc->SetResource(Bc_srv);
+
+	xyzc->SetUnorderedAccessView(xyzc_uav);
+
+	hTechnique->GetPassByIndex(7)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_r_in->SetResource(nullptr);
+	gradError_a_in->SetResource(nullptr);
+
+	Rc->SetResource(nullptr);
+	Ac->SetResource(nullptr);
+	Bc->SetResource(nullptr);
+
+	xyzc->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(7)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateXYZ(float ta, float tr)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+	t_a->SetRawValue(&ta, 0, sizeof(ta));
+	t_r->SetRawValue(&tr, 0, sizeof(tr));
+
+	gradError_r_in->SetResource(gradError_r_srv);
+	gradError_a_in->SetResource(gradError_a_srv);
+
+	R->SetResource(R_srv);
+	A->SetResource(A_srv);
+	B->SetResource(B_srv);
+
+	xyz->SetUnorderedAccessView(xyz_uav);
+
+	hTechnique->GetPassByIndex(8)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_r_in->SetResource(nullptr);
+	gradError_a_in->SetResource(nullptr);
+
+	R->SetResource(nullptr);
+	A->SetResource(nullptr);
+	B->SetResource(nullptr);
+
+	xyz->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(8)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();

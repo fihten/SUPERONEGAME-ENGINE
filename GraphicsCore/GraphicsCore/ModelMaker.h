@@ -661,6 +661,9 @@ public:
 	void calculateAxisI(float t);
 	void calculateAxisJ(float t);
 	void calculateAxisK(float t);
+
+	void calculateXYZC(float ta, float tr);
+	void calculateXYZ(float ta, float tr);
 };
 
 class ModelMaker
