@@ -674,6 +674,9 @@ public:
 
 	void calculateGradOfXYZCr();
 	void calculateGradOfXYZCa();
+
+	void calculateGradOfXYZr();
+	void calculateGradOfXYZa();
 };
 
 class ModelMaker
