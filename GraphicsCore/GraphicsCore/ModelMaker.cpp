@@ -1985,6 +1985,105 @@ void TransformTo3dVertices::calculateError()
 	hTechnique->GetPassByIndex(9)->Apply(0, context);
 }
 
+void TransformTo3dVertices::calculateGradOfAxisI()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+
+	Ad->SetResource(Ad_srv);
+	Bd->SetResource(Bd_srv);
+	Cd->SetResource(Cd_srv);
+
+	dIdA->SetUnorderedAccessView(dIdA_uav);
+	dIdB->SetUnorderedAccessView(dIdB_uav);
+	dIdC->SetUnorderedAccessView(dIdC_uav);
+
+	hTechnique->GetPassByIndex(10)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Ad->SetResource(nullptr);
+	Bd->SetResource(nullptr);
+	Cd->SetResource(nullptr);
+
+	dIdA->SetUnorderedAccessView(nullptr);
+	dIdB->SetUnorderedAccessView(nullptr);
+	dIdC->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(10)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateGradOfAxisJ()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+
+	Ad->SetResource(Ad_srv);
+	Bd->SetResource(Bd_srv);
+	Cd->SetResource(Cd_srv);
+
+	dJdA->SetUnorderedAccessView(dJdA_uav);
+	dJdB->SetUnorderedAccessView(dJdB_uav);
+	dJdC->SetUnorderedAccessView(dJdC_uav);
+
+	hTechnique->GetPassByIndex(11)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Ad->SetResource(nullptr);
+	Bd->SetResource(nullptr);
+	Cd->SetResource(nullptr);
+
+	dJdA->SetUnorderedAccessView(nullptr);
+	dJdB->SetUnorderedAccessView(nullptr);
+	dJdC->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(11)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateGradOfAxisK()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+
+	Ad->SetResource(Ad_srv);
+	Bd->SetResource(Bd_srv);
+	Cd->SetResource(Cd_srv);
+
+	dKdA->SetUnorderedAccessView(dKdA_uav);
+	dKdB->SetUnorderedAccessView(dKdB_uav);
+	dKdC->SetUnorderedAccessView(dKdC_uav);
+
+	hTechnique->GetPassByIndex(12)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Ad->SetResource(nullptr);
+	Bd->SetResource(nullptr);
+	Cd->SetResource(nullptr);
+
+	dKdA->SetUnorderedAccessView(nullptr);
+	dKdB->SetUnorderedAccessView(nullptr);
+	dKdC->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(12)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();

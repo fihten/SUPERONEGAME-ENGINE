@@ -667,6 +667,10 @@ public:
 	void calculateXYZ(float ta, float tr);
 
 	void calculateError();
+
+	void calculateGradOfAxisI();
+	void calculateGradOfAxisJ();
+	void calculateGradOfAxisK();
 };
 
 class ModelMaker
