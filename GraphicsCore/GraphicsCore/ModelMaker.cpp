@@ -2084,6 +2084,62 @@ void TransformTo3dVertices::calculateGradOfAxisK()
 	hTechnique->GetPassByIndex(12)->Apply(0, context);
 }
 
+void TransformTo3dVertices::calculateGradOfXYZCr()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+
+	Ac->SetResource(Ac_srv);
+	Bc->SetResource(Bc_srv);
+	dXYZCdR->SetUnorderedAccessView(dXYZCdR_uav);
+
+	hTechnique->GetPassByIndex(13)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Ac->SetResource(nullptr);
+	Bc->SetResource(nullptr);
+	dXYZCdR->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(13)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateGradOfXYZCa()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+
+	Rc->SetResource(Rc_srv);
+	Ac->SetResource(Ac_srv);
+	Bc->SetResource(Bc_srv);
+
+	dXYZCdA->SetUnorderedAccessView(dXYZCdA_uav);
+	dXYZCdB->SetUnorderedAccessView(dXYZCdB_uav);
+
+	hTechnique->GetPassByIndex(14)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	Rc->SetResource(nullptr);
+	Ac->SetResource(nullptr);
+	Bc->SetResource(nullptr);
+
+	dXYZCdA->SetUnorderedAccessView(nullptr);
+	dXYZCdB->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(14)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();

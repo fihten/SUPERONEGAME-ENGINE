@@ -671,6 +671,9 @@ public:
 	void calculateGradOfAxisI();
 	void calculateGradOfAxisJ();
 	void calculateGradOfAxisK();
+
+	void calculateGradOfXYZCr();
+	void calculateGradOfXYZCa();
 };
 
 class ModelMaker
