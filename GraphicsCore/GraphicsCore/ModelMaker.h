@@ -680,6 +680,10 @@ public:
 
 	void calculateGradOfErrorR();
 	void calculateGradOfErrorA();
+
+	void calculateMinAngularGradComponent();
+
+	void updateAngles(float t);
 };
 
 class ModelMaker

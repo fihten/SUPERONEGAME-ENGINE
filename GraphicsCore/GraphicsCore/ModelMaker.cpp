@@ -2294,6 +2294,67 @@ void TransformTo3dVertices::calculateGradOfErrorA()
 	hTechnique->GetPassByIndex(18)->Apply(0, context);
 }
 
+void TransformTo3dVertices::calculateMinAngularGradComponent()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+
+	gradError_a_in->SetResource(gradError_a_srv);
+	minGradComponent_a->SetUnorderedAccessView(minGradComponent_a_uav);
+
+	hTechnique->GetPassByIndex(19)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_ + amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_a_in->SetResource(nullptr);
+	minGradComponent_a->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(19)->Apply(0, context);
+}
+
+void TransformTo3dVertices::updateAngles(float t)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+	t_a->SetRawValue(&t, 0, sizeof(t));
+
+	gradError_a_in->SetResource(gradError_a_srv);
+	Ac_out->SetUnorderedAccessView(Ac_uav);
+	Bc_out->SetUnorderedAccessView(Bc_uav);
+	Ad_out->SetUnorderedAccessView(Ad_uav);
+	Bd_out->SetUnorderedAccessView(Bd_uav);
+	Cd_out->SetUnorderedAccessView(Cd_uav);
+	A_out->SetUnorderedAccessView(A_uav);
+	B_out->SetUnorderedAccessView(B_uav);
+
+	hTechnique->GetPassByIndex(20)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_ + amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_a_in->SetResource(nullptr);
+	Ac_out->SetUnorderedAccessView(nullptr);
+	Bc_out->SetUnorderedAccessView(nullptr);
+	Ad_out->SetUnorderedAccessView(nullptr);
+	Bd_out->SetUnorderedAccessView(nullptr);
+	Cd_out->SetUnorderedAccessView(nullptr);
+	A_out->SetUnorderedAccessView(nullptr);
+	B_out->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(20)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();
