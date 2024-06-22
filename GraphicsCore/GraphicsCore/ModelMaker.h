@@ -677,6 +677,9 @@ public:
 
 	void calculateGradOfXYZr();
 	void calculateGradOfXYZa();
+
+	void calculateGradOfErrorR();
+	void calculateGradOfErrorA();
 };
 
 class ModelMaker

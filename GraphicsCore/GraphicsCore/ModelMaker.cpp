@@ -2194,6 +2194,106 @@ void TransformTo3dVertices::calculateGradOfXYZa()
 	hTechnique->GetPassByIndex(16)->Apply(0, context);
 }
 
+void TransformTo3dVertices::calculateGradOfErrorR()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfPointsOnPhotos->SetRawValue(&amountOfPointsOnPhotos_, 0, sizeof(amountOfPointsOnPhotos_));
+
+	mapToVertexAndCamera->SetResource(mapToVertexAndCamera_srv);
+	Iin->SetResource(I_srv);
+	Jin->SetResource(J_srv);
+	Kin->SetResource(K_srv);
+	xyz_in->SetResource(xyz_srv);
+	xyzc_in->SetResource(xyzc_srv);
+	pointsOnPhotos->SetResource(pointsOnPhotos_srv);
+	dXYZCdRin->SetResource(dXYZCdR_srv);
+	dXYZdRin->SetResource(dXYZdR_srv);
+	gradError_r->SetUnorderedAccessView(gradError_r_uav);
+
+	hTechnique->GetPassByIndex(17)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfPointsOnPhotos_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	mapToVertexAndCamera->SetResource(nullptr);
+	Iin->SetResource(nullptr);
+	Jin->SetResource(nullptr);
+	Kin->SetResource(nullptr);
+	xyz_in->SetResource(nullptr);
+	xyzc_in->SetResource(nullptr);
+	pointsOnPhotos->SetResource(nullptr);
+	dXYZCdRin->SetResource(nullptr);
+	dXYZdRin->SetResource(nullptr);
+	gradError_r->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(17)->Apply(0, context);
+}
+
+void TransformTo3dVertices::calculateGradOfErrorA()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfPointsOnPhotos->SetRawValue(&amountOfPointsOnPhotos_, 0, sizeof(amountOfPointsOnPhotos_));
+
+	mapToVertexAndCamera->SetResource(mapToVertexAndCamera_srv);
+	Iin->SetResource(I_srv);
+	Jin->SetResource(J_srv);
+	Kin->SetResource(K_srv);
+	xyz_in->SetResource(xyz_srv);
+	xyzc_in->SetResource(xyzc_srv);
+	pointsOnPhotos->SetResource(pointsOnPhotos_srv);
+	dXYZCdAin->SetResource(dXYZCdA_srv);
+	dXYZCdBin->SetResource(dXYZCdB_srv);
+	dIdAin->SetResource(dIdA_srv);
+	dJdAin->SetResource(dJdA_srv);
+	dKdAin->SetResource(dKdA_srv);
+	dIdBin->SetResource(dIdB_srv);
+	dJdBin->SetResource(dJdB_srv);
+	dKdBin->SetResource(dKdB_srv);
+	dIdCin->SetResource(dIdC_srv);
+	dJdCin->SetResource(dJdC_srv);
+	dKdCin->SetResource(dKdC_srv);
+	dXYZdAin->SetResource(dXYZdA_srv);
+	dXYZdBin->SetResource(dXYZdB_srv);
+	gradError_a->SetUnorderedAccessView(gradError_a_uav);
+
+	hTechnique->GetPassByIndex(18)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfPointsOnPhotos_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	mapToVertexAndCamera->SetResource(nullptr);
+	Iin->SetResource(nullptr);
+	Jin->SetResource(nullptr);
+	Kin->SetResource(nullptr);
+	xyz_in->SetResource(nullptr);
+	xyzc_in->SetResource(nullptr);
+	pointsOnPhotos->SetResource(nullptr);
+	dXYZCdAin->SetResource(nullptr);
+	dXYZCdBin->SetResource(nullptr);
+	dIdAin->SetResource(nullptr);
+	dJdAin->SetResource(nullptr);
+	dKdAin->SetResource(nullptr);
+	dIdBin->SetResource(nullptr);
+	dJdBin->SetResource(nullptr);
+	dKdBin->SetResource(nullptr);
+	dIdCin->SetResource(nullptr);
+	dJdCin->SetResource(nullptr);
+	dKdCin->SetResource(nullptr);
+	dXYZdAin->SetResource(nullptr);
+	dXYZdBin->SetResource(nullptr);
+	gradError_a->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(18)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();
