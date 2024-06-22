@@ -1985,6 +1985,23 @@ void TransformTo3dVertices::calculateError()
 	hTechnique->GetPassByIndex(9)->Apply(0, context);
 }
 
+float TransformTo3dVertices::getError()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	context->CopyResource(error_copy_buf, error_buf);
+	
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(error_copy_buf, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	uint32_t* e = (uint32_t*)data.pData;
+	float error = (float)(e[0]) + (float)(e[1]) / 1000000.0f;
+
+	context->Unmap(error_copy_buf, 0);
+
+	return error;
+}
+
 void TransformTo3dVertices::calculateGradOfAxisI()
 {
 	auto context = GraphicsCore::instance()->context;
@@ -2318,6 +2335,23 @@ void TransformTo3dVertices::calculateMinAngularGradComponent()
 	hTechnique->GetPassByIndex(19)->Apply(0, context);
 }
 
+float TransformTo3dVertices::getMinAngularGradComponent()
+{
+	auto context = GraphicsCore::instance()->context;
+
+	context->CopyResource(minGradComponent_a_copy_buf, minGradComponent_a_buf);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(minGradComponent_a_copy_buf, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	float c = ((uint32_t*)(data.pData))[0];
+	c /= 1000000.0f;
+
+	context->Unmap(minGradComponent_a_copy_buf, 0);
+
+	return c;
+}
+
 void TransformTo3dVertices::updateAngles(float t)
 {
 	auto context = GraphicsCore::instance()->context;
@@ -2379,6 +2413,120 @@ void TransformTo3dVertices::updateRadiuses(float t)
 	R_out->SetUnorderedAccessView(nullptr);
 
 	hTechnique->GetPassByIndex(21)->Apply(0, context);
+}
+
+void TransformTo3dVertices::transform(
+	flt2* points,
+	Vec2d<uint32_t>* mapping,
+	int count,
+	flt3* vertices
+)
+{
+	setPointsOnPhotos(points, mapping, count);
+	initCameras();
+	initVertices();
+
+	float error = FLT_MAX;
+	float threshold = 1e-5;
+	while (error > threshold)
+	{
+		initAngleGradients();
+
+		calculateAxisI(0);
+		calculateAxisJ(0);
+		calculateAxisK(0);
+
+		calculateXYZC(0, 0);
+		calculateXYZ(0, 0);
+
+		calculateGradOfAxisI();
+		calculateGradOfAxisJ();
+		calculateGradOfAxisK();
+		
+		calculateGradOfXYZCa();
+		calculateGradOfXYZa();
+		
+		calculateGradOfErrorA();
+
+		calculateMinAngularGradComponent();
+		float minComponent = getMinAngularGradComponent();
+		minComponent = std::max<float>(minComponent, 0.01f);
+
+		int steps = 10;
+		float dt = M_PI * 2 / minComponent / steps;
+
+		float tMin = 0;
+		float t0 = 0.0f;
+		float t1 = M_PI * 2;
+		float t = t0;
+		for (int i = 0; i < 3; i++)
+		{
+			while (t <= t1)
+			{
+				calculateAxisI(t);
+				calculateAxisJ(t);
+				calculateAxisK(t);
+
+				calculateXYZC(t, 0);
+				calculateXYZ(t, 0);
+
+				calculateError();
+				float e = getError();
+
+				if (e < error)
+				{
+					error = e;
+					tMin = t;
+				}
+
+				t += dt;
+			}
+			t0 = tMin - dt;
+			t1 = tMin + dt;
+			t = t0;
+			dt = (t1 - t0) / steps;
+		}
+
+		updateAngles(tMin);
+
+		initRadialGradients();
+
+		calculateAxisI(0);
+		calculateAxisJ(0);
+		calculateAxisK(0);
+
+		calculateXYZC(0, 0);
+		calculateXYZ(0, 0);
+
+		calculateGradOfXYZCr();
+		calculateGradOfXYZr();
+
+		calculateGradOfErrorR();
+
+		float errors[3];
+		float tr[3] = { 0,1,2 };
+		for (int i = 0; i < 3; i++)
+		{
+			calculateXYZC(0, tr[i]);
+			calculateXYZ(0, tr[i]);
+
+			calculateError();
+			errors[i] = getError();
+		}
+		Matrix4x4<float> m(
+			tr[0] * tr[0], tr[0], 1, 0,
+			tr[1] * tr[1], tr[1], 1, 0,
+			tr[2] * tr[2], tr[2], 1, 0,
+			0, 0, 0, 1
+		);
+		auto mInv = m.inverse();
+		flt4 e4(errors[0], errors[1], errors[2], 1);
+		auto coeffs = e4 * mInv;
+		float a = coeffs.x();
+		float b = coeffs.y();
+		float c = coeffs.z();
+
+	}
 }
 
 void ModelMaker::init()

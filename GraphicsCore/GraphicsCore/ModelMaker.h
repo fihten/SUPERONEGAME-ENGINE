@@ -667,6 +667,7 @@ public:
 	void calculateXYZ(float ta, float tr);
 
 	void calculateError();
+	float getError();
 
 	void calculateGradOfAxisI();
 	void calculateGradOfAxisJ();
@@ -682,9 +683,17 @@ public:
 	void calculateGradOfErrorA();
 
 	void calculateMinAngularGradComponent();
+	float getMinAngularGradComponent();
 
 	void updateAngles(float t);
 	void updateRadiuses(float t);
+
+	void transform(
+		flt2* points,
+		Vec2d<uint32_t>* mapping,
+		int count,
+		flt3* vertices
+	);
 };
 
 class ModelMaker
