@@ -520,6 +520,7 @@ public:
 
 	ID3D11Buffer* xyzc_buf = nullptr;
 	ID3D11Buffer* xyz_buf = nullptr;
+	ID3D11Buffer* xyz_copy_buf = nullptr;
 
 	ID3D11Buffer* error_buf = nullptr;
 	ID3D11Buffer* error_copy_buf = nullptr;
@@ -665,6 +666,7 @@ public:
 
 	void calculateXYZC(float ta, float tr);
 	void calculateXYZ(float ta, float tr);
+	void getXYZ(flt3* vertices);
 
 	void calculateError();
 	float getError();

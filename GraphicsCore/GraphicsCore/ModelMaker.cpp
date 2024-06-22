@@ -1561,6 +1561,16 @@ void TransformTo3dVertices::setPointsOnPhotos(
 	}
 	{
 		D3D11_BUFFER_DESC buffer_desc;
+		buffer_desc.ByteWidth = amountOfVertices_ * sizeof(flt3);
+		buffer_desc.Usage = D3D11_USAGE_STAGING;
+		buffer_desc.BindFlags = 0;
+		buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+		buffer_desc.MiscFlags = D3D11_RESOURCE_MISC_BUFFER_STRUCTURED;
+		buffer_desc.StructureByteStride = sizeof(flt3);
+		device->CreateBuffer(&buffer_desc, nullptr, &xyz_copy_buf);
+	}
+	{
+		D3D11_BUFFER_DESC buffer_desc;
 		buffer_desc.ByteWidth = 2 * sizeof(uint32_t);
 		buffer_desc.Usage = D3D11_USAGE_DEFAULT;
 		buffer_desc.BindFlags = D3D11_BIND_UNORDERED_ACCESS;
@@ -1948,6 +1958,20 @@ void TransformTo3dVertices::calculateXYZ(float ta, float tr)
 	xyz->SetUnorderedAccessView(nullptr);
 
 	hTechnique->GetPassByIndex(8)->Apply(0, context);
+}
+
+void TransformTo3dVertices::getXYZ(flt3* vertices)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	context->CopyResource(xyz_copy_buf, xyz_buf);
+
+	D3D11_MAPPED_SUBRESOURCE data;
+	context->Map(xyz_copy_buf, 0, D3D11_MAP::D3D11_MAP_READ, 0, &data);
+
+	std::memcpy(vertices, data.pData, amountOfVertices_ * sizeof(flt3));
+
+	context->Unmap(xyz_copy_buf, 0);
 }
 
 void TransformTo3dVertices::calculateError()
@@ -2432,12 +2456,15 @@ void TransformTo3dVertices::transform(
 	{
 		initAngleGradients();
 
-		calculateAxisI(0);
-		calculateAxisJ(0);
-		calculateAxisK(0);
+		if (error == FLT_MAX)
+		{
+			calculateAxisI(0);
+			calculateAxisJ(0);
+			calculateAxisK(0);
 
-		calculateXYZC(0, 0);
-		calculateXYZ(0, 0);
+			calculateXYZC(0, 0);
+			calculateXYZ(0, 0);
+		}
 
 		calculateGradOfAxisI();
 		calculateGradOfAxisJ();
@@ -2521,12 +2548,21 @@ void TransformTo3dVertices::transform(
 		);
 		auto mInv = m.inverse();
 		flt4 e4(errors[0], errors[1], errors[2], 1);
-		auto coeffs = e4 * mInv;
+		auto coeffs = mInv * e4;
 		float a = coeffs.x();
 		float b = coeffs.y();
 		float c = coeffs.z();
 
+		tMin = -b / 2 / a;
+		updateRadiuses(tMin);
+
+		calculateXYZC(0, 0);
+		calculateXYZ(0, 0);
+
+		calculateError();
+		error = getError();
 	}
+	getXYZ(vertices);
 }
 
 void ModelMaker::init()
