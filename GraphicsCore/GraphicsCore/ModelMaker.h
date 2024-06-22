@@ -684,6 +684,7 @@ public:
 	void calculateMinAngularGradComponent();
 
 	void updateAngles(float t);
+	void updateRadiuses(float t);
 };
 
 class ModelMaker

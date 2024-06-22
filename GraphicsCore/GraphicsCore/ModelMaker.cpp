@@ -2355,6 +2355,32 @@ void TransformTo3dVertices::updateAngles(float t)
 	hTechnique->GetPassByIndex(20)->Apply(0, context);
 }
 
+void TransformTo3dVertices::updateRadiuses(float t)
+{
+	auto context = GraphicsCore::instance()->context;
+
+	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
+	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+
+	gradError_r_in->SetResource(gradError_r_srv);
+	Rc_out->SetUnorderedAccessView(Rc_uav);
+	R_out->SetUnorderedAccessView(R_uav);
+
+	hTechnique->GetPassByIndex(21)->Apply(0, context);
+
+	uint32_t groupsX = std::ceil((float)(amountOfCameras_ + amountOfVertices_) / 64.0f);
+	uint32_t groupsY = 1;
+	uint32_t groupsZ = 1;
+
+	context->Dispatch(groupsX, groupsY, groupsZ);
+
+	gradError_r_in->SetResource(nullptr);
+	Rc_out->SetUnorderedAccessView(nullptr);
+	R_out->SetUnorderedAccessView(nullptr);
+
+	hTechnique->GetPassByIndex(21)->Apply(0, context);
+}
+
 void ModelMaker::init()
 {
 	ptr->gridIntegralsA.init();
