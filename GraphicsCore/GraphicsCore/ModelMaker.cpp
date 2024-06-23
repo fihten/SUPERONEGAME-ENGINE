@@ -2484,7 +2484,7 @@ void TransformTo3dVertices::transform(
 
 		float tMin = 0;
 		float t0 = 0.0f;
-		float t1 = M_PI * 2;
+		float t1 = M_PI * 2 / minComponent;
 		float t = t0;
 		for (int i = 0; i < 3; i++)
 		{
