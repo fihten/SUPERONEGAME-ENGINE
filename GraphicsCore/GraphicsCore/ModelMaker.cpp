@@ -1978,6 +1978,9 @@ void TransformTo3dVertices::calculateError()
 {
 	auto context = GraphicsCore::instance()->context;
 
+	uint32_t iniErr[] = { 0,0 };
+	context->UpdateSubresource(error_buf, 0, nullptr, iniErr, 0, 0);
+
 	amountOfPointsOnPhotos->SetRawValue(&amountOfPointsOnPhotos_, 0, sizeof(amountOfPointsOnPhotos_));
 
 	mapToVertexAndCamera->SetResource(mapToVertexAndCamera_srv);
@@ -2339,6 +2342,9 @@ void TransformTo3dVertices::calculateMinAngularGradComponent()
 {
 	auto context = GraphicsCore::instance()->context;
 
+	uint32_t iniGradCmnt = 0xffffffff;
+	context->UpdateSubresource(minGradComponent_a_buf, 0, nullptr, &iniGradCmnt, 0, 0);
+
 	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
 	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
 
@@ -2419,6 +2425,7 @@ void TransformTo3dVertices::updateRadiuses(float t)
 
 	amountOfCameras->SetRawValue(&amountOfCameras_, 0, sizeof(amountOfCameras_));
 	amountOfVertices->SetRawValue(&amountOfVertices_, 0, sizeof(amountOfVertices_));
+	t_r->SetRawValue(&t, 0, sizeof(t));
 
 	gradError_r_in->SetResource(gradError_r_srv);
 	Rc_out->SetUnorderedAccessView(Rc_uav);
@@ -2452,116 +2459,118 @@ void TransformTo3dVertices::transform(
 
 	float error = FLT_MAX;
 	float threshold = 1e-5;
-	while (error > threshold)
 	{
-		initAngleGradients();
-
-		if (error == FLT_MAX)
+		while (true)
 		{
-			calculateAxisI(0);
-			calculateAxisJ(0);
-			calculateAxisK(0);
-
-			calculateXYZC(0, 0);
-			calculateXYZ(0, 0);
-		}
-
-		calculateGradOfAxisI();
-		calculateGradOfAxisJ();
-		calculateGradOfAxisK();
-		
-		calculateGradOfXYZCa();
-		calculateGradOfXYZa();
-		
-		calculateGradOfErrorA();
-
-		calculateMinAngularGradComponent();
-		float minComponent = getMinAngularGradComponent();
-		minComponent = std::max<float>(minComponent, 0.01f);
-
-		int steps = 10;
-		float dt = M_PI * 2 / minComponent / steps;
-
-		float tMin = 0;
-		float t0 = 0.0f;
-		float t1 = M_PI * 2 / minComponent;
-		float t = t0;
-		for (int i = 0; i < 3; i++)
-		{
-			while (t <= t1)
+			if (error == FLT_MAX)
 			{
-				calculateAxisI(t);
-				calculateAxisJ(t);
-				calculateAxisK(t);
+				calculateAxisI(0);
+				calculateAxisJ(0);
+				calculateAxisK(0);
 
-				calculateXYZC(t, 0);
-				calculateXYZ(t, 0);
+				calculateXYZC(0, 0);
+				calculateXYZ(0, 0);
+			}
+
+			calculateGradOfAxisI();
+			calculateGradOfAxisJ();
+			calculateGradOfAxisK();
+
+			calculateGradOfXYZCa();
+			calculateGradOfXYZa();
+
+			initAngleGradients();
+			calculateGradOfErrorA();
+
+			float dt = 0.1;
+			const float minDt = 1e-8;
+			float currentError = error;
+			while (currentError >= error && dt > minDt)
+			{
+				calculateAxisI(dt);
+				calculateAxisJ(dt);
+				calculateAxisK(dt);
+
+				calculateXYZC(dt, 0);
+				calculateXYZ(dt, 0);
+
+				calculateError();
+				currentError = getError();
+				dt /= 10;
+			}
+			if (currentError >= error)
+				break;
+
+			error = getError();
+			updateAngles(dt * 10);
+
+			char buffer[256];
+			sprintf(buffer, "\nerror(radius) = %f\n", error);
+			OutputDebugStringA(buffer);
+		}
+		{
+			calculateGradOfXYZCr();
+			calculateGradOfXYZr();
+
+			initAngleGradients();
+			calculateGradOfErrorR();
+
+			const int N = 10;
+			float dtr = 0.1f;
+			float TR4 = 0;
+			float TR3 = 0;
+			float TR2 = 0;
+			float TR = 0;
+			float E = 0;
+			float ETR = 0;
+			float ETR2 = 0;
+			float C = 0;
+			for (int i = -N; i <= N; i++)
+			{
+				float tr = i * dtr;
+				calculateXYZC(0, tr);
+				calculateXYZ(0, tr);
 
 				calculateError();
 				float e = getError();
 
-				if (e < error)
-				{
-					error = e;
-					tMin = t;
-				}
+				float tr2 = tr * tr;
+				float tr3 = tr2 * tr;
+				float tr4 = tr3 * tr;
 
-				t += dt;
+				TR4 += tr4;
+				TR3 += tr3;
+				TR2 += tr2;
+				TR += tr;
+				E += e;
+				ETR += e * tr;
+				ETR2 += e * tr2;
+				C++;
 			}
-			t0 = tMin - dt;
-			t1 = tMin + dt;
-			t = t0;
-			dt = (t1 - t0) / steps;
-		}
 
-		updateAngles(tMin);
+			dbl4x4 m(
+				TR4, TR3, TR2, 0,
+				TR3, TR2, TR, 0,
+				TR2, TR, C, 0,
+				0, 0, 0, 1
+			);
+			auto mInv = m.inverse();
 
-		initRadialGradients();
+			dbl4 r(ETR2, ETR, E, 1);
+			dbl4 params = mInv * r;
 
-		calculateAxisI(0);
-		calculateAxisJ(0);
-		calculateAxisK(0);
+			float trMin = -params.y() / 2.0 / params.x();
 
-		calculateXYZC(0, 0);
-		calculateXYZ(0, 0);
+			updateRadiuses(trMin);
 
-		calculateGradOfXYZCr();
-		calculateGradOfXYZr();
-
-		calculateGradOfErrorR();
-
-		float errors[3];
-		float tr[3] = { 0,1,2 };
-		for (int i = 0; i < 3; i++)
-		{
-			calculateXYZC(0, tr[i]);
-			calculateXYZ(0, tr[i]);
+			calculateXYZC(0, 0);
+			calculateXYZ(0, 0);
 
 			calculateError();
-			errors[i] = getError();
+			error = getError();
 		}
-		Matrix4x4<float> m(
-			tr[0] * tr[0], tr[0], 1, 0,
-			tr[1] * tr[1], tr[1], 1, 0,
-			tr[2] * tr[2], tr[2], 1, 0,
-			0, 0, 0, 1
-		);
-		auto mInv = m.inverse();
-		flt4 e4(errors[0], errors[1], errors[2], 1);
-		auto coeffs = mInv * e4;
-		float a = coeffs.x();
-		float b = coeffs.y();
-		float c = coeffs.z();
-
-		tMin = -b / 2 / a;
-		updateRadiuses(tMin);
-
-		calculateXYZC(0, 0);
-		calculateXYZ(0, 0);
-
-		calculateError();
-		error = getError();
 	}
+
 	getXYZ(vertices);
 }
 

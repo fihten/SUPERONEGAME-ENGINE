@@ -191,7 +191,7 @@ float fetchGrad(uint index, StructuredBuffer<int> grad)
 [numthreads(64, 1, 1)]
 void cs_init_vertices(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint i = dispatchThreadId.x;
+	uint i = dispatchThreadID.x;
 	if (i >= amountOfVertices)
 		return;
 
@@ -203,7 +203,7 @@ void cs_init_vertices(uint3 dispatchThreadID : SV_DispatchThreadID)
 [numthreads(64, 1, 1)]
 void cs_init_cameras(uint3 dispatchThreadID : SV_DispatchThreadID)
 {
-	uint i = dispatchThreadId.x;
+	uint i = dispatchThreadID.x;
 	if (i >= amountOfCameras)
 		return;
 
@@ -231,13 +231,13 @@ void cs_init_angle_gradients(uint3 dispatchThreadID : SV_DispatchThreadID)
 		gradError_a[BcId(i)] = 0;
 		gradError_a[BcId(i) + 1] = 0;
 
-		gradError_a[Adid(i)] = 0;
+		gradError_a[AdId(i)] = 0;
 		gradError_a[AdId(i) + 1] = 0;
 
-		gradError_a[Bdid(i)] = 0;
+		gradError_a[BdId(i)] = 0;
 		gradError_a[BdId(i) + 1] = 0;
 
-		gradError_a[Cdid(i)] = 0;
+		gradError_a[CdId(i)] = 0;
 		gradError_a[CdId(i) + 1] = 0;
 	}
 	else
@@ -654,7 +654,7 @@ void cs_calculate_grad_of_error_a(uint3 dispatchThreadID : SV_DispatchThreadID)
 	
 	// Vertices
 	calculateGradient(
-		v,
+		rv,
 		pt,
 		dXYZdAin[vertexId], 0,
 		I_, J_, K_,
@@ -662,7 +662,7 @@ void cs_calculate_grad_of_error_a(uint3 dispatchThreadID : SV_DispatchThreadID)
 		gradError_a
 	);
 	calculateGradient(
-		v,
+		rv,
 		pt,
 		dXYZdBin[vertexId], 0,
 		I_, J_, K_,

@@ -39,9 +39,9 @@ void GS(point VertexOut gin[1],
 	float4 p3 = p;
 
 	float sz = 0.01f;
-	p0.x -= sz;
+	p0.x += -sz;
 	p1.x += sz;
-	p2.y -= sz;
+	p2.y += -sz;
 	p3.y += sz;
 
 	GeoOut go0;
@@ -63,10 +63,10 @@ void GS(point VertexOut gin[1],
 
 float4 PS(GeoOut pin) : SV_TARGET
 {
-	return float4(1,0,0);
+	return float4(1,0,0,0);
 }
 
-technique11 tech
+technique11 verticesVisualizer
 {
 	pass P0
 	{

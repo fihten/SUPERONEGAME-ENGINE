@@ -9,13 +9,13 @@ void generateVerticesAndMapping(
 	std::vector<Vec2d<uint32_t>>& mapping
 )
 {
-	int N = 4;
+	int N = 50;
 	uint32_t verticesCount = (N + 1)*(N + 1);
-	uint32_t camerasCount = 2;
+	uint32_t camerasCount = 3;
 
-	float A = 10;
-	float B = 8;
-	float C = 5;
+	float A = 1;
+	float B = 1;
+	float C = 1;
 
 	float alpha0 = M_PI / 3;
 	float alpha1 = 2 * M_PI / 3;
@@ -42,7 +42,7 @@ void generateVerticesAndMapping(
 	{
 		float alpha = 0.5 * M_PI;
 		float beta = beta0 * (1.0f - (float)(i) / (camerasCount - 1)) + beta1 * (float)(i) / (camerasCount - 1);
-		float r = 2 * std::max<float>(A, std::max<float>(B, C));
+		float r = 4 * std::max<float>(A, std::max<float>(B, C));
 
 		flt3 p(
 			r * sin(alpha) * cos(beta),
