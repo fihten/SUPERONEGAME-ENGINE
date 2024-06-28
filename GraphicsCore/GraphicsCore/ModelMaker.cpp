@@ -2459,7 +2459,10 @@ void TransformTo3dVertices::transform(
 
 	float error = FLT_MAX;
 	float threshold = 1e-5;
+	float prevError = 0;
+	while(prevError != error)
 	{
+		prevError = error;
 		while (true)
 		{
 			if (error == FLT_MAX)
@@ -2505,7 +2508,7 @@ void TransformTo3dVertices::transform(
 			updateAngles(dt * 10);
 
 			char buffer[256];
-			sprintf(buffer, "\nerror(radius) = %f\n", error);
+			sprintf(buffer, "\nerror(angle) = %f\n", error);
 			OutputDebugStringA(buffer);
 		}
 		{
@@ -2567,7 +2570,14 @@ void TransformTo3dVertices::transform(
 			calculateXYZ(0, 0);
 
 			calculateError();
-			error = getError();
+			float e = getError();
+			if (e >= error)
+				break;
+			error = e;
+
+			char buffer[256];
+			sprintf(buffer, "\nerror(radius) = %f\n", error);
+			OutputDebugStringA(buffer);
 		}
 	}
 

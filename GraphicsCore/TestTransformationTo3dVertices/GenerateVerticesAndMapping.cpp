@@ -13,8 +13,8 @@ void generateVerticesAndMapping(
 	uint32_t verticesCount = (N + 1)*(N + 1);
 	uint32_t camerasCount = 3;
 
-	float A = 1;
-	float B = 1;
+	float A = 20;
+	float B = 4;
 	float C = 1;
 
 	float alpha0 = M_PI / 3;
